@@ -32,6 +32,7 @@ export default function RootLayout({
           geistMono.variable,
           spoqaHanSansNeo.variable,
           'antialiased',
+          'mb-32',
         )}
       >
         {children}
