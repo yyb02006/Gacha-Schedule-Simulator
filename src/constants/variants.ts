@@ -1,18 +1,29 @@
 import { Transition, Variant, Variants } from 'motion';
 
+type CardState = 'initial' | 'normal';
+
 export const secondLevelTransition: Record<'fadeIn' | 'fadeOut', Transition> = {
   fadeIn: { boxShadow: { duration: 0.3, delay: 0.1 }, background: { duration: 0.3, delay: 0.3 } },
-  fadeOut: { boxShadow: { duration: 0.3, delay: 0.1 }, background: { duration: 0.3, delay: 0.1 } },
+  fadeOut: { boxShadow: { duration: 0.3, delay: 0.1 }, background: { duration: 0.2 } },
 };
 
-const smallButtonIdle: Variant = {
-  boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
-  background: 'linear-gradient(135deg, #181818, #2e2e2e)',
-};
-
-const smallButtonExit: Variant = {
-  boxShadow: '0px 0px 0px #202020, 0px 0px 0px #202020',
-  background: 'linear-gradient(135deg, #202020, #202020)',
+const smallButton: Variants = {
+  idle: (custom: { state: CardState }) => ({
+    boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
+    background: 'linear-gradient(135deg, #181818, #2e2e2e)',
+    transition:
+      custom.state === 'initial'
+        ? secondLevelTransition.fadeIn
+        : { background: { duration: 0.15 }, boxShadow: { duration: 0.1 } },
+  }),
+  exit: {
+    boxShadow: '0px 0px 0px #202020, 0px 0px 0px #202020',
+    background: 'linear-gradient(135deg, #202020, #202020)',
+    transition: {
+      boxShadow: { duration: 0.3 },
+      background: { duration: 0.2 },
+    },
+  },
 };
 
 const cardIdle: Variant = {
@@ -28,39 +39,49 @@ export const cardVariants: Variants = {
   idle: {
     ...cardIdle,
     transition: {
-      boxShadow: { duration: 0.4, delay: 0.2 },
+      boxShadow: { duration: 0.3, delay: 0.2 },
     },
   },
   exit: {
     ...cardExit,
     transition: {
-      boxShadow: { duration: 0.4, delay: 0.2, ease: 'easeInOut' },
+      boxShadow: { duration: 0.2, delay: 0.2 },
+      background: { duration: 0.1, delay: 0.2 },
     },
   },
 };
 
+export type GachaTypeButtonCustom = { state: 'initial' | 'normal'; hoverBackground: string };
+
 export const gachaTypeButtonVariants: Variants = {
-  idle: {
+  idle: (custom: { state: 'initial' | 'normal'; hoverBackground: string }) => ({
     boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
     background: 'linear-gradient(155deg, #181818, #2e2e2e)',
-    transition: secondLevelTransition.fadeIn,
-  },
+    transition:
+      custom.state === 'initial'
+        ? secondLevelTransition.fadeIn
+        : { background: { duration: 0.15 }, boxShadow: { duration: 0.1 } },
+  }),
   exit: {
     boxShadow: '0px 0px 0px #202020, 0px 0px 0px #202020',
     background: 'linear-gradient(155deg, #202020, #202020)',
     transition: secondLevelTransition.fadeOut,
   },
+  hover: (custom: { state: 'initial' | 'normal'; hoverBackground: string }) => ({
+    boxShadow: '4px 4px 12px #101010, -5px -4px 12px #404040',
+    background: custom.hoverBackground,
+    transition: { duration: 0.3 },
+  }),
 };
 
-export const smallButtonVariants: Variants = {
-  idle: {
-    ...smallButtonIdle,
-    transition: secondLevelTransition.fadeIn,
-  },
-  exit: {
-    ...smallButtonExit,
-    transition: secondLevelTransition.fadeOut,
-  },
+export const optionButtonVariants: Variants = {
+  ...smallButton,
+  hover: { background: 'linear-gradient(135deg, #bb4d00, #ffb900)' },
+};
+
+export const cancelButtonVariants: Variants = {
+  ...smallButton,
+  hover: { background: 'linear-gradient(135deg, #bd1b36, #ff637e)', color: '#eaeaea' },
 };
 
 export const insetInputVariants: Variants = {
@@ -74,15 +95,9 @@ export const insetInputVariants: Variants = {
   },
 };
 
-export const cancelButtonVariants: Variants = {
-  idle: smallButtonIdle,
-  exit: smallButtonExit,
-  hover: { background: 'linear-gradient(135deg, #ff637e, #ff637e)', color: '#eaeaea' },
-};
-
 export const toOpacityZero: Variants = {
   idle: { opacity: 1, transition: { duration: 0.2, delay: 0.2 } },
-  exit: { opacity: 0, transition: { duration: 0.3, delay: 0.2 } },
+  exit: { opacity: 0, transition: { duration: 0.1, delay: 0.2 } },
 };
 
 export const cardTransition = { type: 'spring' as const, stiffness: 170, damping: 27, mass: 1.35 };
