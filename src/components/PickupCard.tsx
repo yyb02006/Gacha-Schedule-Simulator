@@ -9,89 +9,148 @@ import {
   gachaTypeButtonVariants,
   insetInputVariants,
   cardVariants,
-  smallButtonVariants,
   toOpacityZero,
+  GachaTypeButtonCustom,
+  optionButtonVariants,
 } from '#/constants/variants';
+import { gachaTypeButtons } from '#/constants/ui';
 
-const shadowVariants = {
-  idle: {
-    boxShadow: '12px 12px 32px #101010, -10px -12px 32px #303030',
-    background: 'linear-gradient(135deg, #191919, #2a2a2a)',
-  },
-  hover: {
-    boxShadow: '16px 16px 40px #0a0a0a, -13px -16px 40px #333333',
-    background: 'linear-gradient(135deg, #1b1b1b, #303030)',
-  },
-};
-
-const GachaTypeButton = ({ name }: { name: string }) => {
+export const TypeSelectionButton = ({
+  name,
+  hoverBackground,
+}: {
+  name: string;
+  hoverBackground: string;
+}) => {
+  const [isHover, setIsHover] = useState(false);
+  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
+  const custom: GachaTypeButtonCustom = {
+    hoverBackground,
+    state: isFirstRenderOver ? 'normal' : 'initial',
+  };
   return (
-    <motion.div
+    <motion.button
+      onHoverStart={() => setIsHover(true)}
+      onHoverEnd={() => setIsHover(false)}
+      onViewportEnter={() => {
+        setIsFirstRenderOver(true);
+      }}
       variants={gachaTypeButtonVariants}
-      whileInView="idle"
       viewport={{ once: true, amount: 0.5 }}
+      animate={isHover ? 'hover' : 'idle'}
+      custom={custom}
       initial="exit"
-      className="flex w-full items-center justify-center rounded-xl p-2 font-bold"
+      exit="exit"
+      className="font-S-CoreDream-500 flex w-full cursor-pointer items-center justify-center rounded-xl p-2"
     >
       <motion.div
         variants={toOpacityZero}
         whileInView="idle"
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
-        className="relative top-[2px]"
+        exit="exit"
+        className="relative top-[1px]"
       >
         {name}
       </motion.div>
-    </motion.div>
-  );
-};
-
-const OptionButton = () => {
-  return (
-    <motion.button
-      variants={smallButtonVariants}
-      whileInView="idle"
-      viewport={{ once: true, amount: 0.5 }}
-      initial="exit"
-      className="flex size-[44px] self-end rounded-xl p-2 font-bold text-amber-400"
-    >
-      <motion.svg
-        variants={toOpacityZero}
-        whileInView="idle"
-        viewport={{ once: true, amount: 0.5 }}
-        initial="exit"
-      >
-        <use href="/icons/icons.svg#option" />
-      </motion.svg>
     </motion.button>
   );
 };
 
-const CancelButton = () => {
+const OptionButton = () => {
+  const [isHover, setIsHover] = useState(false);
+  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
   return (
     <motion.button
+      onHoverStart={() => setIsHover(true)}
+      onHoverEnd={() => setIsHover(false)}
+      onViewportEnter={() => setIsFirstRenderOver(true)}
+      variants={optionButtonVariants}
+      whileInView="idle"
+      whileHover="hover"
+      viewport={{ once: true, amount: 0.5 }}
+      custom={{ state: isFirstRenderOver ? 'normal' : 'initial' }}
+      initial="exit"
+      exit="exit"
+      className="flex size-[44px] cursor-pointer items-center justify-between self-end rounded-xl p-2"
+    >
+      {[0, 0.1, 0.2].map((delay) => (
+        <motion.div
+          key={delay}
+          variants={toOpacityZero}
+          whileInView="idle"
+          viewport={{ once: true, amount: 0.5 }}
+          initial="exit"
+          exit="exit"
+          animate={
+            isHover
+              ? {
+                  backgroundColor: '#ffffff',
+                  y: [0, -8, 0],
+                  transition: {
+                    y: {
+                      stiffness: 200,
+                      damping: 1000, // 감쇠력
+                      mass: 0.5,
+                      duration: 0.35,
+                      delay,
+                      repeat: Infinity,
+                      repeatDelay: 0.5, //duration이 끝난 시점부터
+                    },
+                  },
+                }
+              : { y: 0 }
+          }
+          className="size-[5px] rounded-full bg-[#ffb900]"
+        />
+      ))}
+    </motion.button>
+  );
+};
+
+const CancelButton = ({ handleDelete }: { handleDelete: () => void }) => {
+  const [isHover, setIsHover] = useState(false);
+  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
+  return (
+    <motion.button
+      onClick={handleDelete}
+      onHoverStart={() => setIsHover(true)}
+      onHoverEnd={() => setIsHover(false)}
+      onViewportEnter={() => {
+        setIsFirstRenderOver(true);
+      }}
       variants={cancelButtonVariants}
       whileInView="idle"
       whileHover="hover"
       viewport={{ once: true, amount: 0.5 }}
+      custom={{ state: isFirstRenderOver ? 'normal' : 'initial' }}
       initial="exit"
-      className="flex size-[44px] cursor-pointer self-end rounded-xl p-2 font-bold text-rose-400"
+      exit="exit"
+      className="flex size-[44px] cursor-pointer self-end rounded-xl p-1 font-bold text-[#ff637e]"
     >
       <motion.svg
         variants={toOpacityZero}
         whileInView="idle"
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
+        exit="exit"
         className="text-shadow-orange-200"
       >
-        <use href="/icons/icons.svg#delete-cap" />
+        <motion.use
+          animate={
+            isHover
+              ? { rotateZ: -45, transformOrigin: 'bottom left' }
+              : { rotateZ: 0, transformOrigin: 'bottom left' }
+          }
+          href="/icons/icons.svg#delete-cap"
+        />
         <use href="/icons/icons.svg#delete" />
       </motion.svg>
     </motion.button>
   );
 };
 
-const TargetInput = ({ name }: { name: string }) => {
+const TargetInput = ({ name, initialValue }: { name: string; initialValue: number }) => {
   return (
     <div className="flex min-w-[100px] flex-col space-y-1">
       <motion.div
@@ -99,6 +158,7 @@ const TargetInput = ({ name }: { name: string }) => {
         whileInView="idle"
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
+        exit="exit"
         className="relative self-center px-4 text-[13px]"
       >
         {name}
@@ -108,6 +168,7 @@ const TargetInput = ({ name }: { name: string }) => {
         whileInView="idle"
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
+        exit="exit"
         className="relative flex h-[44px] items-center justify-center rounded-xl px-4 pt-3 pb-2 font-bold"
       >
         <motion.div
@@ -115,21 +176,35 @@ const TargetInput = ({ name }: { name: string }) => {
           whileInView="idle"
           viewport={{ once: true, amount: 0.5 }}
           initial="exit"
+          exit="exit"
         >
-          2
+          {initialValue}
         </motion.div>
       </motion.div>
     </div>
   );
 };
 
-export default function PickupCard({ pickupData }: { pickupData: PickupData }) {
+export default function PickupCard({
+  pickupData,
+  index,
+  deleteBanner,
+}: {
+  pickupData: PickupData;
+  index: number;
+  deleteBanner: () => void;
+}) {
   const [isHover, setIsHover] = useState(false);
+  const targetInputButtons = [
+    { name: '픽업오퍼 수', initialValue: pickupData.pickupDetails.pickupOpersCount },
+    { name: '목표픽업 수', initialValue: pickupData.pickupDetails.targetPickupCount },
+    { name: '픽업 확률', initialValue: pickupData.pickupDetails.pickupChance },
+  ];
   return (
     <motion.div
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      animate={isHover ? { scale: 1.05 } : undefined}
+      animate={isHover ? { scale: 1.02 } : undefined}
       transition={cardTransition}
       className="Card relative w-[480px] space-y-12 p-4"
     >
@@ -139,7 +214,8 @@ export default function PickupCard({ pickupData }: { pickupData: PickupData }) {
         viewport={{ once: true, amount: 0.5 }}
         transition={{ ...cardTransition, ease: 'easeIn' }}
         initial="exit"
-        className="absolute top-0 left-0 flex size-full items-center justify-center rounded-3xl to-[#2e2e2e] shadow-[12px_12px_32px_#101010,-10px_-12px_32px_#303030]"
+        exit="exit"
+        className="absolute top-0 left-0 flex size-full items-center justify-center rounded-2xl to-[#2e2e2e] shadow-[12px_12px_32px_#101010,-10px_-12px_32px_#303030]"
       />
       <div className="relative space-y-6">
         <div className="flex items-center justify-between">
@@ -148,21 +224,22 @@ export default function PickupCard({ pickupData }: { pickupData: PickupData }) {
             whileInView="idle"
             viewport={{ once: true, amount: 0.5 }}
             initial="exit"
+            exit="exit"
             className="text-lg font-bold"
           >
-            {pickupData.index}. 가챠 스케쥴 - {pickupData.index}
+            <span className="text-amber-400">{index}.</span> 가챠 스케쥴 - {index}
           </motion.div>
-          <CancelButton />
+          <CancelButton handleDelete={deleteBanner} />
         </div>
         <div className="relative flex w-full space-x-3 text-[15px]">
-          {['한정', '일반', '콜라보'].map((name) => (
-            <GachaTypeButton key={name} name={name} />
+          {gachaTypeButtons.map(({ name, hoverBackground }) => (
+            <TypeSelectionButton key={name} name={name} hoverBackground={hoverBackground} />
           ))}
         </div>
         <div className="relative flex justify-between">
           <div className="flex space-x-3">
-            {['픽업오퍼 수', '목표픽업 수', '픽업확률'].map((name) => (
-              <TargetInput key={name} name={name} />
+            {targetInputButtons.map(({ name, initialValue }) => (
+              <TargetInput key={name} name={name} initialValue={initialValue} />
             ))}
           </div>
           <OptionButton />
