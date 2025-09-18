@@ -40,7 +40,7 @@
 
   <!-- 삭제 -->
   <svg width="0" height="0" class="hidden">
-    <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+    <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 32 32"
       id="delete">
       <path d="M10 12V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
         stroke-linejoin="round"></path>
@@ -63,7 +63,7 @@
 
   <!-- 뚜껑 -->
   <svg width="0" height="0" class="hidden">
-    <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+    <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 32 32"
       id="delete-cap">
       <path d="M4 7H20" stroke="currentColor" stroke-width="2"
         stroke-linecap="round"
