@@ -5,7 +5,7 @@ import { motion, Variants } from 'motion/react';
 import Image from 'next/image';
 import { MouseEventHandler, useState } from 'react';
 
-const addShadowVariants: Variants = {
+const playShadowVariants: Variants = {
   idle: {
     filter: 'drop-shadow(4px 4px 4px #101010) drop-shadow(-3px -4px 4px #404040)',
     transition: { duration: 0.3 },
@@ -16,15 +16,15 @@ const addShadowVariants: Variants = {
   },
 };
 
-const addVariants: Variants = {
-  idle: { background: 'linear-gradient(145deg, #dba100, #ffd84d)' },
-  hover: { background: 'linear-gradient(-35deg, #dba100, #ffd84d)' },
+const playVariants: Variants = {
+  idle: { background: 'linear-gradient(135deg, #dba100, #ffd84d)' },
+  hover: { background: 'linear-gradient(-45deg, #dba100, #ffd84d)' },
 };
 
-export default function AddButton({
-  onAddClick,
+export default function PlayButton({
+  onPlayClick,
 }: {
-  onAddClick: MouseEventHandler<HTMLDivElement>;
+  onPlayClick: MouseEventHandler<HTMLDivElement>;
 }) {
   const [isHover, setIsHover] = useState(false);
   const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
@@ -33,31 +33,30 @@ export default function AddButton({
     <motion.div
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      onClick={onAddClick}
+      onClick={onPlayClick}
       onViewportEnter={() => setIsFirstRenderOver(true)}
       className="relative flex size-18 rotate-45 items-center justify-center"
     >
-      <DiamondButton
-        isHover={isHover}
-        initialDelay={initialDelay}
-        isFirstRenderOver={isFirstRenderOver}
-      >
-        <div className="absolute flex size-12 items-center justify-center">
+      <DiamondButton isHover={isHover}>
+        <motion.div
+          animate={isHover ? { rotateZ: 30 } : undefined}
+          className="absolute flex size-12 items-center justify-center"
+        >
           <div className="absolute flex size-12 items-center justify-center overflow-hidden">
             <motion.div
-              variants={addShadowVariants}
+              variants={playShadowVariants}
               animate={isHover ? 'hover' : 'idle'}
+              transition={{ duration: 0.3, delay: isFirstRenderOver ? 0 : initialDelay }}
               initial={{
                 filter: 'drop-shadow(0px 0px 0px #202020) drop-shadow(0px 0px 0px #202020)',
               }}
-              custom={isFirstRenderOver ? 'normal' : 'initial'}
               className="absolute -rotate-z-45"
             >
-              <Image alt="test" src={'/add.svg'} width={32} height={32} />
+              <Image alt="test" src={'/play.svg'} width={32} height={32} />
             </motion.div>
           </div>
           <motion.div
-            variants={addVariants}
+            variants={playVariants}
             animate={isHover ? 'hover' : 'idle'}
             transition={{ duration: 0.3, delay: isFirstRenderOver ? 0 : initialDelay }}
             initial={{
@@ -65,12 +64,12 @@ export default function AddButton({
             }}
             className="absolute size-8 -rotate-z-45"
             style={{
-              maskImage: 'url(add.svg)',
+              maskImage: 'url(play.svg)',
               maskSize: 'contain',
               maskRepeat: 'no-repeat',
             }}
           />
-        </div>
+        </motion.div>
       </DiamondButton>
     </motion.div>
   );
