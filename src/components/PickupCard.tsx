@@ -18,12 +18,13 @@ import { gachaTypeButtons } from '#/constants/ui';
 export const TypeSelectionButton = ({
   name,
   hoverBackground,
+  isFirstRenderOver = true,
 }: {
   name: string;
   hoverBackground: string;
+  isFirstRenderOver?: boolean;
 }) => {
   const [isHover, setIsHover] = useState(false);
-  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
   const custom: GachaTypeButtonCustom = {
     hoverBackground,
     state: isFirstRenderOver ? 'normal' : 'initial',
@@ -32,9 +33,6 @@ export const TypeSelectionButton = ({
     <motion.button
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      onViewportEnter={() => {
-        setIsFirstRenderOver(true);
-      }}
       variants={gachaTypeButtonVariants}
       viewport={{ once: true, amount: 0.5 }}
       animate={isHover ? 'hover' : 'idle'}
@@ -57,14 +55,12 @@ export const TypeSelectionButton = ({
   );
 };
 
-const OptionButton = () => {
+const OptionButton = ({ isFirstRenderOver }: { isFirstRenderOver: boolean }) => {
   const [isHover, setIsHover] = useState(false);
-  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
   return (
     <motion.button
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      onViewportEnter={() => setIsFirstRenderOver(true)}
       variants={optionButtonVariants}
       whileInView="idle"
       whileHover="hover"
@@ -108,17 +104,19 @@ const OptionButton = () => {
   );
 };
 
-const CancelButton = ({ handleDelete }: { handleDelete: () => void }) => {
+const CancelButton = ({
+  handleDelete,
+  isFirstRenderOver,
+}: {
+  handleDelete: () => void;
+  isFirstRenderOver: boolean;
+}) => {
   const [isHover, setIsHover] = useState(false);
-  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
   return (
     <motion.button
       onClick={handleDelete}
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      onViewportEnter={() => {
-        setIsFirstRenderOver(true);
-      }}
       variants={cancelButtonVariants}
       whileInView="idle"
       whileHover="hover"
@@ -150,12 +148,20 @@ const CancelButton = ({ handleDelete }: { handleDelete: () => void }) => {
   );
 };
 
-const TargetInput = ({ name, initialValue }: { name: string; initialValue: number }) => {
+const TargetInput = ({
+  name,
+  initialValue,
+  isFirstRenderOver,
+}: {
+  name: string;
+  initialValue: number;
+  isFirstRenderOver: boolean;
+}) => {
   return (
     <div className="flex min-w-[100px] flex-col space-y-1">
       <motion.div
         variants={toOpacityZero}
-        whileInView="idle"
+        animate={isFirstRenderOver ? 'idle' : undefined}
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
         exit="exit"
@@ -165,7 +171,7 @@ const TargetInput = ({ name, initialValue }: { name: string; initialValue: numbe
       </motion.div>
       <motion.div
         variants={insetInputVariants}
-        whileInView="idle"
+        animate={isFirstRenderOver ? 'idle' : undefined}
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
         exit="exit"
@@ -173,7 +179,7 @@ const TargetInput = ({ name, initialValue }: { name: string; initialValue: numbe
       >
         <motion.div
           variants={toOpacityZero}
-          whileInView="idle"
+          animate={isFirstRenderOver ? 'idle' : undefined}
           viewport={{ once: true, amount: 0.5 }}
           initial="exit"
           exit="exit"
@@ -195,6 +201,7 @@ export default function PickupCard({
   deleteBanner: () => void;
 }) {
   const [isHover, setIsHover] = useState(false);
+  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
   const targetInputButtons = [
     { name: '픽업오퍼 수', initialValue: pickupData.pickupDetails.pickupOpersCount },
     { name: '목표픽업 수', initialValue: pickupData.pickupDetails.targetPickupCount },
@@ -204,13 +211,16 @@ export default function PickupCard({
     <motion.div
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
+      onViewportEnter={() => {
+        setIsFirstRenderOver(true);
+      }}
       animate={isHover ? { scale: 1.02 } : undefined}
       transition={cardTransition}
       className="Card relative w-[480px] space-y-12 p-4"
     >
       <motion.div
         variants={cardVariants}
-        whileInView="idle"
+        animate={isFirstRenderOver ? 'idle' : undefined}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ ...cardTransition, ease: 'easeIn' }}
         initial="exit"
@@ -221,7 +231,7 @@ export default function PickupCard({
         <div className="flex items-center justify-between">
           <motion.div
             variants={toOpacityZero}
-            whileInView="idle"
+            animate={isFirstRenderOver ? 'idle' : undefined}
             viewport={{ once: true, amount: 0.5 }}
             initial="exit"
             exit="exit"
@@ -229,20 +239,30 @@ export default function PickupCard({
           >
             <span className="text-amber-400">{index}.</span> 가챠 스케쥴 - {index}
           </motion.div>
-          <CancelButton handleDelete={deleteBanner} />
+          <CancelButton handleDelete={deleteBanner} isFirstRenderOver={isFirstRenderOver} />
         </div>
         <div className="relative flex w-full space-x-3 text-[15px]">
           {gachaTypeButtons.map(({ name, hoverBackground }) => (
-            <TypeSelectionButton key={name} name={name} hoverBackground={hoverBackground} />
+            <TypeSelectionButton
+              key={name}
+              name={name}
+              hoverBackground={hoverBackground}
+              isFirstRenderOver={isFirstRenderOver}
+            />
           ))}
         </div>
         <div className="relative flex justify-between">
           <div className="flex space-x-3">
             {targetInputButtons.map(({ name, initialValue }) => (
-              <TargetInput key={name} name={name} initialValue={initialValue} />
+              <TargetInput
+                key={name}
+                name={name}
+                initialValue={initialValue}
+                isFirstRenderOver={isFirstRenderOver}
+              />
             ))}
           </div>
-          <OptionButton />
+          <OptionButton isFirstRenderOver={isFirstRenderOver} />
         </div>
         {/*         <div>lim/nor/full</div>
         <div>picked 1,2,3,4</div>
