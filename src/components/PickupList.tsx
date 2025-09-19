@@ -57,13 +57,13 @@ export default function PickupList() {
       <div className="flex flex-col items-center space-y-12">
         <ScheduleOverview />
       </div>
-      <div className="flex flex-col items-center space-y-8">
+      <div className="flex w-[984px] flex-col items-center space-y-8">
         <div className="mb-12 flex space-x-16">
           <ResetButton onResetClick={() => {}} />
           <PlayButton onPlayClick={() => {}} />
         </div>
         <OptionBar />
-        <div className="grid grid-cols-2 gap-x-6 gap-y-9">
+        <div className="grid w-full grid-cols-2 gap-x-6 gap-y-9">
           <AnimatePresence>
             <motion.div
               variants={cardVariants}
@@ -71,7 +71,7 @@ export default function PickupList() {
               initial="exit"
               animate="idle"
               transition={cardTransition}
-              className="flex items-center justify-center rounded-xl p-4"
+              className="flex min-h-[230px] items-center justify-center rounded-xl p-4"
             >
               <AddButton onAddClick={addBanner} />
             </motion.div>
