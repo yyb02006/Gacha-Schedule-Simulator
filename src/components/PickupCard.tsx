@@ -133,7 +133,7 @@ export const DeleteButton = ({
       custom={{ state: isFirstRenderOver ? 'normal' : 'initial' }}
       initial="exit"
       exit="exit"
-      className="flex size-[44px] cursor-pointer rounded-xl p-1 text-[#ff637e]"
+      className="size-[44px] cursor-pointer rounded-xl p-1 text-[#ff637e]"
     >
       <motion.svg
         variants={toOpacityZero}
@@ -141,7 +141,7 @@ export const DeleteButton = ({
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
         exit="exit"
-        className="text-shadow-orange-200"
+        className="size-full"
       >
         <motion.use
           animate={
