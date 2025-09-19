@@ -1,3 +1,4 @@
+import { GachaTypeButtonCustom } from '#/types/types';
 import { Transition, Variant, Variants } from 'motion';
 
 type CardState = 'initial' | 'normal';
@@ -51,10 +52,8 @@ export const cardVariants: Variants = {
   },
 };
 
-export type GachaTypeButtonCustom = { state: 'initial' | 'normal'; hoverBackground: string };
-
 export const gachaTypeButtonVariants: Variants = {
-  idle: (custom: { state: 'initial' | 'normal'; hoverBackground: string }) => ({
+  idle: (custom: GachaTypeButtonCustom) => ({
     boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
     background: 'linear-gradient(155deg, #181818, #2e2e2e)',
     transition:
@@ -67,8 +66,13 @@ export const gachaTypeButtonVariants: Variants = {
     background: 'linear-gradient(155deg, #202020, #202020)',
     transition: secondLevelTransition.fadeOut,
   },
-  hover: (custom: { state: 'initial' | 'normal'; hoverBackground: string }) => ({
+  hover: (custom: GachaTypeButtonCustom) => ({
     boxShadow: '4px 4px 12px #101010, -5px -4px 12px #404040',
+    background: custom.hoverBackground,
+    transition: { duration: 0.3 },
+  }),
+  active: (custom: GachaTypeButtonCustom) => ({
+    boxShadow: 'inset 3px 3px 8px #101010, inset -3px -3px 8px #303030',
     background: custom.hoverBackground,
     transition: { duration: 0.3 },
   }),
