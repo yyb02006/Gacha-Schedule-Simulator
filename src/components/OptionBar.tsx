@@ -83,10 +83,12 @@ export default function OptionBar() {
           <TypeSelectionButton
             name="올명함"
             hoverBackground="linear-gradient(155deg, #1447e6, #51a2ff)"
+            onTypeClick={() => {}}
           />
           <TypeSelectionButton
             name="올풀잠"
             hoverBackground="linear-gradient(155deg, #ec003f, #ff637e)"
+            onTypeClick={() => {}}
           />
         </div>
         <DetailOptionsButton />

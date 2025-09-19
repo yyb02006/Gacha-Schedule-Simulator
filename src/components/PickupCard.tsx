@@ -19,12 +19,17 @@ export const TypeSelectionButton = ({
   name,
   hoverBackground,
   isFirstRenderOver = true,
+  defaultActive = false,
+  onTypeClick,
 }: {
   name: string;
   hoverBackground: string;
   isFirstRenderOver?: boolean;
+  defaultActive?: boolean;
+  onTypeClick: (isActive?: boolean) => void;
 }) => {
   const [isHover, setIsHover] = useState(false);
+  const [isActive, setIsActive] = useState(false);
   const custom: GachaTypeButtonCustom = {
     hoverBackground,
     state: isFirstRenderOver ? 'normal' : 'initial',
@@ -34,6 +39,10 @@ export const TypeSelectionButton = ({
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
       variants={gachaTypeButtonVariants}
+      onClick={() => {
+        onTypeClick(isActive);
+        setIsActive((p) => !p);
+      }}
       viewport={{ once: true, amount: 0.5 }}
       animate={isHover ? 'hover' : 'idle'}
       custom={custom}
@@ -242,12 +251,14 @@ export default function PickupCard({
           <CancelButton handleDelete={deleteBanner} isFirstRenderOver={isFirstRenderOver} />
         </div>
         <div className="relative flex w-full space-x-3 text-[15px]">
-          {gachaTypeButtons.map(({ name, hoverBackground }) => (
+          {gachaTypeButtons.map(({ name, hoverBackground, defaultActive }) => (
             <TypeSelectionButton
               key={name}
               name={name}
               hoverBackground={hoverBackground}
               isFirstRenderOver={isFirstRenderOver}
+              defaultActive={defaultActive}
+              onTypeClick={() => {}}
             />
           ))}
         </div>
