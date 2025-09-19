@@ -10,29 +10,28 @@ import {
   insetInputVariants,
   cardVariants,
   toOpacityZero,
-  GachaTypeButtonCustom,
   optionButtonVariants,
 } from '#/constants/variants';
 import { gachaTypeButtons } from '#/constants/ui';
+import { GachaTypeButtonCustom, GachaTypeButtonId } from '#/types/types';
 
 export const TypeSelectionButton = ({
   name,
   hoverBackground,
   isFirstRenderOver = true,
-  defaultActive = false,
+  isActive = false,
   onTypeClick,
 }: {
   name: string;
   hoverBackground: string;
   isFirstRenderOver?: boolean;
-  defaultActive?: boolean;
-  onTypeClick: (isActive?: boolean) => void;
+  isActive?: boolean;
+  onTypeClick: () => void;
 }) => {
   const [isHover, setIsHover] = useState(false);
-  const [isActive, setIsActive] = useState(false);
   const custom: GachaTypeButtonCustom = {
     hoverBackground,
-    state: isFirstRenderOver ? 'normal' : 'initial',
+    state: isFirstRenderOver ? 'normal' : isActive ? 'active' : 'initial',
   };
   return (
     <motion.button
@@ -40,14 +39,14 @@ export const TypeSelectionButton = ({
       onHoverEnd={() => setIsHover(false)}
       variants={gachaTypeButtonVariants}
       onClick={() => {
-        onTypeClick(isActive);
-        setIsActive((p) => !p);
+        onTypeClick();
       }}
       viewport={{ once: true, amount: 0.5 }}
-      animate={isHover ? 'hover' : 'idle'}
+      animate={isActive ? 'active' : isHover ? 'hover' : 'idle'}
       custom={custom}
       initial="exit"
       exit="exit"
+      aria-pressed={isActive}
       className="font-S-CoreDream-500 flex w-full cursor-pointer items-center justify-center rounded-xl p-2"
     >
       <motion.div
@@ -211,6 +210,7 @@ export default function PickupCard({
 }) {
   const [isHover, setIsHover] = useState(false);
   const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
+  const [currentGachaType, setCurrentGachaType] = useState<GachaTypeButtonId>('limited');
   const targetInputButtons = [
     { name: '픽업오퍼 수', initialValue: pickupData.pickupDetails.pickupOpersCount },
     { name: '목표픽업 수', initialValue: pickupData.pickupDetails.targetPickupCount },
@@ -251,14 +251,16 @@ export default function PickupCard({
           <CancelButton handleDelete={deleteBanner} isFirstRenderOver={isFirstRenderOver} />
         </div>
         <div className="relative flex w-full space-x-3 text-[15px]">
-          {gachaTypeButtons.map(({ name, hoverBackground, defaultActive }) => (
+          {gachaTypeButtons.map(({ id, name, hoverBackground }) => (
             <TypeSelectionButton
-              key={name}
+              key={id}
               name={name}
               hoverBackground={hoverBackground}
               isFirstRenderOver={isFirstRenderOver}
-              defaultActive={defaultActive}
-              onTypeClick={() => {}}
+              isActive={currentGachaType === id ? true : false}
+              onTypeClick={() => {
+                setCurrentGachaType(id);
+              }}
             />
           ))}
         </div>
