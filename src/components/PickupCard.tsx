@@ -31,7 +31,8 @@ export const TypeSelectionButton = ({
   const [isHover, setIsHover] = useState(false);
   const custom: GachaTypeButtonCustom = {
     hoverBackground,
-    state: isFirstRenderOver ? 'normal' : isActive ? 'active' : 'initial',
+    state: isFirstRenderOver ? 'normal' : 'initial',
+    isActive,
   };
   return (
     <motion.button
@@ -251,18 +252,21 @@ export default function PickupCard({
           <CancelButton handleDelete={deleteBanner} isFirstRenderOver={isFirstRenderOver} />
         </div>
         <div className="relative flex w-full space-x-3 text-[15px]">
-          {gachaTypeButtons.map(({ id, name, hoverBackground }) => (
-            <TypeSelectionButton
-              key={id}
-              name={name}
-              hoverBackground={hoverBackground}
-              isFirstRenderOver={isFirstRenderOver}
-              isActive={currentGachaType === id ? true : false}
-              onTypeClick={() => {
-                setCurrentGachaType(id);
-              }}
-            />
-          ))}
+          {gachaTypeButtons.map(({ id, name, hoverBackground }) => {
+            console.log('map', isFirstRenderOver);
+            return (
+              <TypeSelectionButton
+                key={id}
+                name={name}
+                hoverBackground={hoverBackground}
+                isFirstRenderOver={isFirstRenderOver}
+                isActive={currentGachaType === id ? true : false}
+                onTypeClick={() => {
+                  setCurrentGachaType(id);
+                }}
+              />
+            );
+          })}
         </div>
         <div className="relative flex justify-between">
           <div className="flex space-x-3">

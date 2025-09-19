@@ -61,20 +61,25 @@ export const gachaTypeButtonVariants: Variants = {
         ? secondLevelTransition.fadeIn
         : { background: { duration: 0.15 }, boxShadow: { duration: 0.1 } },
   }),
-  exit: {
+  exit: (custom: GachaTypeButtonCustom) => ({
     boxShadow: '0px 0px 0px #202020, 0px 0px 0px #202020',
     background: 'linear-gradient(155deg, #202020, #202020)',
-    transition: secondLevelTransition.fadeOut,
-  },
+    transition: custom.isActive
+      ? { background: { duration: 0 }, boxShadow: { duration: 0.3, delay: 0.1 } }
+      : secondLevelTransition.fadeOut,
+  }),
   hover: (custom: GachaTypeButtonCustom) => ({
     boxShadow: '4px 4px 12px #101010, -5px -4px 12px #404040',
     background: custom.hoverBackground,
     transition: { duration: 0.3 },
   }),
   active: (custom: GachaTypeButtonCustom) => ({
-    boxShadow: 'inset 3px 3px 8px #101010, inset -3px -3px 8px #303030',
+    boxShadow: 'inset 3px 3px 6px #101010, inset -3px -3px 6px #303030',
     background: custom.hoverBackground,
-    transition: { duration: 0.3 },
+    transition:
+      custom.state === 'initial'
+        ? { background: { duration: 0.3, delay: 0.3 }, boxShadow: { duration: 0.3, delay: 0.1 } }
+        : { background: { duration: 0.3 } },
   }),
 };
 
