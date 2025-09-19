@@ -113,17 +113,17 @@ const OptionButton = ({ isFirstRenderOver }: { isFirstRenderOver: boolean }) => 
   );
 };
 
-export const CancelButton = ({
-  handleCancel,
+export const DeleteButton = ({
+  handleDelete,
   isFirstRenderOver = true,
 }: {
-  handleCancel: () => void;
+  handleDelete: () => void;
   isFirstRenderOver?: boolean;
 }) => {
   const [isHover, setIsHover] = useState(false);
   return (
     <motion.button
-      onClick={handleCancel}
+      onClick={handleDelete}
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
       variants={cancelButtonVariants}
@@ -249,7 +249,7 @@ export default function PickupCard({
           >
             <span className="text-amber-400">{index}.</span> 가챠 스케쥴 - {index}
           </motion.div>
-          <CancelButton handleCancel={deleteBanner} isFirstRenderOver={isFirstRenderOver} />
+          <DeleteButton handleDelete={deleteBanner} isFirstRenderOver={isFirstRenderOver} />
         </div>
         <div className="relative flex w-full space-x-3 text-[15px]">
           {gachaTypeButtons.map(({ id, name, hoverBackground }) => {
