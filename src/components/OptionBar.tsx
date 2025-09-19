@@ -1,11 +1,11 @@
 'use client';
 
-import { TypeSelectionButton } from '#/components/PickupCard';
+import SimulatorOptionModal from '#/components/SimulatorOptionModal';
 import { cardVariants, optionButtonVariants, toOpacityZero } from '#/constants/variants';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 
-const DetailOptionsButton = () => {
+const DetailOptionsButton = ({ onClick }: { onClick: () => void }) => {
   const [isHover, setIsHover] = useState(false);
   const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
   return (
@@ -13,6 +13,7 @@ const DetailOptionsButton = () => {
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
       onViewportEnter={() => setIsFirstRenderOver(true)}
+      onClick={onClick}
       variants={optionButtonVariants}
       whileInView="idle"
       whileHover="hover"
@@ -66,6 +67,8 @@ const DetailOptionsButton = () => {
 };
 
 export default function OptionBar() {
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+
   return (
     <motion.div
       variants={cardVariants}
@@ -79,20 +82,15 @@ export default function OptionBar() {
         animate="idle"
         className="font-S-CoreDream-500 flex justify-between"
       >
-        <div className="flex w-60 gap-4">
-          <TypeSelectionButton
-            name="올명함"
-            hoverBackground="linear-gradient(155deg, #1447e6, #51a2ff)"
-            onTypeClick={() => {}}
-          />
-          <TypeSelectionButton
-            name="올풀잠"
-            hoverBackground="linear-gradient(155deg, #ec003f, #ff637e)"
-            onTypeClick={() => {}}
-          />
+        <div className="flex items-center">
+          <span className="text-amber-400">플레이 버튼(▶)</span>을 눌러 시뮬레이션을 시작해보세요
         </div>
-        <DetailOptionsButton />
+        <DetailOptionsButton onClick={() => setIsSettingsModalOpen(true)} />
       </motion.div>
+      <SimulatorOptionModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </motion.div>
   );
 }
