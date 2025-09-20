@@ -13,7 +13,8 @@ import {
   optionButtonVariants,
 } from '#/constants/variants';
 import { gachaTypeButtons } from '#/constants/ui';
-import { GachaTypeButtonCustom, GachaTypeButtonId } from '#/types/types';
+import { GachaTypeButtonCustom, GachaTypeButtonId, SizeClass } from '#/types/types';
+import { cls } from '#/libs/utils';
 
 export const TypeSelectionButton = ({
   name,
@@ -116,9 +117,11 @@ const OptionButton = ({ isFirstRenderOver }: { isFirstRenderOver: boolean }) => 
 export const DeleteButton = ({
   handleDelete,
   isFirstRenderOver = true,
+  size = 'size-[44px]',
 }: {
   handleDelete: () => void;
   isFirstRenderOver?: boolean;
+  size?: SizeClass;
 }) => {
   const [isHover, setIsHover] = useState(false);
   return (
@@ -133,7 +136,7 @@ export const DeleteButton = ({
       custom={{ state: isFirstRenderOver ? 'normal' : 'initial' }}
       initial="exit"
       exit="exit"
-      className="size-[44px] cursor-pointer rounded-xl p-1 text-[#ff637e]"
+      className={cls(size, 'cursor-pointer rounded-xl p-1 text-[#ff637e]')}
     >
       <motion.svg
         variants={toOpacityZero}
