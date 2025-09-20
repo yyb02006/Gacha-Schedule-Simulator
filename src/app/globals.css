@@ -73,3 +73,17 @@ body {
   color: var(--foreground);
   font-family: 'S-CoreDream-400', Arial, Helvetica, sans-serif;
 }
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  appearance: textfield;
+}
+
+input:focus {
+  outline: none;
+}
