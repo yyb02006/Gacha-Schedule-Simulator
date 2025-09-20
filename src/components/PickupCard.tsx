@@ -22,12 +22,14 @@ export const TypeSelectionButton = ({
   isFirstRenderOver = true,
   isActive = false,
   onTypeClick,
+  className = '',
 }: {
   name: string;
   hoverBackground: string;
   isFirstRenderOver?: boolean;
   isActive?: boolean;
   onTypeClick: () => void;
+  className?: string;
 }) => {
   const [isHover, setIsHover] = useState(false);
   const custom: GachaTypeButtonCustom = {
@@ -49,7 +51,10 @@ export const TypeSelectionButton = ({
       initial="exit"
       exit="exit"
       aria-pressed={isActive}
-      className="font-S-CoreDream-500 flex w-full cursor-pointer items-center justify-center rounded-xl p-2"
+      className={cls(
+        className,
+        'font-S-CoreDream-500 flex w-full cursor-pointer items-center justify-center rounded-xl p-2',
+      )}
     >
       <motion.div
         variants={toOpacityZero}
