@@ -118,10 +118,12 @@ export const DeleteButton = ({
   handleDelete,
   isFirstRenderOver = true,
   size = 'size-[44px]',
+  className = '',
 }: {
   handleDelete: () => void;
   isFirstRenderOver?: boolean;
   size?: SizeClass;
+  className?: string;
 }) => {
   const [isHover, setIsHover] = useState(false);
   return (
@@ -136,7 +138,7 @@ export const DeleteButton = ({
       custom={{ state: isFirstRenderOver ? 'normal' : 'initial' }}
       initial="exit"
       exit="exit"
-      className={cls(size, 'cursor-pointer rounded-xl p-1 text-[#ff637e]')}
+      className={cls(size, className, 'cursor-pointer rounded-xl p-1 text-[#ff637e]')}
     >
       <motion.svg
         variants={toOpacityZero}
