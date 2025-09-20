@@ -11,10 +11,12 @@ import ResetButton from '#/components/ResetButton';
 import { cardTransition, cardVariants } from '#/constants/variants';
 import OptionBar from '#/components/OptionBar';
 
+export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
+
 export interface PickupData {
   id: string;
   operators: { name: string; currentQty: number }[];
-  gachaType: 'limited' | 'standard' | 'collab';
+  gachaType: GachaType;
   pickupDetails: { pickupOpersCount: number; targetPickupCount: number; pickupChance: number };
 }
 
