@@ -110,3 +110,72 @@ export const toOpacityZero: Variants = {
 };
 
 export const cardTransition = { type: 'spring' as const, stiffness: 170, damping: 27, mass: 1.35 };
+
+export const toggleButtonVariants: Variants = {
+  left: {
+    boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
+    background: 'linear-gradient(155deg, #bb4d00, #ffb900)',
+    transition: { duration: 0.3, delay: 0.2 },
+  },
+  right: {
+    boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
+    background: 'linear-gradient(155deg, #1447e6, #51a2ff)',
+    transition: { duration: 0.3, delay: 0.2 },
+  },
+  exit: {
+    boxShadow: '0px 0px 0px #202020, 0px 0px 0px #202020',
+    background: 'linear-gradient(155deg, #202020, #202020)',
+    transition: { duration: 0.3, delay: 0.2 },
+  },
+};
+
+export const fontPop: Variants = {
+  active: {
+    filter: 'drop-shadow(6px 6px 5px #000000) drop-shadow(-6px -6px 5px #404040)',
+    color: '#707070',
+    transition: {
+      duration: 0.3,
+      delay: 0.2,
+      ease: [0.25, 1, 0.5, 1],
+    },
+    scale: 1,
+  },
+  inActive: {
+    filter: 'drop-shadow(0px 0px 0px #202020) drop-shadow(0px 0px 0px #202020)',
+    color: '#202020',
+    scale: 0.95,
+    transition: {
+      duration: 0.2,
+      delay: 0,
+      ease: [0.25, 1, 0.5, 1],
+    },
+  },
+  exit: {
+    filter: 'drop-shadow(0px 0px 0px #202020) drop-shadow(0px 0px 0px #202020)',
+    color: '#202020',
+    scale: 0.95,
+    transition: {
+      duration: 0.3,
+      delay: 0.2,
+      ease: [0.25, 1, 0.5, 1],
+    },
+  },
+};
+
+export const gachaBannerOptionCardVariants: Variants = {
+  idle: {
+    boxShadow: '4px 4px 12px #141414, -4px -4px 12px #2e2e2e',
+    background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
+    transition: {
+      boxShadow: { duration: 0.3, delay: 0.2 },
+    },
+  },
+  exit: {
+    boxShadow: '0px 0px 0px #202020, 0px 0px 0px #202020',
+    background: 'linear-gradient(135deg, #202020, #202020)',
+    transition: {
+      boxShadow: { duration: 0.2, delay: 0.2 },
+      background: { duration: 0.1, delay: 0.2 },
+    },
+  },
+};
