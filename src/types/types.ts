@@ -14,4 +14,4 @@ export type GachaTypeButton = {
   hoverBackground: string;
 };
 
-export type SizeClass = `size-[${number}px]` | `size-${number}`;
+export type SizeClass = `size-[${number}px]` | `size-${number}` | `size-full`;
