@@ -8,11 +8,14 @@ const buttonVariants: Variants = {
     boxShadow: '6px 0px 13px #101010, -4px 0px 16px 2px #303030',
     background: 'linear-gradient(90deg, #202020, #303030)',
   },
-  hover: {
+  hover: (custom: 'default' | 'small') => ({
     rotateZ: 90,
-    boxShadow: '0px -10px 20px #000000, 0px 7px 22px 3px #505050',
+    boxShadow:
+      custom === 'default'
+        ? '0px -10px 20px #000000, 0px 7px 22px 3px #505050'
+        : '0px -6px 14px #000000, 0px 4px 15px 2px #505050',
     background: 'linear-gradient(0deg, #dba100, #ffd84d)',
-  },
+  }),
 };
 
 const insetVariants: Variants = {
@@ -45,11 +48,13 @@ export default function DiamondButton({
   isHover,
   initialDelay = 0,
   isFirstRenderOver = true,
+  size = 'default',
 }: {
   children: React.ReactNode;
   isHover: boolean;
   initialDelay?: number;
   isFirstRenderOver?: boolean;
+  size?: 'small' | 'default';
 }) {
   return (
     <motion.button
@@ -60,6 +65,7 @@ export default function DiamondButton({
         boxShadow: '0px 0px 0px #202020, 0px 0px 0px 0px #202020',
         background: 'linear-gradient(90deg, #202020, #202020)',
       }}
+      custom={size}
       className="relative flex size-full cursor-pointer items-center justify-center bg-gradient-to-r from-[#1d1d1d] to-[#222222] p-4"
     >
       <ButtonInset

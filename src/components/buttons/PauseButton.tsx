@@ -1,6 +1,6 @@
 'use client';
 
-import DiamondButton from '#/components/DiamondButton';
+import DiamondButton from '#/components/buttons/DiamondButton';
 import { motion, Variants } from 'motion/react';
 import { MouseEventHandler, useState } from 'react';
 
