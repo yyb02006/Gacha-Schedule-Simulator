@@ -1,53 +1,97 @@
 'use client';
 
-import AddButton from '#/components/AddButton';
+import AddButton from '#/components/buttons/AddButton';
 import ScheduleOverview from '#/components/InfomationBanner';
-import PickupCard from '#/components/PickupCard';
 import { AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import PlayButton from '#/components/PlayButton';
-import ResetButton from '#/components/ResetButton';
+import PlayButton from '#/components/buttons/PlayButton';
 import { cardTransition, cardVariants } from '#/constants/variants';
 import OptionBar from '#/components/OptionBar';
+import ResetButton from '#/components/buttons/ResetButton';
+import PickupBanner from '#/components/PickupBanner';
 
 export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
 
-export interface PickupData {
+export interface Dummy {
   id: string;
-  operators: { name: string; currentQty: number }[];
+  name: string;
+  gachaMax: number | null;
+  gachaMin: number;
   gachaType: GachaType;
+  operators: { name: string; currentQty: number; operType: 'limited' | 'normal' }[];
   pickupDetails: { pickupOpersCount: number; targetPickupCount: number; pickupChance: number };
 }
 
-const dummy: Array<PickupData> = [
+const dummies: Dummy[] = [
   {
     id: '970b5b98-edda-4af6-ae22-49a9227e1ad4',
+    name: '우리 종족',
     gachaType: 'limited',
     operators: [
-      { name: '위셔델', currentQty: 0 },
-      { name: '로고스', currentQty: 0 },
+      { name: '위셔델', currentQty: 0, operType: 'limited' },
+      { name: '로고스', currentQty: 0, operType: 'normal' },
     ],
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
+    gachaMax: 200,
+    gachaMin: 0,
   },
   {
     id: 'a1b2c3d4-e5f6-4789-b0c1-d2e3f4a5b6c7',
+    name: '모래위의 각인',
+    gachaType: 'limited',
+    operators: [
+      { name: '페페', currentQty: 0, operType: 'limited' },
+      { name: '나란투야', currentQty: 0, operType: 'normal' },
+    ],
+    pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
+    gachaMax: null,
+    gachaMin: 0,
+  },
+  {
+    id: 'f8e7d6c5-b4a3-4210-9876-543210fedcba',
+    name: '불타는 엘레지여',
     gachaType: 'standard',
-    operators: [{ name: '네크라스', currentQty: 0 }],
+    operators: [{ name: '네크라스', currentQty: 0, operType: 'normal' }],
     pickupDetails: { pickupOpersCount: 1, targetPickupCount: 1, pickupChance: 50 },
+    gachaMax: null,
+    gachaMin: 0,
   },
 ];
 
+/* const GachaBanners = ({ isGachaSim }: { isGachaSim: boolean }) => {
+  return (
+    <section className="flex h-0 grow flex-col space-y-2">
+      <div className="hide-scrollbar relative -mx-3 space-y-6 overflow-y-auto px-3 py-[10px]">
+        {dummies.map((dummy, index) => (
+          <GachaBannerOptionCard
+            key={dummy.id}
+            isGachaSim={isGachaSim}
+            data={dummy}
+            index={index}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}; */
+
 export default function PickupList() {
-  const [pickupDatas, setPickupDatas] = useState<PickupData[]>(dummy);
+  const [pickupDatas, setPickupDatas] = useState<Dummy[]>(dummies);
+  const [isBannerAddHover, setIsBannerAddHover] = useState(false);
+  const [isGachaSim, setIsGachaSim] = useState(false);
+  const [isSimpleMode, setIsSimpleMode] = useState(false);
   const addBanner = () => {
     setPickupDatas((p) => [
       ...p,
       {
         id: crypto.randomUUID(),
         gachaType: 'standard',
-        operators: [{ name: '오퍼레이터A', currentQty: 0 }],
+        operators: [],
         pickupDetails: { pickupOpersCount: 2, targetPickupCount: 1, pickupChance: 50 },
+        gachaMax: 300,
+        gachaMin: 0,
+        name: 'scheduleA',
       },
     ]);
   };
@@ -56,35 +100,49 @@ export default function PickupList() {
   };
   return (
     <div className="mt-12 flex space-x-6">
-      <div className="flex flex-col items-center space-y-12">
-        <ScheduleOverview />
-      </div>
-      <div className="flex w-[984px] flex-col items-center space-y-8">
+      <ScheduleOverview />
+      <div className="flex w-[984px] flex-col items-center space-y-6">
         <div className="mb-12 flex space-x-16">
           <ResetButton onResetClick={() => {}} />
           <PlayButton onPlayClick={() => {}} />
         </div>
-        <OptionBar />
-        <div className="grid w-full grid-cols-2 gap-x-6 gap-y-9">
+        <OptionBar
+          isGachaSim={isGachaSim}
+          setIsGachaSim={setIsGachaSim}
+          isSimpleMode={isSimpleMode}
+          setIsSimpleMode={setIsSimpleMode}
+        />
+        <div className="flex w-full flex-col gap-y-6">
           <AnimatePresence>
             <motion.div
+              onHoverStart={() => setIsBannerAddHover(true)}
+              onHoverEnd={() => setIsBannerAddHover(false)}
               variants={cardVariants}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, background: 'linear-gradient(155deg, #bb4d00, #ffb900)' }}
               initial="exit"
               animate="idle"
               transition={cardTransition}
-              className="flex min-h-[230px] items-center justify-center rounded-xl p-4"
+              className="flex cursor-pointer items-center justify-center gap-x-24 overflow-hidden rounded-xl py-8"
             >
-              <AddButton onAddClick={addBanner} />
+              {/* 호버시에 카드와 add버튼 그림자까지 노랗게 만들기 */}
+              <div className="font-S-CoreDream-700 text-2xl">픽업 배너 추가</div>
+              <AddButton
+                onAddClick={addBanner}
+                isOtherElHover={isBannerAddHover}
+                custom={{ boxShadow: '0px -7px 20px 5px #bd5b00, 0px 7px 22px 3px #ffde26' }}
+              />
             </motion.div>
-            {pickupDatas.map((pickupData, index) => (
+            {pickupDatas.map((data, index) => (
+              <PickupBanner key={data.id} data={data} index={index} isGachaSim={isGachaSim} />
+            ))}
+            {/*             {pickupDatas.map((pickupData, index) => (
               <PickupCard
                 key={pickupData.id}
                 index={index + 1}
                 pickupData={pickupData}
                 deleteBanner={deleteBanner(pickupData.id)}
               />
-            ))}
+            ))} */}
           </AnimatePresence>
         </div>
       </div>
