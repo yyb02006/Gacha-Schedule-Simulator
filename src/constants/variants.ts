@@ -28,7 +28,7 @@ const smallButton: Variants = {
 };
 
 const cardIdle: Variant = {
-  boxShadow: '12px 12px 32px #141414, -12px -10px 32px #2e2e2e',
+  boxShadow: '6px 6px 16px #141414, -6px -6px 16px #2e2e2e',
   background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
 };
 const cardExit: Variant = {
@@ -36,13 +36,25 @@ const cardExit: Variant = {
   background: 'linear-gradient(135deg, #202020, #202020)',
 };
 
+/*
+const cardIdle: Variant = {
+  boxShadow: '12px 12px 32px #141414, -12px -10px 32px #2e2e2e',
+  background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
+};
+const cardExit: Variant = {
+  boxShadow: '0px 0px 0px #202020, 0px 0px 0px #202020',
+  background: 'linear-gradient(135deg, #202020, #202020)',
+};
+*/
+
 export const cardVariants: Variants = {
-  idle: {
-    ...cardIdle,
+  idle: (custom?: { boxShadow?: string; background?: string }) => ({
+    boxShadow: custom?.boxShadow || cardIdle.boxShadow,
+    background: custom?.background || cardIdle.background,
     transition: {
       boxShadow: { duration: 0.3, delay: 0.2 },
     },
-  },
+  }),
   exit: {
     ...cardExit,
     transition: {
@@ -164,7 +176,7 @@ export const fontPop: Variants = {
 
 export const gachaBannerOptionCardVariants: Variants = {
   idle: {
-    boxShadow: '4px 4px 12px #141414, -4px -4px 12px #2e2e2e',
+    boxShadow: '6px 6px 16px #141414, -6px -6px 16px #2e2e2e',
     background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
     transition: {
       boxShadow: { duration: 0.3, delay: 0.2 },
