@@ -1,80 +1,119 @@
 'use client';
 
+import AdjustmentButton from '#/components/buttons/AdjustmentButton';
 import SimulatorOptionModal from '#/components/SimulatorOptionModal';
-import { cardVariants, optionButtonVariants, toOpacityZero } from '#/constants/variants';
-import { motion } from 'motion/react';
-import { useState } from 'react';
+import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
+import { cardVariants, insetInputVariants, toOpacityZero } from '#/constants/variants';
+import { AnimatePresence, motion } from 'motion/react';
+import { Dispatch, SetStateAction, useState } from 'react';
+import SimulatorTypeButton from '#/components/buttons/SimulatorTypeButton';
+import ToggleButton from '#/components/buttons/ToggleButton';
 
-const DetailOptionsButton = ({ onClick }: { onClick: () => void }) => {
-  const [isHover, setIsHover] = useState(false);
-  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
+const ControlPanel = ({
+  isGachaSim,
+  onTypeClick,
+  isSimpleMode,
+  onViewModeToggle,
+}: {
+  isGachaSim: boolean;
+  onTypeClick: () => void;
+  isSimpleMode: boolean;
+  onViewModeToggle: () => void;
+}) => {
   return (
-    <motion.button
-      onHoverStart={() => setIsHover(true)}
-      onHoverEnd={() => setIsHover(false)}
-      onViewportEnter={() => setIsFirstRenderOver(true)}
-      onClick={onClick}
-      variants={optionButtonVariants}
-      whileInView="idle"
-      whileHover="hover"
-      viewport={{ once: true, amount: 0.5 }}
-      custom={{ state: isFirstRenderOver ? 'normal' : 'initial' }}
-      initial="exit"
-      exit="exit"
-      className="relative flex size-[44px] cursor-pointer items-center justify-between self-end rounded-xl p-2"
-    >
-      <div className="absolute top-0 left-0 flex size-full flex-col justify-between px-2 py-3">
-        {[
-          [12, 2, 17, 12],
-          [5, 21, 15, 5],
-          [17, 10, 1, 17],
-        ].map((sequence, index) => (
-          <motion.div
-            key={index}
-            variants={toOpacityZero}
-            whileInView="idle"
-            viewport={{ once: true, amount: 0.5 }}
-            initial="exit"
-            animate={isHover ? { background: '#ffffff' } : { background: '#ffb900' }}
-            className="flex h-[2px] items-center rounded-full bg-[#ffb900]"
-          >
-            <motion.div
-              variants={toOpacityZero}
-              whileInView="idle"
-              viewport={{ once: true, amount: 0.5 }}
-              initial={{ ...toOpacityZero.exit, x: sequence[0] }}
-              animate={
-                isHover
-                  ? {
-                      backgroundColor: '#ffffff',
-                      x: sequence,
-                      transition: {
-                        x: {
-                          duration: 3,
-                          repeat: Infinity,
-                        },
-                      },
-                    }
-                  : { x: sequence[0] }
-              }
-              className="size-2 rounded-full bg-amber-400"
-            />
-          </motion.div>
-        ))}
+    <div className="flex flex-col gap-4">
+      <SimulatorTypeButton isGachaSim={isGachaSim} onTypeClick={onTypeClick} />
+      <div className="flex flex-wrap justify-between">
+        <div className="flex flex-wrap gap-x-6 gap-y-3">
+          <div className="flex items-center gap-x-3 text-sm">
+            <span className="font-S-CoreDream-400 whitespace-nowrap">프리셋</span>
+            <div className="flex w-fit gap-x-3">
+              <TypeSelectionButton
+                name="올명함"
+                hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+                onTypeClick={() => {}}
+                className="px-4 whitespace-nowrap"
+              />
+              <TypeSelectionButton
+                name="올풀잠"
+                hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+                onTypeClick={() => {}}
+                className="px-4 whitespace-nowrap"
+              />
+            </div>
+          </div>
+          <AnimatePresence>
+            {isGachaSim || (
+              <div className="flex items-center gap-x-3 text-sm">
+                <motion.span
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="font-S-CoreDream-400 whitespace-nowrap"
+                >
+                  초기재화
+                </motion.span>
+                <motion.div
+                  variants={insetInputVariants}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="relative flex items-center rounded-lg px-3"
+                >
+                  <motion.div
+                    variants={toOpacityZero}
+                    initial="exit"
+                    animate="idle"
+                    exit="exit"
+                    className="relative flex items-center px-2 py-2"
+                  >
+                    <input
+                      type="number"
+                      onChange={() => {}}
+                      className="relative w-14 min-w-0 text-right"
+                      value={400000}
+                    />
+                  </motion.div>
+                  <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+                    합성옥
+                  </motion.div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+        <ToggleButton
+          isLeftToggle={isSimpleMode}
+          labels={{ left: '기본옵션', right: '세부옵션' }}
+          onToggle={onViewModeToggle}
+        />
       </div>
-    </motion.button>
+    </div>
   );
 };
 
-export default function OptionBar() {
+export default function OptionBar({
+  isGachaSim,
+  setIsGachaSim,
+  isSimpleMode,
+  setIsSimpleMode,
+}: {
+  isGachaSim: boolean;
+  setIsGachaSim: Dispatch<SetStateAction<boolean>>;
+  isSimpleMode: boolean;
+  setIsSimpleMode: Dispatch<SetStateAction<boolean>>;
+}) {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-
+  const onViewModeToggle = () => {
+    setIsSimpleMode((p) => !p);
+  };
   return (
     <motion.div
       variants={cardVariants}
       initial="exit"
       animate="idle"
-      className="w-full rounded-xl p-4"
+      className="flex w-full flex-col gap-3 rounded-xl p-4"
     >
       <motion.div
         variants={toOpacityZero}
@@ -85,11 +124,19 @@ export default function OptionBar() {
         <div className="flex items-center">
           <span className="text-amber-400">플레이 버튼(▶)</span>을 눌러 시뮬레이션을 시작해보세요
         </div>
-        <DetailOptionsButton onClick={() => setIsSettingsModalOpen(true)} />
+        <AdjustmentButton onClick={() => setIsSettingsModalOpen(true)} />
       </motion.div>
       <SimulatorOptionModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+      />
+      <ControlPanel
+        isGachaSim={isGachaSim}
+        onTypeClick={() => {
+          setIsGachaSim((p) => !p);
+        }}
+        isSimpleMode={isSimpleMode}
+        onViewModeToggle={onViewModeToggle}
       />
     </motion.div>
   );
