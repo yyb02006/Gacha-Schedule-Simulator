@@ -22,16 +22,29 @@ const addVariants: Variants = {
   hover: { background: 'linear-gradient(-35deg, #dba100, #ffd84d)' },
 };
 
+interface AddButtonProps {
+  onAddClick: MouseEventHandler<HTMLDivElement>;
+  custom?: { size?: 'small' | 'default'; boxShadow?: string };
+  isOtherElHover?: boolean;
+}
+
 export default function AddButton({
   onAddClick,
-  size = 'default',
+  custom,
+  isOtherElHover,
 }: {
   onAddClick: MouseEventHandler<HTMLDivElement>;
-  size?: 'small' | 'default';
+  custom?: { size?: 'small' | 'default'; boxShadow?: string };
+  isOtherElHover?: boolean;
 }) {
   const [isHover, setIsHover] = useState(false);
   const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
   const initialDelay = 0.3;
+  const currentHover = isOtherElHover !== undefined ? isOtherElHover : isHover;
+  const mergedCustom: AddButtonProps['custom'] = custom && {
+    size: custom.size || 'default',
+    boxShadow: custom.boxShadow,
+  };
   return (
     <motion.div
       onHoverStart={() => setIsHover(true)}
@@ -39,26 +52,26 @@ export default function AddButton({
       onClick={onAddClick}
       onViewportEnter={() => setIsFirstRenderOver(true)}
       className={cls(
-        size === 'default' ? 'size-18' : 'size-11',
+        mergedCustom?.size === 'default' ? 'size-18' : 'size-11',
         'relative flex rotate-45 items-center justify-center',
       )}
     >
       <DiamondButton
-        isHover={isHover}
+        isHover={currentHover}
         initialDelay={initialDelay}
         isFirstRenderOver={isFirstRenderOver}
-        size={size}
+        custom={mergedCustom}
       >
         <div
           className={cls(
-            size === 'default' ? 'size-12' : 'size-8',
+            mergedCustom?.size === 'default' ? 'size-12' : 'size-8',
             'absolute flex items-center justify-center',
           )}
         >
           <div className="absolute flex size-full items-center justify-center overflow-hidden">
             <motion.div
               variants={addShadowVariants}
-              animate={isHover ? 'hover' : 'idle'}
+              animate={currentHover ? 'hover' : 'idle'}
               initial={{
                 filter: 'drop-shadow(0px 0px 0px #202020) drop-shadow(0px 0px 0px #202020)',
               }}
@@ -69,18 +82,21 @@ export default function AddButton({
                 src={'/add.svg'}
                 width={32}
                 height={32}
-                className={size === 'small' ? 'size-5' : ''}
+                className={mergedCustom?.size === 'small' ? 'size-5' : ''}
               />
             </motion.div>
           </div>
           <motion.div
             variants={addVariants}
-            animate={isHover ? 'hover' : 'idle'}
+            animate={currentHover ? 'hover' : 'idle'}
             transition={{ duration: 0.3, delay: isFirstRenderOver ? 0 : initialDelay }}
             initial={{
               background: 'linear-gradient(145deg, #202020, #202020)',
             }}
-            className={cls(size === 'default' ? 'size-8' : 'size-5', 'absolute -rotate-z-45')}
+            className={cls(
+              mergedCustom?.size === 'default' ? 'size-8' : 'size-5',
+              'absolute -rotate-z-45',
+            )}
             style={{
               maskImage: 'url(add.svg)',
               maskSize: 'contain',
