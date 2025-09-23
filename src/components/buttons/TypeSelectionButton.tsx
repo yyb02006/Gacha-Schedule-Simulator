@@ -5,26 +5,26 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { gachaTypeButtonVariants, toOpacityZero } from '#/constants/variants';
 import { cls } from '#/libs/utils';
+import { useIsMount } from '#/hooks/useIsMount';
 
 export default function TypeSelectionButton({
   name,
   hoverBackground,
-  isFirstRenderOver = true,
   isActive = false,
   onTypeClick,
   className = '',
 }: {
   name: string;
   hoverBackground: string;
-  isFirstRenderOver?: boolean;
   isActive?: boolean;
   onTypeClick: () => void;
   className?: string;
 }) {
   const [isHover, setIsHover] = useState(false);
+  const isMount = useIsMount();
   const custom: GachaTypeButtonCustom = {
     hoverBackground,
-    state: isFirstRenderOver ? 'normal' : 'initial',
+    state: isMount ? 'normal' : 'initial',
     isActive,
   };
   return (
