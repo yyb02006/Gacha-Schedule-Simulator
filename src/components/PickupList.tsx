@@ -10,6 +10,8 @@ import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variant
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
+import BannerAddModal from '#/components/BannerAddModal';
+import { useModal } from '#/hooks/useModal';
 
 export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
 
@@ -59,28 +61,16 @@ const dummies: Dummy[] = [
   },
 ];
 
-/* const GachaBanners = ({ isGachaSim }: { isGachaSim: boolean }) => {
-  return (
-    <section className="flex h-0 grow flex-col space-y-2">
-      <div className="hide-scrollbar relative -mx-3 space-y-6 overflow-y-auto px-3 py-[10px]">
-        {dummies.map((dummy, index) => (
-          <GachaBannerOptionCard
-            key={dummy.id}
-            isGachaSim={isGachaSim}
-            data={dummy}
-            index={index}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}; */
-
 export default function PickupList() {
   const [pickupDatas, setPickupDatas] = useState<Dummy[]>(dummies);
   const [isBannerAddHover, setIsBannerAddHover] = useState(false);
   const [isGachaSim, setIsGachaSim] = useState(false);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
+  const {
+    isOpen: isBannerAddModalOpen,
+    openModal: openBannerAddModal,
+    closeModal: closeBannerAddModal,
+  } = useModal();
   const addBanner = () => {
     setPickupDatas((p) => [
       ...p,
@@ -123,7 +113,7 @@ export default function PickupList() {
               initial="exit"
               animate="idle"
               transition={cardTransition}
-              onClick={addBanner}
+              onClick={openBannerAddModal}
               className="flex cursor-pointer items-center justify-center gap-x-24 overflow-hidden rounded-xl py-8"
             >
               <motion.div
@@ -153,6 +143,7 @@ export default function PickupList() {
           </AnimatePresence>
         </div>
       </div>
+      <BannerAddModal isOpen={isBannerAddModalOpen} onClose={closeBannerAddModal} />
     </div>
   );
 }
