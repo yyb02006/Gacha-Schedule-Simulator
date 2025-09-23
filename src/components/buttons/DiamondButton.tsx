@@ -5,8 +5,8 @@ import { motion, Variants } from 'motion/react';
 const buttonVariants: Variants = {
   idle: {
     rotateZ: 0,
-    boxShadow: '6px 0px 13px 0px #101010, -4px 0px 16px 2px #303030',
-    background: 'linear-gradient(90deg, #202020, #303030)',
+    boxShadow: '6px 0px 13px 0px #101010ff, -4px 0px 16px 2px #303030ff',
+    background: 'linear-gradient(90deg, #202020ff, #303030ff)',
   },
   hover: (custom?: { size?: 'default' | 'small'; boxShadow?: string }) => ({
     rotateZ: 90,
@@ -20,26 +20,35 @@ const buttonVariants: Variants = {
 };
 
 const insetVariants: Variants = {
-  idle: { boxShadow: 'inset 6px 0px 13px #141414, inset -6px 0px 13px #2c2c2c' },
-  hover: { boxShadow: 'inset 0px -6px 13px #0a0a0a, inset 0px 6px 13px #3a3a3a' },
+  idle: {
+    boxShadow: 'inset 6px 0px 13px #141414ff, inset -6px 0px 13px #2c2c2cff',
+    background: '#202020ff',
+  },
+  hover: {
+    boxShadow: 'inset 0px -6px 13px #0a0a0aff, inset 0px 6px 13px #3a3a3aff',
+    background: '#202020ff',
+  },
 };
 
 const ButtonInset = ({
   isHover,
   initialDelay = 0,
-  isFirstRenderOver = true,
+  isMount = true,
 }: {
   isHover: boolean;
   initialDelay?: number;
-  isFirstRenderOver?: boolean;
+  isMount?: boolean;
 }) => {
   return (
     <motion.div
       variants={insetVariants}
       animate={isHover ? 'hover' : 'idle'}
-      transition={{ duration: 0.3, delay: isFirstRenderOver ? 0 : initialDelay }}
-      initial={{ boxShadow: 'inset 0px 0px 0px #202020, inset 0px 0px 0px #202020' }}
-      className="absolute size-2/3 bg-[#202020]"
+      transition={{ duration: 0.3, delay: isMount ? 0 : initialDelay }}
+      initial={{
+        boxShadow: 'inset 0px 0px 0px #20202000, inset 0px 0px 0px #20202000',
+        background: '#20202000',
+      }}
+      className="absolute size-2/3"
     />
   );
 };
@@ -48,32 +57,29 @@ export default function DiamondButton({
   children,
   isHover,
   initialDelay = 0,
-  isFirstRenderOver = true,
+  isMount = true,
   custom,
 }: {
   children: React.ReactNode;
   isHover: boolean;
   initialDelay?: number;
-  isFirstRenderOver?: boolean;
+  isMount?: boolean;
   custom?: { size?: 'small' | 'default'; boxShadow?: string };
 }) {
   return (
     <motion.button
       variants={buttonVariants}
       animate={isHover ? 'hover' : 'idle'}
-      transition={{ duration: 0.3, delay: isFirstRenderOver ? 0 : initialDelay, ease: 'easeOut' }}
+      transition={{ duration: 0.3, delay: isMount ? 0 : initialDelay, ease: 'easeOut' }}
       initial={{
-        boxShadow: '0px 0px 0px #202020, 0px 0px 0px 0px #202020',
-        background: 'linear-gradient(90deg, #202020, #202020)',
+        rotateZ: 0,
+        boxShadow: '0px 0px 0px 0px #2020200, 0px 0px 0px 0px #2020200',
+        background: 'linear-gradient(90deg, #2020200,#20202000)',
       }}
       custom={custom}
-      className="relative flex size-full cursor-pointer items-center justify-center bg-gradient-to-r from-[#1d1d1d] to-[#222222] p-4"
+      className="relative flex size-full cursor-pointer items-center justify-center p-4"
     >
-      <ButtonInset
-        isHover={isHover}
-        initialDelay={initialDelay}
-        isFirstRenderOver={isFirstRenderOver}
-      />
+      <ButtonInset isHover={isHover} initialDelay={initialDelay} isMount={isMount} />
       {children}
     </motion.button>
   );
