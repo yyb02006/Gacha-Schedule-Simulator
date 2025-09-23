@@ -10,6 +10,8 @@ import { Dummy, GachaType } from '#/components/PickupList';
 import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
+import { cls } from '#/libs/utils';
+import { ReactNode } from 'react';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -122,12 +124,16 @@ const MinAttempts = ({
   );
 };
 
-const CurrentPickupAmount = ({
+export const InsetNumberInput = ({
   onInputChange,
-  pickupAmount,
+  value,
+  className = '',
+  name,
 }: {
   onInputChange: () => void;
-  pickupAmount: number;
+  value: number;
+  className?: string;
+  name: ReactNode;
 }) => {
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
@@ -136,9 +142,9 @@ const CurrentPickupAmount = ({
         initial="exit"
         animate="idle"
         exit="exit"
-        className="text-sky-600"
+        className={cls(className)}
       >
-        픽업 <span>인원</span>
+        {name}
       </motion.span>
       <motion.div
         variants={insetInputVariants}
@@ -159,7 +165,7 @@ const CurrentPickupAmount = ({
             onChange={onInputChange}
             className="relative w-8 min-w-0 text-right"
             max={10}
-            value={pickupAmount}
+            value={value}
           />
         </motion.div>
       </motion.div>
@@ -202,51 +208,6 @@ const BannerEndAdditionalRes = ({ onInputChange }: { onInputChange: () => void }
         </motion.div>
         <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
           합성옥
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-};
-
-const TargetPickupAmount = ({
-  onInputChange,
-  pickupAmount,
-}: {
-  onInputChange: () => void;
-  pickupAmount: number;
-}) => {
-  return (
-    <div className="flex items-center gap-2 whitespace-nowrap">
-      <motion.span
-        variants={toOpacityZero}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="text-amber-400"
-      >
-        목표 <span>픽업</span>
-      </motion.span>
-      <motion.div
-        variants={insetInputVariants}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="relative flex items-center rounded-lg"
-      >
-        <motion.div
-          variants={toOpacityZero}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="relative flex items-center px-4 py-2"
-        >
-          <input
-            type="number"
-            onChange={onInputChange}
-            className="relative w-8 min-w-0 text-right"
-            max={10}
-            value={pickupAmount}
-          />
         </motion.div>
       </motion.div>
     </div>
@@ -333,8 +294,18 @@ export default function PickupBanner({
           <div className="font-S-CoreDream-500 flex flex-wrap gap-x-6 gap-y-3 text-sm">
             {isSimpleMode ? (
               <>
-                <CurrentPickupAmount onInputChange={() => {}} pickupAmount={2} />
-                <TargetPickupAmount onInputChange={() => {}} pickupAmount={2} />
+                <InsetNumberInput
+                  name="픽업 인원"
+                  className="text-sky-500"
+                  onInputChange={() => {}}
+                  value={2}
+                />
+                <InsetNumberInput
+                  name="목표 픽업"
+                  className="text-amber-400"
+                  onInputChange={() => {}}
+                  value={2}
+                />
               </>
             ) : (
               <>
@@ -375,32 +346,48 @@ export default function PickupBanner({
                     initial="exit"
                     animate="idle"
                     exit="exit"
-                    className="w-full text-[15px]"
                     type="text"
                     onChange={() => {}}
                     value={name}
+                    className="w-full text-[15px]"
                   />
-                  {operType === 'limited' ? (
+                  <div className="flex h-full gap-x-1">
+                    {operType === 'limited' ? (
+                      <motion.div
+                        variants={toOpacityZero}
+                        initial="exit"
+                        animate="idle"
+                        exit="exit"
+                        className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
+                      >
+                        한정
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        variants={toOpacityZero}
+                        initial="exit"
+                        animate="idle"
+                        exit="exit"
+                        className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600"
+                      >
+                        통상
+                      </motion.div>
+                    )}
                     <motion.div
                       variants={toOpacityZero}
                       initial="exit"
                       animate="idle"
                       exit="exit"
-                      className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
+                      className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
                     >
-                      한정
+                      <div className="absolute flex size-full items-center justify-center p-2">
+                        <div className="h-[2px] w-full rounded-full bg-amber-400" />
+                      </div>
+                      <div className="absolute flex size-full items-center justify-center p-2">
+                        <div className="h-full w-[2px] rounded-full bg-amber-400" />
+                      </div>
                     </motion.div>
-                  ) : (
-                    <motion.div
-                      variants={toOpacityZero}
-                      initial="exit"
-                      animate="idle"
-                      exit="exit"
-                      className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600"
-                    >
-                      통상
-                    </motion.div>
-                  )}
+                  </div>
                 </motion.div>
               </div>
               <div className="flex gap-x-6 gap-y-3">
