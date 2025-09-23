@@ -71,17 +71,26 @@ export default function PickupBanner({
       variants={gachaBannerOptionCardVariants}
       whileHover={{
         scale: 1.02,
+        background: 'linear-gradient(135deg, #222222, #333333)',
         transition: { type: 'spring' as const, stiffness: 170, damping: 27, mass: 1.35 },
       }}
       initial="exit"
       animate="idle"
       exit="exit"
-      className="flex flex-col space-y-6 rounded-xl bg-amber-500 p-4"
+      className="flex flex-col space-y-6 rounded-xl p-4"
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex w-full items-center gap-2">
-            <span className="font-S-CoreDream-700 text-2xl">{index + 1}.</span>
+            <motion.span
+              variants={toOpacityZero}
+              initial="exit"
+              animate="idle"
+              exit="exit"
+              className="font-S-CoreDream-700 text-2xl"
+            >
+              {index + 1}.
+            </motion.span>
             <motion.div
               variants={insetInputVariants}
               initial="exit"
@@ -89,11 +98,26 @@ export default function PickupBanner({
               exit="exit"
               className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl"
             >
-              <input type="text" onChange={() => {}} value={name} className="w-full" />
+              <motion.input
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                type="text"
+                onChange={() => {}}
+                value={name}
+                className="w-full"
+              />
               <div>
-                <div className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400">
+                <motion.div
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
+                >
                   {translatedGachaType}
-                </div>
+                </motion.div>
                 {gachaType === 'revival' && (
                   <div className="inline-block rounded-full border border-violet-400 px-2 py-1 text-sm text-violet-400">
                     구오퍼
@@ -102,12 +126,20 @@ export default function PickupBanner({
               </div>
             </motion.div>
           </div>
-          <DeleteButton handleDelete={() => {}} className="size-[48px] grow" />
+          <DeleteButton handleDelete={() => {}} className="size-[48px] shrink-0 grow" />
         </div>
         <div className="felx-wrap flex justify-between gap-x-6 gap-y-3">
           <div className="font-S-CoreDream-500 flex flex-wrap gap-x-6 gap-y-3 text-sm">
             <div className="flex items-center gap-2 whitespace-nowrap">
-              <span className="text-amber-400">최대 시도</span>
+              <motion.span
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="text-amber-400"
+              >
+                최대 시도
+              </motion.span>
               <motion.div
                 variants={insetInputVariants}
                 initial="exit"
@@ -115,7 +147,13 @@ export default function PickupBanner({
                 exit="exit"
                 className="relative flex items-center rounded-lg"
               >
-                <div className="relative flex items-center px-4 py-2">
+                <motion.div
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="relative flex items-center px-4 py-2"
+                >
                   {!!gachaMax || <div className="absolute right-0 mr-4 text-3xl">∞</div>}
                   <input
                     type="number"
@@ -124,7 +162,7 @@ export default function PickupBanner({
                     max={999}
                     value={gachaMax || ''}
                   />
-                </div>
+                </motion.div>
                 <TypeSelectionButton
                   name="무제한"
                   className="px-3 text-sm"
@@ -134,9 +172,15 @@ export default function PickupBanner({
               </motion.div>
             </div>
             <div className="flex items-center gap-2 whitespace-nowrap">
-              <span className="text-sky-600">
+              <motion.span
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="text-sky-600"
+              >
                 최소 <span>시도</span>
-              </span>
+              </motion.span>
               <motion.div
                 variants={insetInputVariants}
                 initial="exit"
@@ -144,7 +188,13 @@ export default function PickupBanner({
                 exit="exit"
                 className="relative flex items-center rounded-lg"
               >
-                <div className="relative flex items-center px-4 py-2">
+                <motion.div
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="relative flex items-center px-4 py-2"
+                >
                   <input
                     type="number"
                     onChange={() => {}}
@@ -152,7 +202,7 @@ export default function PickupBanner({
                     max={999}
                     value={gachaMin}
                   />
-                </div>
+                </motion.div>
                 {gachaType === 'limited' && (
                   <TypeSelectionButton
                     name="300정가"
@@ -216,26 +266,50 @@ export default function PickupBanner({
                 exit="exit"
                 className="flex min-w-40 grow items-center rounded-lg py-2 pr-2 pl-4"
               >
-                <input
+                <motion.input
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
                   className="w-full text-[15px]"
                   type="text"
                   onChange={() => {}}
                   value={name}
                 />
                 {operType === 'limited' ? (
-                  <div className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400">
+                  <motion.div
+                    variants={toOpacityZero}
+                    initial="exit"
+                    animate="idle"
+                    exit="exit"
+                    className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
+                  >
                     한정
-                  </div>
+                  </motion.div>
                 ) : (
-                  <div className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600">
+                  <motion.div
+                    variants={toOpacityZero}
+                    initial="exit"
+                    animate="idle"
+                    exit="exit"
+                    className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600"
+                  >
                     통상
-                  </div>
+                  </motion.div>
                 )}
               </motion.div>
             </div>
             <div className="flex gap-x-6 gap-y-3">
               <div className="flex items-center gap-2">
-                <span className="whitespace-nowrap">가챠 목표</span>
+                <motion.span
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="whitespace-nowrap"
+                >
+                  가챠 목표
+                </motion.span>
                 <TypeSelectionButton
                   name="명함"
                   hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
@@ -250,7 +324,9 @@ export default function PickupBanner({
                 />
               </div>
               <div className="flex items-center gap-2">
-                현재 잠재
+                <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+                  현재 잠재
+                </motion.span>
                 <motion.div
                   variants={insetInputVariants}
                   initial="exit"
@@ -258,7 +334,11 @@ export default function PickupBanner({
                   exit="exit"
                   className="flex items-center rounded-lg px-4 py-2"
                 >
-                  <input
+                  <motion.input
+                    variants={toOpacityZero}
+                    initial="exit"
+                    animate="idle"
+                    exit="exit"
                     type="number"
                     max={6}
                     onChange={() => {}}
