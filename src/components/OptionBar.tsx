@@ -26,7 +26,15 @@ const ControlPanel = ({
       <div className="flex flex-wrap justify-between">
         <div className="flex flex-wrap gap-x-6 gap-y-3">
           <div className="flex items-center gap-x-3 text-sm">
-            <span className="font-S-CoreDream-400 whitespace-nowrap">프리셋</span>
+            <motion.span
+              variants={toOpacityZero}
+              initial="exit"
+              animate="idle"
+              exit="exit"
+              className="font-S-CoreDream-400 whitespace-nowrap"
+            >
+              프리셋
+            </motion.span>
             <div className="flex w-fit gap-x-3">
               <TypeSelectionButton
                 name="올명함"
@@ -113,7 +121,7 @@ export default function OptionBar({
       variants={cardVariants}
       initial="exit"
       animate="idle"
-      className="flex w-full flex-col gap-3 rounded-xl p-4"
+      className="flex w-full flex-col gap-y-4 rounded-xl p-4"
     >
       <motion.div
         variants={toOpacityZero}
