@@ -4,11 +4,11 @@ import { Transition, Variant, Variants } from 'motion';
 type CardState = 'initial' | 'normal';
 
 export const secondLevelTransition: Record<'fadeIn' | 'fadeOut', Transition> = {
-  fadeIn: { boxShadow: { duration: 0.3, delay: 0.1 }, background: { duration: 0.3, delay: 0.3 } },
-  fadeOut: { boxShadow: { duration: 0.3, delay: 0.1 }, background: { duration: 0.2 } },
+  fadeIn: { boxShadow: { duration: 0.3, delay: 0.2 }, background: { duration: 0.3, delay: 0.3 } },
+  fadeOut: { boxShadow: { duration: 0.3, delay: 0.2 }, background: { duration: 0.2 } },
 };
 
-const smallButton: Variants = {
+export const smallButtonVariants: Variants = {
   idle: (custom: { state: CardState }) => ({
     boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
     background: 'linear-gradient(135deg, #181818, #2e2e2e)',
@@ -25,12 +25,18 @@ const smallButton: Variants = {
       background: { duration: 0.2 },
     },
   },
+  hover: (custom: { background?: string; color?: string }) => ({
+    boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
+    background: custom.background || undefined,
+    color: custom.color || undefined,
+  }),
 };
 
 const cardIdle: Variant = {
   boxShadow: '6px 6px 16px #141414, -6px -6px 16px #2e2e2e',
   background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
 };
+
 const cardExit: Variant = {
   boxShadow: '0px 0px 0px #202020, 0px 0px 0px #202020',
   background: 'linear-gradient(135deg, #202020, #202020)',
@@ -96,12 +102,12 @@ export const gachaTypeButtonVariants: Variants = {
 };
 
 export const optionButtonVariants: Variants = {
-  ...smallButton,
+  ...smallButtonVariants,
   hover: { background: 'linear-gradient(135deg, #bb4d00, #ffb900)' },
 };
 
 export const cancelButtonVariants: Variants = {
-  ...smallButton,
+  ...smallButtonVariants,
   hover: { background: 'linear-gradient(135deg, #bd1b36, #ff637e)', color: '#eaeaea' },
 };
 

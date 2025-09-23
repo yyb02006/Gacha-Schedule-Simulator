@@ -3,33 +3,36 @@
 import { SizeClass } from '#/types/types';
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { cancelButtonVariants, toOpacityZero } from '#/constants/variants';
+import { smallButtonVariants, toOpacityZero } from '#/constants/variants';
 import { cls } from '#/libs/utils';
+import { useIsMount } from '#/hooks/useIsMount';
 
 export default function DeleteButton({
   handleDelete,
-  isFirstRenderOver = true,
   size = 'size-[44px]',
   className = '',
 }: {
   handleDelete: () => void;
-  isFirstRenderOver?: boolean;
   size?: SizeClass;
   className?: string;
 }) {
   const [isHover, setIsHover] = useState(false);
+  const isMount = useIsMount();
   return (
     <motion.button
       onClick={handleDelete}
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      variants={cancelButtonVariants}
-      whileInView="idle"
-      whileHover="hover"
+      variants={smallButtonVariants}
       viewport={{ once: true, amount: 0.5 }}
-      custom={{ state: isFirstRenderOver ? 'normal' : 'initial' }}
       initial="exit"
+      animate={isHover ? 'hover' : 'idle'}
       exit="exit"
+      custom={{
+        state: isMount ? 'normal' : 'initial',
+        background: 'linear-gradient(135deg, #bd1b36, #ff637e)',
+        color: '#eaeaea',
+      }}
       className={cls(size, className, 'cursor-pointer rounded-xl p-1 text-[#ff637e]')}
     >
       <motion.svg
