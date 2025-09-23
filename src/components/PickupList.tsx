@@ -16,8 +16,8 @@ export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
 export interface Dummy {
   id: string;
   name: string;
-  gachaMax: number | null;
-  gachaMin: number;
+  maxGachaAttempts: number | null;
+  minGachaAttempts: number;
   gachaType: GachaType;
   operators: { name: string; currentQty: number; operType: 'limited' | 'normal' }[];
   pickupDetails: { pickupOpersCount: number; targetPickupCount: number; pickupChance: number };
@@ -33,8 +33,8 @@ const dummies: Dummy[] = [
       { name: '로고스', currentQty: 0, operType: 'normal' },
     ],
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
-    gachaMax: 200,
-    gachaMin: 0,
+    maxGachaAttempts: 200,
+    minGachaAttempts: 0,
   },
   {
     id: 'a1b2c3d4-e5f6-4789-b0c1-d2e3f4a5b6c7',
@@ -45,8 +45,8 @@ const dummies: Dummy[] = [
       { name: '나란투야', currentQty: 0, operType: 'normal' },
     ],
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
-    gachaMax: null,
-    gachaMin: 0,
+    maxGachaAttempts: null,
+    minGachaAttempts: 0,
   },
   {
     id: 'f8e7d6c5-b4a3-4210-9876-543210fedcba',
@@ -54,8 +54,8 @@ const dummies: Dummy[] = [
     gachaType: 'standard',
     operators: [{ name: '네크라스', currentQty: 0, operType: 'normal' }],
     pickupDetails: { pickupOpersCount: 1, targetPickupCount: 1, pickupChance: 50 },
-    gachaMax: null,
-    gachaMin: 0,
+    maxGachaAttempts: null,
+    minGachaAttempts: 0,
   },
 ];
 
@@ -80,7 +80,7 @@ export default function PickupList() {
   const [pickupDatas, setPickupDatas] = useState<Dummy[]>(dummies);
   const [isBannerAddHover, setIsBannerAddHover] = useState(false);
   const [isGachaSim, setIsGachaSim] = useState(false);
-  const [isSimpleMode, setIsSimpleMode] = useState(false);
+  const [isSimpleMode, setIsSimpleMode] = useState(true);
   const addBanner = () => {
     setPickupDatas((p) => [
       ...p,
@@ -89,8 +89,8 @@ export default function PickupList() {
         gachaType: 'standard',
         operators: [],
         pickupDetails: { pickupOpersCount: 2, targetPickupCount: 1, pickupChance: 50 },
-        gachaMax: 300,
-        gachaMin: 0,
+        maxGachaAttempts: 300,
+        minGachaAttempts: 0,
         name: 'scheduleA',
       },
     ]);
@@ -142,7 +142,13 @@ export default function PickupList() {
               />
             </motion.div>
             {pickupDatas.map((data, index) => (
-              <PickupBanner key={data.id} data={data} index={index} isGachaSim={isGachaSim} />
+              <PickupBanner
+                key={data.id}
+                data={data}
+                index={index}
+                isSimpleMode={isSimpleMode}
+                isGachaSim={isGachaSim}
+              />
             ))}
           </AnimatePresence>
         </div>
