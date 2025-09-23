@@ -1,53 +1,252 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   gachaBannerOptionCardVariants,
   insetInputVariants,
   toOpacityZero,
 } from '#/constants/variants';
-import { Dummy } from '#/components/PickupList';
+import { Dummy, GachaType } from '#/components/PickupList';
 import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
 
-const TargetInput = ({
-  name,
-  initialValue,
-  isFirstRenderOver,
+const MaxAttempts = ({
+  maxGachaAttempts,
+  onUnlimitedClick,
+  onInputChange,
 }: {
-  name: string;
-  initialValue: number;
-  isFirstRenderOver: boolean;
+  maxGachaAttempts: number | null;
+  onUnlimitedClick: () => void;
+  onInputChange: () => void;
 }) => {
   return (
-    <div className="flex min-w-[100px] flex-col space-y-1">
-      <motion.div
+    <div className="flex items-center gap-2 whitespace-nowrap">
+      <motion.span
         variants={toOpacityZero}
-        animate={isFirstRenderOver ? 'idle' : undefined}
-        viewport={{ once: true, amount: 0.5 }}
         initial="exit"
+        animate="idle"
         exit="exit"
-        className="relative self-center px-4 text-[13px]"
+        className="text-amber-400"
       >
-        {name}
-      </motion.div>
+        최대 시도
+      </motion.span>
       <motion.div
         variants={insetInputVariants}
-        animate={isFirstRenderOver ? 'idle' : undefined}
-        viewport={{ once: true, amount: 0.5 }}
         initial="exit"
+        animate="idle"
         exit="exit"
-        className="relative flex h-[44px] items-center justify-center rounded-xl px-4 pt-3 pb-2 font-bold"
+        className="relative flex items-center rounded-lg"
       >
         <motion.div
           variants={toOpacityZero}
-          animate={isFirstRenderOver ? 'idle' : undefined}
-          viewport={{ once: true, amount: 0.5 }}
           initial="exit"
+          animate="idle"
           exit="exit"
+          className="relative flex items-center px-4 py-2"
         >
-          {initialValue}
+          {!!maxGachaAttempts || <div className="absolute right-0 mr-4 text-3xl">∞</div>}
+          <input
+            type="number"
+            onChange={onInputChange}
+            className="relative w-8 min-w-0 text-right"
+            max={999}
+            value={maxGachaAttempts || ''}
+          />
+        </motion.div>
+        <TypeSelectionButton
+          name="무제한"
+          className="px-3 text-sm"
+          onTypeClick={onUnlimitedClick}
+          hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+        />
+      </motion.div>
+    </div>
+  );
+};
+
+const MinAttempts = ({
+  minGachaAttempts,
+  gachaType,
+  onReach300,
+  onInputChange,
+}: {
+  minGachaAttempts: number;
+  gachaType: GachaType;
+  onReach300: () => void;
+  onInputChange: () => void;
+}) => {
+  return (
+    <div className="flex items-center gap-2 whitespace-nowrap">
+      <motion.span
+        variants={toOpacityZero}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="text-sky-600"
+      >
+        최소 <span>시도</span>
+      </motion.span>
+      <motion.div
+        variants={insetInputVariants}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="relative flex items-center rounded-lg"
+      >
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="relative flex items-center px-4 py-2"
+        >
+          <input
+            type="number"
+            onChange={onInputChange}
+            className="relative w-8 min-w-0 text-right"
+            max={999}
+            value={minGachaAttempts}
+          />
+        </motion.div>
+        {gachaType === 'limited' && (
+          <TypeSelectionButton
+            name="300정가"
+            className="px-3 text-sm"
+            onTypeClick={onReach300}
+            hoverBackground="linear-gradient(155deg, #1447e6, #51a2ff)"
+          />
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
+const CurrentPickupAmount = ({
+  onInputChange,
+  pickupAmount,
+}: {
+  onInputChange: () => void;
+  pickupAmount: number;
+}) => {
+  return (
+    <div className="flex items-center gap-2 whitespace-nowrap">
+      <motion.span
+        variants={toOpacityZero}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="text-sky-600"
+      >
+        픽업 <span>인원</span>
+      </motion.span>
+      <motion.div
+        variants={insetInputVariants}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="relative flex items-center rounded-lg"
+      >
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="relative flex items-center px-4 py-2"
+        >
+          <input
+            type="number"
+            onChange={onInputChange}
+            className="relative w-8 min-w-0 text-right"
+            max={10}
+            value={pickupAmount}
+          />
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+const BannerEndAdditionalRes = ({ onInputChange }: { onInputChange: () => void }) => {
+  return (
+    <div className="flex items-center gap-x-3 text-sm">
+      <motion.span
+        variants={toOpacityZero}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="font-S-CoreDream-400 whitespace-nowrap"
+      >
+        배너 종료시까지 추가재화
+      </motion.span>
+      <motion.div
+        variants={insetInputVariants}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="relative flex items-center rounded-lg px-3"
+      >
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="relative flex items-center px-2 py-2"
+        >
+          <input
+            type="number"
+            onChange={onInputChange}
+            className="relative w-14 min-w-0 text-right"
+            value={400000}
+          />
+        </motion.div>
+        <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+          합성옥
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+const TargetPickupAmount = ({
+  onInputChange,
+  pickupAmount,
+}: {
+  onInputChange: () => void;
+  pickupAmount: number;
+}) => {
+  return (
+    <div className="flex items-center gap-2 whitespace-nowrap">
+      <motion.span
+        variants={toOpacityZero}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="text-amber-400"
+      >
+        목표 <span>픽업</span>
+      </motion.span>
+      <motion.div
+        variants={insetInputVariants}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="relative flex items-center rounded-lg"
+      >
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="relative flex items-center px-4 py-2"
+        >
+          <input
+            type="number"
+            onChange={onInputChange}
+            className="relative w-8 min-w-0 text-right"
+            max={10}
+            value={pickupAmount}
+          />
         </motion.div>
       </motion.div>
     </div>
@@ -58,12 +257,14 @@ export default function PickupBanner({
   data,
   index,
   isGachaSim,
+  isSimpleMode,
 }: {
   data: Dummy;
   index: number;
   isGachaSim: boolean;
+  isSimpleMode: boolean;
 }) {
-  const { gachaMax, gachaMin, gachaType, name, operators } = data;
+  const { maxGachaAttempts, minGachaAttempts, gachaType, name, operators } = data;
   const translatedGachaType =
     gachaType === 'collab' ? '콜라보 배너' : gachaType === 'limited' ? '한정 배너' : '통상 배너';
   return (
@@ -130,229 +331,134 @@ export default function PickupBanner({
         </div>
         <div className="felx-wrap flex justify-between gap-x-6 gap-y-3">
           <div className="font-S-CoreDream-500 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <motion.span
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="text-amber-400"
-              >
-                최대 시도
-              </motion.span>
-              <motion.div
-                variants={insetInputVariants}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="relative flex items-center rounded-lg"
-              >
-                <motion.div
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="relative flex items-center px-4 py-2"
-                >
-                  {!!gachaMax || <div className="absolute right-0 mr-4 text-3xl">∞</div>}
-                  <input
-                    type="number"
-                    onChange={() => {}}
-                    className="relative w-8 min-w-0 text-right"
-                    max={999}
-                    value={gachaMax || ''}
-                  />
-                </motion.div>
-                <TypeSelectionButton
-                  name="무제한"
-                  className="px-3 text-sm"
-                  onTypeClick={() => {}}
-                  hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+            {isSimpleMode ? (
+              <>
+                <CurrentPickupAmount onInputChange={() => {}} pickupAmount={2} />
+                <TargetPickupAmount onInputChange={() => {}} pickupAmount={2} />
+              </>
+            ) : (
+              <>
+                <MaxAttempts
+                  maxGachaAttempts={maxGachaAttempts}
+                  onInputChange={() => {}}
+                  onUnlimitedClick={() => {}}
                 />
-              </motion.div>
-            </div>
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <motion.span
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="text-sky-600"
-              >
-                최소 <span>시도</span>
-              </motion.span>
-              <motion.div
-                variants={insetInputVariants}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="relative flex items-center rounded-lg"
-              >
-                <motion.div
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="relative flex items-center px-4 py-2"
-                >
-                  <input
-                    type="number"
-                    onChange={() => {}}
-                    className="relative w-8 min-w-0 text-right"
-                    max={999}
-                    value={gachaMin}
-                  />
-                </motion.div>
-                {gachaType === 'limited' && (
-                  <TypeSelectionButton
-                    name="300정가"
-                    className="px-3 text-sm"
-                    onTypeClick={() => {}}
-                    hoverBackground="linear-gradient(155deg, #1447e6, #51a2ff)"
-                  />
-                )}
-              </motion.div>
-            </div>
+                <MinAttempts
+                  minGachaAttempts={minGachaAttempts}
+                  onInputChange={() => {}}
+                  onReach300={() => {}}
+                  gachaType={gachaType}
+                />
+              </>
+            )}
           </div>
-          {isGachaSim || (
-            <div className="flex items-center gap-x-3 text-sm">
-              <motion.span
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="font-S-CoreDream-400 whitespace-nowrap"
-              >
-                배너 종료시까지 추가재화
-              </motion.span>
-              <motion.div
-                variants={insetInputVariants}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="relative flex items-center rounded-lg px-3"
-              >
-                <motion.div
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="relative flex items-center px-2 py-2"
-                >
-                  <input
-                    type="number"
-                    onChange={() => {}}
-                    className="relative w-14 min-w-0 text-right"
-                    value={400000}
-                  />
-                </motion.div>
-                <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-                  합성옥
-                </motion.div>
-              </motion.div>
-            </div>
-          )}
+          <AnimatePresence>
+            {isGachaSim || <BannerEndAdditionalRes onInputChange={() => {}} />}
+          </AnimatePresence>
         </div>
       </div>
       <div className="space-y-6 text-sm sm:space-y-4">
-        {operators.map(({ currentQty, name, operType }) => (
-          <div key={name} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-            <div className="flex grow gap-6">
-              <DeleteButton handleDelete={() => {}} className="-mr-2" />
-              <motion.div
-                variants={insetInputVariants}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="flex min-w-40 grow items-center rounded-lg py-2 pr-2 pl-4"
-              >
-                <motion.input
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="w-full text-[15px]"
-                  type="text"
-                  onChange={() => {}}
-                  value={name}
-                />
-                {operType === 'limited' ? (
-                  <motion.div
-                    variants={toOpacityZero}
-                    initial="exit"
-                    animate="idle"
-                    exit="exit"
-                    className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
-                  >
-                    한정
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    variants={toOpacityZero}
-                    initial="exit"
-                    animate="idle"
-                    exit="exit"
-                    className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600"
-                  >
-                    통상
-                  </motion.div>
-                )}
-              </motion.div>
-            </div>
-            <div className="flex gap-x-6 gap-y-3">
-              <div className="flex items-center gap-2">
-                <motion.span
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="whitespace-nowrap"
-                >
-                  가챠 목표
-                </motion.span>
-                <TypeSelectionButton
-                  name="명함"
-                  hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-                  onTypeClick={() => {}}
-                  className="px-4"
-                />
-                <TypeSelectionButton
-                  name="풀잠"
-                  hoverBackground="linear-gradient(155deg, #ec003f, #ff637e)"
-                  onTypeClick={() => {}}
-                  className="px-4"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-                  현재 잠재
-                </motion.span>
+        {isSimpleMode ||
+          operators.map(({ currentQty, name, operType }) => (
+            <div key={name} className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+              <div className="flex grow gap-6">
+                <DeleteButton handleDelete={() => {}} className="-mr-2" />
                 <motion.div
                   variants={insetInputVariants}
                   initial="exit"
                   animate="idle"
                   exit="exit"
-                  className="flex items-center rounded-lg px-4 py-2"
+                  className="flex min-w-40 grow items-center rounded-lg py-2 pr-2 pl-4"
                 >
                   <motion.input
                     variants={toOpacityZero}
                     initial="exit"
                     animate="idle"
                     exit="exit"
-                    type="number"
-                    max={6}
+                    className="w-full text-[15px]"
+                    type="text"
                     onChange={() => {}}
-                    className="w-6 min-w-0 text-right"
-                    value={currentQty}
+                    value={name}
                   />
+                  {operType === 'limited' ? (
+                    <motion.div
+                      variants={toOpacityZero}
+                      initial="exit"
+                      animate="idle"
+                      exit="exit"
+                      className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
+                    >
+                      한정
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      variants={toOpacityZero}
+                      initial="exit"
+                      animate="idle"
+                      exit="exit"
+                      className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600"
+                    >
+                      통상
+                    </motion.div>
+                  )}
                 </motion.div>
               </div>
+              <div className="flex gap-x-6 gap-y-3">
+                <div className="flex items-center gap-2">
+                  <motion.span
+                    variants={toOpacityZero}
+                    initial="exit"
+                    animate="idle"
+                    exit="exit"
+                    className="whitespace-nowrap"
+                  >
+                    가챠 목표
+                  </motion.span>
+                  <TypeSelectionButton
+                    name="명함"
+                    hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+                    onTypeClick={() => {}}
+                    className="px-4"
+                  />
+                  <TypeSelectionButton
+                    name="풀잠"
+                    hoverBackground="linear-gradient(155deg, #ec003f, #ff637e)"
+                    onTypeClick={() => {}}
+                    className="px-4"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+                    현재 잠재
+                  </motion.span>
+                  <motion.div
+                    variants={insetInputVariants}
+                    initial="exit"
+                    animate="idle"
+                    exit="exit"
+                    className="flex items-center rounded-lg px-4 py-2"
+                  >
+                    <motion.input
+                      variants={toOpacityZero}
+                      initial="exit"
+                      animate="idle"
+                      exit="exit"
+                      type="number"
+                      max={6}
+                      onChange={() => {}}
+                      className="w-6 min-w-0 text-right"
+                      value={currentQty}
+                    />
+                  </motion.div>
+                </div>
+              </div>
             </div>
+          ))}
+        {isSimpleMode || (
+          <div className="flex w-full justify-center py-2">
+            <AddButton onAddClick={() => {}} custom={{ size: 'small' }} />
           </div>
-        ))}
-        <div className="flex w-full justify-center py-2">
-          <AddButton onAddClick={() => {}} custom={{ size: 'small' }} />
-        </div>
+        )}
       </div>
     </motion.div>
   );
