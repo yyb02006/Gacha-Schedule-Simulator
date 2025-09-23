@@ -1,4 +1,4 @@
-export type GachaTypeButtonId = 'limited' | 'standard' | 'collab';
+export type GachaType = 'limited' | 'standard' | 'collab';
 
 export type GachaTypeButtonLabel = '한정' | '일반' | '콜라보';
 
@@ -10,7 +10,7 @@ export type GachaTypeButtonCustom = {
 
 export type GachaTypeButton = {
   name: GachaTypeButtonLabel;
-  id: GachaTypeButtonId;
+  type: GachaType;
   hoverBackground: string;
 };
 
