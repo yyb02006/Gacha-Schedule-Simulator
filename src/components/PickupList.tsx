@@ -6,7 +6,7 @@ import { AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import PlayButton from '#/components/buttons/PlayButton';
-import { cardTransition, cardVariants } from '#/constants/variants';
+import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
@@ -119,13 +119,22 @@ export default function PickupList() {
               onHoverEnd={() => setIsBannerAddHover(false)}
               variants={cardVariants}
               whileHover={{ scale: 1.02, background: 'linear-gradient(155deg, #bb4d00, #ffb900)' }}
+              whileTap={{ scale: 1.02, background: 'linear-gradient(155deg, #bb4d00, #ffb900)' }}
               initial="exit"
               animate="idle"
               transition={cardTransition}
+              onClick={addBanner}
               className="flex cursor-pointer items-center justify-center gap-x-24 overflow-hidden rounded-xl py-8"
             >
-              {/* 호버시에 카드와 add버튼 그림자까지 노랗게 만들기 */}
-              <div className="font-S-CoreDream-700 text-2xl">픽업 배너 추가</div>
+              <motion.div
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="font-S-CoreDream-700 text-2xl"
+              >
+                픽업 배너 추가
+              </motion.div>
               <AddButton
                 onAddClick={addBanner}
                 isOtherElHover={isBannerAddHover}
@@ -135,14 +144,6 @@ export default function PickupList() {
             {pickupDatas.map((data, index) => (
               <PickupBanner key={data.id} data={data} index={index} isGachaSim={isGachaSim} />
             ))}
-            {/*             {pickupDatas.map((pickupData, index) => (
-              <PickupCard
-                key={pickupData.id}
-                index={index + 1}
-                pickupData={pickupData}
-                deleteBanner={deleteBanner(pickupData.id)}
-              />
-            ))} */}
           </AnimatePresence>
         </div>
       </div>
