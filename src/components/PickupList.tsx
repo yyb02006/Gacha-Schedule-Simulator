@@ -3,7 +3,7 @@
 import AddButton from '#/components/buttons/AddButton';
 import ScheduleOverview from '#/components/InfomationBanner';
 import { AnimatePresence } from 'motion/react';
-import { useState } from 'react';
+import { useReducer, useState } from 'react';
 import { motion } from 'motion/react';
 import PlayButton from '#/components/buttons/PlayButton';
 import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
@@ -21,7 +21,12 @@ export interface Dummy {
   maxGachaAttempts: number | null;
   minGachaAttempts: number;
   gachaType: GachaType;
-  operators: { name: string; currentQty: number; operType: 'limited' | 'normal' }[];
+  operators: {
+    name: string;
+    currentQty: number;
+    operType: 'limited' | 'normal';
+    targetCount: number | null;
+  }[];
   pickupDetails: { pickupOpersCount: number; targetPickupCount: number; pickupChance: number };
 }
 
@@ -31,8 +36,8 @@ const dummies: Dummy[] = [
     name: '우리 종족',
     gachaType: 'limited',
     operators: [
-      { name: '위셔델', currentQty: 0, operType: 'limited' },
-      { name: '로고스', currentQty: 0, operType: 'normal' },
+      { name: '위셔델', currentQty: 0, operType: 'limited', targetCount: 1 },
+      { name: '로고스', currentQty: 0, operType: 'normal', targetCount: 1 },
     ],
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
     maxGachaAttempts: 200,
@@ -43,8 +48,8 @@ const dummies: Dummy[] = [
     name: '모래위의 각인',
     gachaType: 'limited',
     operators: [
-      { name: '페페', currentQty: 0, operType: 'limited' },
-      { name: '나란투야', currentQty: 0, operType: 'normal' },
+      { name: '페페', currentQty: 0, operType: 'limited', targetCount: 1 },
+      { name: '나란투야', currentQty: 0, operType: 'normal', targetCount: 1 },
     ],
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
     maxGachaAttempts: null,
@@ -54,15 +59,58 @@ const dummies: Dummy[] = [
     id: 'f8e7d6c5-b4a3-4210-9876-543210fedcba',
     name: '불타는 엘레지여',
     gachaType: 'standard',
-    operators: [{ name: '네크라스', currentQty: 0, operType: 'normal' }],
+    operators: [{ name: '네크라스', currentQty: 0, operType: 'normal', targetCount: 1 }],
     pickupDetails: { pickupOpersCount: 1, targetPickupCount: 1, pickupChance: 50 },
     maxGachaAttempts: null,
     minGachaAttempts: 0,
   },
 ];
 
+export type AddType = 'addSimpleBanner' | 'addDetailedBanner';
+
+export type PickupDatasAction = {
+  addType: 'addSimpleBanner';
+  payload: { gachaType: GachaType; pickupOpersCount: number; targetPickupCount: number };
+};
+
+export type PickupDataPayload<T extends AddType> = PickupDatasAction extends { addType: T }
+  ? PickupDatasAction
+  : never;
+
+const reducer = (state: Dummy[], action: PickupDatasAction) => {
+  switch (action.addType) {
+    case 'addSimpleBanner': {
+      const { gachaType, pickupOpersCount, targetPickupCount } = action.payload;
+      const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
+      const operators: Dummy['operators'] = Array.from(
+        { length: pickupOpersCount },
+        (_, index) => ({
+          currentQty: 0,
+          name: `오퍼레이터 ${index + 1}`,
+          operType: pickupChance === 70 && index === 0 ? 'limited' : 'normal',
+          targetCount: 1,
+        }),
+      );
+      return [
+        ...state,
+        {
+          id: crypto.randomUUID(),
+          gachaType: gachaType,
+          pickupDetails: { pickupChance, pickupOpersCount, targetPickupCount },
+          maxGachaAttempts: Infinity,
+          minGachaAttempts: 0,
+          name: `새 가챠 배너`,
+          operators: operators,
+        } satisfies Dummy,
+      ];
+    }
+    default:
+      throw new Error();
+  }
+};
+
 export default function PickupList() {
-  const [pickupDatas, setPickupDatas] = useState<Dummy[]>(dummies);
+  const [pickupDatas, dispatch] = useReducer(reducer, dummies);
   const [isBannerAddHover, setIsBannerAddHover] = useState(false);
   const [isGachaSim, setIsGachaSim] = useState(false);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
@@ -71,23 +119,52 @@ export default function PickupList() {
     openModal: openBannerAddModal,
     closeModal: closeBannerAddModal,
   } = useModal();
-  const addBanner = () => {
+  const addBanner = isSimpleMode
+    ? (payload: PickupDataPayload<'addSimpleBanner'>['payload']) => {
+        dispatch({ addType: 'addSimpleBanner', payload });
+      }
+    : (payload: PickupDataPayload<'addSimpleBanner'>['payload']) => {
+        dispatch({ addType: 'addSimpleBanner', payload });
+      };
+  console.log(pickupDatas);
+
+  /*   const addBanner = (payload: Partial<Dummy>) => {
     setPickupDatas((p) => [
       ...p,
       {
         id: crypto.randomUUID(),
-        gachaType: 'standard',
-        operators: [],
-        pickupDetails: { pickupOpersCount: 2, targetPickupCount: 1, pickupChance: 50 },
+        gachaType: payload.gachaType ?? 'standard',
+        operators: payload.operators?.length
+          ? payload.operators
+          : Array({ length: payload.pickupDetails?.pickupOpersCount ?? 2 }).map((_, index) => ({
+              name: `오퍼레이터${index + 1}`,
+              currentQty: 0,
+              operType:
+                (payload.gachaType === 'limited' || payload.gachaType === 'collab') && index === 0
+                  ? 'limited'
+                  : 'normal',
+              targetCount: 1,
+            })),
+        pickupDetails: {
+          pickupOpersCount:
+            payload.pickupDetails?.pickupOpersCount ?? payload.operators?.length ?? 2,
+          targetPickupCount:
+            payload.pickupDetails?.pickupOpersCount ??
+            payload.operators?.filter(
+              ({ targetCount }) => !(targetCount === 0 || targetCount === null),
+            ).length ??
+            2,
+          pickupChance: payload.gachaType === 'limited' || payload.gachaType === 'collab' ? 70 : 50,
+        },
         maxGachaAttempts: 300,
         minGachaAttempts: 0,
         name: 'scheduleA',
       },
     ]);
-  };
-  const deleteBanner = (targetId: string) => () => {
+  }; */
+  /*   const deleteBanner = (targetId: string) => () => {
     setPickupDatas((p) => p.filter(({ id }) => id !== targetId));
-  };
+  }; */
   return (
     <div className="mt-12 flex space-x-6">
       <ScheduleOverview />
@@ -126,7 +203,7 @@ export default function PickupList() {
                 픽업 배너 추가
               </motion.div>
               <AddButton
-                onAddClick={addBanner}
+                onAddClick={() => {}}
                 isOtherElHover={isBannerAddHover}
                 custom={{ boxShadow: '0px -7px 20px 5px #bd5b00, 0px 7px 22px 3px #ffde26' }}
               />
@@ -143,7 +220,12 @@ export default function PickupList() {
           </AnimatePresence>
         </div>
       </div>
-      <BannerAddModal isOpen={isBannerAddModalOpen} onClose={closeBannerAddModal} />
+      <BannerAddModal
+        isOpen={isBannerAddModalOpen}
+        isSimpleMode={isSimpleMode}
+        onSave={addBanner}
+        onClose={closeBannerAddModal}
+      />
     </div>
   );
 }
