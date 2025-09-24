@@ -11,7 +11,7 @@ import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
 import { cls } from '#/libs/utils';
-import { ReactNode } from 'react';
+import { ChangeEvent, ReactNode } from 'react';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -130,8 +130,8 @@ export const InsetNumberInput = ({
   className = '',
   name,
 }: {
-  onInputChange: () => void;
-  value: number;
+  onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  value: string;
   className?: string;
   name: ReactNode;
 }) => {
@@ -298,13 +298,13 @@ export default function PickupBanner({
                   name="픽업 인원"
                   className="text-sky-500"
                   onInputChange={() => {}}
-                  value={2}
+                  value={'2'}
                 />
                 <InsetNumberInput
                   name="목표 픽업"
                   className="text-amber-400"
                   onInputChange={() => {}}
-                  value={2}
+                  value={'2'}
                 />
               </>
             ) : (
@@ -380,12 +380,9 @@ export default function PickupBanner({
                       exit="exit"
                       className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
                     >
-                      <div className="absolute flex size-full items-center justify-center p-2">
-                        <div className="h-[2px] w-full rounded-full bg-amber-400" />
-                      </div>
-                      <div className="absolute flex size-full items-center justify-center p-2">
-                        <div className="h-full w-[2px] rounded-full bg-amber-400" />
-                      </div>
+                      <svg className="size-[18px] text-amber-400">
+                        <use href="/icons/icons.svg#tag"></use>
+                      </svg>
                     </motion.div>
                   </div>
                 </motion.div>
