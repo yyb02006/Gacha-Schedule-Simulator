@@ -6,12 +6,17 @@ import {
   insetInputVariants,
   toOpacityZero,
 } from '#/constants/variants';
-import { Dummy, GachaType } from '#/components/PickupList';
+import {
+  Dummy,
+  ExtractPayloadFromAction,
+  GachaType,
+  PickupDatasAction,
+} from '#/components/PickupList';
 import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
 import { cls } from '#/libs/utils';
-import { ChangeEvent, ReactNode } from 'react';
+import { ActionDispatch, ChangeEvent, ReactNode } from 'react';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -137,15 +142,15 @@ export const InsetNumberInput = ({
 }) => {
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
-      <motion.span
+      <motion.div
         variants={toOpacityZero}
         initial="exit"
         animate="idle"
         exit="exit"
-        className={cls(className)}
+        className={cls(className, 'flex h-full items-center')}
       >
         {name}
-      </motion.span>
+      </motion.div>
       <motion.div
         variants={insetInputVariants}
         initial="exit"
@@ -163,8 +168,7 @@ export const InsetNumberInput = ({
           <input
             type="number"
             onChange={onInputChange}
-            className="relative w-8 min-w-0 text-right"
-            max={10}
+            className="relative h-full w-8 min-w-0 text-right"
             value={value}
           />
         </motion.div>
@@ -214,20 +218,54 @@ const BannerEndAdditionalRes = ({ onInputChange }: { onInputChange: () => void }
   );
 };
 
-export default function PickupBanner({
-  data,
-  index,
-  isGachaSim,
-  isSimpleMode,
-}: {
-  data: Dummy;
+interface PickupBannerProps {
+  pickupData: Dummy;
+  dispatch: ActionDispatch<[action: PickupDatasAction]>;
   index: number;
   isGachaSim: boolean;
   isSimpleMode: boolean;
-}) {
-  const { maxGachaAttempts, minGachaAttempts, gachaType, name, operators } = data;
+}
+
+export default function PickupBanner({
+  pickupData,
+  dispatch,
+  index,
+  isGachaSim,
+  isSimpleMode,
+}: PickupBannerProps) {
+  const {
+    maxGachaAttempts,
+    minGachaAttempts,
+    gachaType,
+    name,
+    operators,
+    id,
+    pickupDetails: { targetPickupCount, pickupOpersCount },
+  } = pickupData;
+
   const translatedGachaType =
     gachaType === 'collab' ? '콜라보 배너' : gachaType === 'limited' ? '한정 배너' : '통상 배너';
+
+  const onPickupCountChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    targetCount: 'pickupOpersCount' | 'targetPickupCount',
+  ) => {
+    const { value } = e.currentTarget;
+    const numberValue = value === '' ? 0 : parseFloat(value);
+    if (!isNaN(numberValue)) {
+      dispatch({
+        type: 'modifyBanner',
+        payload: {
+          id,
+          pickupDetails: {
+            ...pickupData.pickupDetails,
+            [targetCount]: numberValue,
+          },
+        },
+      });
+    }
+  };
+
   return (
     <motion.div
       variants={gachaBannerOptionCardVariants}
@@ -258,7 +296,7 @@ export default function PickupBanner({
               initial="exit"
               animate="idle"
               exit="exit"
-              className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl"
+              className="font-S-CoreDream-500 flex w-full grow items-center rounded-lg py-2 pr-2 pl-4 text-xl"
             >
               <motion.input
                 variants={toOpacityZero}
@@ -266,11 +304,14 @@ export default function PickupBanner({
                 animate="idle"
                 exit="exit"
                 type="text"
-                onChange={() => {}}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const { value } = e.currentTarget;
+                  dispatch({ type: 'modifyBanner', payload: { id, name: value } });
+                }}
                 value={name}
                 className="w-full"
               />
-              <div>
+              <div className="flex h-full gap-x-1">
                 <motion.div
                   variants={toOpacityZero}
                   initial="exit"
@@ -285,6 +326,17 @@ export default function PickupBanner({
                     구오퍼
                   </div>
                 )}
+                <motion.div
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
+                >
+                  <svg className="size-[22px] text-amber-400">
+                    <use href="/icons/icons.svg#tag"></use>
+                  </svg>
+                </motion.div>
               </div>
             </motion.div>
           </div>
@@ -297,14 +349,18 @@ export default function PickupBanner({
                 <InsetNumberInput
                   name="픽업 인원"
                   className="text-sky-500"
-                  onInputChange={() => {}}
-                  value={'2'}
+                  onInputChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    onPickupCountChange(e, 'pickupOpersCount');
+                  }}
+                  value={pickupOpersCount.toString()}
                 />
                 <InsetNumberInput
                   name="목표 픽업"
                   className="text-amber-400"
-                  onInputChange={() => {}}
-                  value={'2'}
+                  onInputChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    onPickupCountChange(e, 'targetPickupCount');
+                  }}
+                  value={targetPickupCount.toString()}
                 />
               </>
             ) : (
@@ -446,106 +502,4 @@ export default function PickupBanner({
       </div>
     </motion.div>
   );
-}
-
-/* export default function PickupCard({
-  pickupData,
-  index,
-  deleteBanner,
-}: {
-  pickupData: PickupData;
-  index: number;
-  deleteBanner: () => void;
-}) {
-  const [isHover, setIsHover] = useState(false);
-  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
-  const [currentGachaType, setCurrentGachaType] = useState<GachaTypeButtonId>('limited');
-  const targetInputButtons = [
-    { name: '픽업오퍼 수', initialValue: pickupData.pickupDetails.pickupOpersCount },
-    { name: '목표픽업 수', initialValue: pickupData.pickupDetails.targetPickupCount },
-    { name: '픽업 확률', initialValue: pickupData.pickupDetails.pickupChance },
-  ];
-  return (
-    <motion.div
-      onHoverStart={() => setIsHover(true)}
-      onHoverEnd={() => setIsHover(false)}
-      onViewportEnter={() => {
-        setIsFirstRenderOver(true);
-      }}
-      animate={isHover ? { scale: 1.02 } : undefined}
-      transition={cardTransition}
-      className="Card relative w-[480px] space-y-12 p-4"
-    >
-      <motion.div
-        variants={cardVariants}
-        animate={isFirstRenderOver ? 'idle' : undefined}
-        viewport={{ once: true, amount: 0.5 }}
-        transition={{ ...cardTransition, ease: 'easeIn' }}
-        initial="exit"
-        exit="exit"
-        className="absolute top-0 left-0 flex size-full items-center justify-center rounded-2xl to-[#2e2e2e] shadow-[12px_12px_32px_#101010,-10px_-12px_32px_#303030]"
-      />
-      <div className="relative space-y-6">
-        <div className="flex items-center justify-between">
-          <motion.div
-            variants={toOpacityZero}
-            animate={isFirstRenderOver ? 'idle' : undefined}
-            viewport={{ once: true, amount: 0.5 }}
-            initial="exit"
-            exit="exit"
-            className="text-lg font-bold"
-          >
-            <span className="text-amber-400">{index}.</span> 가챠 스케쥴 - {index}
-          </motion.div>
-          <DeleteButton handleDelete={deleteBanner} isFirstRenderOver={isFirstRenderOver} />
-        </div>
-        <div className="relative flex w-full space-x-3 text-[15px]">
-          {gachaTypeButtons.map(({ id, name, hoverBackground }) => {
-            console.log('map', isFirstRenderOver);
-            return (
-              <TypeSelectionButton
-                key={id}
-                name={name}
-                hoverBackground={hoverBackground}
-                isFirstRenderOver={isFirstRenderOver}
-                isActive={currentGachaType === id ? true : false}
-                onTypeClick={() => {
-                  setCurrentGachaType(id);
-                }}
-              />
-            );
-          })}
-        </div>
-        <div className="relative flex justify-between">
-          <div className="flex space-x-3">
-            {targetInputButtons.map(({ name, initialValue }) => (
-              <TargetInput
-                key={name}
-                name={name}
-                initialValue={initialValue}
-                isFirstRenderOver={isFirstRenderOver}
-              />
-            ))}
-          </div>
-          <OptionButton isFirstRenderOver={isFirstRenderOver} />
-        </div>
-        
-        
-      </div>
-    </motion.div>
-  );
-}
- */
-
-{
-  /*         <div>lim/nor/full</div>
-        <div>picked 1,2,3,4</div>
-        <div>want 1,2,3,4</div>
-        <div>pick limit 100~200</div>
-        <div>first one pick</div>
-        <div>yellow tick yes/no</div> */
-}
-
-{
-  /* 자세히 탭에 들어갈 것 - 픽업대상 수, 목표 픽업 수, 픽업 리미트(기본은 명함), 명함 - 횟수제한픽업 - 풀잠, 노티사용 */
 }
