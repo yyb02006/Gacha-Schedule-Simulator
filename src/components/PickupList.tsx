@@ -28,6 +28,7 @@ export interface Dummy {
     targetCount: number | null;
   }[];
   pickupDetails: { pickupOpersCount: number; targetPickupCount: number; pickupChance: number };
+  additionalResource: number;
 }
 
 const dummies: Dummy[] = [
@@ -42,6 +43,7 @@ const dummies: Dummy[] = [
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
     maxGachaAttempts: 200,
     minGachaAttempts: 0,
+    additionalResource: 0,
   },
   {
     id: 'a1b2c3d4-e5f6-4789-b0c1-d2e3f4a5b6c7',
@@ -54,6 +56,7 @@ const dummies: Dummy[] = [
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
     maxGachaAttempts: null,
     minGachaAttempts: 0,
+    additionalResource: 0,
   },
   {
     id: 'f8e7d6c5-b4a3-4210-9876-543210fedcba',
@@ -63,22 +66,24 @@ const dummies: Dummy[] = [
     pickupDetails: { pickupOpersCount: 1, targetPickupCount: 1, pickupChance: 50 },
     maxGachaAttempts: null,
     minGachaAttempts: 0,
+    additionalResource: 0,
   },
 ];
 
-export type AddType = 'addSimpleBanner' | 'addDetailedBanner';
+export type ActionType = 'addSimpleBanner' | 'addDetailedBanner' | 'modifyBanner';
 
-export type PickupDatasAction = {
-  addType: 'addSimpleBanner';
-  payload: { gachaType: GachaType; pickupOpersCount: number; targetPickupCount: number };
-};
+export type PickupDatasAction =
+  | {
+      type: 'addSimpleBanner';
+      payload: { gachaType: GachaType; pickupOpersCount: number; targetPickupCount: number };
+    }
+  | { type: 'modifyBanner'; payload: Partial<Omit<Dummy, 'id'>> & Pick<Dummy, 'id'> };
 
-export type PickupDataPayload<T extends AddType> = PickupDatasAction extends { addType: T }
-  ? PickupDatasAction
-  : never;
+export type ExtractPayloadFromAction<K extends ActionType> =
+  Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
 
 const reducer = (state: Dummy[], action: PickupDatasAction) => {
-  switch (action.addType) {
+  switch (action.type) {
     case 'addSimpleBanner': {
       const { gachaType, pickupOpersCount, targetPickupCount } = action.payload;
       const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
@@ -101,8 +106,35 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
           minGachaAttempts: 0,
           name: `새 가챠 배너`,
           operators: operators,
+          additionalResource: 0,
         } satisfies Dummy,
       ];
+    }
+    case 'modifyBanner': {
+      const editedBanner = state.map((pickupData) => {
+        if (pickupData.id === action.payload.id) {
+          const newPickupData = { ...pickupData, ...action.payload };
+          // pickupOpersCount가 더 작을 경우 targetPickupCount 수정
+          if (action.payload.pickupDetails) {
+            const {
+              pickupDetails: { targetPickupCount, pickupOpersCount },
+            } = newPickupData;
+            if (targetPickupCount > pickupOpersCount) {
+              return {
+                ...newPickupData,
+                pickupDetails: {
+                  ...newPickupData.pickupDetails,
+                  targetPickupCount: pickupOpersCount,
+                },
+              };
+            }
+          }
+          return newPickupData;
+        } else {
+          return pickupData;
+        }
+      });
+      return editedBanner;
     }
     default:
       throw new Error();
@@ -120,13 +152,12 @@ export default function PickupList() {
     closeModal: closeBannerAddModal,
   } = useModal();
   const addBanner = isSimpleMode
-    ? (payload: PickupDataPayload<'addSimpleBanner'>['payload']) => {
-        dispatch({ addType: 'addSimpleBanner', payload });
+    ? (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => {
+        dispatch({ type: 'addSimpleBanner', payload });
       }
-    : (payload: PickupDataPayload<'addSimpleBanner'>['payload']) => {
-        dispatch({ addType: 'addSimpleBanner', payload });
+    : (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => {
+        dispatch({ type: 'addSimpleBanner', payload });
       };
-  console.log(pickupDatas);
 
   /*   const addBanner = (payload: Partial<Dummy>) => {
     setPickupDatas((p) => [
@@ -208,10 +239,11 @@ export default function PickupList() {
                 custom={{ boxShadow: '0px -7px 20px 5px #bd5b00, 0px 7px 22px 3px #ffde26' }}
               />
             </motion.div>
-            {pickupDatas.map((data, index) => (
+            {pickupDatas.map((pickupData, index) => (
               <PickupBanner
-                key={data.id}
-                data={data}
+                key={pickupData.id}
+                pickupData={pickupData}
+                dispatch={dispatch}
                 index={index}
                 isSimpleMode={isSimpleMode}
                 isGachaSim={isGachaSim}
