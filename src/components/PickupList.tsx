@@ -15,18 +15,24 @@ import { useModal } from '#/hooks/useModal';
 
 export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
 
+export type OperatorType = 'limited' | 'normal';
+
+export type Operator = {
+  operatorId: string;
+  name: string;
+  currentQty: number;
+  operatorType: OperatorType;
+  targetCount: number | null;
+  rarity: number;
+};
+
 export interface Dummy {
   id: string;
   name: string;
   maxGachaAttempts: number;
   minGachaAttempts: number;
   gachaType: GachaType;
-  operators: {
-    name: string;
-    currentQty: number;
-    operType: 'limited' | 'normal';
-    targetCount: number | null;
-  }[];
+  operators: Operator[];
   pickupDetails: { pickupOpersCount: number; targetPickupCount: number; pickupChance: number };
   additionalResource: number;
 }
@@ -37,8 +43,22 @@ const dummies: Dummy[] = [
     name: '우리 종족',
     gachaType: 'limited',
     operators: [
-      { name: '위셔델', currentQty: 0, operType: 'limited', targetCount: 1 },
-      { name: '로고스', currentQty: 0, operType: 'normal', targetCount: 1 },
+      {
+        operatorId: '970b5b98-edda-4af6-ae22-49a9227e1ad4',
+        name: '위셔델',
+        currentQty: 0,
+        operatorType: 'limited',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p',
+        name: '로고스',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
     ],
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
     maxGachaAttempts: 200,
@@ -50,8 +70,22 @@ const dummies: Dummy[] = [
     name: '모래위의 각인',
     gachaType: 'limited',
     operators: [
-      { name: '페페', currentQty: 0, operType: 'limited', targetCount: 1 },
-      { name: '나란투야', currentQty: 0, operType: 'normal', targetCount: 1 },
+      {
+        operatorId: 'a1b2c3d4-e5f6-7g8h-9i0j-1k2l3m4n5o6p',
+        name: '페페',
+        currentQty: 0,
+        operatorType: 'limited',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'b1c2d3e4-f5g6-7h8i-9j0k-1l2m3n4o5p6q',
+        name: '나란투야',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
     ],
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
     maxGachaAttempts: Infinity,
@@ -62,7 +96,16 @@ const dummies: Dummy[] = [
     id: 'f8e7d6c5-b4a3-4210-9876-543210fedcba',
     name: '불타는 엘레지여',
     gachaType: 'standard',
-    operators: [{ name: '네크라스', currentQty: 0, operType: 'normal', targetCount: 1 }],
+    operators: [
+      {
+        operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '네크라스',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+    ],
     pickupDetails: { pickupOpersCount: 1, targetPickupCount: 1, pickupChance: 50 },
     maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
@@ -73,23 +116,51 @@ const dummies: Dummy[] = [
 export type ActionType =
   | 'addSimpleBanner'
   | 'addDetailedBanner'
-  | 'modify'
   | 'delete'
-  | 'changePickupOpersCount';
+  | 'updatePickupCount'
+  | 'updateAttempts'
+  | 'updateBannerName'
+  | 'updateOperatorDetails';
 
 export type PickupDatasAction =
   | {
       type: 'addSimpleBanner';
       payload: { gachaType: GachaType; pickupOpersCount: number; targetPickupCount: number };
     }
-  | { type: 'modify'; payload: Partial<Omit<Dummy, 'id'>> & Pick<Dummy, 'id'> }
-  | { type: 'delete'; payload: { id: string } }
+  | { type: 'delete'; payload: { id: string; operatorId?: string; target: 'banner' | 'operator' } }
   | {
-      type: 'changePickupCount';
+      type: 'updatePickupCount';
       payload: {
         id: string;
         count: number;
         target: 'pickupOpersCount' | 'targetPickupCount';
+      };
+    }
+  | {
+      type: 'updateAttempts';
+      payload: {
+        id: string;
+        attempts: number;
+        target: 'max' | 'min' | 'both';
+      };
+    }
+  | {
+      type: 'updateBannerName';
+      payload: {
+        id: string;
+        name: string;
+      };
+    }
+  | {
+      type: 'updateOperatorDetails';
+      payload: {
+        id: string;
+        operatorId: string;
+        targetCount?: number;
+        currentQty?: number;
+        name?: string;
+        operatorType?: OperatorType;
+        rarity?: number;
       };
     };
 
@@ -97,9 +168,21 @@ export type ExtractPayloadFromAction<K extends ActionType> =
   Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
 
 const reducer = (state: Dummy[], action: PickupDatasAction) => {
-  const modifyBanner = (id: string, transform: (pickupData: Dummy) => Partial<Dummy>) =>
+  const modifyBannerDetails = (id: string, transform: (pickupData: Dummy) => Partial<Dummy>) =>
     state.map((pickupData) =>
       pickupData.id === id ? { ...pickupData, ...transform(pickupData) } : pickupData,
+    );
+  const modifyOperatorDetails = ({
+    operatorId,
+    operators,
+    transform,
+  }: {
+    operatorId: string;
+    operators: Operator[];
+    transform: (operator: Operator) => Partial<Operator>;
+  }) =>
+    operators.map((operator) =>
+      operator.operatorId === operatorId ? { ...operator, ...transform(operator) } : operator,
     );
   switch (action.type) {
     case 'addSimpleBanner': {
@@ -108,10 +191,12 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
       const operators: Dummy['operators'] = Array.from(
         { length: pickupOpersCount },
         (_, index) => ({
+          operatorId: crypto.randomUUID(),
           currentQty: 0,
           name: `오퍼레이터 ${index + 1}`,
-          operType: pickupChance === 70 && index === 0 ? 'limited' : 'normal',
+          operatorType: pickupChance === 70 && index === 0 ? 'limited' : 'normal',
           targetCount: 1,
+          rarity: 6,
         }),
       );
       return [
@@ -128,22 +213,29 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
         } satisfies Dummy,
       ];
     }
-    case 'modify': {
-      const editedBanner = state.map((pickupData) =>
-        pickupData.id === action.payload.id ? { ...pickupData, ...action.payload } : pickupData,
-      );
-      return editedBanner;
-    }
     case 'delete': {
-      const newBanner = state.filter(({ id }) => id !== action.payload.id);
-      return newBanner;
+      const { id: bannerId, target, operatorId: payloadOperatorId } = action.payload;
+      if (target === 'banner') {
+        return state.filter(({ id }) => id !== action.payload.id);
+      } else if (target === 'operator') {
+        return state.map((pickupData) =>
+          pickupData.id === bannerId
+            ? {
+                ...pickupData,
+                operators: pickupData.operators.filter(
+                  ({ operatorId }) => operatorId !== payloadOperatorId,
+                ),
+              }
+            : pickupData,
+        );
+      } else {
+        return state;
+      }
     }
-    case 'changePickupCount': {
-      const {
-        payload: { id, count, target },
-      } = action;
+    case 'updatePickupCount': {
+      const { id, count, target } = action.payload;
       if (isNaN(count)) return state;
-      return modifyBanner(id, (pickupData) => {
+      return modifyBannerDetails(id, (pickupData) => {
         const { pickupDetails } = pickupData;
         const { pickupOpersCount, targetPickupCount } = pickupDetails;
         if (target === 'pickupOpersCount') {
@@ -175,7 +267,7 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
                         ({
                           name: `오퍼레이터 ${targetPickupCount + index + 1}`,
                           currentQty: 0,
-                          operType:
+                          operatorType:
                             (gachaType === 'collab' || gachaType === 'limited') &&
                             targetPickupCount + index === 0
                               ? 'limited'
@@ -190,6 +282,52 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
           return pickupData;
         }
       });
+    }
+    case 'updateAttempts': {
+      const { id, attempts, target } = action.payload;
+      if (isNaN(attempts)) return state;
+      return modifyBannerDetails(id, (pickupBanner) => {
+        const { maxGachaAttempts, minGachaAttempts } = pickupBanner;
+        if (target === 'max') {
+          return {
+            maxGachaAttempts: attempts,
+            minGachaAttempts: attempts < minGachaAttempts ? attempts : minGachaAttempts,
+          };
+        } else if (target === 'min') {
+          return {
+            maxGachaAttempts: attempts > maxGachaAttempts ? attempts : maxGachaAttempts,
+            minGachaAttempts: attempts,
+          };
+        } else if (target === 'both') {
+          return { maxGachaAttempts: attempts, minGachaAttempts: attempts };
+        } else {
+          return pickupBanner;
+        }
+      });
+    }
+    case 'updateBannerName': {
+      const { id, name } = action.payload;
+      return modifyBannerDetails(id, () => {
+        return { name };
+      });
+    }
+    case 'updateOperatorDetails': {
+      const { id, operatorId } = action.payload;
+      return state.map((pickupData) =>
+        pickupData.id === id
+          ? {
+              ...pickupData,
+              operators: modifyOperatorDetails({
+                operatorId,
+                operators: pickupData.operators,
+                transform: () =>
+                  Object.fromEntries(
+                    Object.entries(action.payload).filter(([, value]) => value !== undefined),
+                  ),
+              }),
+            }
+          : pickupData,
+      );
     }
     default:
       throw new Error();
@@ -225,7 +363,7 @@ export default function PickupList() {
           : Array({ length: payload.pickupDetails?.pickupOpersCount ?? 2 }).map((_, index) => ({
               name: `오퍼레이터${index + 1}`,
               currentQty: 0,
-              operType:
+              operatorType:
                 (payload.gachaType === 'limited' || payload.gachaType === 'collab') && index === 0
                   ? 'limited'
                   : 'normal',
