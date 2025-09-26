@@ -97,7 +97,7 @@ export const gachaTypeButtonVariants: Variants = {
     transition:
       custom.state === 'initial'
         ? { background: { duration: 0.3, delay: 0.3 }, boxShadow: { duration: 0.3, delay: 0.1 } }
-        : { background: { duration: 0.3 } },
+        : { background: { duration: 0.3 }, boxShadow: { duration: 0, delay: 0 } },
   }),
 };
 
