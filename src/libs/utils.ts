@@ -70,3 +70,33 @@ export function normalizeNumberString(string: string, returnEmptyForZero: boolea
   const trimmedLeadingZero = string.replace(/^0+/, '');
   return trimmedLeadingZero === '' && returnEmptyForZero ? '0' : trimmedLeadingZero;
 }
+
+/**
+ * 주어진 숫자를 최소값과 최대값 사이에 클램핑하여 반환
+ *
+ * @param {number} num - 클램핑할 숫자
+ * @param {number} [min=0] - 최소값
+ * @param {number} [max] - 최대값
+ * @returns {number} 클램핑된 숫자
+ *
+ * @example
+ * const clampedNumber = clamp(5, 1, 10);
+ * console.log(clampedNumber); // 5
+ *
+ * @example
+ * const clampedNumber = clamp(0, 1, 10);
+ * console.log(clampedNumber); // 1
+ *
+ * @example
+ * const clampedNumber = clamp(15, 1, 10);
+ * console.log(clampedNumber); // 10
+ *
+ * @example
+ * const clampedNumber = clamp(5);
+ * console.log(clampedNumber); // 5
+ */
+export function clamp(num: number, min = 0, max?: number): number {
+  if (num < min) return min;
+  if (max !== undefined && num > max) return max;
+  return num;
+}
