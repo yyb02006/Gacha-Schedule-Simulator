@@ -18,7 +18,7 @@ export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
 export interface Dummy {
   id: string;
   name: string;
-  maxGachaAttempts: number | null;
+  maxGachaAttempts: number;
   minGachaAttempts: number;
   gachaType: GachaType;
   operators: {
@@ -54,7 +54,7 @@ const dummies: Dummy[] = [
       { name: '나란투야', currentQty: 0, operType: 'normal', targetCount: 1 },
     ],
     pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
-    maxGachaAttempts: null,
+    maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
     additionalResource: 0,
   },
@@ -64,20 +64,21 @@ const dummies: Dummy[] = [
     gachaType: 'standard',
     operators: [{ name: '네크라스', currentQty: 0, operType: 'normal', targetCount: 1 }],
     pickupDetails: { pickupOpersCount: 1, targetPickupCount: 1, pickupChance: 50 },
-    maxGachaAttempts: null,
+    maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
     additionalResource: 0,
   },
 ];
 
-export type ActionType = 'addSimpleBanner' | 'addDetailedBanner' | 'modifyBanner';
+export type ActionType = 'addSimpleBanner' | 'addDetailedBanner' | 'modify' | 'delete';
 
 export type PickupDatasAction =
   | {
       type: 'addSimpleBanner';
       payload: { gachaType: GachaType; pickupOpersCount: number; targetPickupCount: number };
     }
-  | { type: 'modifyBanner'; payload: Partial<Omit<Dummy, 'id'>> & Pick<Dummy, 'id'> };
+  | { type: 'modify'; payload: Partial<Omit<Dummy, 'id'>> & Pick<Dummy, 'id'> }
+  | { type: 'delete'; payload: { id: string } };
 
 export type ExtractPayloadFromAction<K extends ActionType> =
   Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
@@ -110,31 +111,15 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
         } satisfies Dummy,
       ];
     }
-    case 'modifyBanner': {
-      const editedBanner = state.map((pickupData) => {
-        if (pickupData.id === action.payload.id) {
-          const newPickupData = { ...pickupData, ...action.payload };
-          // pickupOpersCount가 더 작을 경우 targetPickupCount 수정
-          if (action.payload.pickupDetails) {
-            const {
-              pickupDetails: { targetPickupCount, pickupOpersCount },
-            } = newPickupData;
-            if (targetPickupCount > pickupOpersCount) {
-              return {
-                ...newPickupData,
-                pickupDetails: {
-                  ...newPickupData.pickupDetails,
-                  targetPickupCount: pickupOpersCount,
-                },
-              };
-            }
-          }
-          return newPickupData;
-        } else {
-          return pickupData;
-        }
-      });
+    case 'modify': {
+      const editedBanner = state.map((pickupData) =>
+        pickupData.id === action.payload.id ? { ...pickupData, ...action.payload } : pickupData,
+      );
       return editedBanner;
+    }
+    case 'delete': {
+      const newBanner = state.filter(({ id }) => id !== action.payload.id);
+      return newBanner;
     }
     default:
       throw new Error();
