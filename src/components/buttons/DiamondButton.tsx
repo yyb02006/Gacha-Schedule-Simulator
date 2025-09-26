@@ -8,6 +8,11 @@ const buttonVariants: Variants = {
     boxShadow: '6px 0px 13px 0px #101010ff, -4px 0px 16px 2px #303030ff',
     background: 'linear-gradient(90deg, #202020ff, #303030ff)',
   },
+  exit: {
+    rotateZ: 0,
+    boxShadow: '0px 0px 0px 0px #2020200, 0px 0px 0px 0px #2020200',
+    background: 'linear-gradient(90deg, #2020200,#20202000)',
+  },
   hover: (custom?: { size?: 'default' | 'small'; boxShadow?: string }) => ({
     rotateZ: 90,
     boxShadow:
@@ -23,6 +28,10 @@ const insetVariants: Variants = {
   idle: {
     boxShadow: 'inset 6px 0px 13px #141414ff, inset -6px 0px 13px #2c2c2cff',
     background: '#202020ff',
+  },
+  exit: {
+    boxShadow: 'inset 0px 0px 0px #20202000, inset 0px 0px 0px #20202000',
+    background: '#20202000',
   },
   hover: {
     boxShadow: 'inset 0px -6px 13px #0a0a0aff, inset 0px 6px 13px #3a3a3aff',
@@ -42,12 +51,10 @@ const ButtonInset = ({
   return (
     <motion.div
       variants={insetVariants}
-      animate={isHover ? 'hover' : 'idle'}
       transition={{ duration: 0.3, delay: isMount ? 0 : initialDelay }}
-      initial={{
-        boxShadow: 'inset 0px 0px 0px #20202000, inset 0px 0px 0px #20202000',
-        background: '#20202000',
-      }}
+      initial="exit"
+      animate={isHover ? 'hover' : 'idle'}
+      exit="exit"
       className="absolute size-2/3"
     />
   );
@@ -69,13 +76,10 @@ export default function DiamondButton({
   return (
     <motion.button
       variants={buttonVariants}
-      animate={isHover ? 'hover' : 'idle'}
       transition={{ duration: 0.3, delay: isMount ? 0 : initialDelay, ease: 'easeOut' }}
-      initial={{
-        rotateZ: 0,
-        boxShadow: '0px 0px 0px 0px #2020200, 0px 0px 0px 0px #2020200',
-        background: 'linear-gradient(90deg, #2020200,#20202000)',
-      }}
+      initial="exit"
+      animate={isHover ? 'hover' : 'idle'}
+      exit="exit"
       custom={custom}
       className="relative flex size-full cursor-pointer items-center justify-center p-4"
     >
