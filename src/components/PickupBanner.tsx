@@ -1,17 +1,23 @@
 'use client';
 
-import { AnimatePresence, motion, useIsPresent, usePresenceData } from 'motion/react';
+import { AnimatePresence, motion, number, useIsPresent, usePresenceData } from 'motion/react';
 import {
   gachaBannerOptionCardVariants,
   insetInputVariants,
   secondLevelTransition,
   toOpacityZero,
 } from '#/constants/variants';
-import { Dummy, GachaType, PickupDatasAction } from '#/components/PickupList';
+import {
+  Dummy,
+  ExtractPayloadFromAction,
+  GachaType,
+  Operator,
+  PickupDatasAction,
+} from '#/components/PickupList';
 import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
-import { cls, normalizeNumberString, stringToNumber } from '#/libs/utils';
+import { clamp, cls, normalizeNumberString, stringToNumber } from '#/libs/utils';
 import { ActionDispatch, ChangeEvent, FocusEvent, ReactNode } from 'react';
 import { useSyncedState } from '#/hooks/useSyncedState';
 
@@ -54,10 +60,14 @@ const MaxAttempts = ({
           {isInfinity && <div className="absolute right-0 mr-4 text-3xl">∞</div>}
           <input
             type="number"
+            inputMode="numeric"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const numberString = normalizeNumberString(e.currentTarget.value);
               if (numberString === undefined) return;
-              setLocalValue(numberString);
+              const normalizedString = Math.floor(
+                clamp(parseFloat(numberString), 0, 999),
+              ).toString();
+              setLocalValue(normalizedString);
             }}
             onBlur={(e: FocusEvent<HTMLInputElement>) => {
               if (isInfinity) return;
@@ -118,10 +128,14 @@ const MinAttempts = ({
         >
           <input
             type="number"
+            inputMode="numeric"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const numberString = normalizeNumberString(e.currentTarget.value);
               if (numberString === undefined) return;
-              setLocalValue(numberString);
+              const normalizedString = Math.floor(
+                clamp(parseFloat(numberString), 0, 999),
+              ).toString();
+              setLocalValue(normalizedString);
             }}
             onBlur={(e: FocusEvent<HTMLInputElement>) => {
               onInputBlur(e);
@@ -147,13 +161,17 @@ const MinAttempts = ({
 export const InsetNumberInput = ({
   onInputBlur,
   currentValue,
-  className = '',
   name,
+  className = '',
+  max,
+  maxLength,
 }: {
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
   currentValue: string;
-  className?: string;
   name: ReactNode;
+  className?: string;
+  max?: number;
+  maxLength?: number;
 }) => {
   const [localValue, setLocalValue] = useSyncedState(currentValue);
   const isParentPresent = usePresenceData();
@@ -194,14 +212,20 @@ export const InsetNumberInput = ({
         >
           <input
             type="number"
+            inputMode="numeric"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const { value } = e.currentTarget;
               const numberString = normalizeNumberString(value);
               if (numberString === undefined) return;
-              setLocalValue(numberString);
+              const normalizedString = Math.floor(
+                clamp(parseFloat(numberString), 0, max),
+              ).toString();
+              setLocalValue(normalizedString);
             }}
             onBlur={onInputBlur}
             className="relative h-full w-8 min-w-0 text-right"
+            max={max}
+            maxLength={maxLength}
             value={localValue}
           />
         </motion.div>
@@ -210,7 +234,7 @@ export const InsetNumberInput = ({
   );
 };
 
-const AdditionalResUntilEnd = ({
+const AdditionalResUntilBannerEnd = ({
   onInputBlur,
   additionalResource,
 }: {
@@ -245,11 +269,13 @@ const AdditionalResUntilEnd = ({
         >
           <input
             type="number"
+            inputMode="numeric"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const { value } = e.currentTarget;
               const numberString = normalizeNumberString(value);
               if (numberString === undefined) return;
-              setLocalValue(e.currentTarget.value);
+              const normalizedString = Math.floor(clamp(parseFloat(numberString), 0)).toString();
+              setLocalValue(normalizedString);
             }}
             onBlur={onInputBlur}
             className="relative w-14 min-w-0 text-right"
@@ -264,6 +290,337 @@ const AdditionalResUntilEnd = ({
   );
 };
 
+const BannerHeader = ({
+  id,
+  index,
+  currentName,
+  gachaType,
+  onNameBlur,
+  onBannerDelete,
+}: {
+  id: string;
+  index: number;
+  currentName: string;
+  gachaType: GachaType;
+  onNameBlur: (e: FocusEvent<HTMLInputElement>) => void;
+  onBannerDelete: () => void;
+}) => {
+  const [localValue, setLocalValue] = useSyncedState(currentName);
+  const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setLocalValue(e.currentTarget.value);
+  };
+  const translatedGachaType =
+    gachaType === 'collab' ? '콜라보 배너' : gachaType === 'limited' ? '한정 배너' : '통상 배너';
+  return (
+    <div className="flex grow gap-4">
+      <motion.div
+        variants={toOpacityZero}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="font-S-CoreDream-700 flex items-center text-2xl"
+      >
+        <AnimatePresence mode="wait" propagate>
+          <motion.span
+            key={`${id} ${index + 1}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            {index + 1}.
+          </motion.span>
+        </AnimatePresence>
+      </motion.div>
+      <motion.div
+        variants={insetInputVariants}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl"
+      >
+        <motion.input
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          type="text"
+          onChange={onNameChange}
+          onBlur={onNameBlur}
+          value={localValue}
+          className="w-full"
+        />
+        <div className="flex h-full gap-x-1">
+          <motion.div
+            variants={toOpacityZero}
+            initial="exit"
+            animate="idle"
+            exit="exit"
+            className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
+          >
+            <div className="relative top-[1px]">{translatedGachaType}</div>
+          </motion.div>
+          {gachaType === 'revival' && (
+            <div className="inline-block rounded-full border border-violet-400 px-2 py-1 text-sm text-violet-400">
+              구오퍼
+            </div>
+          )}
+          <motion.div
+            variants={toOpacityZero}
+            initial="exit"
+            animate="idle"
+            exit="exit"
+            className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
+          >
+            <svg className="size-[22px] text-amber-400">
+              <use href="/icons/icons.svg#tag" />
+            </svg>
+          </motion.div>
+        </div>
+      </motion.div>
+      <DeleteButton onDelete={onBannerDelete} className="size-[48px] shrink-0 grow" />
+    </div>
+  );
+};
+
+const PreInfoField = ({
+  isPresent,
+  isSimpleMode,
+  isGachaSim,
+  pickupData,
+  updatePickupCount,
+  updateAttempts,
+}: {
+  isPresent: boolean;
+  isSimpleMode: boolean;
+  isGachaSim: boolean;
+  pickupData: Dummy;
+  updatePickupCount: (count: number, target: 'pickupOpersCount' | 'targetPickupCount') => void;
+  updateAttempts: (attempts: number, target: 'max' | 'min' | 'both') => void;
+}) => {
+  const {
+    pickupDetails: { pickupOpersCount, targetPickupCount },
+    maxGachaAttempts,
+    minGachaAttempts,
+    id,
+    gachaType,
+    additionalResource,
+  } = pickupData;
+  return (
+    <div className="felx-wrap flex justify-between gap-x-6 gap-y-3">
+      <AnimatePresence mode="wait" custom={isPresent} propagate>
+        <motion.div
+          key={String(isSimpleMode)}
+          className="font-S-CoreDream-500 flex flex-wrap gap-x-6 gap-y-3 text-sm"
+        >
+          {isSimpleMode ? (
+            <>
+              <InsetNumberInput
+                name="픽업 6성"
+                className="text-sky-500"
+                onInputBlur={(e) => {
+                  updatePickupCount(stringToNumber(e.currentTarget.value), 'pickupOpersCount');
+                }}
+                currentValue={pickupOpersCount.toString()}
+                max={10}
+              />
+              <InsetNumberInput
+                name="목표 6성"
+                className="text-amber-400"
+                onInputBlur={(e) => {
+                  updatePickupCount(stringToNumber(e.currentTarget.value), 'targetPickupCount');
+                }}
+                currentValue={targetPickupCount.toString()}
+                max={10}
+              />
+            </>
+          ) : (
+            <>
+              <MaxAttempts
+                maxGachaAttempts={maxGachaAttempts.toString()}
+                onInputBlur={(e) => {
+                  updateAttempts(stringToNumber(e.currentTarget.value), 'max');
+                }}
+                onUnlimitedClick={() => {
+                  updateAttempts(Infinity, 'max');
+                }}
+              />
+              <MinAttempts
+                minGachaAttempts={minGachaAttempts.toString()}
+                onInputBlur={(e) => {
+                  updateAttempts(stringToNumber(e.currentTarget.value), 'min');
+                }}
+                onReach300={() => {
+                  updateAttempts(300, 'both');
+                }}
+                gachaType={gachaType}
+              />
+            </>
+          )}
+        </motion.div>
+      </AnimatePresence>
+      <AnimatePresence mode="wait" propagate>
+        {isGachaSim ? (
+          <div key={`resAlter-${`${id} ${isGachaSim}` ? 'shown' : 'hidden'}`} className="hidden" />
+        ) : (
+          <AdditionalResUntilBannerEnd
+            key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
+            additionalResource={additionalResource.toString()}
+            onInputBlur={() => {}}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const PickupOperatorDetail = ({
+  operator,
+  onOperatorDelete,
+  onChangeOperatorDetails,
+}: {
+  operator: Operator;
+  onOperatorDelete: () => void;
+  onChangeOperatorDetails: (payload: ChangeOperatorDetails) => void;
+}) => {
+  const { name, operatorId, operatorType, currentQty } = operator;
+  const [localName, setLocalName] = useSyncedState(name);
+  const [localQty, setLocalQty] = useSyncedState(currentQty.toString());
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+      <div className="flex grow gap-6">
+        <DeleteButton onDelete={onOperatorDelete} className="-mr-2" />
+        <motion.div
+          variants={insetInputVariants}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="flex grow items-center rounded-lg py-2 pr-2 pl-4"
+        >
+          <motion.input
+            variants={toOpacityZero}
+            initial="exit"
+            animate="idle"
+            exit="exit"
+            type="text"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setLocalName(e.currentTarget.value);
+            }}
+            onBlur={(e: FocusEvent<HTMLInputElement>) => {
+              onChangeOperatorDetails({ name: e.currentTarget.value, operatorId });
+            }}
+            value={localName}
+            className="w-full text-[15px]"
+          />
+          <div className="flex h-full gap-x-1">
+            {operatorType === 'limited' ? (
+              <motion.div
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
+              >
+                한정
+              </motion.div>
+            ) : (
+              <motion.div
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600"
+              >
+                통상
+              </motion.div>
+            )}
+            <motion.div
+              variants={toOpacityZero}
+              initial="exit"
+              animate="idle"
+              exit="exit"
+              className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
+            >
+              <svg className="size-[18px] text-amber-400">
+                <use href="/icons/icons.svg#tag"></use>
+              </svg>
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+      <div className="flex gap-x-6 gap-y-3">
+        <div className="flex items-center gap-2">
+          <motion.span
+            variants={toOpacityZero}
+            initial="exit"
+            animate="idle"
+            exit="exit"
+            className="whitespace-nowrap"
+          >
+            가챠 목표
+          </motion.span>
+          <TypeSelectionButton
+            name="명함"
+            hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+            onTypeClick={() => {
+              onChangeOperatorDetails({ operatorId, targetCount: 1 });
+            }}
+            className="px-4"
+          />
+          <TypeSelectionButton
+            name="풀잠"
+            hoverBackground="linear-gradient(155deg, #ec003f, #ff637e)"
+            onTypeClick={() => {
+              onChangeOperatorDetails({ operatorId, targetCount: 6 });
+            }}
+            className="px-4"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+            현재 잠재
+          </motion.span>
+          <motion.div
+            variants={insetInputVariants}
+            initial="exit"
+            animate="idle"
+            exit="exit"
+            className="flex items-center rounded-lg px-4 py-2"
+          >
+            <motion.input
+              variants={toOpacityZero}
+              initial="exit"
+              animate="idle"
+              exit="exit"
+              type="number"
+              inputMode="numeric"
+              max={6}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const numberString = normalizeNumberString(e.currentTarget.value);
+                if (numberString === undefined) return;
+                const normalizedString = Math.floor(
+                  clamp(parseFloat(numberString), 0, 6),
+                ).toString();
+                setLocalQty(normalizedString);
+              }}
+              onBlur={(e: FocusEvent<HTMLInputElement>) => {
+                const newQty = stringToNumber(e.currentTarget.value);
+                const clampQty = newQty > 6 ? 6 : newQty;
+                onChangeOperatorDetails({
+                  operatorId,
+                  currentQty: isNaN(newQty) ? undefined : clampQty,
+                });
+              }}
+              className="w-6 min-w-0 text-right"
+              value={localQty}
+            />
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface PickupBannerProps {
   pickupData: Dummy;
   dispatch: ActionDispatch<[action: PickupDatasAction]>;
@@ -271,6 +628,10 @@ interface PickupBannerProps {
   isGachaSim: boolean;
   isSimpleMode: boolean;
 }
+
+type ChangeNameProps = Omit<ExtractPayloadFromAction<'updateBannerName'>, 'id'>;
+type DeleteDataProps = Omit<ExtractPayloadFromAction<'delete'>, 'id'>;
+type ChangeOperatorDetails = Omit<ExtractPayloadFromAction<'updateOperatorDetails'>, 'id'>;
 
 export default function PickupBanner({
   pickupData,
@@ -280,76 +641,48 @@ export default function PickupBanner({
   isSimpleMode,
 }: PickupBannerProps) {
   const isPresent = useIsPresent();
-  const {
-    maxGachaAttempts,
-    minGachaAttempts,
-    gachaType,
-    name,
-    operators,
-    id,
-    pickupDetails: { targetPickupCount, pickupOpersCount },
-    additionalResource,
-  } = pickupData;
+  const { gachaType, name, operators, id } = pickupData;
 
-  const translatedGachaType =
-    gachaType === 'collab' ? '콜라보 배너' : gachaType === 'limited' ? '한정 배너' : '통상 배너';
+  const deleteData = (payload: DeleteDataProps) => {
+    dispatch({ type: 'delete', payload: { id, ...payload } });
+  };
 
-  const changePickupCount = (count: number, target: 'pickupOpersCount' | 'targetPickupCount') => {
+  const updatePickupCount = (count: number, target: 'pickupOpersCount' | 'targetPickupCount') => {
     dispatch({
-      type: 'changePickupCount',
+      type: 'updatePickupCount',
       payload: {
         id,
-        count: count,
-        target: target,
+        count,
+        target,
       },
     });
   };
 
-  const changeAttempts = (attempts: number, targetCount: 'max' | 'min' | 'both') => {
-    if (isNaN(attempts)) return;
-    switch (targetCount) {
-      case 'max':
-        {
-          dispatch({
-            type: 'modify',
-            payload: {
-              id,
-              maxGachaAttempts: attempts,
-              minGachaAttempts: attempts < minGachaAttempts ? attempts : minGachaAttempts,
-            },
-          });
-        }
-        break;
-      case 'min':
-        {
-          dispatch({
-            type: 'modify',
-            payload: {
-              id,
-              maxGachaAttempts: attempts > maxGachaAttempts ? attempts : maxGachaAttempts,
-              minGachaAttempts: attempts,
-            },
-          });
-        }
-        break;
-      default:
-        {
-          dispatch({
-            type: 'modify',
-            payload: {
-              id,
-              maxGachaAttempts: attempts,
-              minGachaAttempts: attempts,
-            },
-          });
-        }
-        break;
-    }
+  const updateAttempts = (attempts: number, target: 'max' | 'min' | 'both') => {
+    dispatch({
+      type: 'updateAttempts',
+      payload: {
+        id,
+        attempts,
+        target,
+      },
+    });
+  };
+
+  const updateBannerName = (payload: ChangeNameProps) => {
+    dispatch({
+      type: 'updateBannerName',
+      payload: { id, ...payload },
+    });
+  };
+
+  const updateOperatorDetails = (payload: ChangeOperatorDetails) => {
+    dispatch({ type: 'updateOperatorDetails', payload: { id, ...payload } });
   };
 
   return (
     <motion.div
-      layout
+      layout="position"
       variants={gachaBannerOptionCardVariants}
       whileHover={{
         scale: 1.02,
@@ -370,146 +703,26 @@ export default function PickupBanner({
       className="flex flex-col space-y-6 rounded-xl p-4"
     >
       <div className="flex flex-col gap-4">
-        <div className="flex grow gap-4">
-          <motion.div
-            variants={toOpacityZero}
-            initial="exit"
-            animate="idle"
-            exit="exit"
-            className="font-S-CoreDream-700 flex items-center text-2xl"
-          >
-            <AnimatePresence mode="wait" propagate>
-              <motion.span
-                key={`${id} ${index + 1}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                {index + 1}.
-              </motion.span>
-            </AnimatePresence>
-          </motion.div>
-          <motion.div
-            variants={insetInputVariants}
-            initial="exit"
-            animate="idle"
-            exit="exit"
-            className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl"
-          >
-            <motion.input
-              variants={toOpacityZero}
-              initial="exit"
-              animate="idle"
-              exit="exit"
-              type="text"
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const { value } = e.currentTarget;
-                dispatch({ type: 'modify', payload: { id, name: value } });
-              }}
-              value={name}
-              className="w-full"
-            />
-            <div className="flex h-full gap-x-1">
-              <motion.div
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
-              >
-                <div className="relative top-[1px]">{translatedGachaType}</div>
-              </motion.div>
-              {gachaType === 'revival' && (
-                <div className="inline-block rounded-full border border-violet-400 px-2 py-1 text-sm text-violet-400">
-                  구오퍼
-                </div>
-              )}
-              <motion.div
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
-              >
-                <svg className="size-[22px] text-amber-400">
-                  <use href="/icons/icons.svg#tag" />
-                </svg>
-              </motion.div>
-            </div>
-          </motion.div>
-          <DeleteButton
-            handleDelete={() => {
-              dispatch({ type: 'delete', payload: { id } });
-            }}
-            className="size-[48px] shrink-0 grow"
-          />
-        </div>
-        <div className="felx-wrap flex justify-between gap-x-6 gap-y-3">
-          <AnimatePresence mode="wait" custom={isPresent} propagate>
-            <motion.div
-              key={String(isSimpleMode)}
-              className="font-S-CoreDream-500 flex flex-wrap gap-x-6 gap-y-3 text-sm"
-            >
-              {isSimpleMode ? (
-                <>
-                  <InsetNumberInput
-                    name="픽업 6성"
-                    className="text-sky-500"
-                    onInputBlur={(e) => {
-                      changePickupCount(stringToNumber(e.currentTarget.value), 'pickupOpersCount');
-                    }}
-                    currentValue={pickupOpersCount.toString()}
-                  />
-                  <InsetNumberInput
-                    name="목표 6성"
-                    className="text-amber-400"
-                    onInputBlur={(e) => {
-                      changePickupCount(stringToNumber(e.currentTarget.value), 'targetPickupCount');
-                    }}
-                    currentValue={targetPickupCount.toString()}
-                  />
-                </>
-              ) : (
-                <>
-                  <MaxAttempts
-                    maxGachaAttempts={maxGachaAttempts.toString()}
-                    onInputBlur={(e) => {
-                      changeAttempts(stringToNumber(e.currentTarget.value), 'max');
-                    }}
-                    onUnlimitedClick={() => {
-                      changeAttempts(Infinity, 'max');
-                    }}
-                  />
-                  <MinAttempts
-                    minGachaAttempts={minGachaAttempts.toString()}
-                    onInputBlur={(e) => {
-                      changeAttempts(stringToNumber(e.currentTarget.value), 'min');
-                    }}
-                    onReach300={() => {
-                      changeAttempts(300, 'both');
-                    }}
-                    gachaType={gachaType}
-                  />
-                </>
-              )}
-            </motion.div>
-          </AnimatePresence>
-          <AnimatePresence mode="wait" propagate>
-            {isGachaSim ? (
-              <div
-                key={`resAlter-${`${id} ${isGachaSim}` ? 'shown' : 'hidden'}`}
-                className="hidden"
-              />
-            ) : (
-              <AdditionalResUntilEnd
-                key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
-                additionalResource={additionalResource.toString()}
-                onInputBlur={() => {}}
-              />
-            )}
-          </AnimatePresence>
-        </div>
+        <BannerHeader
+          id={id}
+          currentName={name}
+          gachaType={gachaType}
+          index={index}
+          onBannerDelete={() => {
+            deleteData({ target: 'banner' });
+          }}
+          onNameBlur={(e) => {
+            updateBannerName({ name: e.currentTarget.value });
+          }}
+        />
+        <PreInfoField
+          isPresent={isPresent}
+          isSimpleMode={isSimpleMode}
+          isGachaSim={isGachaSim}
+          pickupData={pickupData}
+          updatePickupCount={updatePickupCount}
+          updateAttempts={updateAttempts}
+        />
       </div>
       <AnimatePresence mode="wait" propagate>
         {isSimpleMode ? (
@@ -522,116 +735,15 @@ export default function PickupBanner({
             key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
             className="space-y-6 text-sm sm:space-y-4"
           >
-            {operators.map(({ currentQty, name, operType }) => (
-              <div
-                key={name}
-                className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3"
-              >
-                <div className="flex grow gap-6">
-                  <DeleteButton handleDelete={() => {}} className="-mr-2" />
-                  <motion.div
-                    variants={insetInputVariants}
-                    initial="exit"
-                    animate="idle"
-                    exit="exit"
-                    className="flex grow items-center rounded-lg py-2 pr-2 pl-4"
-                  >
-                    <motion.input
-                      variants={toOpacityZero}
-                      initial="exit"
-                      animate="idle"
-                      exit="exit"
-                      type="text"
-                      onChange={() => {}}
-                      value={name}
-                      className="w-full text-[15px]"
-                    />
-                    <div className="flex h-full gap-x-1">
-                      {operType === 'limited' ? (
-                        <motion.div
-                          variants={toOpacityZero}
-                          initial="exit"
-                          animate="idle"
-                          exit="exit"
-                          className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
-                        >
-                          한정
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          variants={toOpacityZero}
-                          initial="exit"
-                          animate="idle"
-                          exit="exit"
-                          className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600"
-                        >
-                          통상
-                        </motion.div>
-                      )}
-                      <motion.div
-                        variants={toOpacityZero}
-                        initial="exit"
-                        animate="idle"
-                        exit="exit"
-                        className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
-                      >
-                        <svg className="size-[18px] text-amber-400">
-                          <use href="/icons/icons.svg#tag"></use>
-                        </svg>
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                </div>
-                <div className="flex gap-x-6 gap-y-3">
-                  <div className="flex items-center gap-2">
-                    <motion.span
-                      variants={toOpacityZero}
-                      initial="exit"
-                      animate="idle"
-                      exit="exit"
-                      className="whitespace-nowrap"
-                    >
-                      가챠 목표
-                    </motion.span>
-                    <TypeSelectionButton
-                      name="명함"
-                      hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-                      onTypeClick={() => {}}
-                      className="px-4"
-                    />
-                    <TypeSelectionButton
-                      name="풀잠"
-                      hoverBackground="linear-gradient(155deg, #ec003f, #ff637e)"
-                      onTypeClick={() => {}}
-                      className="px-4"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-                      현재 잠재
-                    </motion.span>
-                    <motion.div
-                      variants={insetInputVariants}
-                      initial="exit"
-                      animate="idle"
-                      exit="exit"
-                      className="flex items-center rounded-lg px-4 py-2"
-                    >
-                      <motion.input
-                        variants={toOpacityZero}
-                        initial="exit"
-                        animate="idle"
-                        exit="exit"
-                        type="number"
-                        max={6}
-                        onChange={() => {}}
-                        className="w-6 min-w-0 text-right"
-                        value={currentQty}
-                      />
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
+            {operators.map((operator) => (
+              <PickupOperatorDetail
+                key={operator.operatorId}
+                operator={operator}
+                onChangeOperatorDetails={updateOperatorDetails}
+                onOperatorDelete={() => {
+                  deleteData({ target: 'operator', operatorId: operator.operatorId });
+                }}
+              />
             ))}
             <div className="flex w-full justify-center py-2">
               <AddButton onAddClick={() => {}} custom={{ size: 'small' }} />
