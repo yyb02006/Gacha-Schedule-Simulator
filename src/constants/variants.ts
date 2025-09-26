@@ -114,7 +114,7 @@ export const cancelButtonVariants: Variants = {
 export const insetInputVariants: Variants = {
   idle: {
     boxShadow: 'inset 6px 6px 13px #101010, inset -6px -6px 13px #303030',
-    transition: secondLevelTransition.fadeOut,
+    transition: secondLevelTransition.fadeIn,
   },
   exit: {
     boxShadow: 'inset 0px 0px 0px #202020, inset 0px 0px 0px #202020',
