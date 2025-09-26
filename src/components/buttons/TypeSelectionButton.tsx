@@ -21,7 +21,9 @@ export default function TypeSelectionButton({
   className?: string;
 }) {
   const [isHover, setIsHover] = useState(false);
+  const [isMouseDown, setIsMouseDown] = useState(false);
   const isMount = useIsMount();
+  const isButtonDown = isActive ? true : isMouseDown ? true : false;
   const custom: GachaTypeButtonCustom = {
     hoverBackground,
     state: isMount ? 'normal' : 'initial',
@@ -31,12 +33,15 @@ export default function TypeSelectionButton({
     <motion.button
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
+      onMouseDown={() => setIsMouseDown(true)}
+      onMouseUp={() => setIsMouseDown(false)}
+      onMouseLeave={() => setIsMouseDown(false)}
       variants={gachaTypeButtonVariants}
       onClick={() => {
         onTypeClick();
       }}
       viewport={{ once: true, amount: 0.5 }}
-      animate={isActive ? 'active' : isHover ? 'hover' : 'idle'}
+      animate={isButtonDown ? 'active' : isHover ? 'hover' : 'idle'}
       custom={custom}
       initial="exit"
       exit="exit"
