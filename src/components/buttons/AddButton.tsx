@@ -13,6 +13,10 @@ const addShadowVariants: Variants = {
     opacity: 1,
     transition: { duration: 0.3, delay: custom.isMount ? 0 : 0.3 },
   }),
+  exit: {
+    filter: 'drop-shadow(0px 0px 0px #202020) drop-shadow(0px 0px 0px #202020)',
+    opacity: 0,
+  },
   hover: {
     filter: 'drop-shadow(4px -4px 4px #101010) drop-shadow(-3px 4px 4px #404040)',
     opacity: 1,
@@ -22,6 +26,9 @@ const addShadowVariants: Variants = {
 
 const addVariants: Variants = {
   idle: { background: 'linear-gradient(145deg, #dba100, #ffd84d)' },
+  exit: {
+    background: 'linear-gradient(145deg, #202020, #202020)',
+  },
   hover: { background: 'linear-gradient(-35deg, #dba100, #ffd84d)' },
 };
 
@@ -74,10 +81,8 @@ export default function AddButton({
             <motion.div
               variants={addShadowVariants}
               animate={currentHover ? 'hover' : 'idle'}
-              initial={{
-                filter: 'drop-shadow(0px 0px 0px #202020) drop-shadow(0px 0px 0px #202020)',
-                opacity: 0,
-              }}
+              initial="exit"
+              exit="exit"
               custom={{ isMount }}
               className="absolute -rotate-z-45"
             >
@@ -92,11 +97,10 @@ export default function AddButton({
           </div>
           <motion.div
             variants={addVariants}
-            animate={currentHover ? 'hover' : 'idle'}
             transition={{ duration: 0.3, delay: isMount ? 0 : 0.6 }}
-            initial={{
-              background: 'linear-gradient(145deg, #202020, #202020)',
-            }}
+            initial="exit"
+            animate={currentHover ? 'hover' : 'idle'}
+            exit="exit"
             className={cls(
               mergedCustom?.size === 'default' ? 'size-8' : 'size-5',
               'absolute -rotate-z-45',
