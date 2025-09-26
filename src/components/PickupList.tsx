@@ -70,7 +70,12 @@ const dummies: Dummy[] = [
   },
 ];
 
-export type ActionType = 'addSimpleBanner' | 'addDetailedBanner' | 'modify' | 'delete';
+export type ActionType =
+  | 'addSimpleBanner'
+  | 'addDetailedBanner'
+  | 'modify'
+  | 'delete'
+  | 'changePickupOpersCount';
 
 export type PickupDatasAction =
   | {
@@ -78,12 +83,24 @@ export type PickupDatasAction =
       payload: { gachaType: GachaType; pickupOpersCount: number; targetPickupCount: number };
     }
   | { type: 'modify'; payload: Partial<Omit<Dummy, 'id'>> & Pick<Dummy, 'id'> }
-  | { type: 'delete'; payload: { id: string } };
+  | { type: 'delete'; payload: { id: string } }
+  | {
+      type: 'changePickupCount';
+      payload: {
+        id: string;
+        count: number;
+        target: 'pickupOpersCount' | 'targetPickupCount';
+      };
+    };
 
 export type ExtractPayloadFromAction<K extends ActionType> =
   Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
 
 const reducer = (state: Dummy[], action: PickupDatasAction) => {
+  const modifyBanner = (id: string, transform: (pickupData: Dummy) => Partial<Dummy>) =>
+    state.map((pickupData) =>
+      pickupData.id === id ? { ...pickupData, ...transform(pickupData) } : pickupData,
+    );
   switch (action.type) {
     case 'addSimpleBanner': {
       const { gachaType, pickupOpersCount, targetPickupCount } = action.payload;
@@ -120,6 +137,59 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
     case 'delete': {
       const newBanner = state.filter(({ id }) => id !== action.payload.id);
       return newBanner;
+    }
+    case 'changePickupCount': {
+      const {
+        payload: { id, count, target },
+      } = action;
+      if (isNaN(count)) return state;
+      return modifyBanner(id, (pickupData) => {
+        const { pickupDetails } = pickupData;
+        const { pickupOpersCount, targetPickupCount } = pickupDetails;
+        if (target === 'pickupOpersCount') {
+          return {
+            pickupDetails: {
+              ...pickupDetails,
+              pickupOpersCount: count,
+              targetPickupCount: count < targetPickupCount ? count : targetPickupCount,
+            },
+            /*               operators:
+                pickupCount < targetPickupCount
+                  ? operators.filter((_, index) => index < pickupCount)
+                  : operators, */
+          };
+        } else if (target === 'targetPickupCount') {
+          return {
+            pickupDetails: {
+              ...pickupDetails,
+              pickupOpersCount: count > pickupOpersCount ? count : pickupOpersCount,
+              targetPickupCount: count,
+            },
+            /* operators:
+              pickupCount > targetPickupCount
+                ? [
+                    ...operators,
+                    ...Array.from(
+                      { length: pickupCount - targetPickupCount },
+                      (_, index) =>
+                        ({
+                          name: `오퍼레이터 ${targetPickupCount + index + 1}`,
+                          currentQty: 0,
+                          operType:
+                            (gachaType === 'collab' || gachaType === 'limited') &&
+                            targetPickupCount + index === 0
+                              ? 'limited'
+                              : 'normal',
+                          targetCount: 1,
+                        }) satisfies ElementOfArray<Dummy['operators']>,
+                    ),
+                  ]
+                : operators.filter((_, index) => index < pickupCount), */
+          };
+        } else {
+          return pickupData;
+        }
+      });
     }
     default:
       throw new Error();

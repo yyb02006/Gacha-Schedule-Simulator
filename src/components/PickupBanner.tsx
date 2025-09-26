@@ -210,7 +210,14 @@ export const InsetNumberInput = ({
   );
 };
 
-const AdditionalResUntilEnd = ({ onInputChange }: { onInputChange: () => void }) => {
+const AdditionalResUntilEnd = ({
+  onInputBlur,
+  additionalResource,
+}: {
+  onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
+  additionalResource: string;
+}) => {
+  const [localValue, setLocalValue] = useSyncedState(additionalResource);
   return (
     <div className="flex items-center gap-x-3 text-sm">
       <motion.span
@@ -238,9 +245,15 @@ const AdditionalResUntilEnd = ({ onInputChange }: { onInputChange: () => void })
         >
           <input
             type="number"
-            onChange={onInputChange}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const { value } = e.currentTarget;
+              const numberString = normalizeNumberString(value);
+              if (numberString === undefined) return;
+              setLocalValue(e.currentTarget.value);
+            }}
+            onBlur={onInputBlur}
             className="relative w-14 min-w-0 text-right"
-            value={400000}
+            value={localValue}
           />
         </motion.div>
         <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
@@ -275,73 +288,21 @@ export default function PickupBanner({
     operators,
     id,
     pickupDetails: { targetPickupCount, pickupOpersCount },
+    additionalResource,
   } = pickupData;
 
   const translatedGachaType =
     gachaType === 'collab' ? '콜라보 배너' : gachaType === 'limited' ? '한정 배너' : '통상 배너';
 
-  const changePickupCount = (
-    pickupCount: number,
-    targetCount: 'pickupOpersCount' | 'targetPickupCount',
-  ) => {
-    if (isNaN(pickupCount)) return;
-    switch (targetCount) {
-      case 'pickupOpersCount':
-        {
-          dispatch({
-            type: 'modify',
-            payload: {
-              id,
-              pickupDetails: {
-                ...pickupData.pickupDetails,
-                pickupOpersCount: pickupCount,
-                targetPickupCount:
-                  pickupCount < targetPickupCount ? pickupCount : targetPickupCount,
-              },
-              /*               operators:
-                pickupCount < targetPickupCount
-                  ? operators.filter((_, index) => index < pickupCount)
-                  : operators, */
-            },
-          });
-        }
-        break;
-      case 'targetPickupCount': {
-        dispatch({
-          type: 'modify',
-          payload: {
-            id,
-            pickupDetails: {
-              ...pickupData.pickupDetails,
-              pickupOpersCount: pickupCount > pickupOpersCount ? pickupCount : pickupOpersCount,
-              targetPickupCount: pickupCount,
-            },
-            /* operators:
-              pickupCount > targetPickupCount
-                ? [
-                    ...operators,
-                    ...Array.from(
-                      { length: pickupCount - targetPickupCount },
-                      (_, index) =>
-                        ({
-                          name: `오퍼레이터 ${targetPickupCount + index + 1}`,
-                          currentQty: 0,
-                          operType:
-                            (gachaType === 'collab' || gachaType === 'limited') &&
-                            targetPickupCount + index === 0
-                              ? 'limited'
-                              : 'normal',
-                          targetCount: 1,
-                        }) satisfies ElementOfArray<Dummy['operators']>,
-                    ),
-                  ]
-                : operators.filter((_, index) => index < pickupCount), */
-          },
-        });
-      }
-      default:
-        break;
-    }
+  const changePickupCount = (count: number, target: 'pickupOpersCount' | 'targetPickupCount') => {
+    dispatch({
+      type: 'changePickupCount',
+      payload: {
+        id,
+        count: count,
+        target: target,
+      },
+    });
   };
 
   const changeAttempts = (attempts: number, targetCount: 'max' | 'min' | 'both') => {
@@ -543,7 +504,8 @@ export default function PickupBanner({
             ) : (
               <AdditionalResUntilEnd
                 key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
-                onInputChange={() => {}}
+                additionalResource={additionalResource.toString()}
+                onInputBlur={() => {}}
               />
             )}
           </AnimatePresence>
