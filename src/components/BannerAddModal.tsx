@@ -2,7 +2,7 @@ import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/Modal';
 import { InsetNumberInput } from '#/components/PickupBanner';
-import { AddType, PickupDataPayload } from '#/components/PickupList';
+import { ExtractPayloadFromAction } from '#/components/PickupList';
 import { gachaTypeButtons } from '#/constants/ui';
 import { toOpacityZero } from '#/constants/variants';
 import { GachaType } from '#/types/types';
@@ -40,25 +40,27 @@ const SimpleModeModal = ({
         <InsetNumberInput
           name="픽업 인원"
           className="text-sky-500"
-          onInputChange={(e: ChangeEvent<HTMLInputElement>) => {
+          onInputBlur={(e: ChangeEvent<HTMLInputElement>) => {
             onPickupCountChange(e, 'pickupOpersCount');
           }}
-          value={modalState.pickupOpersCount.toString()}
+          currentValue={modalState.pickupOpersCount.toString()}
         />
         <InsetNumberInput
           name="목표 픽업"
           className="text-amber-400"
-          onInputChange={(e: ChangeEvent<HTMLInputElement>) => {
+          onInputBlur={(e: ChangeEvent<HTMLInputElement>) => {
             onPickupCountChange(e, 'targetPickupCount');
           }}
-          value={modalState.targetPickupCount.toString()}
+          currentValue={modalState.targetPickupCount.toString()}
         />
       </div>
     </>
   );
 };
 
-type ModalState = PickupDataPayload<AddType>['payload'];
+type AddActionType = 'addSimpleBanner' | 'addDetailedBanner';
+
+type ModalState = ExtractPayloadFromAction<AddActionType>;
 
 type ModalAction =
   | { type: 'changeType'; payload: GachaType }
@@ -111,7 +113,7 @@ export default function BannerAddModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (payload: PickupDataPayload<AddType>['payload']) => void;
+  onSave: (payload: ExtractPayloadFromAction<AddActionType>) => void;
   isSimpleMode: boolean;
 }) {
   const [modalState, dispatch] = useReducer(reducer, initialState);
