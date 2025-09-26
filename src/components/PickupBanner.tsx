@@ -682,6 +682,10 @@ export default function PickupBanner({
     dispatch({ type: 'updateOperatorDetails', payload: { id, ...payload } });
   };
 
+  const addOperator = () => {
+    dispatch({ type: 'addOperator', payload: { id } });
+  };
+
   return (
     <motion.div
       layout="position"
@@ -747,9 +751,19 @@ export default function PickupBanner({
                 }}
               />
             ))}
-            <div className="flex w-full justify-center py-2">
-              <AddButton onAddClick={() => {}} custom={{ size: 'small' }} />
-            </div>
+            <motion.div
+              layout="position"
+              transition={{
+                layout: {
+                  duration: 0.05,
+                  type: 'spring',
+                  mass: 0.3,
+                },
+              }}
+              className="flex w-full justify-center py-2"
+            >
+              <AddButton onAddClick={addOperator} custom={{ size: 'small' }} />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
