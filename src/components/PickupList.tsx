@@ -116,6 +116,7 @@ const dummies: Dummy[] = [
 export type ActionType =
   | 'addSimpleBanner'
   | 'addDetailedBanner'
+  | 'addOperator'
   | 'delete'
   | 'updatePickupCount'
   | 'updateAttempts'
@@ -126,6 +127,12 @@ export type PickupDatasAction =
   | {
       type: 'addSimpleBanner';
       payload: { gachaType: GachaType; pickupOpersCount: number; targetPickupCount: number };
+    }
+  | {
+      type: 'addOperator';
+      payload: {
+        id: string;
+      };
     }
   | { type: 'delete'; payload: { id: string; operatorId?: string; target: 'banner' | 'operator' } }
   | {
@@ -167,9 +174,9 @@ export type PickupDatasAction =
 export type ExtractPayloadFromAction<K extends ActionType> =
   Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
 
-const reducer = (state: Dummy[], action: PickupDatasAction) => {
+const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
   const modifyBannerDetails = (id: string, transform: (pickupData: Dummy) => Partial<Dummy>) =>
-    state.map((pickupData) =>
+    pickupDatas.map((pickupData) =>
       pickupData.id === id ? { ...pickupData, ...transform(pickupData) } : pickupData,
     );
   const modifyOperatorDetails = ({
@@ -200,7 +207,7 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
         }),
       );
       return [
-        ...state,
+        ...pickupDatas,
         {
           id: crypto.randomUUID(),
           gachaType: gachaType,
@@ -213,12 +220,34 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
         } satisfies Dummy,
       ];
     }
+    case 'addOperator': {
+      const { id } = action.payload;
+      const currentBanner = pickupDatas.find((pickupData) => pickupData.id === id);
+      if (!currentBanner) return pickupDatas;
+      const operatorCount = currentBanner.operators.length;
+      const isFirstOperatorInLimitedBanner =
+        (currentBanner.gachaType === 'limited' || currentBanner.gachaType === 'collab') &&
+        operatorCount === 0;
+      const newOperator: Operator = {
+        name: `오퍼레이터 ${operatorCount + 1}`,
+        operatorId: crypto.randomUUID(),
+        currentQty: 0,
+        operatorType: isFirstOperatorInLimitedBanner ? 'limited' : 'normal',
+        rarity: 6,
+        targetCount: 1,
+      };
+      return pickupDatas.map((pickupData) =>
+        pickupData.id === id
+          ? { ...pickupData, operators: [...pickupData.operators, newOperator] }
+          : pickupData,
+      );
+    }
     case 'delete': {
       const { id: bannerId, target, operatorId: payloadOperatorId } = action.payload;
       if (target === 'banner') {
-        return state.filter(({ id }) => id !== action.payload.id);
+        return pickupDatas.filter(({ id }) => id !== action.payload.id);
       } else if (target === 'operator') {
-        return state.map((pickupData) =>
+        return pickupDatas.map((pickupData) =>
           pickupData.id === bannerId
             ? {
                 ...pickupData,
@@ -229,12 +258,12 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
             : pickupData,
         );
       } else {
-        return state;
+        return pickupDatas;
       }
     }
     case 'updatePickupCount': {
       const { id, count, target } = action.payload;
-      if (isNaN(count)) return state;
+      if (isNaN(count)) return pickupDatas;
       return modifyBannerDetails(id, (pickupData) => {
         const { pickupDetails } = pickupData;
         const { pickupOpersCount, targetPickupCount } = pickupDetails;
@@ -285,7 +314,7 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
     }
     case 'updateAttempts': {
       const { id, attempts, target } = action.payload;
-      if (isNaN(attempts)) return state;
+      if (isNaN(attempts)) return pickupDatas;
       return modifyBannerDetails(id, (pickupBanner) => {
         const { maxGachaAttempts, minGachaAttempts } = pickupBanner;
         if (target === 'max') {
@@ -313,7 +342,7 @@ const reducer = (state: Dummy[], action: PickupDatasAction) => {
     }
     case 'updateOperatorDetails': {
       const { id, operatorId } = action.payload;
-      return state.map((pickupData) =>
+      return pickupDatas.map((pickupData) =>
         pickupData.id === id
           ? {
               ...pickupData,
