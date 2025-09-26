@@ -15,3 +15,5 @@ export type GachaTypeButton = {
 };
 
 export type SizeClass = `size-[${number}px]` | `size-${number}` | `size-full`;
+
+export type ElementOfArray<Arr> = Arr extends (infer E)[] ? E : never;
