@@ -396,15 +396,24 @@ export default function PickupBanner({
 
   return (
     <motion.div
+      layout
       variants={gachaBannerOptionCardVariants}
       whileHover={{
         scale: 1.02,
         background: 'linear-gradient(135deg, #222222, #333333)',
-        transition: { type: 'spring' as const, stiffness: 170, damping: 27, mass: 1.35 },
+        transition: { type: 'spring', stiffness: 170, damping: 27, mass: 1.35 },
       }}
       initial="exit"
       animate="idle"
       exit="exit"
+      transition={{
+        layout: {
+          duration: 0.3,
+          ease: 'easeInOut',
+          type: 'spring',
+          mass: 0.6,
+        },
+      }}
       className="flex flex-col space-y-6 rounded-xl p-4"
     >
       <div className="flex flex-col gap-4">
@@ -535,22 +544,28 @@ export default function PickupBanner({
           </AnimatePresence>
           <AnimatePresence mode="wait" propagate>
             {isGachaSim ? (
-              <div className="hidden" />
+              <div
+                key={`resAlter-${`${id} ${isGachaSim}` ? 'shown' : 'hidden'}`}
+                className="hidden"
+              />
             ) : (
               <AdditionalResUntilEnd
-                key={`res-${isGachaSim ? 'hidden' : 'shown'}`}
+                key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
                 onInputChange={() => {}}
               />
             )}
           </AnimatePresence>
         </div>
       </div>
-      <AnimatePresence propagate>
+      <AnimatePresence mode="wait" propagate>
         {isSimpleMode ? (
-          <div className="hidden" />
+          <div
+            key={`opersAlter-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
+            className="hidden"
+          />
         ) : (
           <motion.div
-            key={`opers-${isSimpleMode ? 'hidden' : 'shown'}`}
+            key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
             className="space-y-6 text-sm sm:space-y-4"
           >
             {operators.map(({ currentQty, name, operType }) => (
