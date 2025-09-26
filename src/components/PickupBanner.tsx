@@ -483,7 +483,7 @@ const PickupOperatorDetail = ({
   onOperatorDelete: () => void;
   onChangeOperatorDetails: (payload: ChangeOperatorDetails) => void;
 }) => {
-  const { name, operatorId, operatorType, currentQty } = operator;
+  const { name, operatorId, operatorType, currentQty, targetCount } = operator;
   const [localName, setLocalName] = useSyncedState(name);
   const [localQty, setLocalQty] = useSyncedState(currentQty.toString());
   return (
@@ -566,6 +566,7 @@ const PickupOperatorDetail = ({
               onChangeOperatorDetails({ operatorId, targetCount: 1 });
             }}
             className="px-4"
+            isActive={targetCount === 1}
           />
           <TypeSelectionButton
             name="풀잠"
@@ -574,6 +575,7 @@ const PickupOperatorDetail = ({
               onChangeOperatorDetails({ operatorId, targetCount: 6 });
             }}
             className="px-4"
+            isActive={targetCount === 6}
           />
         </div>
         <div className="flex items-center gap-2">
