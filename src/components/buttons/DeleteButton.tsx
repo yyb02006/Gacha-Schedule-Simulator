@@ -8,11 +8,11 @@ import { cls } from '#/libs/utils';
 import { useIsMount } from '#/hooks/useIsMount';
 
 export default function DeleteButton({
-  handleDelete,
+  onDelete,
   size = 'size-[44px]',
   className = '',
 }: {
-  handleDelete: () => void;
+  onDelete: () => void;
   size?: SizeClass;
   className?: string;
 }) {
@@ -20,7 +20,7 @@ export default function DeleteButton({
   const isMount = useIsMount();
   return (
     <motion.button
-      onClick={handleDelete}
+      onClick={onDelete}
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
       variants={smallButtonVariants}
