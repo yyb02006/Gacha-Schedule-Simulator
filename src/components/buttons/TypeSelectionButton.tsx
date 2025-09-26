@@ -36,6 +36,8 @@ export default function TypeSelectionButton({
       onMouseDown={() => setIsMouseDown(true)}
       onMouseUp={() => setIsMouseDown(false)}
       onMouseLeave={() => setIsMouseDown(false)}
+      onTapStart={() => setIsMouseDown(true)}
+      onTapCancel={() => setIsMouseDown(false)}
       variants={gachaTypeButtonVariants}
       onClick={() => {
         onTypeClick();
