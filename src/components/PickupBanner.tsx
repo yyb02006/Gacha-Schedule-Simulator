@@ -12,7 +12,8 @@ import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
 import { cls, normalizeNumberString, stringToNumber } from '#/libs/utils';
-import { ActionDispatch, ChangeEvent, FocusEvent, ReactNode, useEffect, useState } from 'react';
+import { ActionDispatch, ChangeEvent, FocusEvent, ReactNode } from 'react';
+import { useSyncedState } from '#/hooks/useSyncedState';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -23,11 +24,8 @@ const MaxAttempts = ({
   onUnlimitedClick: () => void;
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
 }) => {
-  const [localValue, setLocalValue] = useState(maxGachaAttempts);
+  const [localValue, setLocalValue] = useSyncedState(maxGachaAttempts);
   const isInfinity = maxGachaAttempts === 'Infinity' && localValue === 'Infinity';
-  useEffect(() => {
-    setLocalValue(maxGachaAttempts);
-  }, [maxGachaAttempts]);
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
       <motion.span
@@ -92,10 +90,7 @@ const MinAttempts = ({
   onReach300: () => void;
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
 }) => {
-  const [localValue, setLocalValue] = useState(minGachaAttempts);
-  useEffect(() => {
-    setLocalValue(minGachaAttempts);
-  }, [minGachaAttempts]);
+  const [localValue, setLocalValue] = useSyncedState(minGachaAttempts);
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
       <motion.span
@@ -160,12 +155,9 @@ export const InsetNumberInput = ({
   className?: string;
   name: ReactNode;
 }) => {
-  const [localValue, setLocalValue] = useState(currentValue);
+  const [localValue, setLocalValue] = useSyncedState(currentValue);
   const isParentPresent = usePresenceData();
   const preventTransition = { duration: 0, delay: 0 };
-  useEffect(() => {
-    setLocalValue(currentValue);
-  }, [currentValue]);
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
       <motion.div
