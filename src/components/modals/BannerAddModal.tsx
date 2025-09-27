@@ -1,6 +1,6 @@
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
-import Modal from '#/components/Modal';
+import Modal from '#/components/modals/Modal';
 import { InsetNumberInput } from '#/components/PickupBanner';
 import { ExtractPayloadFromAction } from '#/components/PickupList';
 import { gachaTypeButtons } from '#/constants/ui';

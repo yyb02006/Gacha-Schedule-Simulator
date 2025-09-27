@@ -1,6 +1,6 @@
 'use client';
 
-import Modal from '#/components/Modal';
+import Modal from '#/components/modals/Modal';
 import { GachaType } from '#/components/PickupList';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { insetInputVariants, toOpacityZero } from '#/constants/variants';
