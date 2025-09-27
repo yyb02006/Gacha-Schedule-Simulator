@@ -9,7 +9,7 @@ import { GachaType } from '#/types/types';
 import { motion } from 'motion/react';
 import { ChangeEvent, useReducer } from 'react';
 
-const SimpleModeModal = ({
+const SimpleModeModalContents = ({
   modalState,
   onPickupCountChange,
   onTypeClick,
@@ -155,7 +155,7 @@ export default function BannerAddModal({
         </div>
         <div className="flex flex-col gap-y-6">
           {isSimpleMode ? (
-            <SimpleModeModal
+            <SimpleModeModalContents
               modalState={modalState}
               onTypeClick={changeType}
               onPickupCountChange={changePickupCount}
