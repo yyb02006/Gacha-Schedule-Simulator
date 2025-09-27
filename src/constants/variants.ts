@@ -123,8 +123,20 @@ export const insetInputVariants: Variants = {
 };
 
 export const toOpacityZero: Variants = {
-  idle: { opacity: 1, transition: { duration: 0.2, delay: 0.2 } },
-  exit: { opacity: 0, transition: { duration: 0.1, delay: 0.2 } },
+  idle: (
+    { idle }: { idle?: { transition?: Transition; additional?: Variant } } = { idle: {} },
+  ) => ({
+    opacity: 1,
+    transition: idle?.transition || { duration: 0.2, delay: 0.2 },
+    ...idle?.additional,
+  }),
+  exit: (
+    { exit }: { exit?: { transition?: Transition; additional?: Variant } } = { exit: {} },
+  ) => ({
+    opacity: 0,
+    transition: exit?.transition === undefined ? undefined : { duration: 0.2, delay: 0.2 },
+    ...exit?.additional,
+  }),
 };
 
 export const cardTransition = { type: 'spring' as const, stiffness: 170, damping: 27, mass: 1.35 };
