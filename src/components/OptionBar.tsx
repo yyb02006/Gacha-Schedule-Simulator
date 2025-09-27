@@ -1,7 +1,7 @@
 'use client';
 
 import AdjustmentButton from '#/components/buttons/AdjustmentButton';
-import SimulatorOptionModal from '#/components/SimulatorOptionModal';
+import SimulatorOptionModal from '#/components/modals/SimulatorOptionModal';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { cardVariants, insetInputVariants, toOpacityZero } from '#/constants/variants';
 import { AnimatePresence, motion } from 'motion/react';

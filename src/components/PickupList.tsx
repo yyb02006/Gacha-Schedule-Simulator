@@ -10,7 +10,7 @@ import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variant
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
-import BannerAddModal from '#/components/BannerAddModal';
+import BannerAddModal from '#/components/modals/BannerAddModal';
 import { useModal } from '#/hooks/useModal';
 
 export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
