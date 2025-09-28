@@ -17,3 +17,25 @@ export const gachaTypeButtons: GachaTypeButton[] = [
     hoverBackground: 'linear-gradient(155deg, #ec003f, #ff637e)',
   },
 ];
+
+export const operatorBadgeProps = {
+  operatorType: {
+    limited: { id: 'limited', props: { name: '한정', color: 'border-amber-400 text-amber-400' } },
+    normal: { id: 'normal', props: { name: '통상', color: 'border-sky-600 text-sky-600' } },
+  },
+  rarity: {
+    sixth: { id: 6, props: { name: '6성', color: 'border-orange-400 text-orange-400' } },
+    fifth: { id: 5, props: { name: '5성', color: 'border-yellow-400 text-yellow-400' } },
+  },
+};
+
+export const BannerBadgeProps = {
+  gachaType: {
+    limited: { id: 'limited', props: { name: '한정', color: 'border-amber-400 text-amber-400' } },
+    normal: { id: 'normal', props: { name: '통상', color: 'border-sky-600 text-sky-600' } },
+  },
+  rarity: {
+    sixth: { id: 6, props: { name: '6성', color: 'border-orange-400 text-orange-400' } },
+    fifth: { id: 5, props: { name: '5성', color: 'border-yellow-400 text-yellow-400' } },
+  },
+};
