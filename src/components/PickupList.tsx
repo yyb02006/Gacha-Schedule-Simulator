@@ -17,13 +17,15 @@ export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
 
 export type OperatorType = 'limited' | 'normal';
 
+export type OperatorRarity = 6 | 5 | 4;
+
 export type Operator = {
   operatorId: string;
   name: string;
   currentQty: number;
   operatorType: OperatorType;
   targetCount: number | null;
-  rarity: number;
+  rarity: OperatorRarity;
 };
 
 export interface Dummy {
@@ -33,7 +35,13 @@ export interface Dummy {
   minGachaAttempts: number;
   gachaType: GachaType;
   operators: Operator[];
-  pickupDetails: { pickupOpersCount: number; targetPickupCount: number; pickupChance: number };
+  pickupDetails: {
+    pickupOpersCount: number;
+    targetPickupCount: number;
+    fifthOpersCount: number;
+    fourthOpersCount: number;
+    pickupChance: number;
+  };
   additionalResource: number;
 }
 
@@ -60,7 +68,13 @@ const dummies: Dummy[] = [
         rarity: 6,
       },
     ],
-    pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
+    pickupDetails: {
+      pickupOpersCount: 2,
+      targetPickupCount: 2,
+      fifthOpersCount: 1,
+      fourthOpersCount: 1,
+      pickupChance: 70,
+    },
     maxGachaAttempts: 200,
     minGachaAttempts: 0,
     additionalResource: 0,
@@ -87,7 +101,13 @@ const dummies: Dummy[] = [
         rarity: 6,
       },
     ],
-    pickupDetails: { pickupOpersCount: 2, targetPickupCount: 2, pickupChance: 70 },
+    pickupDetails: {
+      pickupOpersCount: 2,
+      targetPickupCount: 2,
+      fifthOpersCount: 1,
+      fourthOpersCount: 1,
+      pickupChance: 70,
+    },
     maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
     additionalResource: 0,
@@ -106,7 +126,13 @@ const dummies: Dummy[] = [
         rarity: 6,
       },
     ],
-    pickupDetails: { pickupOpersCount: 1, targetPickupCount: 1, pickupChance: 50 },
+    pickupDetails: {
+      pickupOpersCount: 1,
+      targetPickupCount: 1,
+      fifthOpersCount: 1,
+      fourthOpersCount: 1,
+      pickupChance: 50,
+    },
     maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
     additionalResource: 0,
@@ -126,7 +152,13 @@ export type ActionType =
 export type PickupDatasAction =
   | {
       type: 'addSimpleBanner';
-      payload: { gachaType: GachaType; pickupOpersCount: number; targetPickupCount: number };
+      payload: {
+        gachaType: GachaType;
+        pickupOpersCount: number;
+        fifthOpersCount: number;
+        fourthOpersCount: number;
+        targetPickupCount: number;
+      };
     }
   | {
       type: 'addOperator';
@@ -193,7 +225,8 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
     );
   switch (action.type) {
     case 'addSimpleBanner': {
-      const { gachaType, pickupOpersCount, targetPickupCount } = action.payload;
+      const { gachaType, pickupOpersCount, fifthOpersCount, fourthOpersCount, targetPickupCount } =
+        action.payload;
       const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
       const operators: Dummy['operators'] = Array.from(
         { length: pickupOpersCount },
@@ -211,7 +244,13 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
         {
           id: crypto.randomUUID(),
           gachaType: gachaType,
-          pickupDetails: { pickupChance, pickupOpersCount, targetPickupCount },
+          pickupDetails: {
+            pickupChance,
+            pickupOpersCount,
+            fifthOpersCount,
+            fourthOpersCount,
+            targetPickupCount,
+          },
           maxGachaAttempts: Infinity,
           minGachaAttempts: 0,
           name: `새 가챠 배너`,
