@@ -1,6 +1,13 @@
 'use client';
 
-import { AnimatePresence, motion, number, useIsPresent, usePresenceData } from 'motion/react';
+import {
+  AnimatePresence,
+  motion,
+  Transition,
+  useIsPresent,
+  usePresenceData,
+  Variant,
+} from 'motion/react';
 import {
   gachaBannerOptionCardVariants,
   insetInputVariants,
@@ -12,14 +19,19 @@ import {
   ExtractPayloadFromAction,
   GachaType,
   Operator,
+  OperatorRarity,
+  OperatorType,
   PickupDatasAction,
 } from '#/components/PickupList';
 import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
 import { clamp, cls, normalizeNumberString, stringToNumber } from '#/libs/utils';
-import { ActionDispatch, ChangeEvent, FocusEvent, ReactNode } from 'react';
+import React, { ActionDispatch, ChangeEvent, FocusEvent, ReactNode, useState } from 'react';
 import { useSyncedState } from '#/hooks/useSyncedState';
+import Badge from '#/components/badge';
+import { operatorBadgeProps } from '#/constants/ui';
+import OperatorBadgeEditModal from '#/components/modals/OperatorBadgeEditModal';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -30,62 +42,22 @@ const MaxAttempts = ({
   onUnlimitedClick: () => void;
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
 }) => {
-  const [localValue, setLocalValue] = useSyncedState(maxGachaAttempts);
-  const isInfinity = maxGachaAttempts === 'Infinity' && localValue === 'Infinity';
   return (
-    <div className="flex items-center gap-2 whitespace-nowrap">
-      <motion.span
-        variants={toOpacityZero}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="text-amber-400"
-      >
-        최대 시도
-      </motion.span>
-      <motion.div
-        variants={insetInputVariants}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="relative flex items-center rounded-lg"
-      >
-        <motion.div
-          variants={toOpacityZero}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="relative flex items-center px-4 py-2"
-        >
-          {isInfinity && <div className="absolute right-0 mr-4 text-3xl">∞</div>}
-          <input
-            type="number"
-            inputMode="numeric"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const numberString = normalizeNumberString(e.currentTarget.value);
-              if (numberString === undefined) return;
-              const normalizedString = Math.floor(
-                clamp(parseFloat(numberString), 0, 999),
-              ).toString();
-              setLocalValue(normalizedString);
-            }}
-            onBlur={(e: FocusEvent<HTMLInputElement>) => {
-              if (isInfinity) return;
-              onInputBlur(e);
-            }}
-            className="relative w-8 min-w-0 text-right"
-            max={999}
-            value={localValue === 'Infinity' ? '' : localValue}
-          />
-        </motion.div>
-        <TypeSelectionButton
-          name="무제한"
-          className="px-3 text-sm"
-          onTypeClick={onUnlimitedClick}
-          hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-        />
-      </motion.div>
-    </div>
+    <InsetNumberInput
+      currentValue={maxGachaAttempts.toString()}
+      name="최대 시도"
+      onInputBlur={onInputBlur}
+      className="text-amber-400"
+      max={999}
+      showInfinity
+    >
+      <TypeSelectionButton
+        name="무제한"
+        className="px-3 text-sm"
+        onTypeClick={onUnlimitedClick}
+        hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+      />
+    </InsetNumberInput>
   );
 };
 
@@ -100,82 +72,52 @@ const MinAttempts = ({
   onReach300: () => void;
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
 }) => {
-  const [localValue, setLocalValue] = useSyncedState(minGachaAttempts);
   return (
-    <div className="flex items-center gap-2 whitespace-nowrap">
-      <motion.span
-        variants={toOpacityZero}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="text-sky-600"
-      >
-        최소 <span>시도</span>
-      </motion.span>
-      <motion.div
-        variants={insetInputVariants}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="relative flex items-center rounded-lg"
-      >
-        <motion.div
-          variants={toOpacityZero}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="relative flex items-center px-4 py-2"
-        >
-          <input
-            type="number"
-            inputMode="numeric"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const numberString = normalizeNumberString(e.currentTarget.value);
-              if (numberString === undefined) return;
-              const normalizedString = Math.floor(
-                clamp(parseFloat(numberString), 0, 999),
-              ).toString();
-              setLocalValue(normalizedString);
-            }}
-            onBlur={(e: FocusEvent<HTMLInputElement>) => {
-              onInputBlur(e);
-            }}
-            className="relative w-8 min-w-0 text-right"
-            max={999}
-            value={localValue}
-          />
-        </motion.div>
-        {gachaType === 'limited' && (
-          <TypeSelectionButton
-            name="300정가"
-            className="px-3 text-sm"
-            onTypeClick={onReach300}
-            hoverBackground="linear-gradient(155deg, #1447e6, #51a2ff)"
-          />
-        )}
-      </motion.div>
-    </div>
+    <InsetNumberInput
+      currentValue={minGachaAttempts.toString()}
+      name="최소 시도"
+      onInputBlur={onInputBlur}
+      className="text-sky-500"
+      max={999}
+    >
+      {gachaType === 'limited' && (
+        <TypeSelectionButton
+          name="300정가"
+          className="px-3 text-sm"
+          onTypeClick={onReach300}
+          hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+        />
+      )}
+    </InsetNumberInput>
   );
 };
 
 export const InsetNumberInput = ({
+  children,
   onInputBlur,
   currentValue,
   name,
   className = '',
   max,
   maxLength,
+  immediateExit = false,
+  showInfinity = false,
 }: {
+  children?: ReactNode;
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
   currentValue: string;
   name: ReactNode;
   className?: string;
   max?: number;
   maxLength?: number;
+  immediateExit?: boolean;
+  showInfinity?: boolean;
 }) => {
   const [localValue, setLocalValue] = useSyncedState(currentValue);
+  const isInfinity = currentValue === 'Infinity' && localValue === 'Infinity';
   const isParentPresent = usePresenceData();
-  const preventTransition = { duration: 0, delay: 0 };
+  const preventedTransition = { duration: 0, delay: 0 };
+  const preventTransition = immediateExit && isParentPresent;
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
       <motion.div
@@ -183,7 +125,7 @@ export const InsetNumberInput = ({
         animate={{ opacity: 1, transition: { duration: 0.2, delay: 0.2 } }}
         exit={{
           opacity: 0,
-          transition: isParentPresent ? preventTransition : { duration: 0.1, delay: 0.2 },
+          transition: preventTransition ? preventedTransition : { duration: 0.1, delay: 0.2 },
         }}
         className={cls(className, 'flex h-full items-center')}
       >
@@ -197,7 +139,7 @@ export const InsetNumberInput = ({
         }}
         exit={{
           boxShadow: 'inset 0px 0px 0px #202020, inset 0px 0px 0px #202020',
-          transition: isParentPresent ? preventTransition : secondLevelTransition.fadeOut,
+          transition: preventTransition ? preventedTransition : secondLevelTransition.fadeOut,
         }}
         className="relative flex items-center rounded-lg"
       >
@@ -206,10 +148,11 @@ export const InsetNumberInput = ({
           animate={{ opacity: 1, transition: { duration: 0.2, delay: 0.2 } }}
           exit={{
             opacity: 0,
-            transition: isParentPresent ? preventTransition : { duration: 0.1, delay: 0.2 },
+            transition: preventTransition ? preventedTransition : { duration: 0.1, delay: 0.2 },
           }}
           className="relative flex items-center px-4 py-2"
         >
+          {showInfinity && isInfinity && <div className="absolute right-0 mr-4 text-3xl">∞</div>}
           <input
             type="number"
             inputMode="numeric"
@@ -229,6 +172,7 @@ export const InsetNumberInput = ({
             value={localValue}
           />
         </motion.div>
+        {children}
       </motion.div>
     </div>
   );
@@ -290,6 +234,40 @@ const AdditionalResUntilBannerEnd = ({
   );
 };
 
+const BannerBadges = ({ gachaType }: { gachaType: GachaType }) => {
+  const translatedGachaType =
+    gachaType === 'collab' ? '콜라보 배너' : gachaType === 'limited' ? '한정 배너' : '통상 배너';
+  return (
+    <div className="flex h-full gap-x-1">
+      <motion.div
+        variants={toOpacityZero}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
+      >
+        <div className="relative top-[1px]">{translatedGachaType}</div>
+      </motion.div>
+      {gachaType === 'revival' && (
+        <div className="inline-block rounded-full border border-violet-400 px-2 py-1 text-sm text-violet-400">
+          구오퍼
+        </div>
+      )}
+      <motion.div
+        variants={toOpacityZero}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
+      >
+        <svg className="size-[22px] text-amber-400">
+          <use href="/icons/icons.svg#tag" />
+        </svg>
+      </motion.div>
+    </div>
+  );
+};
+
 const BannerHeader = ({
   id,
   index,
@@ -309,8 +287,6 @@ const BannerHeader = ({
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocalValue(e.currentTarget.value);
   };
-  const translatedGachaType =
-    gachaType === 'collab' ? '콜라보 배너' : gachaType === 'limited' ? '한정 배너' : '통상 배너';
   return (
     <div className="flex grow gap-4">
       <motion.div
@@ -350,33 +326,7 @@ const BannerHeader = ({
           value={localValue}
           className="w-full"
         />
-        <div className="flex h-full gap-x-1">
-          <motion.div
-            variants={toOpacityZero}
-            initial="exit"
-            animate="idle"
-            exit="exit"
-            className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
-          >
-            <div className="relative top-[1px]">{translatedGachaType}</div>
-          </motion.div>
-          {gachaType === 'revival' && (
-            <div className="inline-block rounded-full border border-violet-400 px-2 py-1 text-sm text-violet-400">
-              구오퍼
-            </div>
-          )}
-          <motion.div
-            variants={toOpacityZero}
-            initial="exit"
-            animate="idle"
-            exit="exit"
-            className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
-          >
-            <svg className="size-[22px] text-amber-400">
-              <use href="/icons/icons.svg#tag" />
-            </svg>
-          </motion.div>
-        </div>
+        <BannerBadges gachaType={gachaType} />
       </motion.div>
       <DeleteButton onDelete={onBannerDelete} className="size-[48px] shrink-0 grow" />
     </div>
@@ -407,35 +357,86 @@ const PreInfoField = ({
     additionalResource,
   } = pickupData;
   return (
-    <div className="felx-wrap flex justify-between gap-x-6 gap-y-3">
+    <div className="felx-wrap font-S-CoreDream-500 flex flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <AnimatePresence mode="wait" custom={isPresent} propagate>
-        <motion.div
-          key={String(isSimpleMode)}
-          className="font-S-CoreDream-500 flex flex-wrap gap-x-6 gap-y-3 text-sm"
-        >
-          {isSimpleMode ? (
-            <>
-              <InsetNumberInput
-                name="픽업 6성"
-                className="text-sky-500"
-                onInputBlur={(e) => {
-                  updatePickupCount(stringToNumber(e.currentTarget.value), 'pickupOpersCount');
-                }}
-                currentValue={pickupOpersCount.toString()}
-                max={10}
+        {isSimpleMode ? (
+          <div
+            key={String(isSimpleMode)}
+            className="flex flex-wrap justify-between gap-x-6 gap-y-3"
+          >
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
+              <div className="flex gap-x-4">
+                <InsetNumberInput
+                  name="픽업 6성"
+                  className="text-orange-400"
+                  onInputBlur={(e) => {
+                    updatePickupCount(stringToNumber(e.currentTarget.value), 'pickupOpersCount');
+                  }}
+                  currentValue={pickupOpersCount.toString()}
+                  max={10}
+                />
+                <InsetNumberInput
+                  name="목표 6성"
+                  className="text-orange-400"
+                  onInputBlur={(e) => {
+                    updatePickupCount(stringToNumber(e.currentTarget.value), 'targetPickupCount');
+                  }}
+                  currentValue={targetPickupCount.toString()}
+                  max={10}
+                />
+              </div>
+              <div className="flex gap-x-4">
+                <InsetNumberInput
+                  name="픽업 5성"
+                  className="text-amber-400"
+                  onInputBlur={(e) => {
+                    updatePickupCount(stringToNumber(e.currentTarget.value), 'pickupOpersCount');
+                  }}
+                  currentValue={pickupOpersCount.toString()}
+                  max={10}
+                />
+                <InsetNumberInput
+                  name="목표 5성"
+                  className="text-amber-400"
+                  onInputBlur={(e) => {
+                    updatePickupCount(stringToNumber(e.currentTarget.value), 'targetPickupCount');
+                  }}
+                  currentValue={targetPickupCount.toString()}
+                  max={10}
+                />
+              </div>
+              <div className="flex gap-x-4">
+                <InsetNumberInput
+                  name="픽업 4성"
+                  className="text-sky-500"
+                  onInputBlur={(e) => {
+                    updatePickupCount(stringToNumber(e.currentTarget.value), 'pickupOpersCount');
+                  }}
+                  currentValue={pickupOpersCount.toString()}
+                  max={10}
+                />
+                <InsetNumberInput
+                  name="목표 4성"
+                  className="text-sky-500"
+                  onInputBlur={(e) => {
+                    updatePickupCount(stringToNumber(e.currentTarget.value), 'targetPickupCount');
+                  }}
+                  currentValue={targetPickupCount.toString()}
+                  max={10}
+                />
+              </div>
+            </div>
+            <div className="mt-2">
+              <AdditionalResUntilBannerEnd
+                key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
+                additionalResource={additionalResource.toString()}
+                onInputBlur={() => {}}
               />
-              <InsetNumberInput
-                name="목표 6성"
-                className="text-amber-400"
-                onInputBlur={(e) => {
-                  updatePickupCount(stringToNumber(e.currentTarget.value), 'targetPickupCount');
-                }}
-                currentValue={targetPickupCount.toString()}
-                max={10}
-              />
-            </>
-          ) : (
-            <>
+            </div>
+          </div>
+        ) : (
+          <div className="flex w-full justify-between">
+            <div className="flex gap-x-6">
               <MaxAttempts
                 maxGachaAttempts={maxGachaAttempts.toString()}
                 onInputBlur={(e) => {
@@ -455,22 +456,115 @@ const PreInfoField = ({
                 }}
                 gachaType={gachaType}
               />
-            </>
-          )}
-        </motion.div>
-      </AnimatePresence>
-      <AnimatePresence mode="wait" propagate>
-        {isGachaSim ? (
-          <div key={`resAlter-${`${id} ${isGachaSim}` ? 'shown' : 'hidden'}`} className="hidden" />
-        ) : (
-          <AdditionalResUntilBannerEnd
-            key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
-            additionalResource={additionalResource.toString()}
-            onInputBlur={() => {}}
-          />
+            </div>
+            <div className="flex gap-x-6">
+              <InsetNumberInput
+                name="픽업 6성"
+                className="text-orange-400"
+                onInputBlur={(e) => {
+                  updatePickupCount(stringToNumber(e.currentTarget.value), 'pickupOpersCount');
+                }}
+                currentValue={'4'}
+                max={10}
+              />
+              <InsetNumberInput
+                name="픽업 5성"
+                className="text-amber-400"
+                onInputBlur={(e) => {
+                  updatePickupCount(stringToNumber(e.currentTarget.value), 'targetPickupCount');
+                }}
+                currentValue={'4'}
+                max={10}
+              />
+              <InsetNumberInput
+                name="픽업 4성"
+                className="text-purple-400"
+                onInputBlur={(e) => {
+                  updatePickupCount(stringToNumber(e.currentTarget.value), 'targetPickupCount');
+                }}
+                currentValue={'4'}
+                max={10}
+              />
+            </div>
+          </div>
         )}
       </AnimatePresence>
     </div>
+  );
+};
+
+const OperatorBadges = ({
+  operator,
+  onChangeOperatorDetails,
+}: {
+  operator: Operator;
+  onChangeOperatorDetails: (payload: ChangeOperatorDetails) => void;
+}) => {
+  const { operatorId, operatorType, rarity } = operator;
+  const [isHover, setIsHover] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const editBadge = (newType: OperatorType, newRarity: OperatorRarity) => {
+    onChangeOperatorDetails({ operatorId, operatorType: newType, rarity: newRarity });
+  };
+  return (
+    <>
+      <motion.button
+        onHoverStart={() => {
+          setIsHover(true);
+        }}
+        onHoverEnd={() => {
+          setIsHover(false);
+        }}
+        onClick={() => {
+          setIsModalOpen(true);
+        }}
+        className="flex h-full cursor-pointer gap-x-1"
+      >
+        {operatorType === 'limited' ? (
+          <Badge {...operatorBadgeProps.operatorType.limited.props} />
+        ) : (
+          <Badge {...operatorBadgeProps.operatorType.normal.props} />
+        )}
+        {rarity === 6 ? (
+          <Badge {...operatorBadgeProps.rarity.sixth.props} />
+        ) : (
+          <Badge {...operatorBadgeProps.rarity.fifth.props} />
+        )}
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          custom={{
+            idle: {
+              transition: {
+                opacity: { duration: 0.2, delay: 0.2 },
+                borderColor: { duration: 0.2 },
+              } satisfies Transition,
+              additional: { borderColor: isHover ? '#ff521d' : '#ffb900' } satisfies Variant,
+            },
+          }}
+          className="border-rose relative flex aspect-square h-full items-center justify-center rounded-full border"
+        >
+          <motion.svg
+            animate={isHover ? { rotateZ: 45, color: '#ff521d' } : { rotateZ: 0, color: '#ffb900' }}
+            transition={{ duration: 0.2 }}
+            className="size-[18px] text-amber-400"
+          >
+            <use href="/icons/icons.svg#tag" />
+          </motion.svg>
+        </motion.div>
+      </motion.button>
+      <OperatorBadgeEditModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+        }}
+        operatorType={operatorType}
+        rarity={rarity}
+        onBadgeEdit={editBadge}
+      />
+    </>
   );
 };
 
@@ -483,7 +577,7 @@ const PickupOperatorDetail = ({
   onOperatorDelete: () => void;
   onChangeOperatorDetails: (payload: ChangeOperatorDetails) => void;
 }) => {
-  const { name, operatorId, operatorType, currentQty, targetCount } = operator;
+  const { name, operatorId, currentQty, targetCount } = operator;
   const [localName, setLocalName] = useSyncedState(name);
   const [localQty, setLocalQty] = useSyncedState(currentQty.toString());
   return (
@@ -512,40 +606,7 @@ const PickupOperatorDetail = ({
             value={localName}
             className="w-full text-[15px]"
           />
-          <div className="flex h-full gap-x-1">
-            {operatorType === 'limited' ? (
-              <motion.div
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="inline-block rounded-full border border-amber-400 px-3 py-1 text-sm whitespace-nowrap text-amber-400"
-              >
-                한정
-              </motion.div>
-            ) : (
-              <motion.div
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="inline-block rounded-full border border-sky-600 px-3 py-1 text-sm whitespace-nowrap text-sky-600"
-              >
-                통상
-              </motion.div>
-            )}
-            <motion.div
-              variants={toOpacityZero}
-              initial="exit"
-              animate="idle"
-              exit="exit"
-              className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
-            >
-              <svg className="size-[18px] text-amber-400">
-                <use href="/icons/icons.svg#tag"></use>
-              </svg>
-            </motion.div>
-          </div>
+          <OperatorBadges onChangeOperatorDetails={onChangeOperatorDetails} operator={operator} />
         </motion.div>
       </div>
       <div className="flex gap-x-6 gap-y-3">
@@ -633,7 +694,7 @@ interface PickupBannerProps {
 
 type ChangeNameProps = Omit<ExtractPayloadFromAction<'updateBannerName'>, 'id'>;
 type DeleteDataProps = Omit<ExtractPayloadFromAction<'delete'>, 'id'>;
-type ChangeOperatorDetails = Omit<ExtractPayloadFromAction<'updateOperatorDetails'>, 'id'>;
+export type ChangeOperatorDetails = Omit<ExtractPayloadFromAction<'updateOperatorDetails'>, 'id'>;
 
 export default function PickupBanner({
   pickupData,
@@ -741,6 +802,16 @@ export default function PickupBanner({
             key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
             className="space-y-6 text-sm sm:space-y-4"
           >
+            <div className="font-S-CoreDream-500 flex justify-between text-xl">
+              <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+                <span className="text-amber-400">목표</span> 픽업 목록
+              </motion.span>
+              <AdditionalResUntilBannerEnd
+                key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
+                additionalResource={pickupData.additionalResource.toString()}
+                onInputBlur={() => {}}
+              />
+            </div>
             {operators.map((operator) => (
               <PickupOperatorDetail
                 key={operator.operatorId}
