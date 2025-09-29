@@ -19,6 +19,8 @@ export type OperatorType = 'limited' | 'normal';
 
 export type OperatorRarity = 6 | 5 | 4;
 
+export type OperatorRarityForString = 'sixth' | 'fifth' | 'fourth';
+
 export type Operator = {
   operatorId: string;
   name: string;
@@ -36,11 +38,13 @@ export interface Dummy {
   gachaType: GachaType;
   operators: Operator[];
   pickupDetails: {
-    pickupOpersCount: number;
-    targetPickupCount: number;
-    fifthOpersCount: number;
-    fourthOpersCount: number;
+    pickupOpersCount: { sixth: number; fifth: number; fourth: number };
+    targetOpersCount: { sixth: number; fifth: number; fourth: number };
     pickupChance: number;
+    simpleMode: {
+      pickupOpersCount: { sixth: number; fifth: number; fourth: number };
+      targetOpersCount: { sixth: number; fifth: number; fourth: number };
+    };
   };
   additionalResource: number;
 }
@@ -69,11 +73,13 @@ const dummies: Dummy[] = [
       },
     ],
     pickupDetails: {
-      pickupOpersCount: 2,
-      targetPickupCount: 2,
-      fifthOpersCount: 1,
-      fourthOpersCount: 1,
+      pickupOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
       pickupChance: 70,
+      simpleMode: {
+        pickupOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+      },
     },
     maxGachaAttempts: 200,
     minGachaAttempts: 0,
@@ -102,11 +108,13 @@ const dummies: Dummy[] = [
       },
     ],
     pickupDetails: {
-      pickupOpersCount: 2,
-      targetPickupCount: 2,
-      fifthOpersCount: 1,
-      fourthOpersCount: 1,
+      pickupOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
       pickupChance: 70,
+      simpleMode: {
+        pickupOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+      },
     },
     maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
@@ -127,11 +135,13 @@ const dummies: Dummy[] = [
       },
     ],
     pickupDetails: {
-      pickupOpersCount: 1,
-      targetPickupCount: 1,
-      fifthOpersCount: 1,
-      fourthOpersCount: 1,
+      pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
       pickupChance: 50,
+      simpleMode: {
+        pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      },
     },
     maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
@@ -147,17 +157,16 @@ export type ActionType =
   | 'updatePickupCount'
   | 'updateAttempts'
   | 'updateBannerName'
-  | 'updateOperatorDetails';
+  | 'updateOperatorDetails'
+  | 'updateSimplePickupCount';
 
 export type PickupDatasAction =
   | {
       type: 'addSimpleBanner';
       payload: {
         gachaType: GachaType;
-        pickupOpersCount: number;
-        fifthOpersCount: number;
-        fourthOpersCount: number;
-        targetPickupCount: number;
+        pickupOpersCount: { sixth: number; fifth: number; fourth: number };
+        targetOpersCount: { sixth: number; fifth: number; fourth: number };
       };
     }
   | {
@@ -172,7 +181,17 @@ export type PickupDatasAction =
       payload: {
         id: string;
         count: number;
-        target: 'pickupOpersCount' | 'targetPickupCount';
+        countType: 'pickupOpersCount' | 'targetOpersCount';
+        rarityType: 'sixth' | 'fifth' | 'fourth';
+      };
+    }
+  | {
+      type: 'updateSimplePickupCount';
+      payload: {
+        id: string;
+        count: number;
+        countType: 'pickupOpersCount' | 'targetOpersCount';
+        rarityType: 'sixth' | 'fifth' | 'fourth';
       };
     }
   | {
@@ -199,14 +218,23 @@ export type PickupDatasAction =
         currentQty?: number;
         name?: string;
         operatorType?: OperatorType;
-        rarity?: number;
+        rarity?: OperatorRarity;
       };
     };
 
 export type ExtractPayloadFromAction<K extends ActionType> =
   Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
 
-const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
+export const rarities = {
+  6: 'sixth',
+  5: 'fifth',
+  4: 'fourth',
+  sixth: 6,
+  fifth: 5,
+  fourth: 4,
+} as const;
+
+const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
   const modifyBannerDetails = (id: string, transform: (pickupData: Dummy) => Partial<Dummy>) =>
     pickupDatas.map((pickupData) =>
       pickupData.id === id ? { ...pickupData, ...transform(pickupData) } : pickupData,
@@ -223,22 +251,59 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
     operators.map((operator) =>
       operator.operatorId === operatorId ? { ...operator, ...transform(operator) } : operator,
     );
+  const getCurrentOperatorsCount = (operators: Operator[]) =>
+    operators.reduce(
+      (acc, current) => ({
+        ...acc,
+        [rarities[current.rarity]]: acc[rarities[current.rarity]] + 1,
+      }),
+      { sixth: 0, fifth: 0, fourth: 0 },
+    );
   switch (action.type) {
     case 'addSimpleBanner': {
-      const { gachaType, pickupOpersCount, fifthOpersCount, fourthOpersCount, targetPickupCount } =
-        action.payload;
+      const { gachaType, pickupOpersCount, targetOpersCount } = action.payload;
       const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
-      const operators: Dummy['operators'] = Array.from(
-        { length: pickupOpersCount },
-        (_, index) => ({
-          operatorId: crypto.randomUUID(),
-          currentQty: 0,
-          name: `오퍼레이터 ${index + 1}`,
-          operatorType: pickupChance === 70 && index === 0 ? 'limited' : 'normal',
-          targetCount: 1,
-          rarity: 6,
-        }),
-      );
+      const operators: Dummy['operators'] = [
+        ...Array.from(
+          { length: pickupOpersCount.sixth },
+          (_, index) =>
+            ({
+              operatorId: crypto.randomUUID(),
+              currentQty: 0,
+              name: `오퍼레이터 ${index + 1}`,
+              operatorType:
+                (gachaType === 'limited' || gachaType === 'collab') && index === 0
+                  ? 'limited'
+                  : 'normal',
+              targetCount: 1,
+              rarity: 6,
+            }) satisfies Operator,
+        ),
+        ...Array.from(
+          { length: pickupOpersCount.fifth },
+          (_, index) =>
+            ({
+              operatorId: crypto.randomUUID(),
+              currentQty: 0,
+              name: `오퍼레이터 ${index + 1}`,
+              operatorType: 'normal',
+              targetCount: 1,
+              rarity: 5,
+            }) satisfies Operator,
+        ),
+        ...Array.from(
+          { length: pickupOpersCount.fourth },
+          (_, index) =>
+            ({
+              operatorId: crypto.randomUUID(),
+              currentQty: 0,
+              name: `오퍼레이터 ${index + 1}`,
+              operatorType: 'normal',
+              targetCount: 1,
+              rarity: 4,
+            }) satisfies Operator,
+        ),
+      ];
       return [
         ...pickupDatas,
         {
@@ -247,9 +312,11 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
           pickupDetails: {
             pickupChance,
             pickupOpersCount,
-            fifthOpersCount,
-            fourthOpersCount,
-            targetPickupCount,
+            targetOpersCount,
+            simpleMode: {
+              pickupOpersCount,
+              targetOpersCount,
+            },
           },
           maxGachaAttempts: Infinity,
           minGachaAttempts: 0,
@@ -264,22 +331,38 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
       const currentBanner = pickupDatas.find((pickupData) => pickupData.id === id);
       if (!currentBanner) return pickupDatas;
       const operatorCount = currentBanner.operators.length;
+      const {
+        pickupDetails: { pickupOpersCount },
+      } = currentBanner;
+      const { sixth, fifth } = pickupOpersCount;
       const isFirstOperatorInLimitedBanner =
         (currentBanner.gachaType === 'limited' || currentBanner.gachaType === 'collab') &&
         operatorCount === 0;
+      const currentOperatorsCount = getCurrentOperatorsCount(currentBanner.operators);
+      const newRarity =
+        currentOperatorsCount.sixth >= sixth ? (currentOperatorsCount.fifth >= fifth ? 4 : 5) : 6;
       const newOperator: Operator = {
         name: `오퍼레이터 ${operatorCount + 1}`,
         operatorId: crypto.randomUUID(),
         currentQty: 0,
         operatorType: isFirstOperatorInLimitedBanner ? 'limited' : 'normal',
-        rarity: 6,
+        rarity: newRarity,
         targetCount: 1,
       };
-      return pickupDatas.map((pickupData) =>
-        pickupData.id === id
-          ? { ...pickupData, operators: [...pickupData.operators, newOperator] }
-          : pickupData,
-      );
+      return modifyBannerDetails(id, (originalPickupData) => ({
+        pickupDetails: {
+          ...originalPickupData.pickupDetails,
+          pickupOpersCount: {
+            ...originalPickupData.pickupDetails.pickupOpersCount,
+            [rarities[newRarity]]:
+              currentOperatorsCount[rarities[newRarity]] + 1 >=
+              pickupOpersCount[rarities[newRarity]]
+                ? currentOperatorsCount[rarities[newRarity]] + 1
+                : originalPickupData.pickupDetails.pickupOpersCount[rarities[newRarity]],
+          },
+        },
+        operators: [...originalPickupData.operators, newOperator],
+      }));
     }
     case 'delete': {
       const { id: bannerId, target, operatorId: payloadOperatorId } = action.payload;
@@ -301,54 +384,93 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
       }
     }
     case 'updatePickupCount': {
-      const { id, count, target } = action.payload;
-      if (isNaN(count)) return pickupDatas;
+      const { id, count, countType, rarityType } = action.payload;
+      const currentBanner = pickupDatas.find((pickupData) => pickupData.id === id);
+      if (isNaN(count) || !currentBanner) return pickupDatas;
+      const oppositeCountType: typeof countType =
+        countType === 'pickupOpersCount' ? 'targetOpersCount' : 'pickupOpersCount';
       return modifyBannerDetails(id, (pickupData) => {
         const { pickupDetails } = pickupData;
-        const { pickupOpersCount, targetPickupCount } = pickupDetails;
-        if (target === 'pickupOpersCount') {
-          return {
-            pickupDetails: {
-              ...pickupDetails,
-              pickupOpersCount: count,
-              targetPickupCount: count < targetPickupCount ? count : targetPickupCount,
+        const currentTargetOpersCount = pickupDetails.targetOpersCount[rarityType];
+        const currentPickupOpersCount = pickupDetails.pickupOpersCount[rarityType];
+        const needChangePickupOpersCount = count > currentPickupOpersCount;
+        const needChangeTargetOpersCount = count < currentTargetOpersCount;
+        const newOppositeCount: Partial<
+          Dummy['pickupDetails']['pickupOpersCount' | 'targetOpersCount']
+        > = {
+          [rarityType]:
+            countType === 'pickupOpersCount'
+              ? needChangeTargetOpersCount
+                ? count
+                : currentTargetOpersCount
+              : needChangePickupOpersCount
+                ? count
+                : currentPickupOpersCount,
+        };
+        const filteredOperator = currentBanner.operators.reduce<{
+          accumulatedCount: number;
+          accumulatedOperators: Operator[];
+        }>(
+          (acc, current) =>
+            current.rarity === rarities[rarityType]
+              ? {
+                  accumulatedCount: acc.accumulatedCount + 1,
+                  accumulatedOperators:
+                    acc.accumulatedCount >= count
+                      ? acc.accumulatedOperators
+                      : [...acc.accumulatedOperators, current],
+                }
+              : {
+                  accumulatedCount: acc.accumulatedCount,
+                  accumulatedOperators: [...acc.accumulatedOperators, current],
+                },
+          { accumulatedCount: 0, accumulatedOperators: [] },
+        );
+        const newPickupDetails: Partial<Dummy> = {
+          pickupDetails: {
+            ...pickupDetails,
+            [countType]: { ...pickupDetails[countType], [rarityType]: count },
+            [oppositeCountType]: {
+              ...pickupDetails[oppositeCountType],
+              ...newOppositeCount,
+            } satisfies Dummy['pickupDetails']['pickupOpersCount' | 'targetOpersCount'],
+          },
+          operators: filteredOperator.accumulatedOperators,
+        };
+        return newPickupDetails;
+      });
+    }
+    case 'updateSimplePickupCount': {
+      const { id, count, countType, rarityType } = action.payload;
+      const oppositeCountType: typeof countType =
+        countType === 'pickupOpersCount' ? 'targetOpersCount' : 'pickupOpersCount';
+      return modifyBannerDetails(id, (pickupData) => {
+        const { pickupDetails } = pickupData;
+        const { simpleMode } = pickupDetails;
+        const currentTargetOpersCount = pickupDetails.simpleMode.targetOpersCount[rarityType];
+        const currentPickupOpersCount = pickupDetails.simpleMode.pickupOpersCount[rarityType];
+        const isTargetOpersCountExceeded = count > currentPickupOpersCount;
+        const isPickupOpersCountDeficit = count < currentTargetOpersCount;
+        const newOppoisteCount = {
+          [rarityType]:
+            countType === 'pickupOpersCount'
+              ? isPickupOpersCountDeficit
+                ? count
+                : currentTargetOpersCount
+              : isTargetOpersCountExceeded
+                ? count
+                : currentPickupOpersCount,
+        };
+        return {
+          pickupDetails: {
+            ...pickupDetails,
+            simpleMode: {
+              ...simpleMode,
+              [countType]: { ...simpleMode[countType], [rarityType]: count },
+              [oppositeCountType]: { ...simpleMode[oppositeCountType], ...newOppoisteCount },
             },
-            /*               operators:
-                pickupCount < targetPickupCount
-                  ? operators.filter((_, index) => index < pickupCount)
-                  : operators, */
-          };
-        } else if (target === 'targetPickupCount') {
-          return {
-            pickupDetails: {
-              ...pickupDetails,
-              pickupOpersCount: count > pickupOpersCount ? count : pickupOpersCount,
-              targetPickupCount: count,
-            },
-            /* operators:
-              pickupCount > targetPickupCount
-                ? [
-                    ...operators,
-                    ...Array.from(
-                      { length: pickupCount - targetPickupCount },
-                      (_, index) =>
-                        ({
-                          name: `오퍼레이터 ${targetPickupCount + index + 1}`,
-                          currentQty: 0,
-                          operatorType:
-                            (gachaType === 'collab' || gachaType === 'limited') &&
-                            targetPickupCount + index === 0
-                              ? 'limited'
-                              : 'normal',
-                          targetCount: 1,
-                        }) satisfies ElementOfArray<Dummy['operators']>,
-                    ),
-                  ]
-                : operators.filter((_, index) => index < pickupCount), */
-          };
-        } else {
-          return pickupData;
-        }
+          },
+        };
       });
     }
     case 'updateAttempts': {
@@ -380,22 +502,38 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction) => {
       });
     }
     case 'updateOperatorDetails': {
-      const { id, operatorId } = action.payload;
-      return pickupDatas.map((pickupData) =>
-        pickupData.id === id
-          ? {
-              ...pickupData,
-              operators: modifyOperatorDetails({
-                operatorId,
-                operators: pickupData.operators,
-                transform: () =>
-                  Object.fromEntries(
-                    Object.entries(action.payload).filter(([, value]) => value !== undefined),
-                  ),
-              }),
-            }
-          : pickupData,
-      );
+      const { id, operatorId, rarity } = action.payload;
+
+      return modifyBannerDetails(id, (pickupData) => {
+        const prevOperator = pickupData.operators.find(
+          (operator) => operator.operatorId === operatorId,
+        );
+        if (!prevOperator) return pickupData;
+        const prevStringRarity = rarities[prevOperator.rarity];
+        return {
+          pickupDetails:
+            rarity === undefined
+              ? pickupData.pickupDetails
+              : {
+                  ...pickupData.pickupDetails,
+                  pickupOpersCount: {
+                    ...pickupData.pickupDetails.pickupOpersCount,
+                    [prevStringRarity]:
+                      pickupData.pickupDetails.pickupOpersCount[prevStringRarity] - 1,
+                    [rarities[rarity]]:
+                      pickupData.pickupDetails.pickupOpersCount[rarities[rarity]] + 1,
+                  },
+                },
+          operators: modifyOperatorDetails({
+            operatorId,
+            operators: pickupData.operators,
+            transform: () =>
+              Object.fromEntries(
+                Object.entries(action.payload).filter(([, value]) => value !== undefined),
+              ),
+          }),
+        };
+      });
     }
     default:
       throw new Error();
