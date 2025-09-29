@@ -335,12 +335,14 @@ const PreInfoField = ({
   isGachaSim,
   pickupData,
   updatePickupCount,
+  updateSimplePickupCount,
   updateAttempts,
 }: {
   isSimpleMode: boolean;
   isGachaSim: boolean;
   pickupData: Dummy;
-  updatePickupCount: UpdatePickupCount;
+  updatePickupCount: (count: number, rarityType: OperatorRarityForString) => void;
+  updateSimplePickupCount: UpdateSimplePickupCount;
   updateAttempts: (attempts: number, target: 'max' | 'min' | 'both') => void;
 }) => {
   const {
@@ -361,11 +363,10 @@ const PreInfoField = ({
                 name="픽업 6성"
                 className="text-orange-400"
                 onInputBlur={(e) => {
-                  updatePickupCount({
+                  updateSimplePickupCount({
                     count: stringToNumber(e.currentTarget.value),
                     countType: 'pickupOpersCount',
                     rarityType: 'sixth',
-                    isSimpleMode: true,
                   });
                 }}
                 currentValue={simpleMode.pickupOpersCount.sixth.toString()}
@@ -375,11 +376,10 @@ const PreInfoField = ({
                 name="목표 6성"
                 className="text-orange-400"
                 onInputBlur={(e) => {
-                  updatePickupCount({
+                  updateSimplePickupCount({
                     count: stringToNumber(e.currentTarget.value),
                     countType: 'targetOpersCount',
                     rarityType: 'sixth',
-                    isSimpleMode: true,
                   });
                 }}
                 currentValue={simpleMode.targetOpersCount.sixth.toString()}
@@ -391,11 +391,10 @@ const PreInfoField = ({
                 name="픽업 5성"
                 className="text-amber-400"
                 onInputBlur={(e) => {
-                  updatePickupCount({
+                  updateSimplePickupCount({
                     count: stringToNumber(e.currentTarget.value),
                     countType: 'pickupOpersCount',
                     rarityType: 'fifth',
-                    isSimpleMode: true,
                   });
                 }}
                 currentValue={simpleMode.pickupOpersCount.fifth.toString()}
@@ -405,11 +404,10 @@ const PreInfoField = ({
                 name="목표 5성"
                 className="text-amber-400"
                 onInputBlur={(e) => {
-                  updatePickupCount({
+                  updateSimplePickupCount({
                     count: stringToNumber(e.currentTarget.value),
                     countType: 'targetOpersCount',
                     rarityType: 'fifth',
-                    isSimpleMode: true,
                   });
                 }}
                 currentValue={simpleMode.targetOpersCount.fifth.toString()}
@@ -421,11 +419,10 @@ const PreInfoField = ({
                 name="픽업 4성"
                 className="text-sky-500"
                 onInputBlur={(e) => {
-                  updatePickupCount({
+                  updateSimplePickupCount({
                     count: stringToNumber(e.currentTarget.value),
                     countType: 'pickupOpersCount',
                     rarityType: 'fourth',
-                    isSimpleMode: true,
                   });
                 }}
                 currentValue={simpleMode.pickupOpersCount.fourth.toString()}
@@ -435,11 +432,10 @@ const PreInfoField = ({
                 name="목표 4성"
                 className="text-sky-500"
                 onInputBlur={(e) => {
-                  updatePickupCount({
+                  updateSimplePickupCount({
                     count: stringToNumber(e.currentTarget.value),
                     countType: 'targetOpersCount',
                     rarityType: 'fourth',
-                    isSimpleMode: true,
                   });
                 }}
                 currentValue={simpleMode.targetOpersCount.fourth.toString()}
@@ -483,11 +479,7 @@ const PreInfoField = ({
               name="픽업 6성"
               className="text-orange-400"
               onInputBlur={(e) => {
-                updatePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
-                  countType: 'pickupOpersCount',
-                  rarityType: 'sixth',
-                });
+                updatePickupCount(stringToNumber(e.currentTarget.value), 'sixth');
               }}
               currentValue={pickupOpersCount.sixth.toString()}
               max={10}
@@ -496,11 +488,7 @@ const PreInfoField = ({
               name="픽업 5성"
               className="text-amber-400"
               onInputBlur={(e) => {
-                updatePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
-                  countType: 'pickupOpersCount',
-                  rarityType: 'fifth',
-                });
+                updatePickupCount(stringToNumber(e.currentTarget.value), 'fifth');
               }}
               currentValue={pickupOpersCount.fifth.toString()}
               max={10}
@@ -509,11 +497,7 @@ const PreInfoField = ({
               name="픽업 4성"
               className="text-purple-400"
               onInputBlur={(e) => {
-                updatePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
-                  countType: 'pickupOpersCount',
-                  rarityType: 'fourth',
-                });
+                updatePickupCount(stringToNumber(e.currentTarget.value), 'fourth');
               }}
               currentValue={pickupOpersCount.fourth.toString()}
               max={10}
@@ -726,22 +710,20 @@ interface PickupBannerProps {
   isSimpleMode: boolean;
 }
 
-type UpdatePickupCount = ({
-  count,
-  countType,
-  rarityType,
-  isSimpleMode,
-}: UpdatePickupCountProps) => void;
-
 type ChangeNameProps = Omit<ExtractPayloadFromAction<'updateBannerName'>, 'id'>;
 type DeleteDataProps = Omit<ExtractPayloadFromAction<'delete'>, 'id'>;
 export type ChangeOperatorDetails = Omit<ExtractPayloadFromAction<'updateOperatorDetails'>, 'id'>;
 
-interface UpdatePickupCountProps {
+type UpdateSimplePickupCount = ({
+  count,
+  countType,
+  rarityType,
+}: UpdateSimplePickupCountProps) => void;
+
+interface UpdateSimplePickupCountProps {
   count: number;
   countType: 'pickupOpersCount' | 'targetOpersCount';
   rarityType: OperatorRarityForString;
-  isSimpleMode?: boolean;
 }
 
 export default function PickupBanner({
@@ -758,21 +740,23 @@ export default function PickupBanner({
     dispatch({ type: 'delete', payload: { id, ...payload } });
   };
 
-  const updatePickupCount = ({
-    count,
-    countType,
-    rarityType,
-    isSimpleMode = false,
-  }: UpdatePickupCountProps) => {
+  const updatePickupCount = (count: number, rarityType: OperatorRarityForString) => {
     dispatch({
-      type: isSimpleMode ? 'updateSimplePickupCount' : 'updatePickupCount',
+      type: 'updatePickupCount',
       payload: {
         id,
         count,
-        countType,
         rarityType,
       },
     });
+  };
+
+  const updateSimplePickupCount = ({
+    count,
+    countType,
+    rarityType,
+  }: UpdateSimplePickupCountProps) => {
+    dispatch({ type: 'updateSimplePickupCount', payload: { id, count, countType, rarityType } });
   };
 
   const updateAttempts = (attempts: number, target: 'max' | 'min' | 'both') => {
@@ -843,6 +827,7 @@ export default function PickupBanner({
             isGachaSim={isGachaSim}
             pickupData={pickupData}
             updatePickupCount={updatePickupCount}
+            updateSimplePickupCount={updateSimplePickupCount}
             updateAttempts={updateAttempts}
           />
         ) : (
@@ -856,6 +841,7 @@ export default function PickupBanner({
               isGachaSim={isGachaSim}
               pickupData={pickupData}
               updatePickupCount={updatePickupCount}
+              updateSimplePickupCount={updateSimplePickupCount}
               updateAttempts={updateAttempts}
             />
             <div className="space-y-3">

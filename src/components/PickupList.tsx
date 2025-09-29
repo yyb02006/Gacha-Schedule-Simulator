@@ -181,7 +181,6 @@ export type PickupDatasAction =
       payload: {
         id: string;
         count: number;
-        countType: 'pickupOpersCount' | 'targetOpersCount';
         rarityType: 'sixth' | 'fifth' | 'fourth';
       };
     }
@@ -384,29 +383,11 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       }
     }
     case 'updatePickupCount': {
-      const { id, count, countType, rarityType } = action.payload;
+      const { id, count, rarityType } = action.payload;
       const currentBanner = pickupDatas.find((pickupData) => pickupData.id === id);
       if (isNaN(count) || !currentBanner) return pickupDatas;
-      const oppositeCountType: typeof countType =
-        countType === 'pickupOpersCount' ? 'targetOpersCount' : 'pickupOpersCount';
       return modifyBannerDetails(id, (pickupData) => {
         const { pickupDetails } = pickupData;
-        const currentTargetOpersCount = pickupDetails.targetOpersCount[rarityType];
-        const currentPickupOpersCount = pickupDetails.pickupOpersCount[rarityType];
-        const needChangePickupOpersCount = count > currentPickupOpersCount;
-        const needChangeTargetOpersCount = count < currentTargetOpersCount;
-        const newOppositeCount: Partial<
-          Dummy['pickupDetails']['pickupOpersCount' | 'targetOpersCount']
-        > = {
-          [rarityType]:
-            countType === 'pickupOpersCount'
-              ? needChangeTargetOpersCount
-                ? count
-                : currentTargetOpersCount
-              : needChangePickupOpersCount
-                ? count
-                : currentPickupOpersCount,
-        };
         const filteredOperator = currentBanner.operators.reduce<{
           accumulatedCount: number;
           accumulatedOperators: Operator[];
@@ -429,11 +410,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
         const newPickupDetails: Partial<Dummy> = {
           pickupDetails: {
             ...pickupDetails,
-            [countType]: { ...pickupDetails[countType], [rarityType]: count },
-            [oppositeCountType]: {
-              ...pickupDetails[oppositeCountType],
-              ...newOppositeCount,
-            } satisfies Dummy['pickupDetails']['pickupOpersCount' | 'targetOpersCount'],
+            pickupOpersCount: { ...pickupDetails.pickupOpersCount, [rarityType]: count },
           },
           operators: filteredOperator.accumulatedOperators,
         };
