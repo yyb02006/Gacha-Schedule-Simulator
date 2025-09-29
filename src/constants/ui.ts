@@ -26,8 +26,9 @@ export const operatorBadgeProps = {
   rarity: {
     sixth: { id: 6, props: { name: '6성', color: 'border-orange-400 text-orange-400' } },
     fifth: { id: 5, props: { name: '5성', color: 'border-yellow-400 text-yellow-400' } },
+    fourth: { id: 4, props: { name: '4성', color: 'border-purple-400 text-purple-400' } },
   },
-};
+} as const;
 
 export const BannerBadgeProps = {
   gachaType: {
