@@ -36,10 +36,10 @@ export default function Badge({
         animate={
           animation && isHover
             ? {
-                rotateZ: [0, 20, 0, -20, 0],
+                rotateZ: [0, 10, 0, -10, 0],
                 y: -4,
                 scale: 1.1,
-                transition: { rotateZ: { repeat: Infinity, duration: 1, delay: 0.1 } },
+                transition: { rotateZ: { repeat: Infinity, duration: 0.6, delay: 0.2 } },
               }
             : { rotateZ: 0 }
         }
