@@ -12,14 +12,7 @@ import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
 import BannerAddModal from '#/components/modals/BannerAddModal';
 import { useModal } from '#/hooks/useModal';
-
-export type GachaType = 'limited' | 'standard' | 'collab' | 'revival';
-
-export type OperatorType = 'limited' | 'normal';
-
-export type OperatorRarity = 6 | 5 | 4;
-
-export type OperatorRarityForString = 'sixth' | 'fifth' | 'fourth';
+import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 
 export type Operator = {
   operatorId: string;
@@ -46,7 +39,7 @@ export interface Dummy {
       targetOpersCount: { sixth: number; fifth: number; fourth: number };
     };
   };
-  additionalResource: number;
+  additionalResource: { simpleMode: number; extendedMode: number };
 }
 
 const dummies: Dummy[] = [
@@ -83,7 +76,7 @@ const dummies: Dummy[] = [
     },
     maxGachaAttempts: 200,
     minGachaAttempts: 0,
-    additionalResource: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
   },
   {
     id: 'a1b2c3d4-e5f6-4789-b0c1-d2e3f4a5b6c7',
@@ -118,7 +111,7 @@ const dummies: Dummy[] = [
     },
     maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
-    additionalResource: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
   },
   {
     id: 'f8e7d6c5-b4a3-4210-9876-543210fedcba',
@@ -145,7 +138,7 @@ const dummies: Dummy[] = [
     },
     maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
-    additionalResource: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
   },
 ];
 
@@ -158,7 +151,9 @@ export type ActionType =
   | 'updateAttempts'
   | 'updateBannerName'
   | 'updateOperatorDetails'
-  | 'updateSimplePickupCount';
+  | 'updateSimplePickupCount'
+  | 'updateAdditionalResource'
+  | 'updateGachaType';
 
 export type PickupDatasAction =
   | {
@@ -218,6 +213,21 @@ export type PickupDatasAction =
         name?: string;
         operatorType?: OperatorType;
         rarity?: OperatorRarity;
+      };
+    }
+  | {
+      type: 'updateAdditionalResource';
+      payload: {
+        id: string;
+        mode: 'simpleMode' | 'extendedMode';
+        additionalResource: number;
+      };
+    }
+  | {
+      type: 'updateGachaType';
+      payload: {
+        id: string;
+        gachaType: GachaType;
       };
     };
 
@@ -321,7 +331,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           minGachaAttempts: 0,
           name: `새 가챠 배너`,
           operators: operators,
-          additionalResource: 0,
+          additionalResource: { simpleMode: 0, extendedMode: 0 },
         } satisfies Dummy,
       ];
     }
@@ -480,7 +490,6 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
     }
     case 'updateOperatorDetails': {
       const { id, operatorId, rarity } = action.payload;
-
       return modifyBannerDetails(id, (pickupData) => {
         const prevOperator = pickupData.operators.find(
           (operator) => operator.operatorId === operatorId,
@@ -510,6 +519,20 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
               ),
           }),
         };
+      });
+    }
+    case 'updateAdditionalResource': {
+      const { id, mode, additionalResource } = action.payload;
+      return modifyBannerDetails(id, (pickupData) => {
+        return {
+          additionalResource: { ...pickupData.additionalResource, [mode]: additionalResource },
+        };
+      });
+    }
+    case 'updateGachaType': {
+      const { id, gachaType } = action.payload;
+      return modifyBannerDetails(id, () => {
+        return { gachaType };
       });
     }
     default:
