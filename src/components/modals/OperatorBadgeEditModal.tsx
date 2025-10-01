@@ -4,9 +4,10 @@ import Badge from '#/components/Badge';
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/modals/Modal';
-import { OperatorRarity, OperatorType, rarities } from '#/components/PickupList';
+import { rarities } from '#/components/PickupList';
 import { operatorBadgeProps } from '#/constants/ui';
 import { toOpacityZero } from '#/constants/variants';
+import { OperatorRarity, OperatorType } from '#/types/types';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 
@@ -67,7 +68,7 @@ export default function OperatorBadgeEditModal({
           >
             <span className="text-sky-500">미선택</span> 뱃지
           </motion.div>
-          <div className="flex gap-x-2">
+          <div className="flex flex-wrap gap-x-2 gap-y-3">
             {currentState.operatorType === 'limited' ? (
               <Badge
                 key={'normal'}
@@ -127,7 +128,7 @@ export default function OperatorBadgeEditModal({
           >
             <span className="text-amber-400">선택된</span> 뱃지
           </motion.div>
-          <div className="flex gap-x-2">
+          <div className="flex flex-wrap gap-x-2 gap-y-3">
             {currentState.operatorType === 'limited' ? (
               <Badge key={'limited'} {...limited.props} isLayout />
             ) : (
