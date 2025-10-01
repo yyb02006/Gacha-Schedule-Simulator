@@ -24,7 +24,7 @@ const SimpleModeModalContents = ({
 }) => {
   return (
     <>
-      <div className="flex gap-x-4">
+      <div className="flex flex-wrap gap-4">
         {gachaTypeButtons.map(({ type, name, hoverBackground }) => (
           <TypeSelectionButton
             key={type}
@@ -34,6 +34,7 @@ const SimpleModeModalContents = ({
             onTypeClick={() => {
               onTypeClick(type);
             }}
+            className="px-4"
           />
         ))}
       </div>
@@ -59,12 +60,10 @@ const SimpleModeModalContents = ({
   );
 };
 
-type AddActionType = 'addSimpleBanner' | 'addDetailedBanner';
-
-type ModalState = ExtractPayloadFromAction<AddActionType>;
+type ModalState = ExtractPayloadFromAction<'addSimpleBanner'>;
 
 type ModalAction =
-  | { type: 'changeType'; payload: GachaType }
+  | { type: 'changeType'; payload: { gachaType: GachaType } }
   | {
       type: 'changeCount';
       payload: {
@@ -74,24 +73,29 @@ type ModalAction =
     };
 
 const reducer = (state: ModalState, action: ModalAction) => {
-  let modifiedPickupCount = state.pickupOpersCount;
-  let modifiedtargetOpersCount = state.targetOpersCount;
-  if (action.type === 'changeType') {
-    if (action.payload === 'limited') {
-      modifiedPickupCount = { sixth: 2, fourth: 0, fifth: 0 };
-      modifiedtargetOpersCount = { sixth: 2, fourth: 0, fifth: 0 };
-    } else {
-      modifiedPickupCount = { sixth: 1, fourth: 0, fifth: 0 };
-      modifiedtargetOpersCount = { sixth: 1, fourth: 0, fifth: 0 };
-    }
-  }
   switch (action.type) {
-    case 'changeType':
+    case 'changeType': {
+      const { gachaType } = action.payload;
+      const commonOpersCount =
+        gachaType === 'limited' || gachaType === 'standard'
+          ? {
+              pickupOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
+              targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
+            }
+          : gachaType === 'revival' || gachaType === 'collab'
+            ? {
+                pickupOpersCount: { sixth: 1, fourth: 0, fifth: 0 },
+                targetOpersCount: { sixth: 1, fourth: 0, fifth: 0 },
+              }
+            : {
+                pickupOpersCount: { sixth: 4, fourth: 0, fifth: 0 },
+                targetOpersCount: { sixth: 4, fourth: 0, fifth: 0 },
+              };
       return {
-        gachaType: action.payload,
-        pickupOpersCount: modifiedPickupCount,
-        targetOpersCount: modifiedtargetOpersCount,
+        gachaType,
+        ...commonOpersCount,
       };
+    }
     case 'changeCount':
       return {
         ...state,
@@ -109,16 +113,14 @@ const initialState: ModalState = {
   targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
 };
 
-export default function BannerAddModal({
+export default function SimpleModeBannerAddModal({
   isOpen,
   onClose,
   onSave,
-  isSimpleMode,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (payload: ExtractPayloadFromAction<AddActionType>) => void;
-  isSimpleMode: boolean;
+  onSave: (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => void;
 }) {
   const [modalState, dispatch] = useReducer(reducer, initialState);
   const updatePickupCount = (
@@ -134,8 +136,8 @@ export default function BannerAddModal({
       payload: { [countType]: { sixth: normalizedString, fifth: 0, fourth: 0 } },
     });
   };
-  const updateType = (type: GachaType) => {
-    dispatch({ type: 'changeType', payload: type });
+  const updateType = (gachaType: GachaType) => {
+    dispatch({ type: 'changeType', payload: { gachaType } });
   };
   const onSaveClick = () => {
     onSave(modalState);
@@ -157,13 +159,11 @@ export default function BannerAddModal({
           <CancelButton handleCancel={onClose} />
         </div>
         <div className="flex flex-col gap-y-6">
-          {isSimpleMode ? (
-            <SimpleModeModalContents
-              modalState={modalState}
-              onTypeClick={updateType}
-              onPickupCountChange={updatePickupCount}
-            />
-          ) : null}
+          <SimpleModeModalContents
+            modalState={modalState}
+            onTypeClick={updateType}
+            onPickupCountChange={updatePickupCount}
+          />
         </div>
         <TypeSelectionButton
           name="추가하기"

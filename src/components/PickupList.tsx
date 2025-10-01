@@ -10,9 +10,9 @@ import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variant
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
-import BannerAddModal from '#/components/modals/BannerAddModal';
 import { useModal } from '#/hooks/useModal';
 import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
+import SimpleModeBannerAddModal from '#/components/modals/SimpleBannerAddModal';
 
 export type Operator = {
   operatorId: string;
@@ -550,13 +550,13 @@ export default function PickupList() {
     openModal: openBannerAddModal,
     closeModal: closeBannerAddModal,
   } = useModal();
-  const addBanner = isSimpleMode
-    ? (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => {
-        dispatch({ type: 'addSimpleBanner', payload });
-      }
-    : (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => {
-        dispatch({ type: 'addSimpleBanner', payload });
-      };
+
+  const addSimpleBanner = (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => {
+    dispatch({ type: 'addSimpleBanner', payload });
+  };
+  const addDetailedBanner = (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => {
+    dispatch({ type: 'addSimpleBanner', payload });
+  };
 
   /*   const addBanner = (payload: Partial<Dummy>) => {
     setPickupDatas((p) => [
@@ -651,10 +651,9 @@ export default function PickupList() {
           </AnimatePresence>
         </div>
       </div>
-      <BannerAddModal
+      <SimpleModeBannerAddModal
         isOpen={isBannerAddModalOpen}
-        isSimpleMode={isSimpleMode}
-        onSave={addBanner}
+        onSave={addSimpleBanner}
         onClose={closeBannerAddModal}
       />
     </div>
