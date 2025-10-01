@@ -7,14 +7,24 @@ export const gachaTypeButtons: GachaTypeButton[] = [
     hoverBackground: 'linear-gradient(155deg, #bb4d00, #ffb900)',
   },
   {
-    name: '일반',
+    name: '단일 통상',
     type: 'standard',
     hoverBackground: 'linear-gradient(155deg, #1447e6, #51a2ff)',
   },
   {
+    name: '일반',
+    type: 'revival',
+    hoverBackground: 'linear-gradient(155deg, #7008e7, #a684ff)',
+  },
+  {
+    name: '4중 가챠',
+    type: 'contract',
+    hoverBackground: 'linear-gradient(155deg, #00786f, #00bba7)',
+  },
+  {
     name: '콜라보',
     type: 'collab',
-    hoverBackground: 'linear-gradient(155deg, #ec003f, #ff637e)',
+    hoverBackground: 'linear-gradient(155deg, #c70036, #ff637e)',
   },
 ];
 

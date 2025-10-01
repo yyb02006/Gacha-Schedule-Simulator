@@ -2,7 +2,7 @@ export type SimulationMode = 'simple' | 'extended';
 
 export type GachaType = 'limited' | 'standard' | 'collab' | 'revival' | 'contract';
 
-export type GachaTypeButtonLabel = '한정' | '일반' | '콜라보';
+export type GachaTypeButtonLabel = '한정' | '단일 통상' | '일반' | '4중 가챠' | '콜라보';
 
 export type GachaTypeButtonCustom = {
   state: 'initial' | 'normal';
