@@ -5,6 +5,7 @@ import { InsetNumberInput } from '#/components/PickupBanner';
 import { ExtractPayloadFromAction } from '#/components/PickupList';
 import { gachaTypeButtons } from '#/constants/ui';
 import { toOpacityZero } from '#/constants/variants';
+import { clamp, normalizeNumberString } from '#/libs/utils';
 import { GachaType } from '#/types/types';
 import { motion } from 'motion/react';
 import { ChangeEvent, useReducer } from 'react';
@@ -17,7 +18,7 @@ const SimpleModeModalContents = ({
   modalState: ModalState;
   onPickupCountChange: (
     e: ChangeEvent<HTMLInputElement>,
-    changeTarget: 'pickupOpersCount' | 'targetPickupCount',
+    countType: 'pickupOpersCount' | 'targetOpersCount',
   ) => void;
   onTypeClick: (type: GachaType) => void;
 }) => {
@@ -38,20 +39,20 @@ const SimpleModeModalContents = ({
       </div>
       <div className="flex gap-x-6">
         <InsetNumberInput
-          name="픽업 인원"
+          name="픽업 6성"
           className="text-sky-500"
           onInputBlur={(e: ChangeEvent<HTMLInputElement>) => {
             onPickupCountChange(e, 'pickupOpersCount');
           }}
-          currentValue={modalState.pickupOpersCount.toString()}
+          currentValue={modalState.pickupOpersCount.sixth.toString()}
         />
         <InsetNumberInput
-          name="목표 픽업"
+          name="목표 6성"
           className="text-amber-400"
           onInputBlur={(e: ChangeEvent<HTMLInputElement>) => {
-            onPickupCountChange(e, 'targetPickupCount');
+            onPickupCountChange(e, 'targetOpersCount');
           }}
-          currentValue={modalState.targetPickupCount.toString()}
+          currentValue={modalState.targetOpersCount.sixth.toString()}
         />
       </div>
     </>
@@ -66,19 +67,22 @@ type ModalAction =
   | { type: 'changeType'; payload: GachaType }
   | {
       type: 'changeCount';
-      payload: { pickupOpersCount?: number; targetPickupCount?: number };
+      payload: {
+        pickupOpersCount?: { sixth: number; fourth: number; fifth: number };
+        targetOpersCount?: { sixth: number; fourth: number; fifth: number };
+      };
     };
 
 const reducer = (state: ModalState, action: ModalAction) => {
   let modifiedPickupCount = state.pickupOpersCount;
-  let modifiedtargetPickupCount = state.targetPickupCount;
+  let modifiedtargetOpersCount = state.targetOpersCount;
   if (action.type === 'changeType') {
     if (action.payload === 'limited') {
-      modifiedPickupCount = 2;
-      modifiedtargetPickupCount = 2;
+      modifiedPickupCount = { sixth: 2, fourth: 0, fifth: 0 };
+      modifiedtargetOpersCount = { sixth: 2, fourth: 0, fifth: 0 };
     } else {
-      modifiedPickupCount = 1;
-      modifiedtargetPickupCount = 1;
+      modifiedPickupCount = { sixth: 1, fourth: 0, fifth: 0 };
+      modifiedtargetOpersCount = { sixth: 1, fourth: 0, fifth: 0 };
     }
   }
   switch (action.type) {
@@ -86,13 +90,13 @@ const reducer = (state: ModalState, action: ModalAction) => {
       return {
         gachaType: action.payload,
         pickupOpersCount: modifiedPickupCount,
-        targetPickupCount: modifiedtargetPickupCount,
+        targetOpersCount: modifiedtargetOpersCount,
       };
     case 'changeCount':
       return {
         ...state,
         pickupOpersCount: action.payload.pickupOpersCount ?? state.pickupOpersCount,
-        targetPickupCount: action.payload.targetPickupCount ?? state.targetPickupCount,
+        targetOpersCount: action.payload.targetOpersCount ?? state.targetOpersCount,
       };
     default:
       throw new Error();
@@ -101,8 +105,8 @@ const reducer = (state: ModalState, action: ModalAction) => {
 
 const initialState: ModalState = {
   gachaType: 'limited',
-  pickupOpersCount: 2,
-  targetPickupCount: 2,
+  pickupOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
+  targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
 };
 
 export default function BannerAddModal({
@@ -117,21 +121,20 @@ export default function BannerAddModal({
   isSimpleMode: boolean;
 }) {
   const [modalState, dispatch] = useReducer(reducer, initialState);
-  const changePickupCount = (
+  const updatePickupCount = (
     e: ChangeEvent<HTMLInputElement>,
-    changeTarget: 'pickupOpersCount' | 'targetPickupCount',
+    countType: 'pickupOpersCount' | 'targetOpersCount',
   ) => {
     const { value } = e.currentTarget;
-    const numberValue = value === '' ? 0 : parseFloat(value);
-    const maxValue = 99;
-    if (!isNaN(numberValue) && numberValue <= maxValue) {
-      dispatch({
-        type: 'changeCount',
-        payload: { [changeTarget]: numberValue },
-      });
-    }
+    const numberString = normalizeNumberString(value);
+    if (numberString === undefined) return;
+    const normalizedString = Math.floor(clamp(parseFloat(numberString), 0)).toString();
+    dispatch({
+      type: 'changeCount',
+      payload: { [countType]: { sixth: normalizedString, fifth: 0, fourth: 0 } },
+    });
   };
-  const changeType = (type: GachaType) => {
+  const updateType = (type: GachaType) => {
     dispatch({ type: 'changeType', payload: type });
   };
   const onSaveClick = () => {
@@ -157,8 +160,8 @@ export default function BannerAddModal({
           {isSimpleMode ? (
             <SimpleModeModalContents
               modalState={modalState}
-              onTypeClick={changeType}
-              onPickupCountChange={changePickupCount}
+              onTypeClick={updateType}
+              onPickupCountChange={updatePickupCount}
             />
           ) : null}
         </div>
