@@ -10,7 +10,7 @@ import { GachaType } from '#/types/types';
 import { motion } from 'motion/react';
 import { ChangeEvent, useReducer } from 'react';
 
-const SimpleModeModalContents = ({
+const ModalContents = ({
   modalState,
   onPickupCountChange,
   onTypeClick,
@@ -60,21 +60,28 @@ const SimpleModeModalContents = ({
   );
 };
 
-type ModalState = ExtractPayloadFromAction<'addSimpleBanner'>;
+type ModalState = ExtractPayloadFromAction<'addBanner'>;
 
 type ModalAction =
-  | { type: 'changeType'; payload: { gachaType: GachaType } }
+  | { type: 'updateType'; payload: { gachaType: GachaType } }
   | {
-      type: 'changeCount';
+      type: 'updatePickupCount';
       payload: {
-        pickupOpersCount?: { sixth: number; fourth: number; fifth: number };
-        targetOpersCount?: { sixth: number; fourth: number; fifth: number };
+        count: number;
+        countType: 'pickupOpersCount' | 'targetOpersCount';
       };
     };
 
-const reducer = (state: ModalState, action: ModalAction) => {
+const reducer = (
+  state: ModalState,
+  action: ModalAction,
+): {
+  gachaType: GachaType;
+  pickupOpersCount: { sixth: number; fourth: number; fifth: number };
+  targetOpersCount: { sixth: number; fourth: number; fifth: number };
+} => {
   switch (action.type) {
-    case 'changeType': {
+    case 'updateType': {
       const { gachaType } = action.payload;
       const commonOpersCount =
         gachaType === 'limited' || gachaType === 'standard'
@@ -96,12 +103,28 @@ const reducer = (state: ModalState, action: ModalAction) => {
         ...commonOpersCount,
       };
     }
-    case 'changeCount':
+    case 'updatePickupCount': {
+      const { count, countType } = action.payload;
+      const isTargetOpersCountExceeded = count > state[countType]['sixth'];
+      const isPickupOpersCountDeficit = count < state[countType]['sixth'];
+      const oppositeCountType: typeof countType =
+        countType === 'pickupOpersCount' ? 'targetOpersCount' : 'pickupOpersCount';
+      const newOppositeCount = {
+        sixth:
+          countType === 'pickupOpersCount'
+            ? isPickupOpersCountDeficit
+              ? count
+              : state.targetOpersCount.sixth
+            : isTargetOpersCountExceeded
+              ? count
+              : state.pickupOpersCount.sixth,
+      };
       return {
         ...state,
-        pickupOpersCount: action.payload.pickupOpersCount ?? state.pickupOpersCount,
-        targetOpersCount: action.payload.targetOpersCount ?? state.targetOpersCount,
+        [countType]: { ...state[countType], sixth: count },
+        [oppositeCountType]: { ...state[oppositeCountType], ...newOppositeCount },
       };
+    }
     default:
       throw new Error();
   }
@@ -113,14 +136,14 @@ const initialState: ModalState = {
   targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
 };
 
-export default function SimpleModeBannerAddModal({
+export default function BannerAddModal({
   isOpen,
   onClose,
   onSave,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => void;
+  onSave: (payload: ExtractPayloadFromAction<'addBanner'>) => void;
 }) {
   const [modalState, dispatch] = useReducer(reducer, initialState);
   const updatePickupCount = (
@@ -130,14 +153,14 @@ export default function SimpleModeBannerAddModal({
     const { value } = e.currentTarget;
     const numberString = normalizeNumberString(value);
     if (numberString === undefined) return;
-    const normalizedString = Math.floor(clamp(parseFloat(numberString), 0)).toString();
+    const normalizedNumber = Math.floor(clamp(parseFloat(numberString), 0));
     dispatch({
-      type: 'changeCount',
-      payload: { [countType]: { sixth: normalizedString, fifth: 0, fourth: 0 } },
+      type: 'updatePickupCount',
+      payload: { count: normalizedNumber, countType },
     });
   };
   const updateType = (gachaType: GachaType) => {
-    dispatch({ type: 'changeType', payload: { gachaType } });
+    dispatch({ type: 'updateType', payload: { gachaType } });
   };
   const onSaveClick = () => {
     onSave(modalState);
@@ -159,7 +182,7 @@ export default function SimpleModeBannerAddModal({
           <CancelButton handleCancel={onClose} />
         </div>
         <div className="flex flex-col gap-y-6">
-          <SimpleModeModalContents
+          <ModalContents
             modalState={modalState}
             onTypeClick={updateType}
             onPickupCountChange={updatePickupCount}

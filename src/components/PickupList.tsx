@@ -12,7 +12,7 @@ import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
 import { useModal } from '#/hooks/useModal';
 import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
-import SimpleModeBannerAddModal from '#/components/modals/SimpleBannerAddModal';
+import BannerAddModal from '#/components/modals/BannerAddModal';
 
 export type Operator = {
   operatorId: string;
@@ -143,7 +143,7 @@ const dummies: Dummy[] = [
 ];
 
 export type ActionType =
-  | 'addSimpleBanner'
+  | 'addBanner'
   | 'addDetailedBanner'
   | 'addOperator'
   | 'delete'
@@ -157,7 +157,7 @@ export type ActionType =
 
 export type PickupDatasAction =
   | {
-      type: 'addSimpleBanner';
+      type: 'addBanner';
       payload: {
         gachaType: GachaType;
         pickupOpersCount: { sixth: number; fifth: number; fourth: number };
@@ -269,7 +269,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       { sixth: 0, fifth: 0, fourth: 0 },
     );
   switch (action.type) {
-    case 'addSimpleBanner': {
+    case 'addBanner': {
       const { gachaType, pickupOpersCount, targetOpersCount } = action.payload;
       const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
       const operators: Dummy['operators'] = [
@@ -438,7 +438,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
         const currentPickupOpersCount = pickupDetails.simpleMode.pickupOpersCount[rarityType];
         const isTargetOpersCountExceeded = count > currentPickupOpersCount;
         const isPickupOpersCountDeficit = count < currentTargetOpersCount;
-        const newOppoisteCount = {
+        const newOppositeCount = {
           [rarityType]:
             countType === 'pickupOpersCount'
               ? isPickupOpersCountDeficit
@@ -454,7 +454,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
             simpleMode: {
               ...simpleMode,
               [countType]: { ...simpleMode[countType], [rarityType]: count },
-              [oppositeCountType]: { ...simpleMode[oppositeCountType], ...newOppoisteCount },
+              [oppositeCountType]: { ...simpleMode[oppositeCountType], ...newOppositeCount },
             },
           },
         };
@@ -545,17 +545,10 @@ export default function PickupList() {
   const [isBannerAddHover, setIsBannerAddHover] = useState(false);
   const [isGachaSim, setIsGachaSim] = useState(false);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
-  const {
-    isOpen: isBannerAddModalOpen,
-    openModal: openBannerAddModal,
-    closeModal: closeBannerAddModal,
-  } = useModal();
+  const { isOpen: isModalOpen, openModal: openModal, closeModal: closeModal } = useModal();
 
-  const addSimpleBanner = (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => {
-    dispatch({ type: 'addSimpleBanner', payload });
-  };
-  const addDetailedBanner = (payload: ExtractPayloadFromAction<'addSimpleBanner'>) => {
-    dispatch({ type: 'addSimpleBanner', payload });
+  const addBanner = (payload: ExtractPayloadFromAction<'addBanner'>) => {
+    dispatch({ type: 'addBanner', payload });
   };
 
   /*   const addBanner = (payload: Partial<Dummy>) => {
@@ -620,7 +613,7 @@ export default function PickupList() {
               initial="exit"
               animate="idle"
               transition={cardTransition}
-              onClick={openBannerAddModal}
+              onClick={openModal}
               className="flex cursor-pointer items-center justify-center gap-x-24 overflow-hidden rounded-xl py-8"
             >
               <motion.div
@@ -651,11 +644,7 @@ export default function PickupList() {
           </AnimatePresence>
         </div>
       </div>
-      <SimpleModeBannerAddModal
-        isOpen={isBannerAddModalOpen}
-        onSave={addSimpleBanner}
-        onClose={closeBannerAddModal}
-      />
+      <BannerAddModal isOpen={isModalOpen} onClose={closeModal} onSave={addBanner} />
     </div>
   );
 }
