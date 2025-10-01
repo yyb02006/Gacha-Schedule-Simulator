@@ -31,12 +31,24 @@ export const operatorBadgeProps = {
 } as const;
 
 export const BannerBadgeProps = {
-  gachaType: {
-    limited: { id: 'limited', props: { name: '한정', color: 'border-amber-400 text-amber-400' } },
-    normal: { id: 'normal', props: { name: '통상', color: 'border-sky-600 text-sky-600' } },
+  limited: {
+    id: 'limited',
+    props: { name: '한정 배너', color: 'border-amber-400 text-amber-400' },
   },
-  rarity: {
-    sixth: { id: 6, props: { name: '6성', color: 'border-orange-400 text-orange-400' } },
-    fifth: { id: 5, props: { name: '5성', color: 'border-yellow-400 text-yellow-400' } },
+  standard: {
+    id: 'standard',
+    props: { name: '단일 통상 배너', color: 'border-sky-600 text-sky-600' },
   },
-};
+  collab: {
+    id: 'collab',
+    props: { name: '콜라보 배너', color: 'border-rose-400 text-rose-400' },
+  },
+  revival: {
+    id: 'revival',
+    props: { name: '일반 배너', color: 'border-violet-400 text-violet-400' },
+  },
+  contract: {
+    id: 'contract',
+    props: { name: '4중 배너', color: 'border-teal-500 text-teal-500' },
+  },
+} as const;
