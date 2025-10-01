@@ -164,7 +164,7 @@ export const InsetNumberInput = ({
             className="relative h-full w-8 min-w-0 text-right"
             max={max}
             maxLength={maxLength}
-            value={localValue}
+            value={showInfinity && isInfinity ? '' : localValue}
           />
         </motion.div>
         {children}
@@ -851,10 +851,6 @@ export default function PickupBanner({
     dispatch({ type: 'updateGachaType', payload: { id, gachaType } });
   };
 
-  const addOperator = () => {
-    dispatch({ type: 'addOperator', payload: { id } });
-  };
-
   const updateBannerBadge = (newGachaType: GachaType) => {
     const newCount =
       newGachaType === 'limited' || newGachaType === 'revival'
@@ -874,6 +870,10 @@ export default function PickupBanner({
         payload: { id, count: newCount, rarityType: 'sixth' },
       });
     }
+  };
+
+  const addOperator = () => {
+    dispatch({ type: 'addOperator', payload: { id } });
   };
 
   return (
