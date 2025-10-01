@@ -50,7 +50,7 @@ export default function TypeSelectionButton({
       aria-pressed={isActive}
       className={cls(
         className,
-        'font-S-CoreDream-500 flex w-full cursor-pointer items-center justify-center rounded-xl p-2',
+        'font-S-CoreDream-500 flex cursor-pointer items-center justify-center rounded-xl p-2',
       )}
     >
       <motion.div
