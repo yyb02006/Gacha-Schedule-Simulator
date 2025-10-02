@@ -31,7 +31,7 @@ export const gachaTypeButtons: GachaTypeButton[] = [
 export const operatorBadgeProps = {
   operatorType: {
     limited: { id: 'limited', props: { name: '한정', color: 'border-amber-400 text-amber-400' } },
-    normal: { id: 'normal', props: { name: '통상', color: 'border-sky-600 text-sky-600' } },
+    normal: { id: 'normal', props: { name: '통상', color: 'border-sky-500 text-sky-500' } },
   },
   rarity: {
     sixth: { id: 6, props: { name: '6성', color: 'border-orange-400 text-orange-400' } },
@@ -47,7 +47,7 @@ export const BannerBadgeProps = {
   },
   standard: {
     id: 'standard',
-    props: { name: '단일 통상 배너', color: 'border-sky-600 text-sky-600' },
+    props: { name: '단일 통상 배너', color: 'border-sky-500 text-sky-500' },
   },
   collab: {
     id: 'collab',
