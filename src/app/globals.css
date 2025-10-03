@@ -1,4 +1,12 @@
 @import 'tailwindcss';
+@import 'simplebar-react/dist/simplebar.min.css';
+
+.simplebar-scrollbar::before {
+  background: #ffb900 !important;
+  opacity: 1 !important;
+  right: 3 !important;
+  left: 3 !important;
+}
 
 :root {
   --background: #ffffff;
