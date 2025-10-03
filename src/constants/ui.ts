@@ -8,7 +8,7 @@ export const gachaTypeButtons: GachaTypeButton[] = [
   },
   {
     name: '단일 통상',
-    type: 'standard',
+    type: 'single',
     hoverBackground: 'linear-gradient(155deg, #1447e6, #51a2ff)',
   },
   {
@@ -24,6 +24,11 @@ export const gachaTypeButtons: GachaTypeButton[] = [
   {
     name: '콜라보',
     type: 'collab',
+    hoverBackground: 'linear-gradient(155deg, #c70036, #ff637e)',
+  },
+  {
+    name: '지향',
+    type: 'orient',
     hoverBackground: 'linear-gradient(155deg, #c70036, #ff637e)',
   },
 ];
@@ -45,8 +50,8 @@ export const BannerBadgeProps = {
     id: 'limited',
     props: { name: '한정 배너', color: 'border-amber-400 text-amber-400' },
   },
-  standard: {
-    id: 'standard',
+  single: {
+    id: 'single',
     props: { name: '단일 통상 배너', color: 'border-sky-500 text-sky-500' },
   },
   collab: {
@@ -60,5 +65,9 @@ export const BannerBadgeProps = {
   contract: {
     id: 'contract',
     props: { name: '4중 배너', color: 'border-teal-500 text-teal-500' },
+  },
+  orient: {
+    id: 'orient',
+    props: { name: '지향 배너', color: 'border-orange-500 text-orange-500' },
   },
 } as const;
