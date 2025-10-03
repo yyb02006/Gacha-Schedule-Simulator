@@ -24,6 +24,7 @@ import Badge from '#/components/Badge';
 import BannerBadgeEditModal from '#/components/modals/BannerBadgeEditModal';
 import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
 import { useSyncedState } from '#/hooks/useSyncedState';
+import Image from 'next/image';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -793,7 +794,7 @@ export default function PickupBanner({
   isSimpleMode,
 }: PickupBannerProps) {
   // const isPresent = useIsPresent();
-  const { gachaType, name, operators, id } = pickupData;
+  const { gachaType, name, operators, id, image } = pickupData;
 
   const deleteData = (payload: DeleteDataProps) => {
     dispatch({ type: 'delete', payload: { id, ...payload } });
@@ -855,9 +856,11 @@ export default function PickupBanner({
     const newCount =
       newGachaType === 'limited' || newGachaType === 'revival'
         ? 2
-        : newGachaType === 'collab' || newGachaType === 'standard'
+        : newGachaType === 'collab' || newGachaType === 'single'
           ? 1
-          : 4;
+          : newGachaType === 'orient'
+            ? 3
+            : 4;
     updateGachaType(newGachaType);
     if (isSimpleMode) {
       dispatch({
@@ -911,6 +914,11 @@ export default function PickupBanner({
         }}
         onBannerBadgeChange={updateBannerBadge}
       />
+      {image ? (
+        <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+          <Image src={image} width={1560} height={500} alt="babel" />
+        </motion.div>
+      ) : null}
       <AnimatePresence mode="wait" propagate>
         {isSimpleMode ? (
           <SimplePreInfoField
