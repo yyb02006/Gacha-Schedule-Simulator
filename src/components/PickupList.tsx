@@ -13,6 +13,7 @@ import PickupBanner from '#/components/PickupBanner';
 import { useModal } from '#/hooks/useModal';
 import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 import BannerAddModal from '#/components/modals/BannerAddModal';
+import pickupDatas from '#/data/pickupDatas.json';
 
 export type Operator = {
   operatorId: string;
@@ -26,6 +27,7 @@ export type Operator = {
 export interface Dummy {
   id: string;
   name: string;
+  image: string | null;
   maxGachaAttempts: number;
   minGachaAttempts: number;
   gachaType: GachaType;
@@ -42,23 +44,16 @@ export interface Dummy {
   additionalResource: { simpleMode: number; extendedMode: number };
 }
 
-const dummies: Dummy[] = [
+/* const dummies: Dummy[] = [
   {
     id: '970b5b98-edda-4af6-ae22-49a9227e1ad4',
-    name: '우리 종족',
-    gachaType: 'limited',
+    name: '바벨 복각',
+    image: '/images/ascaron.jpg',
+    gachaType: 'single',
     operators: [
       {
         operatorId: '970b5b98-edda-4af6-ae22-49a9227e1ad4',
-        name: '위셔델',
-        currentQty: 0,
-        operatorType: 'limited',
-        targetCount: 1,
-        rarity: 6,
-      },
-      {
-        operatorId: '1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p',
-        name: '로고스',
+        name: '아스카론',
         currentQty: 0,
         operatorType: 'normal',
         targetCount: 1,
@@ -66,26 +61,27 @@ const dummies: Dummy[] = [
       },
     ],
     pickupDetails: {
-      pickupOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
-      targetOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
-      pickupChance: 70,
+      pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      pickupChance: 50,
       simpleMode: {
-        pickupOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
-        targetOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+        pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
       },
     },
-    maxGachaAttempts: 200,
+    maxGachaAttempts: Infinity,
     minGachaAttempts: 0,
     additionalResource: { simpleMode: 0, extendedMode: 0 },
   },
   {
     id: 'a1b2c3d4-e5f6-4789-b0c1-d2e3f4a5b6c7',
-    name: '모래위의 각인',
+    name: '중생의 순례기',
+    image: '/images/exusiai.jpg',
     gachaType: 'limited',
     operators: [
       {
         operatorId: 'a1b2c3d4-e5f6-7g8h-9i0j-1k2l3m4n5o6p',
-        name: '페페',
+        name: '엑시아 더 뉴 커버넌트',
         currentQty: 0,
         operatorType: 'limited',
         targetCount: 1,
@@ -93,7 +89,7 @@ const dummies: Dummy[] = [
       },
       {
         operatorId: 'b1c2d3e4-f5g6-7h8i-9j0k-1l2m3n4o5p6q',
-        name: '나란투야',
+        name: '르무엔',
         currentQty: 0,
         operatorType: 'normal',
         targetCount: 1,
@@ -115,12 +111,13 @@ const dummies: Dummy[] = [
   },
   {
     id: 'f8e7d6c5-b4a3-4210-9876-543210fedcba',
-    name: '불타는 엘레지여',
-    gachaType: 'standard',
+    name: '크림슨 벨벳',
+    image: '/images/tragodia.jpg',
+    gachaType: 'single',
     operators: [
       {
         operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
-        name: '네크라스',
+        name: '트라고디아',
         currentQty: 0,
         operatorType: 'normal',
         targetCount: 1,
@@ -140,7 +137,311 @@ const dummies: Dummy[] = [
     minGachaAttempts: 0,
     additionalResource: { simpleMode: 0, extendedMode: 0 },
   },
-];
+  {
+    id: 'f8e7d6c5-b4a3-4210-9876-543ddddedcba',
+    name: '지향 헤드헌팅',
+    image: '/images/orient-1.jpg',
+    gachaType: 'orient',
+    operators: [
+      {
+        operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '데겐블레허',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2zzzzz5q6r',
+        name: '리드 더 플레임 섀도우',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2sdfsddq6r',
+        name: '님프',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+    ],
+    pickupDetails: {
+      pickupOpersCount: { sixth: 3, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 3, fifth: 0, fourth: 0 },
+      pickupChance: 100,
+      simpleMode: {
+        pickupOpersCount: { sixth: 3, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 3, fifth: 0, fourth: 0 },
+      },
+    },
+    maxGachaAttempts: Infinity,
+    minGachaAttempts: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
+  },
+  {
+    id: 'f8e7d6c5-b4a3-4zz0-9876-54zzzddedcba',
+    name: '삶의 길 복각',
+    image: '/images/ulpianus.jpg',
+    gachaType: 'single',
+    operators: [
+      {
+        operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '울피아누스',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+    ],
+    pickupDetails: {
+      pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      pickupChance: 50,
+      simpleMode: {
+        pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      },
+    },
+    maxGachaAttempts: Infinity,
+    minGachaAttempts: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
+  },
+  {
+    id: 'f8e7d6c5-b4a1-4zz0-9876-54zzzddedcba',
+    name: '경중집',
+    image: '/images/leizi.jpg',
+    gachaType: 'single',
+    operators: [
+      {
+        operatorId: 'c1d233f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '레이즈 더 썬더브링어',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+    ],
+    pickupDetails: {
+      pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      pickupChance: 50,
+      simpleMode: {
+        pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      },
+    },
+    maxGachaAttempts: Infinity,
+    minGachaAttempts: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
+  },
+  {
+    id: 'f8e7d6c5-b4a3-4zz0-9556-54zzzddedcba',
+    name: '허',
+    image: '/images/hoshiguma.jpg',
+    gachaType: 'limited',
+    operators: [
+      {
+        operatorId: 'c1d2e3f4-g556-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '호시구마 더 브리처',
+        currentQty: 0,
+        operatorType: 'limited',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'czf2e3f4-g556-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '하루카',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+    ],
+    pickupDetails: {
+      pickupOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+      pickupChance: 70,
+      simpleMode: {
+        pickupOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 2, fifth: 0, fourth: 0 },
+      },
+    },
+    maxGachaAttempts: Infinity,
+    minGachaAttempts: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
+  },
+  {
+    id: 'f8e7d6c5-b4g3-4zz0-9876-54zzzddedcba',
+    name: '4중 픽업',
+    image: '/images/contract-1.jpg',
+    gachaType: 'contract',
+    operators: [
+      {
+        operatorId: 'c1gge3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '님프',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'c1ggebf4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '이네스',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'c1xge3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '엔텔레키아',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'c1cce3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r',
+        name: '블레이즈 디 이그나이팅 스파크',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+    ],
+    pickupDetails: {
+      pickupOpersCount: { sixth: 4, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 4, fifth: 0, fourth: 0 },
+      pickupChance: 100,
+      simpleMode: {
+        pickupOpersCount: { sixth: 4, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 4, fifth: 0, fourth: 0 },
+      },
+    },
+    maxGachaAttempts: Infinity,
+    minGachaAttempts: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
+  },
+  {
+    id: 'f8e7d6c5-b4a3-4zz0-9876-54zzzxdedcba',
+    name: '근심없는 잠꼬대',
+    image: '/images/avemujica.jpg',
+    gachaType: 'collab',
+    operators: [
+      {
+        operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2n3oxx5q6r',
+        name: '토가와 사키코',
+        currentQty: 0,
+        operatorType: 'limited',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'c1d2e3f4-xxxx-7i8j-9k0l-1m2n3oxx5q6r',
+        name: '미스미 우이카',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 5,
+      },
+      {
+        operatorId: 'c1dxxxf4-g5h6-7i8j-9k0l-1m2n3oxx5q6r',
+        name: '와카바 무츠미',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 5,
+      },
+    ],
+    pickupDetails: {
+      pickupOpersCount: { sixth: 1, fifth: 2, fourth: 0 },
+      targetOpersCount: { sixth: 1, fifth: 2, fourth: 0 },
+      pickupChance: 50,
+      simpleMode: {
+        pickupOpersCount: { sixth: 1, fifth: 2, fourth: 0 },
+        targetOpersCount: { sixth: 1, fifth: 2, fourth: 0 },
+      },
+    },
+    maxGachaAttempts: Infinity,
+    minGachaAttempts: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
+  },
+  {
+    id: 'f8e7d6c5-b4a3-4zz0-9876-xxzzzxdedcba',
+    name: '위대한 서곡의 끝',
+    image: '/images/siege.jpg',
+    gachaType: 'single',
+    operators: [
+      {
+        operatorId: 'c1d2ecd4-g5h6-7i8j-9k0l-1m2n3oxx5q6r',
+        name: '비나 빅토리아',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+    ],
+    pickupDetails: {
+      pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      pickupChance: 50,
+      simpleMode: {
+        pickupOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
+      },
+    },
+    maxGachaAttempts: Infinity,
+    minGachaAttempts: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
+  },
+  {
+    id: 'xxe7d6c5-b4a3-4zz0-9876-54zzzddddcba',
+    name: '지향 헤드헌팅',
+    image: '/images/orient-2.jpg',
+    gachaType: 'orient',
+    operators: [
+      {
+        operatorId: 'c1d2ecv4-g5h6-7i8j-9k0l-1m2n3oxvvq6r',
+        name: 'Mon3tr',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'c1d2e3f4-vvvx-vv8j-9k0l-1m2n3oxx5q6r',
+        name: '로고스',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+      {
+        operatorId: 'c1dxxxf4-g5h6-7dej-vvvl-1m2n3oxx5q6r',
+        name: '아스카론',
+        currentQty: 0,
+        operatorType: 'normal',
+        targetCount: 1,
+        rarity: 6,
+      },
+    ],
+    pickupDetails: {
+      pickupOpersCount: { sixth: 3, fifth: 0, fourth: 0 },
+      targetOpersCount: { sixth: 3, fifth: 0, fourth: 0 },
+      pickupChance: 100,
+      simpleMode: {
+        pickupOpersCount: { sixth: 3, fifth: 0, fourth: 0 },
+        targetOpersCount: { sixth: 3, fifth: 0, fourth: 0 },
+      },
+    },
+    maxGachaAttempts: Infinity,
+    minGachaAttempts: 0,
+    additionalResource: { simpleMode: 0, extendedMode: 0 },
+  },
+]; */
 
 export type ActionType =
   | 'addBanner'
@@ -274,7 +575,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
       const operators: Dummy['operators'] = [
         ...Array.from(
-          { length: pickupOpersCount.sixth },
+          { length: targetOpersCount.sixth },
           (_, index) =>
             ({
               operatorId: crypto.randomUUID(),
@@ -318,6 +619,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
         {
           id: crypto.randomUUID(),
           gachaType: gachaType,
+          image: null,
           pickupDetails: {
             pickupChance,
             pickupOpersCount,
@@ -540,8 +842,16 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
   }
 };
 
+const picupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
+  ...data,
+  operators: data.operators as Operator[],
+  gachaType: data.gachaType as GachaType,
+  maxGachaAttempts:
+    data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
+}));
+
 export default function PickupList() {
-  const [pickupDatas, dispatch] = useReducer(reducer, dummies);
+  const [pickupDatas, dispatch] = useReducer(reducer, picupDatas);
   const [isBannerAddHover, setIsBannerAddHover] = useState(false);
   const [isGachaSim, setIsGachaSim] = useState(false);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
@@ -556,7 +866,7 @@ export default function PickupList() {
       ...p,
       {
         id: crypto.randomUUID(),
-        gachaType: payload.gachaType ?? 'standard',
+        gachaType: payload.gachaType ?? 'single',
         operators: payload.operators?.length
           ? payload.operators
           : Array({ length: payload.pickupDetails?.pickupOpersCount ?? 2 }).map((_, index) => ({
