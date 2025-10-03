@@ -4,13 +4,21 @@ import Modal from '#/components/modals/Modal';
 import { InsetNumberInput } from '#/components/PickupBanner';
 import { ExtractPayloadFromAction } from '#/components/PickupList';
 import { gachaTypeButtons } from '#/constants/ui';
-import { toOpacityZero } from '#/constants/variants';
+import {
+  cardVariants,
+  fontPop,
+  insetInputVariants,
+  toggleButtonVariants,
+  toOpacityZero,
+} from '#/constants/variants';
 import { clamp, normalizeNumberString } from '#/libs/utils';
 import { GachaType } from '#/types/types';
 import { motion } from 'motion/react';
-import { ChangeEvent, useReducer } from 'react';
+import { ChangeEvent, useReducer, useState } from 'react';
+import SimpleBar from 'simplebar-react';
+import 'simplebar-react/dist/simplebar.min.css';
 
-const ModalContents = ({
+const CustomModalContents = ({
   modalState,
   onPickupCountChange,
   onTypeClick,
@@ -34,14 +42,14 @@ const ModalContents = ({
             onTypeClick={() => {
               onTypeClick(type);
             }}
-            className="px-4"
+            className="px-4 text-sm"
           />
         ))}
       </div>
       <div className="flex gap-x-6">
         <InsetNumberInput
           name="픽업 6성"
-          className="text-sky-500"
+          className="text-sm text-sky-500"
           onInputBlur={(e: ChangeEvent<HTMLInputElement>) => {
             onPickupCountChange(e, 'pickupOpersCount');
           }}
@@ -49,7 +57,7 @@ const ModalContents = ({
         />
         <InsetNumberInput
           name="목표 6성"
-          className="text-amber-400"
+          className="text-sm text-amber-400"
           onInputBlur={(e: ChangeEvent<HTMLInputElement>) => {
             onPickupCountChange(e, 'targetOpersCount');
           }}
@@ -63,6 +71,7 @@ const ModalContents = ({
 type ModalState = ExtractPayloadFromAction<'addBanner'>;
 
 type ModalAction =
+  | { type: 'initialIzation' }
   | { type: 'updateType'; payload: { gachaType: GachaType } }
   | {
       type: 'updatePickupCount';
@@ -71,6 +80,12 @@ type ModalAction =
         countType: 'pickupOpersCount' | 'targetOpersCount';
       };
     };
+
+const initialState: ModalState = {
+  gachaType: 'limited',
+  pickupOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
+  targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
+};
 
 const reducer = (
   state: ModalState,
@@ -81,10 +96,13 @@ const reducer = (
   targetOpersCount: { sixth: number; fourth: number; fifth: number };
 } => {
   switch (action.type) {
+    case 'initialIzation': {
+      return initialState;
+    }
     case 'updateType': {
       const { gachaType } = action.payload;
       const commonOpersCount =
-        gachaType === 'limited' || gachaType === 'standard'
+        gachaType === 'limited' || gachaType === 'single'
           ? {
               pickupOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
               targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
@@ -94,10 +112,15 @@ const reducer = (
                 pickupOpersCount: { sixth: 1, fourth: 0, fifth: 0 },
                 targetOpersCount: { sixth: 1, fourth: 0, fifth: 0 },
               }
-            : {
-                pickupOpersCount: { sixth: 4, fourth: 0, fifth: 0 },
-                targetOpersCount: { sixth: 4, fourth: 0, fifth: 0 },
-              };
+            : gachaType === 'orient'
+              ? {
+                  pickupOpersCount: { sixth: 3, fourth: 0, fifth: 0 },
+                  targetOpersCount: { sixth: 3, fourth: 0, fifth: 0 },
+                }
+              : {
+                  pickupOpersCount: { sixth: 4, fourth: 0, fifth: 0 },
+                  targetOpersCount: { sixth: 4, fourth: 0, fifth: 0 },
+                };
       return {
         gachaType,
         ...commonOpersCount,
@@ -130,10 +153,128 @@ const reducer = (
   }
 };
 
-const initialState: ModalState = {
-  gachaType: 'limited',
-  pickupOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
-  targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
+const PresetModalContents = () => {
+  return (
+    <SimpleBar autoHide={false} className="-mx-4 h-full space-y-6 p-4" style={{ minHeight: 0 }}>
+      <div className="space-y-6">
+        <motion.div
+          variants={cardVariants}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="h-[200px] rounded-xl"
+        >
+          우리 종족
+        </motion.div>
+        <motion.div
+          variants={cardVariants}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="h-[200px] rounded-xl"
+        >
+          파란 불꽃의 마음
+        </motion.div>
+        <motion.div
+          variants={cardVariants}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="h-[200px] rounded-xl"
+        >
+          어쩌구 저쩌구
+        </motion.div>
+        <motion.div
+          variants={cardVariants}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="h-[200px] rounded-xl"
+        >
+          신 픽업 1
+        </motion.div>
+      </div>
+    </SimpleBar>
+  );
+};
+
+const BannerAddTypeToggle = ({
+  isCustomMode,
+  onTypeClick,
+}: {
+  isCustomMode: boolean;
+  onTypeClick: () => void;
+}) => {
+  return (
+    <div className="flex min-w-[100px] flex-col space-y-1">
+      <motion.div
+        variants={insetInputVariants}
+        animate="idle"
+        viewport={{ once: true, amount: 0.5 }}
+        initial="exit"
+        exit="exit"
+        onClick={onTypeClick}
+        className="relative flex h-[48px] cursor-pointer items-center justify-center rounded-xl px-4 pt-3 pb-2 font-bold"
+      >
+        <motion.div
+          variants={toOpacityZero}
+          animate="idle"
+          initial="exit"
+          exit="exit"
+          className="relative w-full text-center whitespace-nowrap"
+        >
+          <motion.div
+            variants={fontPop}
+            animate={isCustomMode ? 'inAcitve' : 'active'}
+            initial={isCustomMode ? 'active' : 'inAcitve'}
+            exit="exit"
+            className="font-S-CoreDream-700"
+          >
+            커스텀
+          </motion.div>
+        </motion.div>
+        <motion.div
+          variants={toOpacityZero}
+          animate="idle"
+          initial="exit"
+          exit="exit"
+          className="relative w-full text-center whitespace-nowrap"
+        >
+          <motion.div
+            variants={fontPop}
+            animate={isCustomMode ? 'inAcitve' : 'active'}
+            initial={isCustomMode ? 'active' : 'inAcitve'}
+            exit="exit"
+            className="font-S-CoreDream-700"
+          >
+            프리셋
+          </motion.div>
+        </motion.div>
+        <div className="absolute top-0 flex size-full">
+          <motion.div
+            transition={{
+              left: { type: 'spring', visualDuration: 0.3, bounce: 0.2 },
+            }}
+            animate={isCustomMode ? { left: 0 } : { left: '50%' }}
+            className="relative h-full w-1/2 p-[2px]"
+          >
+            <motion.div
+              variants={toggleButtonVariants}
+              initial="exit"
+              animate={isCustomMode ? 'left' : 'right'}
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="flex size-full items-center justify-center rounded-lg"
+            >
+              <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+                {isCustomMode ? '커스텀' : '프리셋'}
+              </motion.span>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.div>
+    </div>
+  );
 };
 
 export default function BannerAddModal({
@@ -145,6 +286,7 @@ export default function BannerAddModal({
   onClose: () => void;
   onSave: (payload: ExtractPayloadFromAction<'addBanner'>) => void;
 }) {
+  const [isCustomMode, setIsCustomMode] = useState(false);
   const [modalState, dispatch] = useReducer(reducer, initialState);
   const updatePickupCount = (
     e: ChangeEvent<HTMLInputElement>,
@@ -164,11 +306,18 @@ export default function BannerAddModal({
   };
   const onSaveClick = () => {
     onSave(modalState);
+    dispatch({ type: 'initialIzation' });
     onClose();
   };
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="flex w-[360px] flex-col gap-y-8">
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        dispatch({ type: 'initialIzation' });
+        onClose();
+      }}
+    >
+      <motion.div className="flex h-0 w-[360px] flex-1 flex-col gap-y-8 lg:w-[480px]">
         <div className="flex items-center justify-between gap-x-6">
           <motion.h1
             variants={toOpacityZero}
@@ -181,21 +330,31 @@ export default function BannerAddModal({
           </motion.h1>
           <CancelButton handleCancel={onClose} />
         </div>
-        <div className="flex flex-col gap-y-6">
-          <ModalContents
-            modalState={modalState}
-            onTypeClick={updateType}
-            onPickupCountChange={updatePickupCount}
-          />
-        </div>
-        <TypeSelectionButton
-          name="추가하기"
-          hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+        <BannerAddTypeToggle
+          isCustomMode={isCustomMode}
           onTypeClick={() => {
-            onSaveClick();
+            setIsCustomMode((p) => !p);
           }}
         />
-      </div>
+        {isCustomMode ? (
+          <>
+            <CustomModalContents
+              modalState={modalState}
+              onTypeClick={updateType}
+              onPickupCountChange={updatePickupCount}
+            />
+            <TypeSelectionButton
+              name="추가하기"
+              hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+              onTypeClick={() => {
+                onSaveClick();
+              }}
+            />
+          </>
+        ) : (
+          <PresetModalContents />
+        )}
+      </motion.div>
     </Modal>
   );
 }
