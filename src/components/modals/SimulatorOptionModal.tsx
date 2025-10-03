@@ -52,7 +52,7 @@ const dummies: Dummy[] = [
   {
     id: 'f8e7d6c5-b4a3-4210-9876-543210fedcba',
     name: '불타는 엘레지여',
-    gachaType: 'standard',
+    gachaType: 'single',
     operators: [{ name: '네크라스', currentQty: 0, operType: 'normal' }],
     pickupDetails: { pickupOpersCount: 1, targetPickupCount: 1, pickupChance: 50 },
     gachaMax: null,
