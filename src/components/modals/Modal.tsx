@@ -23,11 +23,14 @@ export default function Modal({ children, isOpen, onClose }: ModalProps) {
     setMounted(true);
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
     };
   }, [isOpen]);
 
@@ -64,7 +67,7 @@ export default function Modal({ children, isOpen, onClose }: ModalProps) {
                     ...modalTransition,
                   },
                 }}
-                className="relative -top-16 flex max-w-[960px] flex-col space-y-6 rounded-xl bg-[#202020] p-6"
+                className="relative flex max-h-[calc(100vh-48px)] max-w-[960px] flex-col space-y-6 rounded-xl bg-[#202020] p-6"
               >
                 {children}
               </motion.div>
