@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion, Transition, Variant } from 'motion/react';
+import { motion, Transition, Variant } from 'motion/react';
 import {
   gachaBannerOptionCardVariants,
   insetInputVariants,
@@ -17,7 +17,14 @@ import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
 import { clamp, cls, normalizeNumberString, stringToNumber } from '#/libs/utils';
-import React, { ActionDispatch, ChangeEvent, FocusEvent, ReactNode, useState } from 'react';
+import React, {
+  ActionDispatch,
+  ChangeEvent,
+  FocusEvent,
+  ReactNode,
+  useEffect,
+  useState,
+} from 'react';
 import { BannerBadgeProps, operatorBadgeProps } from '#/constants/ui';
 import OperatorBadgeEditModal from '#/components/modals/OperatorBadgeEditModal';
 import Badge from '#/components/Badge';
@@ -333,17 +340,15 @@ const BannerHeader = ({
         exit="exit"
         className="font-S-CoreDream-700 flex items-center text-2xl"
       >
-        <AnimatePresence mode="wait" propagate>
-          <motion.span
-            key={`${id} ${index + 1}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {index + 1}.
-          </motion.span>
-        </AnimatePresence>
+        <motion.span
+          key={`${id} ${index + 1}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {index + 1}.
+        </motion.span>
       </motion.div>
       <motion.div
         variants={insetInputVariants}
@@ -479,17 +484,15 @@ const SimplePreInfoField = ({
           </div>
         </div>
         <div className="mt-2 flex w-full justify-end">
-          <AnimatePresence propagate>
-            {isGachaSim || (
-              <AdditionalResUntilBannerEnd
-                key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
-                additionalResource={additionalResource.simpleMode.toString()}
-                onInputBlur={(e) => {
-                  updateAdditionalResource('simpleMode', stringToNumber(e.currentTarget.value));
-                }}
-              />
-            )}
-          </AnimatePresence>
+          {isGachaSim || (
+            <AdditionalResUntilBannerEnd
+              key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
+              additionalResource={additionalResource.simpleMode.toString()}
+              onInputBlur={(e) => {
+                updateAdditionalResource('simpleMode', stringToNumber(e.currentTarget.value));
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -795,6 +798,11 @@ export default function PickupBanner({
 }: PickupBannerProps) {
   // const isPresent = useIsPresent();
   const { gachaType, name, operators, id, image } = pickupData;
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    setIsInView(false);
+  }, [isSimpleMode]);
 
   const deleteData = (payload: DeleteDataProps) => {
     dispatch({ type: 'delete', payload: { id, ...payload } });
@@ -888,6 +896,12 @@ export default function PickupBanner({
         background: 'linear-gradient(135deg, #222222, #333333)',
         transition: { type: 'spring', stiffness: 170, damping: 27, mass: 1.35 },
       }}
+      viewport={{ amount: 0.5 }}
+      onViewportEnter={() => {
+        if (!isInView) {
+          setIsInView(true);
+        }
+      }}
       initial="exit"
       animate="idle"
       exit="exit"
@@ -896,7 +910,7 @@ export default function PickupBanner({
           duration: 0.3,
           ease: 'easeInOut',
           type: 'spring',
-          mass: 0.6,
+          mass: 0.5,
         },
       }}
       className="flex flex-col space-y-6 rounded-xl p-4"
@@ -919,8 +933,8 @@ export default function PickupBanner({
           <Image src={image} width={1560} height={500} alt="babel" />
         </motion.div>
       ) : null}
-      <AnimatePresence mode="wait" propagate>
-        {isSimpleMode ? (
+      {isInView ? (
+        isSimpleMode ? (
           <SimplePreInfoField
             // isPresent={isPresent}
             isGachaSim={isGachaSim}
@@ -950,34 +964,31 @@ export default function PickupBanner({
                 >
                   <span className="text-amber-400">목표</span> 픽업 목록
                 </motion.span>
-                <AnimatePresence propagate>
-                  {isGachaSim || (
-                    <AdditionalResUntilBannerEnd
-                      key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
-                      additionalResource={pickupData.additionalResource.extendedMode.toString()}
-                      onInputBlur={(e) => {
-                        updateAdditionalResource(
-                          'extendedMode',
-                          stringToNumber(e.currentTarget.value),
-                        );
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
+
+                {isGachaSim || (
+                  <AdditionalResUntilBannerEnd
+                    key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
+                    additionalResource={pickupData.additionalResource.extendedMode.toString()}
+                    onInputBlur={(e) => {
+                      updateAdditionalResource(
+                        'extendedMode',
+                        stringToNumber(e.currentTarget.value),
+                      );
+                    }}
+                  />
+                )}
               </div>
               <div className="space-y-6 lg:space-y-4">
-                <AnimatePresence propagate>
-                  {operators.map((operator) => (
-                    <PickupOperatorDetail
-                      key={operator.operatorId}
-                      operator={operator}
-                      onChangeOperatorDetails={updateOperatorDetails}
-                      onOperatorDelete={() => {
-                        deleteData({ target: 'operator', operatorId: operator.operatorId });
-                      }}
-                    />
-                  ))}
-                </AnimatePresence>
+                {operators.map((operator) => (
+                  <PickupOperatorDetail
+                    key={operator.operatorId}
+                    operator={operator}
+                    onChangeOperatorDetails={updateOperatorDetails}
+                    onOperatorDelete={() => {
+                      deleteData({ target: 'operator', operatorId: operator.operatorId });
+                    }}
+                  />
+                ))}
               </div>
               <motion.div
                 layout="position"
@@ -994,8 +1005,8 @@ export default function PickupBanner({
               </motion.div>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        )
+      ) : null}
     </motion.div>
   );
 }
