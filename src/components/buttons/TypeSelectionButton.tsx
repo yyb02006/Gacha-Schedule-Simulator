@@ -3,7 +3,7 @@
 import { GachaTypeButtonCustom } from '#/types/types';
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { gachaTypeButtonVariants, toOpacityZero } from '#/constants/variants';
+import { gachaTypeButtonVariants } from '#/constants/variants';
 import { cls } from '#/libs/utils';
 import { useIsMount } from '#/hooks/useIsMount';
 
@@ -44,25 +44,15 @@ export default function TypeSelectionButton({
       }}
       viewport={{ once: true, amount: 0.5 }}
       animate={isButtonDown ? 'active' : isHover ? 'hover' : 'idle'}
+      initial="idle"
       custom={custom}
-      initial="exit"
-      exit="exit"
       aria-pressed={isActive}
       className={cls(
         className,
         'font-S-CoreDream-500 flex cursor-pointer items-center justify-center rounded-xl p-2',
       )}
     >
-      <motion.div
-        variants={toOpacityZero}
-        whileInView="idle"
-        viewport={{ once: true, amount: 0.5 }}
-        initial="exit"
-        exit="exit"
-        className="relative top-[1px]"
-      >
-        {name}
-      </motion.div>
+      <div className="relative top-[1px]">{name}</div>
     </motion.button>
   );
 }
