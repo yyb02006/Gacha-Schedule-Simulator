@@ -2,8 +2,8 @@ import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/modals/Modal';
 import { InsetNumberInput } from '#/components/PickupBanner';
-import { ExtractPayloadFromAction } from '#/components/PickupList';
-import { gachaTypeButtons } from '#/constants/ui';
+import { Dummy, ExtractPayloadFromAction, Operator } from '#/components/PickupList';
+import { BannerBadgeProps, gachaTypeButtons } from '#/constants/ui';
 import {
   cardVariants,
   fontPop,
@@ -16,7 +16,10 @@ import { GachaType } from '#/types/types';
 import { motion } from 'motion/react';
 import { ChangeEvent, useReducer, useState } from 'react';
 import SimpleBar from 'simplebar-react';
+import pickupDatas from '#/data/pickupDatas.json';
 import 'simplebar-react/dist/simplebar.min.css';
+import Image from 'next/image';
+import Badge from '#/components/Badge';
 
 const CustomModalContents = ({
   modalState,
@@ -153,46 +156,61 @@ const reducer = (
   }
 };
 
-const PresetModalContents = () => {
+const prePickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
+  ...data,
+  operators: data.operators as Operator[],
+  gachaType: data.gachaType as GachaType,
+  maxGachaAttempts:
+    data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
+}));
+
+const PresetModalContents = ({ onPresetClick }: { onPresetClick: (payload: Dummy) => void }) => {
   return (
     <SimpleBar autoHide={false} className="-mx-4 h-full space-y-6 p-4" style={{ minHeight: 0 }}>
       <div className="space-y-6">
-        <motion.div
-          variants={cardVariants}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="h-[200px] rounded-xl"
-        >
-          우리 종족
-        </motion.div>
-        <motion.div
-          variants={cardVariants}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="h-[200px] rounded-xl"
-        >
-          파란 불꽃의 마음
-        </motion.div>
-        <motion.div
-          variants={cardVariants}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="h-[200px] rounded-xl"
-        >
-          어쩌구 저쩌구
-        </motion.div>
-        <motion.div
-          variants={cardVariants}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="h-[200px] rounded-xl"
-        >
-          신 픽업 1
-        </motion.div>
+        {prePickupDatas.map((pickupData) => {
+          const { id, image, name, gachaType } = pickupData;
+          return (
+            <motion.div
+              key={id}
+              variants={cardVariants}
+              initial="exit"
+              animate="idle"
+              exit="exit"
+              whileHover={{
+                scale: 1.02,
+              }}
+              className="cursor-pointer rounded-xl"
+              onClick={() => {
+                onPresetClick(pickupData);
+              }}
+            >
+              <motion.div
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="space-y-2 rounded-xl p-2 hover:ring-[2px] hover:ring-amber-400"
+              >
+                {image ? (
+                  <div>
+                    <Image
+                      src={image}
+                      width={1560}
+                      height={500}
+                      alt="babel"
+                      className="rounded-t-lg"
+                    />
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between gap-x-2 text-base">
+                  {name}
+                  <Badge {...BannerBadgeProps[gachaType].props} />
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })}
       </div>
     </SimpleBar>
   );
@@ -281,10 +299,12 @@ export default function BannerAddModal({
   isOpen,
   onClose,
   onSave,
+  onSavePreset,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onSave: (payload: ExtractPayloadFromAction<'addBanner'>) => void;
+  onSavePreset: (payload: Dummy) => void;
 }) {
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [modalState, dispatch] = useReducer(reducer, initialState);
@@ -307,6 +327,10 @@ export default function BannerAddModal({
   const onSaveClick = () => {
     onSave(modalState);
     dispatch({ type: 'initialIzation' });
+    onClose();
+  };
+  const onPresetSaveClick = (payload: Dummy) => {
+    onSavePreset(payload);
     onClose();
   };
   return (
@@ -352,7 +376,7 @@ export default function BannerAddModal({
             />
           </>
         ) : (
-          <PresetModalContents />
+          <PresetModalContents onPresetClick={onPresetSaveClick} />
         )}
       </motion.div>
     </Modal>
