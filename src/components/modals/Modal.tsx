@@ -53,22 +53,7 @@ export default function Modal({ children, isOpen, onClose }: ModalProps) {
             className="fixed top-0 left-0 flex h-screen w-screen items-center justify-center bg-[#00000090]"
           >
             <div className="relative flex h-screen items-center justify-center py-6">
-              <motion.div
-                animate={{
-                  clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0% 100%)',
-                  transition: {
-                    ...modalTransition,
-                  },
-                }}
-                initial={{ clipPath: 'polygon(0 50%, 100% 50%, 100% 50%, 0 50%)' }}
-                exit={{
-                  clipPath: 'polygon(0 50%, 100% 50%, 100% 50%, 0 50%)',
-                  transition: {
-                    ...modalTransition,
-                  },
-                }}
-                className="relative flex max-h-[calc(100vh-48px)] max-w-[960px] flex-col space-y-6 rounded-xl bg-[#202020] p-6"
-              >
+              <motion.div className="relative flex max-h-[calc(100vh-48px)] max-w-[960px] flex-col space-y-6 rounded-xl bg-[#202020] p-6">
                 {children}
               </motion.div>
             </div>
