@@ -1,12 +1,9 @@
 'use client';
 
-import AddButton from '#/components/buttons/AddButton';
 import ScheduleOverview from '#/components/InfomationBanner';
 import { AnimatePresence } from 'motion/react';
 import { useReducer, useState } from 'react';
-import { motion } from 'motion/react';
 import PlayButton from '#/components/buttons/PlayButton';
-import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
@@ -14,6 +11,7 @@ import { useModal } from '#/hooks/useModal';
 import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 import BannerAddModal from '#/components/modals/BannerAddModal';
 import pickupDatas from '#/data/pickupDatas.json';
+import AddBannerCard from '#/components/AddBannerCard';
 
 export type Operator = {
   operatorId: string;
@@ -445,7 +443,7 @@ export interface Dummy {
 
 export type ActionType =
   | 'addBanner'
-  | 'addDetailedBanner'
+  | 'addBannerUsePreset'
   | 'addOperator'
   | 'delete'
   | 'updatePickupCount'
@@ -464,6 +462,10 @@ export type PickupDatasAction =
         pickupOpersCount: { sixth: number; fifth: number; fourth: number };
         targetOpersCount: { sixth: number; fifth: number; fourth: number };
       };
+    }
+  | {
+      type: 'addBannerUsePreset';
+      payload: Dummy;
     }
   | {
       type: 'addOperator';
@@ -636,6 +638,9 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           additionalResource: { simpleMode: 0, extendedMode: 0 },
         } satisfies Dummy,
       ];
+    }
+    case 'addBannerUsePreset': {
+      return [...pickupDatas, { ...action.payload, id: crypto.randomUUID() }];
     }
     case 'addOperator': {
       const { id } = action.payload;
@@ -842,7 +847,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
   }
 };
 
-const picupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
+const prepickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
   ...data,
   operators: data.operators as Operator[],
   gachaType: data.gachaType as GachaType,
@@ -851,14 +856,17 @@ const picupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
 }));
 
 export default function PickupList() {
-  const [pickupDatas, dispatch] = useReducer(reducer, picupDatas);
-  const [isBannerAddHover, setIsBannerAddHover] = useState(false);
+  const [pickupDatas, dispatch] = useReducer(reducer, prepickupDatas);
   const [isGachaSim, setIsGachaSim] = useState(false);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
   const { isOpen: isModalOpen, openModal: openModal, closeModal: closeModal } = useModal();
 
   const addBanner = (payload: ExtractPayloadFromAction<'addBanner'>) => {
     dispatch({ type: 'addBanner', payload });
+  };
+
+  const addBannerUsePreset = (payload: Dummy) => {
+    dispatch({ type: 'addBannerUsePreset', payload });
   };
 
   /*   const addBanner = (payload: Partial<Dummy>) => {
@@ -913,34 +921,8 @@ export default function PickupList() {
           setIsSimpleMode={setIsSimpleMode}
         />
         <div className="flex w-full flex-col gap-y-6">
+          <AddBannerCard openModal={openModal} />
           <AnimatePresence>
-            <motion.div
-              onHoverStart={() => setIsBannerAddHover(true)}
-              onHoverEnd={() => setIsBannerAddHover(false)}
-              variants={cardVariants}
-              whileHover={{ scale: 1.02, background: 'linear-gradient(155deg, #bb4d00, #ffb900)' }}
-              whileTap={{ scale: 1.02, background: 'linear-gradient(155deg, #bb4d00, #ffb900)' }}
-              initial="exit"
-              animate="idle"
-              transition={cardTransition}
-              onClick={openModal}
-              className="flex cursor-pointer items-center justify-center gap-x-24 overflow-hidden rounded-xl py-8"
-            >
-              <motion.div
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="font-S-CoreDream-700 text-2xl"
-              >
-                픽업 배너 추가
-              </motion.div>
-              <AddButton
-                onAddClick={() => {}}
-                isOtherElHover={isBannerAddHover}
-                custom={{ boxShadow: '0px -7px 20px 5px #bd5b00, 0px 7px 22px 3px #ffde26' }}
-              />
-            </motion.div>
             {pickupDatas.map((pickupData, index) => (
               <PickupBanner
                 key={pickupData.id}
@@ -954,7 +936,12 @@ export default function PickupList() {
           </AnimatePresence>
         </div>
       </div>
-      <BannerAddModal isOpen={isModalOpen} onClose={closeModal} onSave={addBanner} />
+      <BannerAddModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSave={addBanner}
+        onSavePreset={addBannerUsePreset}
+      />
     </div>
   );
 }
