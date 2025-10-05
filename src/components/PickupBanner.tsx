@@ -1,12 +1,7 @@
 'use client';
 
-import { motion, Transition, Variant } from 'motion/react';
-import {
-  gachaBannerOptionCardVariants,
-  insetInputVariants,
-  secondLevelTransition,
-  toOpacityZero,
-} from '#/constants/variants';
+import { motion } from 'motion/react';
+import { toOpacityZero } from '#/constants/variants';
 import {
   Dummy,
   ExtractPayloadFromAction,
@@ -23,6 +18,7 @@ import React, {
   FocusEvent,
   ReactNode,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 import { BannerBadgeProps, operatorBadgeProps } from '#/constants/ui';
@@ -120,41 +116,9 @@ export const InsetNumberInput = ({
   const preventTransition = immediateExit && isParentPresent; */
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { duration: 0.2, delay: 0.2 } }}
-        exit={{
-          opacity: 0,
-          transition: /* preventTransition ? preventedTransition : */ { duration: 0.1, delay: 0.2 },
-        }}
-        className={cls(className, 'flex h-full items-center')}
-      >
-        {name}
-      </motion.div>
-      <motion.div
-        initial={{ boxShadow: 'inset 0px 0px 0px #202020, inset 0px 0px 0px #202020' }}
-        animate={{
-          boxShadow: 'inset 6px 6px 13px #101010, inset -6px -6px 13px #303030',
-          transition: secondLevelTransition.fadeIn,
-        }}
-        exit={{
-          boxShadow: 'inset 0px 0px 0px #202020, inset 0px 0px 0px #202020',
-          transition: /* preventTransition ? preventedTransition : */ secondLevelTransition.fadeOut,
-        }}
-        className="relative flex items-center rounded-lg"
-      >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, transition: { duration: 0.2, delay: 0.2 } }}
-          exit={{
-            opacity: 0,
-            transition: /* preventTransition ? preventedTransition : */ {
-              duration: 0.1,
-              delay: 0.2,
-            },
-          }}
-          className="relative flex items-center px-4 py-2"
-        >
+      <div className={cls(className, 'flex h-full items-center')}>{name}</div>
+      <div className="relative flex items-center rounded-lg shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+        <div className="relative flex items-center px-4 py-2">
           {showInfinity && isInfinity && <div className="absolute right-0 mr-4 text-3xl">∞</div>}
           <input
             type="text"
@@ -174,9 +138,9 @@ export const InsetNumberInput = ({
             maxLength={maxLength}
             value={showInfinity && isInfinity ? '' : localValue}
           />
-        </motion.div>
+        </div>
         {children}
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -191,29 +155,9 @@ const AdditionalResUntilBannerEnd = ({
   const [localValue, setLocalValue] = useState(additionalResource);
   return (
     <div className="flex items-center gap-x-3 text-sm">
-      <motion.span
-        variants={toOpacityZero}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="font-S-CoreDream-400 whitespace-nowrap"
-      >
-        배너 종료시까지 추가재화
-      </motion.span>
-      <motion.div
-        variants={insetInputVariants}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="relative flex items-center rounded-lg px-3"
-      >
-        <motion.div
-          variants={toOpacityZero}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="relative flex items-center px-2 py-2"
-        >
+      <span className="font-S-CoreDream-400 whitespace-nowrap">배너 종료시까지 추가재화</span>
+      <div className="relative flex items-center rounded-lg px-3 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+        <div className="relative flex items-center px-2 py-2">
           <input
             type="text"
             inputMode="numeric"
@@ -228,11 +172,9 @@ const AdditionalResUntilBannerEnd = ({
             className="relative w-14 min-w-0 text-right"
             value={localValue}
           />
-        </motion.div>
-        <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-          합성옥
-        </motion.div>
-      </motion.div>
+        </div>
+        <div>합성옥</div>
+      </div>
     </div>
   );
 };
@@ -261,32 +203,17 @@ const BannerBadges = ({
         }}
         className="flex h-full cursor-pointer gap-x-1"
       >
-        <motion.div
-          variants={toOpacityZero}
-          initial="exit"
-          animate="idle"
-          exit="exit"
+        <div
           className={cls(
             currentBadgeProp.color,
             'rounded-full border px-3 py-1 text-sm whitespace-nowrap',
           )}
         >
           <div className="relative top-[1px]">{currentBadgeProp.name}</div>
-        </motion.div>
+        </div>
         <motion.div
-          variants={toOpacityZero}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          custom={{
-            idle: {
-              transition: {
-                opacity: { duration: 0.2, delay: 0.2 },
-                borderColor: { duration: 0.2 },
-              } satisfies Transition,
-              additional: { borderColor: isHover ? '#ff637e' : '#ffb900' } satisfies Variant,
-            },
-          }}
+          animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
+          transition={{ duration: 0.2 }}
           className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
         >
           <motion.svg
@@ -333,35 +260,11 @@ const BannerHeader = ({
   };
   return (
     <div className="flex grow gap-4">
-      <motion.div
-        variants={toOpacityZero}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="font-S-CoreDream-700 flex items-center text-2xl"
-      >
-        <motion.span
-          key={`${id} ${index + 1}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          {index + 1}.
-        </motion.span>
-      </motion.div>
-      <motion.div
-        variants={insetInputVariants}
-        initial="exit"
-        animate="idle"
-        exit="exit"
-        className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl"
-      >
-        <motion.input
-          variants={toOpacityZero}
-          initial="exit"
-          animate="idle"
-          exit="exit"
+      <div className="font-S-CoreDream-700 flex items-center text-2xl">
+        <span key={`${id} ${index + 1}`}>{index + 1}.</span>
+      </div>
+      <div className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+        <input
           type="text"
           onChange={onNameChange}
           onBlur={onNameBlur}
@@ -369,7 +272,7 @@ const BannerHeader = ({
           className="w-full"
         />
         <BannerBadges gachaType={gachaType} onBannerBadgeChange={onBannerBadgeChange} />
-      </motion.div>
+      </div>
       <DeleteButton onDelete={onBannerDelete} className="size-[48px] shrink-0 grow" />
     </div>
   );
@@ -612,19 +515,7 @@ const OperatorBadges = ({
           <Badge {...operatorBadgeProps.rarity.fourth.props} />
         )}
         <motion.div
-          variants={toOpacityZero}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          custom={{
-            idle: {
-              transition: {
-                opacity: { duration: 0.2, delay: 0.2 },
-                borderColor: { duration: 0.2 },
-              } satisfies Transition,
-              additional: { borderColor: isHover ? '#ff637e' : '#ffb900' } satisfies Variant,
-            },
-          }}
+          animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
           className="border-rose relative flex aspect-square h-full items-center justify-center rounded-full border"
         >
           <motion.svg
@@ -665,18 +556,8 @@ const PickupOperatorDetail = ({
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
       <div className="flex grow gap-6">
         <DeleteButton onDelete={onOperatorDelete} className="-mr-2" />
-        <motion.div
-          variants={insetInputVariants}
-          initial="exit"
-          animate="idle"
-          exit="exit"
-          className="flex grow items-center rounded-lg py-2 pr-2 pl-4"
-        >
-          <motion.input
-            variants={toOpacityZero}
-            initial="exit"
-            animate="idle"
-            exit="exit"
+        <div className="flex grow items-center rounded-lg py-2 pr-2 pl-4 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+          <input
             type="text"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setLocalName(e.currentTarget.value);
@@ -688,19 +569,11 @@ const PickupOperatorDetail = ({
             className="w-full text-[15px]"
           />
           <OperatorBadges onChangeOperatorDetails={onChangeOperatorDetails} operator={operator} />
-        </motion.div>
+        </div>
       </div>
       <div className="flex gap-x-6 gap-y-3">
         <div className="flex items-center gap-2">
-          <motion.span
-            variants={toOpacityZero}
-            initial="exit"
-            animate="idle"
-            exit="exit"
-            className="whitespace-nowrap"
-          >
-            가챠 목표
-          </motion.span>
+          <span className="whitespace-nowrap">가챠 목표</span>
           <TypeSelectionButton
             name="명함"
             hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
@@ -721,21 +594,9 @@ const PickupOperatorDetail = ({
           />
         </div>
         <div className="flex items-center gap-2">
-          <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-            현재 잠재
-          </motion.span>
-          <motion.div
-            variants={insetInputVariants}
-            initial="exit"
-            animate="idle"
-            exit="exit"
-            className="flex items-center rounded-lg px-4 py-2"
-          >
-            <motion.input
-              variants={toOpacityZero}
-              initial="exit"
-              animate="idle"
-              exit="exit"
+          <span>현재 잠재</span>
+          <div className="flex items-center rounded-lg px-4 py-2 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+            <input
               type="text"
               inputMode="numeric"
               max={6}
@@ -758,7 +619,7 @@ const PickupOperatorDetail = ({
               className="w-6 min-w-0 text-right"
               value={localQty}
             />
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
@@ -798,10 +659,39 @@ export default function PickupBanner({
 }: PickupBannerProps) {
   // const isPresent = useIsPresent();
   const { gachaType, name, operators, id, image } = pickupData;
-  const [isInView, setIsInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [isView, setIsView] = useState(false);
+
+  const isViewRef = useRef(false);
 
   useEffect(() => {
-    setIsInView(false);
+    if (!ref.current) return;
+    const el = ref.current;
+
+    setIsView(false);
+    isViewRef.current = false;
+
+    const rect = el.getBoundingClientRect();
+    // console.log(rect.top, window.scrollY + window.innerHeight);
+    if (rect.top < window.scrollY + window.innerHeight && rect.top > 0) {
+      setIsView(true);
+      isViewRef.current = true;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isViewRef.current) {
+          setIsView(entry.isIntersecting);
+          isViewRef.current = true;
+        }
+      },
+      { threshold: 0.5 },
+    );
+
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+    };
   }, [isSimpleMode]);
 
   const deleteData = (payload: DeleteDataProps) => {
@@ -889,19 +779,15 @@ export default function PickupBanner({
 
   return (
     <motion.div
+      ref={ref}
       layout="position"
-      variants={gachaBannerOptionCardVariants}
+      variants={toOpacityZero}
       whileHover={{
         scale: 1.02,
         background: 'linear-gradient(135deg, #222222, #333333)',
         transition: { type: 'spring', stiffness: 170, damping: 27, mass: 1.35 },
       }}
-      viewport={{ amount: 0.5 }}
-      onViewportEnter={() => {
-        if (!isInView) {
-          setIsInView(true);
-        }
-      }}
+      viewport={{ amount: 0.4 }}
       initial="exit"
       animate="idle"
       exit="exit"
@@ -913,7 +799,7 @@ export default function PickupBanner({
           mass: 0.5,
         },
       }}
-      className="flex flex-col space-y-6 rounded-xl p-4"
+      className="flex flex-col space-y-6 rounded-xl bg-gradient-to-br from-[#1c1c1c] to-[#2a2a2a] p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]"
     >
       <BannerHeader
         id={id}
@@ -933,7 +819,7 @@ export default function PickupBanner({
           <Image src={image} width={1560} height={500} alt="babel" />
         </motion.div>
       ) : null}
-      {isInView ? (
+      {isView ? (
         isSimpleMode ? (
           <SimplePreInfoField
             // isPresent={isPresent}
@@ -943,7 +829,7 @@ export default function PickupBanner({
             updateAdditionalResource={updateAdditionalResource}
           />
         ) : (
-          <motion.div
+          <div
             key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
             className="space-y-6 text-sm lg:space-y-7"
           >
@@ -955,16 +841,9 @@ export default function PickupBanner({
             />
             <div className="space-y-3">
               <div className="font-S-CoreDream-500 flex flex-wrap justify-between gap-x-6 gap-y-4 text-xl">
-                <motion.span
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="py-1 whitespace-nowrap"
-                >
+                <span className="py-1 whitespace-nowrap">
                   <span className="text-amber-400">목표</span> 픽업 목록
-                </motion.span>
-
+                </span>
                 {isGachaSim || (
                   <AdditionalResUntilBannerEnd
                     key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
@@ -1004,7 +883,7 @@ export default function PickupBanner({
                 <AddButton onAddClick={addOperator} custom={{ size: 'small' }} />
               </motion.div>
             </div>
-          </motion.div>
+          </div>
         )
       ) : null}
     </motion.div>
