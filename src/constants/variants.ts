@@ -30,6 +30,15 @@ export const smallButtonVariants: Variants = {
     background: custom.background || undefined,
     color: custom.color || undefined,
   }),
+  active: (custom: { background?: string; color?: string }) => ({
+    boxShadow: 'inset 3px 3px 6px #101010, inset -3px -3px 6px #303030',
+    background: custom.background,
+    color: custom.color || undefined,
+    transition: {
+      background: { duration: 0.3, delay: 0.3 },
+      boxShadow: { duration: 0.3, delay: 0.1 },
+    },
+  }),
 };
 
 const cardIdle: Variant = {
