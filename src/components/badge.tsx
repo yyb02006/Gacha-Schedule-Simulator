@@ -1,4 +1,3 @@
-import { toOpacityZero } from '#/constants/variants';
 import { cls } from '#/libs/utils';
 import { motion } from 'motion/react';
 import { useState } from 'react';
@@ -9,18 +8,19 @@ export default function Badge({
   animation = false,
   onBadgeClick,
   isLayout = false,
+  className = '',
 }: {
   name: string;
   color: string;
   animation?: boolean;
   onBadgeClick?: () => void;
   isLayout?: boolean;
+  className?: string;
 }) {
   const [isHover, setIsHover] = useState(false);
   return (
     <motion.div
       layout={isLayout ? 'position' : false}
-      variants={toOpacityZero}
       onHoverStart={() => {
         setIsHover(true);
       }}
@@ -28,9 +28,7 @@ export default function Badge({
         setIsHover(false);
       }}
       onClick={onBadgeClick}
-      initial="exit"
-      animate="idle"
-      exit="exit"
+      className={className}
     >
       <motion.div
         animate={
