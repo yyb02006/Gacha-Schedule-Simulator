@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { toOpacityZero } from '#/constants/variants';
+import { insetInputVariants, toOpacityZero } from '#/constants/variants';
 import {
   Dummy,
   ExtractPayloadFromAction,
@@ -98,6 +98,7 @@ export const InsetNumberInput = ({
   maxLength,
   // immediateExit = false,
   showInfinity = false,
+  animate = false,
 }: {
   children?: ReactNode;
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
@@ -108,6 +109,7 @@ export const InsetNumberInput = ({
   maxLength?: number;
   immediateExit?: boolean;
   showInfinity?: boolean;
+  animate?: boolean;
 }) => {
   const [localValue, setLocalValue] = useSyncedState(currentValue);
   const isInfinity = currentValue === 'Infinity' && localValue === 'Infinity';
@@ -116,9 +118,31 @@ export const InsetNumberInput = ({
   const preventTransition = immediateExit && isParentPresent; */
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
-      <div className={cls(className, 'flex h-full items-center')}>{name}</div>
-      <div className="relative flex items-center rounded-lg shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
-        <div className="relative flex items-center px-4 py-2">
+      {name ? (
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className={cls(className, 'flex h-full items-center')}
+        >
+          {name}
+        </motion.div>
+      ) : null}
+      <motion.div
+        variants={animate ? insetInputVariants : undefined}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="relative flex items-center rounded-lg shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]"
+      >
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className="relative flex items-center px-4 py-2"
+        >
           {showInfinity && isInfinity && <div className="absolute right-0 mr-4 text-3xl">∞</div>}
           <input
             type="text"
@@ -138,9 +162,9 @@ export const InsetNumberInput = ({
             maxLength={maxLength}
             value={showInfinity && isInfinity ? '' : localValue}
           />
-        </div>
+        </motion.div>
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -661,6 +685,7 @@ export default function PickupBanner({
   const { gachaType, name, operators, id, image } = pickupData;
   const ref = useRef<HTMLDivElement>(null);
   const [isView, setIsView] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
   const isViewRef = useRef(false);
 
@@ -781,16 +806,32 @@ export default function PickupBanner({
     <motion.div
       ref={ref}
       layout="position"
-      variants={toOpacityZero}
-      whileHover={{
-        scale: 1.02,
-        background: 'linear-gradient(135deg, #222222, #333333)',
-        transition: { type: 'spring', stiffness: 170, damping: 27, mass: 1.35 },
+      onHoverStart={() => {
+        setIsHover(true);
       }}
+      onHoverEnd={() => {
+        setIsHover(false);
+      }}
+      variants={toOpacityZero}
       viewport={{ amount: 0.4 }}
       initial="exit"
-      animate="idle"
-      exit="exit"
+      animate={
+        isHover
+          ? {
+              scale: 1.02,
+              background: 'linear-gradient(135deg, #222222, #333333)',
+              opacity: 1,
+              transition: {
+                scale: { type: 'spring', stiffness: 170, damping: 27, mass: 1.35, duration: 0.2 },
+                background: { duration: 0.1 },
+              },
+            }
+          : {
+              opacity: 1,
+              background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
+            }
+      }
+      exit={{ opacity: 0, transition: { duration: 0.1 } }}
       transition={{
         layout: {
           duration: 0.3,
@@ -799,7 +840,7 @@ export default function PickupBanner({
           mass: 0.5,
         },
       }}
-      className="flex flex-col space-y-6 rounded-xl bg-gradient-to-br from-[#1c1c1c] to-[#2a2a2a] p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]"
+      className="flex flex-col space-y-6 rounded-xl p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]"
     >
       <BannerHeader
         id={id}
