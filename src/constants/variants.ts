@@ -112,12 +112,19 @@ export const gachaTypeButtonVariants: Variants = {
 
 export const optionButtonVariants: Variants = {
   ...smallButtonVariants,
-  hover: { background: 'linear-gradient(135deg, #bb4d00, #ffb900)' },
+  hover: {
+    boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
+    background: 'linear-gradient(135deg, #bb4d00, #ffb900)',
+  },
 };
 
 export const cancelButtonVariants: Variants = {
   ...smallButtonVariants,
-  hover: { background: 'linear-gradient(135deg, #bd1b36, #ff637e)', color: '#eaeaea' },
+  hover: {
+    boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
+    background: 'linear-gradient(135deg, #bd1b36, #ff637e)',
+    color: '#eaeaea',
+  },
 };
 
 export const insetInputVariants: Variants = {
