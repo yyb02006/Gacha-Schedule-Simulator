@@ -85,9 +85,7 @@ export default function BannerBadgeEditModal({
           >
             <span className="text-amber-400">선택된</span> 뱃지
           </motion.div>
-          <div className="flex gap-x-2">
-            <Badge key={selected.id} {...selected.props} />
-          </div>
+          <Badge key={selected.id} {...selected.props} isLayout />
         </div>
         <TypeSelectionButton
           name="수정완료"
