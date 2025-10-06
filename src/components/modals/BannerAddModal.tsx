@@ -341,7 +341,7 @@ export default function BannerAddModal({
         onClose();
       }}
     >
-      <motion.div className="flex h-0 w-[360px] flex-1 flex-col gap-y-8 lg:w-[480px]">
+      <div className="flex h-0 w-[360px] flex-1 flex-col gap-y-8 lg:w-[480px]">
         <div className="flex items-center justify-between gap-x-6">
           <motion.h1
             variants={toOpacityZero}
@@ -378,7 +378,7 @@ export default function BannerAddModal({
         ) : (
           <PresetModalContents onPresetClick={onPresetSaveClick} />
         )}
-      </motion.div>
+      </div>
     </Modal>
   );
 }
