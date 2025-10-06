@@ -68,6 +68,6 @@ export const BannerBadgeProps = {
   },
   orient: {
     id: 'orient',
-    props: { name: '지향 배너', color: 'border-orange-500 text-orange-500' },
+    props: { name: '3중 선택 배너', color: 'border-orange-500 text-orange-500' },
   },
 } as const;
