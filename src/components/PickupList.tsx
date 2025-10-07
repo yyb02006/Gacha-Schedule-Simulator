@@ -28,6 +28,7 @@ export interface Dummy {
   image: string | null;
   maxGachaAttempts: number;
   minGachaAttempts: number;
+  firstSixthTry: boolean;
   gachaType: GachaType;
   operators: Operator[];
   pickupDetails: {
@@ -446,6 +447,7 @@ export type ActionType =
   | 'addBannerUsePreset'
   | 'addOperator'
   | 'delete'
+  | 'updateFirstSixTry'
   | 'updatePickupCount'
   | 'updateAttempts'
   | 'updateBannerName'
@@ -474,6 +476,7 @@ export type PickupDatasAction =
       };
     }
   | { type: 'delete'; payload: { id: string; operatorId?: string; target: 'banner' | 'operator' } }
+  | { type: 'updateFirstSixTry'; payload: { id: string; isTry: boolean } }
   | {
       type: 'updatePickupCount';
       payload: {
@@ -633,6 +636,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           },
           maxGachaAttempts: Infinity,
           minGachaAttempts: 0,
+          firstSixthTry: false,
           name: `새 가챠 배너`,
           operators: operators,
           additionalResource: { simpleMode: 0, extendedMode: 0 },
@@ -766,6 +770,10 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           },
         };
       });
+    }
+    case 'updateFirstSixTry': {
+      const { id, isTry } = action.payload;
+      return modifyBannerDetails(id, (pickupData) => ({ ...pickupData, firstSixthTry: isTry }));
     }
     case 'updateAttempts': {
       const { id, attempts, target } = action.payload;

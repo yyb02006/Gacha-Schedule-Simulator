@@ -26,6 +26,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -62,6 +63,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -90,6 +92,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -134,6 +137,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -162,6 +166,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -190,6 +195,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -226,6 +232,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -278,6 +285,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -322,6 +330,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -350,6 +359,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     },
     {
@@ -394,6 +404,7 @@
       },
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
+      "firstSixthTry": false,
       "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
     }
   ]
