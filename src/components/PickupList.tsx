@@ -454,7 +454,8 @@ export type ActionType =
   | 'updateOperatorDetails'
   | 'updateSimplePickupCount'
   | 'updateAdditionalResource'
-  | 'updateGachaType';
+  | 'updateGachaType'
+  | 'swapIndex';
 
 export type PickupDatasAction =
   | {
@@ -534,6 +535,13 @@ export type PickupDatasAction =
       payload: {
         id: string;
         gachaType: GachaType;
+      };
+    }
+  | {
+      type: 'swapIndex';
+      payload: {
+        fromIndex: number;
+        toIndex: number;
       };
     };
 
@@ -773,7 +781,12 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
     }
     case 'updateFirstSixTry': {
       const { id, isTry } = action.payload;
-      return modifyBannerDetails(id, (pickupData) => ({ ...pickupData, firstSixthTry: isTry }));
+      return modifyBannerDetails(id, (pickupData) => ({
+        ...pickupData,
+        firstSixthTry: isTry,
+        maxGachaAttempts: 0,
+        minGachaAttempts: 0,
+      }));
     }
     case 'updateAttempts': {
       const { id, attempts, target } = action.payload;
@@ -784,14 +797,16 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           return {
             maxGachaAttempts: attempts,
             minGachaAttempts: attempts < minGachaAttempts ? attempts : minGachaAttempts,
+            firstSixthTry: false,
           };
         } else if (target === 'min') {
           return {
             maxGachaAttempts: attempts > maxGachaAttempts ? attempts : maxGachaAttempts,
             minGachaAttempts: attempts,
+            firstSixthTry: false,
           };
         } else if (target === 'both') {
-          return { maxGachaAttempts: attempts, minGachaAttempts: attempts };
+          return { maxGachaAttempts: attempts, minGachaAttempts: attempts, firstSixthTry: false };
         } else {
           return pickupBanner;
         }
@@ -850,6 +865,15 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
         return { gachaType };
       });
     }
+    case 'swapIndex': {
+      const { fromIndex, toIndex } = action.payload;
+      const newPickupDatas = [...pickupDatas];
+      [newPickupDatas[fromIndex], newPickupDatas[toIndex]] = [
+        newPickupDatas[toIndex],
+        newPickupDatas[fromIndex],
+      ];
+      return newPickupDatas;
+    }
     default:
       throw new Error();
   }
@@ -876,6 +900,8 @@ export default function PickupList() {
   const addBannerUsePreset = (payload: Dummy) => {
     dispatch({ type: 'addBannerUsePreset', payload });
   };
+
+  console.log(pickupDatas);
 
   /*   const addBanner = (payload: Partial<Dummy>) => {
     setPickupDatas((p) => [
@@ -939,6 +965,7 @@ export default function PickupList() {
                 index={index}
                 isSimpleMode={isSimpleMode}
                 isGachaSim={isGachaSim}
+                bannersLength={pickupDatas.length}
               />
             ))}
           </AnimatePresence>
