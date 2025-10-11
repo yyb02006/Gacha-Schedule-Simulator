@@ -41,6 +41,7 @@ export interface Dummy {
     };
   };
   additionalResource: { simpleMode: number; extendedMode: number };
+  active: boolean;
 }
 
 /* const dummies: Dummy[] = [
@@ -455,6 +456,7 @@ export type ActionType =
   | 'updateSimplePickupCount'
   | 'updateAdditionalResource'
   | 'updateGachaType'
+  | 'toggleActive'
   | 'swapIndex';
 
 export type PickupDatasAction =
@@ -535,6 +537,12 @@ export type PickupDatasAction =
       payload: {
         id: string;
         gachaType: GachaType;
+      };
+    }
+  | {
+      type: 'toggleActive';
+      payload: {
+        id: string;
       };
     }
   | {
@@ -648,6 +656,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           name: `새 가챠 배너`,
           operators: operators,
           additionalResource: { simpleMode: 0, extendedMode: 0 },
+          active: true,
         } satisfies Dummy,
       ];
     }
@@ -865,6 +874,12 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
         return { gachaType };
       });
     }
+    case 'toggleActive': {
+      const { id } = action.payload;
+      return modifyBannerDetails(id, (pickupData) => {
+        return { active: !pickupData.active };
+      });
+    }
     case 'swapIndex': {
       const { fromIndex, toIndex } = action.payload;
       const newPickupDatas = [...pickupDatas];
@@ -901,45 +916,6 @@ export default function PickupList() {
     dispatch({ type: 'addBannerUsePreset', payload });
   };
 
-  console.log(pickupDatas);
-
-  /*   const addBanner = (payload: Partial<Dummy>) => {
-    setPickupDatas((p) => [
-      ...p,
-      {
-        id: crypto.randomUUID(),
-        gachaType: payload.gachaType ?? 'single',
-        operators: payload.operators?.length
-          ? payload.operators
-          : Array({ length: payload.pickupDetails?.pickupOpersCount ?? 2 }).map((_, index) => ({
-              name: `오퍼레이터${index + 1}`,
-              currentQty: 0,
-              operatorType:
-                (payload.gachaType === 'limited' || payload.gachaType === 'collab') && index === 0
-                  ? 'limited'
-                  : 'normal',
-              targetCount: 1,
-            })),
-        pickupDetails: {
-          pickupOpersCount:
-            payload.pickupDetails?.pickupOpersCount ?? payload.operators?.length ?? 2,
-          targetPickupCount:
-            payload.pickupDetails?.pickupOpersCount ??
-            payload.operators?.filter(
-              ({ targetCount }) => !(targetCount === 0 || targetCount === null),
-            ).length ??
-            2,
-          pickupChance: payload.gachaType === 'limited' || payload.gachaType === 'collab' ? 70 : 50,
-        },
-        maxGachaAttempts: 300,
-        minGachaAttempts: 0,
-        name: 'scheduleA',
-      },
-    ]);
-  }; */
-  /*   const deleteBanner = (targetId: string) => () => {
-    setPickupDatas((p) => p.filter(({ id }) => id !== targetId));
-  }; */
   return (
     <div className="mt-12 flex space-x-6">
       <ScheduleOverview />

@@ -27,7 +27,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "a1b2c3d4-e5f6-4789-b0c1-d2e3f4a5b6c7",
@@ -64,7 +65,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "f8e7d6c5-b4a3-4210-9876-543210fedcba",
@@ -93,7 +95,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "f8e7d6c5-b4a3-4210-9876-543ddddedcba",
@@ -138,7 +141,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "f8e7d6c5-b4a3-4zz0-9876-54zzzddedcba",
@@ -167,7 +171,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "f8e7d6c5-b4a1-4zz0-9876-54zzzddedcba",
@@ -196,7 +201,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "f8e7d6c5-b4a3-4zz0-9556-54zzzddedcba",
@@ -233,7 +239,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "f8e7d6c5-b4g3-4zz0-9876-54zzzddedcba",
@@ -286,7 +293,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "f8e7d6c5-b4a3-4zz0-9876-54zzzxdedcba",
@@ -331,7 +339,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "f8e7d6c5-b4a3-4zz0-9876-xxzzzxdedcba",
@@ -360,7 +369,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     },
     {
       "id": "xxe7d6c5-b4a3-4zz0-9876-54zzzddddcba",
@@ -405,7 +415,8 @@
       "maxGachaAttempts": "Infinity",
       "minGachaAttempts": 0,
       "firstSixthTry": false,
-      "additionalResource": { "simpleMode": 0, "extendedMode": 0 }
+      "additionalResource": { "simpleMode": 0, "extendedMode": 0 },
+      "active": true
     }
   ]
 }
