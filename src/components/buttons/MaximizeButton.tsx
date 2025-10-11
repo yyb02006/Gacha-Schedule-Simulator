@@ -7,14 +7,14 @@ import { smallButtonVariants } from '#/constants/variants';
 import { cls } from '#/libs/utils';
 import { useIsMount } from '#/hooks/useIsMount';
 
-export default function MaximizeButton({
-  onMaximize,
-  isMaximized,
+export default function FoldButton({
+  onFold,
+  isFolded,
   size = 'size-[44px]',
   className = '',
 }: {
-  onMaximize: () => void;
-  isMaximized: boolean;
+  onFold: () => void;
+  isFolded: boolean;
   size?: SizeClass;
   className?: string;
 }) {
@@ -23,7 +23,7 @@ export default function MaximizeButton({
   const isMount = useIsMount();
   return (
     <motion.button
-      onClick={onMaximize}
+      onClick={onFold}
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
       onMouseDown={() => setIsClicked(true)}
@@ -47,13 +47,13 @@ export default function MaximizeButton({
         'relative shrink-0 cursor-pointer rounded-xl p-1 text-[#51a2ff]',
       )}
     >
-      {isMaximized ? (
-        <svg className="relative top-2 size-full">
-          <use href="/icons/icons.svg#minimize" />
-        </svg>
-      ) : (
+      {isFolded ? (
         <svg className="size-full">
           <use href="/icons/icons.svg#maximize" />
+        </svg>
+      ) : (
+        <svg className="relative top-2 size-full">
+          <use href="/icons/icons.svg#minimize" />
         </svg>
       )}
     </motion.button>
