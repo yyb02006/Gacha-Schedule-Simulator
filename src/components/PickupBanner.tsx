@@ -28,13 +28,18 @@ import BannerBadgeEditModal from '#/components/modals/BannerBadgeEditModal';
 import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
 import { useSyncedState } from '#/hooks/useSyncedState';
 import Image from 'next/image';
+import ToggleButton from '#/components/buttons/ToggleButton';
+import SmallButton from '#/components/buttons/SmallButton';
+import FoldButton from '#/components/buttons/MaximizeButton';
 
 const MaxAttempts = ({
   maxGachaAttempts,
+  isFirstSixthTry,
   onUnlimitedClick,
   onInputBlur,
 }: {
   maxGachaAttempts: string;
+  isFirstSixthTry: boolean;
   onUnlimitedClick: () => void;
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
 }) => {
@@ -45,7 +50,8 @@ const MaxAttempts = ({
       onInputBlur={onInputBlur}
       className="text-amber-400"
       max={999}
-      showInfinity
+      isFirstSixthTry={isFirstSixthTry}
+      showAttemptsSign
     >
       <TypeSelectionButton
         name="무제한"
@@ -59,32 +65,34 @@ const MaxAttempts = ({
 
 const MinAttempts = ({
   minGachaAttempts,
-  gachaType,
-  onReach300,
+  isFirstSixthTry,
+  onFirstSixth,
   onInputBlur,
 }: {
   minGachaAttempts: string;
-  gachaType: GachaType;
-  onReach300: () => void;
+  isFirstSixthTry: boolean;
+  onFirstSixth: () => void;
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
 }) => {
   return (
-    <InsetNumberInput
-      currentValue={minGachaAttempts.toString()}
-      name="최소 시도"
-      onInputBlur={onInputBlur}
-      className="text-sky-500"
-      max={999}
-    >
-      {gachaType === 'limited' && (
+    <div className="flex gap-x-3">
+      <InsetNumberInput
+        currentValue={minGachaAttempts.toString()}
+        name="최소 시도"
+        onInputBlur={onInputBlur}
+        isFirstSixthTry={isFirstSixthTry}
+        className="text-sky-500"
+        max={999}
+        showAttemptsSign
+      >
         <TypeSelectionButton
-          name="300정가"
+          name="첫 6성"
           className="px-3 text-sm"
-          onTypeClick={onReach300}
+          onTypeClick={onFirstSixth}
           hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
         />
-      )}
-    </InsetNumberInput>
+      </InsetNumberInput>
+    </div>
   );
 };
 
@@ -97,7 +105,8 @@ export const InsetNumberInput = ({
   max,
   maxLength,
   // immediateExit = false,
-  showInfinity = false,
+  showAttemptsSign = false,
+  isFirstSixthTry,
   animate = false,
 }: {
   children?: ReactNode;
@@ -108,14 +117,17 @@ export const InsetNumberInput = ({
   max?: number;
   maxLength?: number;
   immediateExit?: boolean;
-  showInfinity?: boolean;
+  showAttemptsSign?: boolean;
+  isFirstSixthTry?: boolean;
   animate?: boolean;
 }) => {
   const [localValue, setLocalValue] = useSyncedState(currentValue);
   const isInfinity = currentValue === 'Infinity' && localValue === 'Infinity';
+  const firstSixthTry = currentValue === '0' && localValue === '0' && isFirstSixthTry;
   /*   const isParentPresent = usePresenceData();
   const preventedTransition = { duration: 0, delay: 0 };
   const preventTransition = immediateExit && isParentPresent; */
+
   return (
     <div className="flex items-center gap-2 whitespace-nowrap">
       {name ? (
@@ -143,7 +155,14 @@ export const InsetNumberInput = ({
           exit="exit"
           className="relative flex items-center px-4 py-2"
         >
-          {showInfinity && isInfinity && <div className="absolute right-0 mr-4 text-3xl">∞</div>}
+          {showAttemptsSign && isInfinity && (
+            <div className="absolute right-0 mr-4 text-3xl">∞</div>
+          )}
+          {showAttemptsSign && firstSixthTry && (
+            <div className="absolute right-0 flex size-full items-center justify-center">
+              첫 6성
+            </div>
+          )}
           <input
             type="text"
             inputMode="numeric"
@@ -156,11 +175,14 @@ export const InsetNumberInput = ({
               ).toString();
               setLocalValue(normalizedString);
             }}
-            onBlur={onInputBlur}
+            onBlur={(e: FocusEvent<HTMLInputElement>) => {
+              if (!e.currentTarget.value) return;
+              onInputBlur(e);
+            }}
             className="relative h-full w-8 min-w-0 text-right"
             max={max}
             maxLength={maxLength}
-            value={showInfinity && isInfinity ? '' : localValue}
+            value={showAttemptsSign && (isInfinity || firstSixthTry) ? '' : localValue}
           />
         </motion.div>
         {children}
@@ -265,39 +287,103 @@ const BannerHeader = ({
   id,
   index,
   currentName,
+  isAnimateLocked,
   gachaType,
+  isMinimized,
+  isActive,
   onNameBlur,
   onBannerDelete,
   onBannerBadgeChange,
+  onUpdateIndex,
+  onMinimized,
+  onToggle,
 }: {
   id: string;
   index: number;
   currentName: string;
+  isAnimateLocked: boolean;
   gachaType: GachaType;
+  isMinimized: boolean;
+  isActive: boolean;
   onNameBlur: (e: FocusEvent<HTMLInputElement>) => void;
   onBannerDelete: () => void;
   onBannerBadgeChange: (gachaType: GachaType) => void;
+  onUpdateIndex: (direction: 'increase' | 'decrease') => void;
+  onMinimized: () => void;
+  onToggle: (isLeft?: boolean) => void;
 }) => {
   const [localValue, setLocalValue] = useState(currentName);
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setLocalValue(e.currentTarget.value);
   };
   return (
-    <div className="flex grow gap-4">
-      <div className="font-S-CoreDream-700 flex items-center text-2xl">
-        <span key={`${id} ${index + 1}`}>{index + 1}.</span>
+    <div className="flex flex-col gap-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex h-full gap-x-4">
+          <div className="relative">
+            <FoldButton
+              onFold={() => {
+                if (isActive) {
+                  onMinimized();
+                }
+              }}
+              isFolded={isMinimized}
+            />
+            {isActive || (
+              <div className="absolute top-0 left-0 size-full rounded-xl bg-[#505050aa]" />
+            )}
+          </div>
+          <ToggleButton
+            isLeft={isActive}
+            labels={{ left: '활성화', right: '비활성화' }}
+            onToggle={() => {
+              onToggle();
+            }}
+          />
+        </div>
+        <DeleteButton onDelete={onBannerDelete} className="shrink-0" />
       </div>
-      <div className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
-        <input
-          type="text"
-          onChange={onNameChange}
-          onBlur={onNameBlur}
-          value={localValue}
-          className="w-full"
-        />
-        <BannerBadges gachaType={gachaType} onBannerBadgeChange={onBannerBadgeChange} />
+      <div className="flex grow gap-4">
+        <SmallButton
+          background="linear-gradient(135deg, #bb4d00, #ffb900)"
+          color="#eaeaea"
+          onButtonClick={() => {
+            onUpdateIndex('decrease');
+          }}
+          isAnimateLocked={isAnimateLocked}
+          className="text-amber-400"
+        >
+          <svg className="relative size-full">
+            <use href="/icons/icons.svg#chevron-up" />
+          </svg>
+        </SmallButton>
+        <SmallButton
+          background="linear-gradient(135deg, #bb4d00, #ffb900)"
+          color="#eaeaea"
+          onButtonClick={() => {
+            onUpdateIndex('increase');
+          }}
+          isAnimateLocked={isAnimateLocked}
+          className="text-amber-400"
+        >
+          <svg className="relative size-full">
+            <use href="/icons/icons.svg#chevron-down" />
+          </svg>
+        </SmallButton>
+        <div className="font-S-CoreDream-700 flex items-center text-2xl">
+          <span key={`${id} ${index + 1}`}>{index + 1}.</span>
+        </div>
+        <div className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+          <input
+            type="text"
+            onChange={onNameChange}
+            onBlur={onNameBlur}
+            value={localValue}
+            className="w-full"
+          />
+          <BannerBadges gachaType={gachaType} onBannerBadgeChange={onBannerBadgeChange} />
+        </div>
       </div>
-      <DeleteButton onDelete={onBannerDelete} className="size-[48px] shrink-0 grow" />
     </div>
   );
 };
@@ -430,17 +516,20 @@ const PreInfoField = ({
   pickupData,
   updatePickupCount,
   updateAttempts,
+  updateFirstSixthTry,
 }: {
   pickupData: Dummy;
   updatePickupCount: (count: number, rarityType: OperatorRarityForString) => void;
   updateAttempts: (attempts: number, target: 'max' | 'min' | 'both') => void;
+  updateFirstSixthTry: (isTry: boolean) => void;
 }) => {
   const {
     pickupDetails: { pickupOpersCount },
     maxGachaAttempts,
     minGachaAttempts,
-    gachaType,
+    firstSixthTry,
   } = pickupData;
+
   return (
     <div className="font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex w-full flex-wrap justify-between gap-x-6 gap-y-3">
@@ -453,16 +542,17 @@ const PreInfoField = ({
             onUnlimitedClick={() => {
               updateAttempts(Infinity, 'max');
             }}
+            isFirstSixthTry={firstSixthTry}
           />
           <MinAttempts
             minGachaAttempts={minGachaAttempts.toString()}
             onInputBlur={(e) => {
               updateAttempts(stringToNumber(e.currentTarget.value), 'min');
             }}
-            onReach300={() => {
-              updateAttempts(300, 'both');
+            onFirstSixth={() => {
+              updateFirstSixthTry(true);
             }}
-            gachaType={gachaType}
+            isFirstSixthTry={firstSixthTry}
           />
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-3">
@@ -650,14 +740,6 @@ const PickupOperatorDetail = ({
   );
 };
 
-interface PickupBannerProps {
-  pickupData: Dummy;
-  dispatch: ActionDispatch<[action: PickupDatasAction]>;
-  index: number;
-  isGachaSim: boolean;
-  isSimpleMode: boolean;
-}
-
 type UpdateNameProps = Omit<ExtractPayloadFromAction<'updateBannerName'>, 'id'>;
 type DeleteDataProps = Omit<ExtractPayloadFromAction<'delete'>, 'id'>;
 export type UpdateOperatorDetails = Omit<ExtractPayloadFromAction<'updateOperatorDetails'>, 'id'>;
@@ -674,18 +756,32 @@ interface UpdateSimplePickupCountProps {
   rarityType: OperatorRarityForString;
 }
 
+interface PickupBannerProps {
+  pickupData: Dummy;
+  dispatch: ActionDispatch<[action: PickupDatasAction]>;
+  index: number;
+  isGachaSim: boolean;
+  isSimpleMode: boolean;
+  bannersLength: number;
+  isImageVisible: boolean;
+}
+
 export default function PickupBanner({
   pickupData,
   dispatch,
   index,
   isGachaSim,
   isSimpleMode,
+  bannersLength,
+  isImageVisible,
 }: PickupBannerProps) {
   // const isPresent = useIsPresent();
-  const { gachaType, name, operators, id, image } = pickupData;
+  const { gachaType, name, operators, id, image, active } = pickupData;
   const ref = useRef<HTMLDivElement>(null);
   const [isView, setIsView] = useState(false);
   const [isHover, setIsHover] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isAnimateLocked, setIsAnimateLocked] = useState(false);
 
   const isViewRef = useRef(false);
 
@@ -721,6 +817,16 @@ export default function PickupBanner({
 
   const deleteData = (payload: DeleteDataProps) => {
     dispatch({ type: 'delete', payload: { id, ...payload } });
+  };
+
+  const updateFirstSixthTry = (isTry: boolean) => {
+    dispatch({
+      type: 'updateFirstSixTry',
+      payload: {
+        id,
+        isTry,
+      },
+    });
   };
 
   const updatePickupCount = (count: number, rarityType: OperatorRarityForString) => {
@@ -798,6 +904,18 @@ export default function PickupBanner({
     }
   };
 
+  const updateIndex = (direction: 'increase' | 'decrease') => {
+    if (direction === 'increase' && index < bannersLength - 1) {
+      dispatch({ type: 'swapIndex', payload: { fromIndex: index, toIndex: index + 1 } });
+    } else if (direction === 'decrease' && index > 0) {
+      dispatch({ type: 'swapIndex', payload: { fromIndex: index, toIndex: index - 1 } });
+    }
+  };
+
+  const toggleActive = (isLeft?: boolean) => {
+    dispatch({ type: 'toggleActive', payload: { id, isLeft } });
+  };
+
   const addOperator = () => {
     dispatch({ type: 'addOperator', payload: { id } });
   };
@@ -840,13 +958,24 @@ export default function PickupBanner({
           mass: 0.5,
         },
       }}
-      className="flex flex-col space-y-6 rounded-xl p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]"
+      onLayoutAnimationStart={() => {
+        setIsAnimateLocked(true);
+      }}
+      onLayoutAnimationComplete={() => {
+        setIsAnimateLocked(false);
+      }}
+      className={cls(
+        'relative flex flex-col space-y-6 rounded-xl p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]',
+      )}
     >
       <BannerHeader
         id={id}
         currentName={name}
         gachaType={gachaType}
+        isAnimateLocked={isAnimateLocked}
+        isMinimized={isMinimized}
         index={index}
+        isActive={active}
         onBannerDelete={() => {
           deleteData({ target: 'banner' });
         }}
@@ -854,13 +983,18 @@ export default function PickupBanner({
           updateBannerName({ name: e.currentTarget.value });
         }}
         onBannerBadgeChange={updateBannerBadge}
+        onUpdateIndex={updateIndex}
+        onMinimized={() => {
+          setIsMinimized((p) => !p);
+        }}
+        onToggle={toggleActive}
       />
-      {image ? (
+      {!isMinimized && image && active && isImageVisible ? (
         <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
           <Image src={image} width={1560} height={500} alt="babel" />
         </motion.div>
       ) : null}
-      {isView ? (
+      {!isMinimized && isView && active ? (
         isSimpleMode ? (
           <SimplePreInfoField
             // isPresent={isPresent}
@@ -879,6 +1013,7 @@ export default function PickupBanner({
               pickupData={pickupData}
               updatePickupCount={updatePickupCount}
               updateAttempts={updateAttempts}
+              updateFirstSixthTry={updateFirstSixthTry}
             />
             <div className="space-y-3">
               <div className="font-S-CoreDream-500 flex flex-wrap justify-between gap-x-6 gap-y-4 text-xl">
