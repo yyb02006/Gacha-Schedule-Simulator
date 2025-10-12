@@ -297,11 +297,13 @@ const BannerAddTypeToggle = ({
 
 export default function BannerAddModal({
   isOpen,
+  bannerCount,
   onClose,
   onSave,
   onSavePreset,
 }: {
   isOpen: boolean;
+  bannerCount: number;
   onClose: () => void;
   onSave: (payload: ExtractPayloadFromAction<'addBanner'>) => void;
   onSavePreset: (payload: Dummy) => void;
@@ -325,11 +327,13 @@ export default function BannerAddModal({
     dispatch({ type: 'updateType', payload: { gachaType } });
   };
   const onSaveClick = () => {
+    if (bannerCount >= 20) return alert('배너는 20개까지만 추가 가능합니다.');
     onSave(modalState);
     dispatch({ type: 'initialIzation' });
     onClose();
   };
   const onPresetSaveClick = (payload: Dummy) => {
+    if (bannerCount >= 20) return alert('배너는 20개까지만 추가 가능합니다.');
     onSavePreset(payload);
     onClose();
   };

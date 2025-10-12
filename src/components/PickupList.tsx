@@ -579,6 +579,7 @@ export default function PickupList() {
       </div>
       <BannerAddModal
         isOpen={isModalOpen}
+        bannerCount={pickupDatas.length}
         onClose={closeModal}
         onSave={addBanner}
         onSavePreset={addBannerUsePreset}
