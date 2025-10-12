@@ -194,6 +194,9 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
     );
   switch (action.type) {
     case 'addBanner': {
+      if (pickupDatas.length >= 20) {
+        return pickupDatas;
+      }
       const { gachaType, pickupOpersCount, targetOpersCount } = action.payload;
       const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
       const operators: Dummy['operators'] = [
@@ -263,6 +266,9 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       ];
     }
     case 'addBannerUsePreset': {
+      if (pickupDatas.length >= 20) {
+        return pickupDatas;
+      }
       return [...pickupDatas, { ...action.payload, id: crypto.randomUUID() }];
     }
     case 'addOperator': {
@@ -515,8 +521,6 @@ export type SimulationOptions = {
   threshold: 'success' | 'complete';
   showBannerImage: boolean;
 };
-
-// max banners 20
 
 export default function PickupList() {
   const [pickupDatas, dispatch] = useReducer(reducer, prepickupDatas);
