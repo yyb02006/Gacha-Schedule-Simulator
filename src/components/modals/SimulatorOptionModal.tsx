@@ -1,118 +1,35 @@
 'use client';
 
 import Modal from '#/components/modals/Modal';
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { InsetNumberInput } from '#/components/PickupBanner';
 import { motion } from 'motion/react';
-import {
-  fontPop,
-  insetInputVariants,
-  toggleButtonVariants,
-  toOpacityZero,
-} from '#/constants/variants';
-
-/* 가챠 배너는 20개까지 */
+import { toOpacityZero } from '#/constants/variants';
+import { SimulationOptions } from '#/components/PickupList';
+import { stringToNumber } from '#/libs/utils';
+import ToggleButton from '#/components/buttons/ToggleButton';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  options: SimulationOptions;
+  setOptions: Dispatch<SetStateAction<SimulationOptions>>;
 }
 
-const PresetPhotoToggle = ({
-  isLeft,
-  onTypeClick,
-  leftName,
-  rightName,
-}: {
-  isLeft: boolean;
-  onTypeClick: () => void;
-  leftName: string;
-  rightName: string;
-}) => {
-  return (
-    <div className="flex min-w-[100px] flex-col space-y-1 text-sm">
-      <motion.div
-        variants={insetInputVariants}
-        animate="idle"
-        viewport={{ once: true, amount: 0.5 }}
-        initial="exit"
-        exit="exit"
-        onClick={onTypeClick}
-        className="relative flex h-[36px] cursor-pointer items-center justify-center rounded-xl px-4 pt-3 pb-2 font-bold"
-      >
-        <motion.div
-          variants={toOpacityZero}
-          animate="idle"
-          initial="exit"
-          exit="exit"
-          className="relative w-full text-center whitespace-nowrap"
-        >
-          <motion.div
-            variants={fontPop}
-            animate={isLeft ? 'inAcitve' : 'active'}
-            initial={isLeft ? 'active' : 'inAcitve'}
-            exit="exit"
-            className="font-S-CoreDream-700"
-          >
-            {leftName}
-          </motion.div>
-        </motion.div>
-        <motion.div
-          variants={toOpacityZero}
-          animate="idle"
-          initial="exit"
-          exit="exit"
-          className="relative w-full text-center whitespace-nowrap"
-        >
-          <motion.div
-            variants={fontPop}
-            animate={isLeft ? 'inAcitve' : 'active'}
-            initial={isLeft ? 'active' : 'inAcitve'}
-            exit="exit"
-            className="font-S-CoreDream-700"
-          >
-            {rightName}
-          </motion.div>
-        </motion.div>
-        <div className="absolute top-0 flex size-full">
-          <motion.div
-            transition={{
-              left: { type: 'spring', visualDuration: 0.3, bounce: 0.2 },
-            }}
-            animate={isLeft ? { left: 0 } : { left: '50%' }}
-            className="relative h-full w-1/2 p-[2px]"
-          >
-            <motion.div
-              variants={toggleButtonVariants}
-              initial="exit"
-              animate={isLeft ? 'left' : 'right'}
-              exit="exit"
-              transition={{ duration: 0.3 }}
-              className="flex size-full items-center justify-center rounded-lg"
-            >
-              <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-                {isLeft ? leftName : rightName}
-              </motion.span>
-            </motion.div>
-          </motion.div>
-        </div>
-      </motion.div>
-    </div>
-  );
-};
+export default function SimulatorOptionModal({
+  isOpen,
+  onClose,
+  options,
+  setOptions,
+}: SettingsModalProps) {
+  const [localOptions, setLocalOptions] = useState<SimulationOptions>(options);
 
-export default function SimulatorOptionModal({ isOpen, onClose }: SettingsModalProps) {
-  const [settingA, setSettingA] = useState(false);
-  const [settingB, setSettingB] = useState('option1');
-
-  const handleSave = () => {
-    console.log('설정 저장:', { settingA, settingB });
+  const onSaveClick = () => {
+    setOptions(localOptions);
     onClose();
   };
-
-  const onSaveClick = () => {};
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -139,22 +56,59 @@ export default function SimulatorOptionModal({ isOpen, onClose }: SettingsModalP
                 name="한정 확률"
                 className="text-sm text-orange-400"
                 onInputBlur={(e) => {
-                  // updatePickupCount(stringToNumber(e.currentTarget.value), 'sixth');
+                  const { value } = e.currentTarget;
+                  if (!value) return;
+                  setLocalOptions((p) => ({
+                    ...p,
+                    probability: {
+                      ...p.probability,
+                      limited: stringToNumber(value),
+                    },
+                  }));
                 }}
-                currentValue={'70'}
+                currentValue={localOptions.probability.limited.toString()}
                 max={100}
                 animate
-              />
+              >
+                <motion.div
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="relative top-[2px] mr-3 -ml-2 text-sm"
+                >
+                  %
+                </motion.div>
+              </InsetNumberInput>
               <InsetNumberInput
                 name="통상 확률"
                 className="text-sm text-sky-500"
                 onInputBlur={(e) => {
-                  // updatePickupCount(stringToNumber(e.currentTarget.value), 'sixth');
+                  const { value } = e.currentTarget;
+                  if (!value) return;
+                  setLocalOptions((p) => ({
+                    ...p,
+                    probability: {
+                      ...p.probability,
+                      normal: stringToNumber(value),
+                    },
+                  }));
                 }}
-                currentValue={'50'}
+                currentValue={localOptions.probability.normal.toString()}
                 max={100}
                 animate
-              />
+              >
+                {' '}
+                <motion.div
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="relative top-[2px] mr-3 -ml-2 text-sm"
+                >
+                  %
+                </motion.div>
+              </InsetNumberInput>
             </div>
           </div>
           <div className="flex flex-col gap-y-3">
@@ -165,9 +119,14 @@ export default function SimulatorOptionModal({ isOpen, onClose }: SettingsModalP
               name=""
               className="text-sky-500"
               onInputBlur={(e) => {
-                // updatePickupCount(stringToNumber(e.currentTarget.value), 'sixth');
+                const { value } = e.currentTarget;
+                if (!value) return;
+                setLocalOptions((p) => ({
+                  ...p,
+                  maxSimulation: stringToNumber(value),
+                }));
               }}
-              currentValue={'300'}
+              currentValue={localOptions.maxSimulation.toString()}
               max={300}
               animate
             >
@@ -176,9 +135,9 @@ export default function SimulatorOptionModal({ isOpen, onClose }: SettingsModalP
                 initial="exit"
                 animate="idle"
                 exit="exit"
-                className="mr-3 text-sm"
+                className="relative top-[2px] mr-3 -ml-2 text-sm"
               >
-                합성옥
+                회
               </motion.div>
             </InsetNumberInput>
           </div>
@@ -186,22 +145,44 @@ export default function SimulatorOptionModal({ isOpen, onClose }: SettingsModalP
             <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
               재화 소모 시뮬레이션 실패/성공 기준
             </motion.div>
-            <PresetPhotoToggle
-              isLeft={true}
-              onTypeClick={() => {}}
-              leftName="모든 배너 성공시"
-              rightName="일정 소화 완료시"
+            <ToggleButton
+              isLeft={localOptions.threshold === 'complete'}
+              onToggle={(isLeft?: boolean) => {
+                setLocalOptions((p) => ({
+                  ...p,
+                  threshold:
+                    isLeft === undefined
+                      ? p.threshold === 'complete'
+                        ? 'success'
+                        : 'complete'
+                      : isLeft
+                        ? 'complete'
+                        : 'success',
+                }));
+              }}
+              labels={{ left: '일정 소화 완료시', right: '모든 배너 성공시' }}
+              className="h-[36px]"
             />
           </div>
           <div className="flex flex-col gap-y-3">
             <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
               프리셋 배너 사진 표시 여부
             </motion.div>
-            <PresetPhotoToggle isLeft={true} onTypeClick={() => {}} leftName="켬" rightName="끔" />
+            <ToggleButton
+              isLeft={localOptions.showBannerImage}
+              onToggle={(isLeft?: boolean) => {
+                setLocalOptions((p) => ({
+                  ...p,
+                  showBannerImage: isLeft === undefined ? !p.showBannerImage : isLeft,
+                }));
+              }}
+              labels={{ left: '켬', right: '끔' }}
+              className="h-[36px]"
+            />
           </div>
         </div>
         <TypeSelectionButton
-          name="추가하기"
+          name="설정완료"
           hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
           onTypeClick={() => {
             onSaveClick();
