@@ -43,7 +43,7 @@ const ControlPanel = ({
             </motion.span>
             <div className="flex w-fit gap-x-3">
               <TypeSelectionButton
-                name="올명함"
+                name="6성 올명함"
                 hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
                 onTypeClick={() => {
                   if (initialInputs.gachaGoal !== 'allFirst') {
@@ -58,7 +58,7 @@ const ControlPanel = ({
                 className="px-4 whitespace-nowrap"
               />
               <TypeSelectionButton
-                name="올풀잠"
+                name="6성 올풀잠"
                 hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
                 onTypeClick={() => {
                   if (initialInputs.gachaGoal !== 'allMax') {
