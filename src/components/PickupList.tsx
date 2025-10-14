@@ -510,6 +510,14 @@ const prepickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
     data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
 }));
 
+export interface WorkerInput {
+  type: string;
+  payload: {
+    pickupDatas: Dummy[];
+    options: { isGachaSim: boolean; isSimpleMode: boolean } & SimulationOptions & InitialInputs;
+  };
+}
+
 export type InitialInputs = {
   gachaGoal: 'allFirst' | 'allMax' | null;
   initialResource: number;
@@ -546,13 +554,59 @@ export default function PickupList() {
     dispatch({ type: 'addBannerUsePreset', payload });
   };
 
+  const [progress, setProgress] = useState(0);
+  const [results, setResults] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
+
+  const runSimulation = () => {
+    if (isRunning) return;
+    setIsRunning(true);
+    const worker = new Worker(new URL('#/workers/simulatorWorker', import.meta.url), {
+      type: 'module',
+    });
+
+    const { maxSimulation, probability, showBannerImage, threshold } = options;
+    const {
+      current: { gachaGoal, initialResource },
+    } = initialInputs;
+
+    const postMessage: WorkerInput = {
+      type: 'start',
+      payload: {
+        pickupDatas,
+        options: {
+          isGachaSim,
+          isSimpleMode,
+          gachaGoal,
+          initialResource,
+          maxSimulation,
+          probability,
+          showBannerImage,
+          threshold,
+        },
+      },
+    };
+
+    worker.postMessage(postMessage);
+
+    worker.onmessage = (e) => {
+      setResults(e.data);
+      setIsRunning(false);
+      worker.terminate();
+    };
+  };
+
   return (
     <div className="mt-12 flex space-x-6">
       <ScheduleOverview />
       <div className="flex w-[984px] flex-col items-center space-y-6">
         <div className="mb-12 flex space-x-16">
           <ResetButton onResetClick={() => {}} />
-          <PlayButton onPlayClick={() => {}} />
+          <PlayButton
+            onPlayClick={() => {
+              runSimulation();
+            }}
+          />
         </div>
         <OptionBar
           isGachaSim={isGachaSim}
