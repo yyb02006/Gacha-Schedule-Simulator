@@ -5,9 +5,10 @@ export default {} as typeof Worker & { new (): Worker };
 
 interface OperatorResult {
   index: number;
-  count: number;
+  currentCount: number;
   targetCount: number;
   success: boolean;
+  isFirstObtained: boolean;
   operatorType: OperatorType;
 }
 
@@ -25,6 +26,19 @@ interface SimpleBannerResult {
   };
 }
 
+interface SuccessCount {
+  sixth: number;
+  fifth: number;
+  fourth: number;
+}
+
+interface SimulationMetrics {
+  isPityRewardFirstObtained: boolean;
+  pityRewardObtainedCount: number;
+  failedSixthAttempts: number;
+  adjustedSixthRate: number;
+}
+
 // const getRollResultnormalSixths = () => {};
 
 interface RollResult {
@@ -40,14 +54,16 @@ const handleSimplePityRollWin = (
   result: RollResult,
   gachaGoalCount: number,
 ) => {
-  pityRewardOperator.count++;
-  if (pityRewardOperator.count >= gachaGoalCount) pityRewardOperator.success = true;
-  if (pityRewardOperator.count === gachaGoalCount) result.isSuccessOnThisTry = true;
+  pityRewardOperator.currentCount++;
+  pityRewardOperator.isFirstObtained = true;
+  if (pityRewardOperator.currentCount >= gachaGoalCount) pityRewardOperator.success = true;
+  if (pityRewardOperator.currentCount === gachaGoalCount) result.isSuccessOnThisTry = true;
   result.sixth = pityRewardOperator;
 };
 
 const executeSimplePityRoll = ({
   targetSixths,
+  pityRewardOperators,
   isPityReached,
   isPityRewardFirstObtained,
   pickupChance,
@@ -55,6 +71,7 @@ const executeSimplePityRoll = ({
   gachaGoalCount,
 }: {
   targetSixths: OperatorResult[];
+  pityRewardOperators: OperatorResult[];
   isPityReached?: boolean;
   isPityRewardFirstObtained: boolean;
   pickupChance: number;
@@ -68,29 +85,44 @@ const executeSimplePityRoll = ({
     isPityRewardFirstObtained,
   };
 
-  if (isPityReached && !isPityRewardFirstObtained) {
+  if (isPityReached) {
     // 천장일 시
     // console.log('천장');
-    const pityRewardOperator = targetSixths[0];
-    result.isPityRewardFirstObtained = true;
-    handleSimplePityRollWin(pityRewardOperator, result, gachaGoalCount);
+    // ㅇㅇㅇㅇㅇㅇㅇ여기 로직 이미 있는 거 제외하고 애초에 굴려야함
+    const pityRoll = Math.random() * 100;
+    const PickupChanceByEachReward = 100 / pityRewardOperators.length;
+    for (const [ci, pityRewardOperator] of pityRewardOperators.entries()) {
+      if (
+        pityRoll < PickupChanceByEachReward * (ci + 1) &&
+        pityRoll >= PickupChanceByEachReward * ci
+      ) {
+        // 천장시 확률을 픽업 캐릭터 수만큼 나눈 뒤
+        // 각 캐릭터가 자신의 구간에서 당첨됐을 시
+        handleSimplePityRollWin(pityRewardOperator, result, gachaGoalCount);
+        break;
+      }
+    }
   } else {
     // 천장이 아닐 시
-    const roll = Math.random() * 100;
-    if (roll < pickupChance) {
+    const nonePityRoll = Math.random() * 100;
+    if (nonePityRoll < pickupChance) {
       // 픽업 당첨
-      // console.log('픽업 당첨', '/ 확률 :', pickupChance, '주사위 눈 :', roll);
-      for (const [ci, currentOperator] of targetSixths.entries()) {
-        if (roll < pickupChanceByEach * (ci + 1) && roll >= pickupChanceByEach * ci) {
+      // console.log('픽업 당첨', '/ 확률 :', pickupChance, '주사위 눈 :', nonePityRoll);
+      for (const [ci, targetOperator] of targetSixths.entries()) {
+        if (
+          nonePityRoll < pickupChanceByEach * (ci + 1) &&
+          nonePityRoll >= pickupChanceByEach * ci
+        ) {
           // 픽업확률을 픽업 캐릭터 수만큼 나눈 뒤
           // 각 캐릭터가 자신의 구간에서 당첨됐을 시
           if (ci === 0 && !isPityRewardFirstObtained) result.isPityRewardFirstObtained = true;
-          handleSimplePityRollWin(currentOperator, result, gachaGoalCount);
+          handleSimplePityRollWin(targetOperator, result, gachaGoalCount);
+          break;
         }
       }
     } else {
       // 픽뚫 당첨
-      // console.log('픽뚫 당첨', '/ 확률 :', pickupChance, '주사위 눈 :', roll);
+      // console.log('픽뚫 당첨', '/ 확률 :', pickupChance, '주사위 눈 :', nonePityRoll);
       result.isOffBannerHits = true;
     }
   }
@@ -98,72 +130,28 @@ const executeSimplePityRoll = ({
   return result;
 };
 
-const getRollResultLimitedSixths = ({
-  i,
-  initialOffBannerHits,
-  initialTargetSixths,
-  pickupChance,
-  pickupChanceByEach,
-  pity,
-  hasGotFirstLimitedSixth,
+const updateSimpleResult = ({
+  simpleBannerResult,
+  rollResult,
+  successCount,
+  simulationMetrics,
+  isPityReached,
 }: {
-  i: number;
-  initialOffBannerHits: number;
-  initialTargetSixths: OperatorResult[];
-  pickupChance: number;
-  pickupChanceByEach: number;
-  pity: number;
-  hasGotFirstLimitedSixth: boolean;
+  simpleBannerResult: SimpleBannerResult;
+  rollResult: RollResult;
+  successCount: SuccessCount;
+  simulationMetrics: SimulationMetrics;
+  isPityReached?: boolean;
 }) => {
-  const limitedOpersIndex = initialTargetSixths.findIndex(
-    ({ operatorType }) => operatorType === 'limited',
-  );
-  const hasLimitedOperator = limitedOpersIndex >= 0;
-  const result = {
-    isThisTrySuccess: false,
-    isFirstLimitedSixObtained: false,
-    sixths: structuredClone(initialTargetSixths),
-    offBannerHits: initialOffBannerHits,
-  };
-  if (i === pity && hasLimitedOperator && !hasGotFirstLimitedSixth) {
-    console.log('120 천장');
-    // 천장일 시
-    const currentOperator = result.sixths[limitedOpersIndex];
-    currentOperator.count++;
-    if (currentOperator.count >= currentOperator.targetCount) {
-      currentOperator.success = true;
-    }
-    if (currentOperator.count === currentOperator.targetCount) {
-      result.isThisTrySuccess = true;
-    }
-  } else {
-    // 천장이 아닐 시
-    const collabRoll = Math.random() * 100;
-    if (collabRoll < pickupChance) {
-      console.log('픽업 당첨');
-      // 픽업 당첨
-      for (const [ci, currentOperator] of result.sixths.entries()) {
-        if (collabRoll < pickupChanceByEach * (ci + 1) && collabRoll >= pickupChanceByEach * ci) {
-          // 모든 목표캐릭터에 대해 당첨 여부 확인
-          currentOperator.count++;
-          if (currentOperator.operatorType === 'limited') {
-            result.isFirstLimitedSixObtained = true;
-          }
-          if (currentOperator.count >= currentOperator.targetCount) {
-            currentOperator.success = true;
-          }
-          if (currentOperator.count === currentOperator.targetCount) {
-            result.isThisTrySuccess = true;
-          }
-        }
-      }
-    } else {
-      console.log('픽뚫 당첨');
-      // 픽뚫 당첨
-      result.offBannerHits++;
-    }
+  if (rollResult.sixth) {
+    const { index } = rollResult.sixth;
+    simpleBannerResult.bannerResults.sixth[index] = rollResult.sixth;
   }
-  return result;
+  if (rollResult.isPityRewardFirstObtained) simulationMetrics.isPityRewardFirstObtained = true;
+  if (isPityReached) simulationMetrics.pityRewardObtainedCount++;
+  if (rollResult.isOffBannerHits) simpleBannerResult.statistics.offBannerHits++;
+  if (!rollResult.isOffBannerHits) simpleBannerResult.statistics.pickupObtained++;
+  if (rollResult.isSuccessOnThisTry) successCount.sixth++;
 };
 
 const gachaRateSimulate = (
@@ -186,25 +174,27 @@ const gachaRateSimulate = (
       operators,
       pickupDetails: { pickupChance, pickupOpersCount, targetOpersCount, simpleMode },
     }) => {
-      let isPityReached = false;
-      let isPityRewardFirstObtained = false;
-      let failedSixthAttempts = 0;
-      let adjustedSixthRate = 0 + sixthRate;
       // collab 120연차 천장
       // limited 300천장 30% 픽뚫 있음
-      // single 150연차 다음 6성 천장 50%픽뚫 있음
-      // revival 50% 픽뚫 있음
+      // single 150연차 다음 6성 천장 50% 픽뚫 있음
+      // revival 150연차 다음 6성 천장 300연차 다음 안나온 6성 천장 50% 픽뚫 있음
       // contract 4중 픽뚫 없음
       // orient 지정 6성 3개 픽뚫 없음
-      const pities: Record<GachaType, number | null> = {
+      const pities = {
         collab: 119,
         limited: 299,
         single: 149,
+        revival: [149, 299],
         contract: null,
         orient: null,
-        revival: null,
-      };
+      } as const;
       const pity = pities[gachaType];
+      const simulationMetrics: SimulationMetrics = {
+        isPityRewardFirstObtained: false,
+        pityRewardObtainedCount: 0,
+        failedSixthAttempts: 0,
+        adjustedSixthRate: 0 + sixthRate,
+      };
       if (isSimpleMode) {
         const targetCount = gachaGoal === 'allMax' ? 6 : 1;
         const { pickupOpersCount, targetOpersCount } = simpleMode;
@@ -216,9 +206,10 @@ const gachaRateSimulate = (
           bannerResults: {
             sixth: Array.from({ length: targetOpersCount.sixth }, (_, index) => ({
               index,
-              count: 0,
+              currentCount: 0,
               targetCount,
               success: false,
+              isFirstObtained: false,
               operatorType:
                 (gachaType === 'collab' || gachaType === 'limited') && index === 0
                   ? 'limited'
@@ -226,16 +217,18 @@ const gachaRateSimulate = (
             })),
             fifth: Array.from({ length: targetOpersCount.fifth }, (_, index) => ({
               index,
-              count: 0,
+              currentCount: 0,
               targetCount: 1,
               success: false,
+              isFirstObtained: false,
               operatorType: 'normal',
             })),
             fourth: Array.from({ length: targetOpersCount.fourth }, (_, index) => ({
               index,
-              count: 0,
+              currentCount: 0,
               targetCount: 1,
               success: false,
+              isFirstObtained: false,
               operatorType: 'normal',
             })),
           },
@@ -249,53 +242,51 @@ const gachaRateSimulate = (
         };
         const targetSixths = simpleBannerResult.bannerResults.sixth;
         const pityRewardOperator = targetSixths[0];
-        // 성공 시도 따로 기록하는 게 성능적으론 좋지만 그냥 배열 메서드 돌리는 것도 고려
-        const successCount = { sixth: 0, fifth: 0, fourth: 0 };
-        const updateBannerResult = (rollResult: RollResult) => {
-          if (rollResult.sixth) {
-            const { index } = rollResult.sixth;
-            simpleBannerResult.bannerResults.sixth[index] = rollResult.sixth;
-          }
-          if (rollResult.isPityRewardFirstObtained) isPityRewardFirstObtained = true;
-          if (rollResult.isOffBannerHits) simpleBannerResult.statistics.pickupObtained++;
-          if (!rollResult.isOffBannerHits) simpleBannerResult.statistics.pickupObtained++;
-          if (rollResult.isSuccessOnThisTry) successCount.sixth++;
-        };
-
+        const successCount: SuccessCount = { sixth: 0, fifth: 0, fourth: 0 };
         for (let i = 0; i < maxGachaAttempts; i++) {
-          if (failedSixthAttempts >= 50) {
+          const { isPityRewardFirstObtained } = simulationMetrics;
+          if (simulationMetrics.failedSixthAttempts >= 50) {
             // 연속 실패횟수 50번 부터 확률 2%씩 증가
-            adjustedSixthRate = sixthRate + sixthRate * (failedSixthAttempts - 49);
+            simulationMetrics.adjustedSixthRate =
+              sixthRate + sixthRate * (simulationMetrics.failedSixthAttempts - 49);
           } else {
-            adjustedSixthRate = sixthRate;
+            simulationMetrics.adjustedSixthRate = sixthRate;
           }
           if (gachaType === 'limited' && i === pity) {
-            isPityRewardFirstObtained = true;
-            pityRewardOperator.count++;
+            // console.log('한정 천장');
+            simulationMetrics.isPityRewardFirstObtained = true;
+            pityRewardOperator.currentCount++;
             simpleBannerResult.statistics.pickupObtained++;
-            if (pityRewardOperator.count >= targetCount) pityRewardOperator.success = true;
-            if (pityRewardOperator.count === targetCount) successCount.sixth++;
-          }
-          if (gachaType === 'collab' && !isPityRewardFirstObtained && i === pity) {
-            isPityReached = true;
+            if (pityRewardOperator.currentCount >= targetCount) pityRewardOperator.success = true;
+            if (pityRewardOperator.currentCount === targetCount) successCount.sixth++;
           }
           const roll = Math.random() * 100;
-          if (roll < adjustedSixthRate || (isPityReached && gachaType !== 'single')) {
+          if (
+            roll < simulationMetrics.adjustedSixthRate ||
+            (gachaType === 'collab' && !isPityRewardFirstObtained && i === pity)
+          ) {
             // 6성 당첨
-            failedSixthAttempts = 0;
+            simulationMetrics.failedSixthAttempts = 0;
             simpleBannerResult.statistics.sixthObtained++;
             switch (gachaType) {
               case 'collab':
                 {
+                  const collabPity = pities[gachaType];
                   const rollResult = executeSimplePityRoll({
                     targetSixths,
-                    isPityReached,
+                    isPityReached: !isPityRewardFirstObtained && i === collabPity,
                     pickupChance,
                     pickupChanceByEach,
                     gachaGoalCount: targetCount,
                     isPityRewardFirstObtained,
+                    pityRewardOperators: [targetSixths[0]],
                   });
-                  updateBannerResult(rollResult);
+                  updateSimpleResult({
+                    rollResult,
+                    simpleBannerResult,
+                    simulationMetrics,
+                    successCount,
+                  });
                 }
                 break;
               case 'limited':
@@ -306,21 +297,61 @@ const gachaRateSimulate = (
                     pickupChanceByEach,
                     gachaGoalCount: targetCount,
                     isPityRewardFirstObtained,
+                    pityRewardOperators: [targetSixths[0]],
                   });
-                  updateBannerResult(rollResult);
+                  updateSimpleResult({
+                    rollResult,
+                    simpleBannerResult,
+                    simulationMetrics,
+                    successCount,
+                  });
                 }
                 break;
               case 'single':
                 {
+                  const singlePity = pities[gachaType];
                   const rollResult = executeSimplePityRoll({
                     targetSixths,
-                    isPityReached: !isPityRewardFirstObtained && i > 149,
+                    isPityReached: !isPityRewardFirstObtained && i > singlePity,
                     pickupChance,
                     pickupChanceByEach,
                     gachaGoalCount: targetCount,
                     isPityRewardFirstObtained,
+                    pityRewardOperators: [targetSixths[0]],
                   });
-                  updateBannerResult(rollResult);
+                  updateSimpleResult({
+                    rollResult,
+                    simpleBannerResult,
+                    simulationMetrics,
+                    successCount,
+                  });
+                }
+                break;
+              case 'revival':
+                {
+                  const currentPityRewards = [targetSixths[0], targetSixths[1]].filter(
+                    ({ isFirstObtained }) => !isFirstObtained,
+                  );
+                  const pityObtainedCount = simulationMetrics.pityRewardObtainedCount;
+                  const isRotationPityReached =
+                    currentPityRewards.length > 0 &&
+                    ((i > 149 && pityObtainedCount < 1) || (i > 299 && pityObtainedCount < 2));
+                  const rollResult = executeSimplePityRoll({
+                    targetSixths,
+                    isPityReached: isRotationPityReached,
+                    pickupChance,
+                    pickupChanceByEach,
+                    gachaGoalCount: targetCount,
+                    isPityRewardFirstObtained,
+                    pityRewardOperators: currentPityRewards,
+                  });
+                  updateSimpleResult({
+                    rollResult,
+                    simpleBannerResult,
+                    simulationMetrics,
+                    successCount,
+                    isPityReached: isRotationPityReached,
+                  });
                 }
                 break;
               default:
@@ -328,13 +359,16 @@ const gachaRateSimulate = (
             }
           } else {
             // 6성 미당첨
-            failedSixthAttempts++;
+            simulationMetrics.failedSixthAttempts++;
             simpleBannerResult.statistics.sixthFailed++;
-            if (roll < adjustedSixthRate + fifthRate && roll >= adjustedSixthRate) {
+            if (
+              roll < simulationMetrics.adjustedSixthRate + fifthRate &&
+              roll >= simulationMetrics.adjustedSixthRate
+            ) {
               // 5성 당첨
             } else if (
-              roll < adjustedSixthRate + fifthRate + fourthRate &&
-              roll >= adjustedSixthRate + fifthRate
+              roll < simulationMetrics.adjustedSixthRate + fifthRate + fourthRate &&
+              roll >= simulationMetrics.adjustedSixthRate + fifthRate
             ) {
               // 4성 당첨
             }
@@ -345,9 +379,9 @@ const gachaRateSimulate = (
             '성공 횟수 :',
             successCount.sixth,
             '6성 확률 :',
-            adjustedSixthRate,
+            simulationMetrics.adjustedSixthRate,
             '픽뚫 횟수',
-            offBannerHits,
+            simpleBannerResult.statistics.offBannerHits,
             '주사위 눈 :',
             roll,
           ); */
@@ -490,7 +524,7 @@ const singleDummy: Dummy = {
 };
 
 // revival => rotation
-const revivalDummy: Dummy = {
+const rotationDummy: Dummy = {
   id: 'a1b2c3d4-e5f6-4789-b0c1-d2e3zzzzb6c7',
   name: '로테이션-151',
   image: '/images/exusiai.jpg',
@@ -549,9 +583,11 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   // console.log('[Worker] 메인으로부터 데이터 수신:', pickupDatas);
   if (type !== 'start') return;
 
+  const testTryCount = 300000;
+
   const startTime = performance.now();
   const result = gachaRateSimulate(
-    Array.from({ length: 300000 }, () => limitedDummy),
+    Array.from({ length: testTryCount }, () => limitedDummy),
     isSimpleMode,
     gachaGoal,
   );
@@ -583,7 +619,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
     '픽업 확률 :',
     (statistics.pickupObtained / statistics.sixthObtained) * 100,
     '평균 가챠 횟수 :',
-    statistics.totalRuns / 300000,
+    statistics.totalRuns / testTryCount,
   );
   console.log(statistics);
 
