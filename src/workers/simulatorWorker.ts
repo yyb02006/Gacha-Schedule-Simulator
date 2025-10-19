@@ -48,6 +48,30 @@ interface RollResult {
   isPityRewardFirstObtained: boolean;
 }
 
+const updateSimpleResult = ({
+  simpleBannerResult,
+  rollResult,
+  successCount,
+  simulationMetrics,
+  isPityReached,
+}: {
+  simpleBannerResult: SimpleBannerResult;
+  rollResult: RollResult;
+  successCount: SuccessCount;
+  simulationMetrics: SimulationMetrics;
+  isPityReached?: boolean;
+}) => {
+  if (rollResult.sixth) {
+    const { index } = rollResult.sixth;
+    simpleBannerResult.bannerResults.sixth[index] = rollResult.sixth;
+  }
+  if (rollResult.isPityRewardFirstObtained) simulationMetrics.isPityRewardFirstObtained = true;
+  if (isPityReached) simulationMetrics.pityRewardObtainedCount++;
+  if (rollResult.isOffBannerHits) simpleBannerResult.statistics.offBannerHits++;
+  if (!rollResult.isOffBannerHits) simpleBannerResult.statistics.pickupObtained++;
+  if (rollResult.isSuccessOnThisTry) successCount.sixth++;
+};
+
 // 비순수함수
 const handleSimplePityRollWin = (
   pityRewardOperator: OperatorResult,
@@ -128,30 +152,6 @@ const executeSimplePityRoll = ({
   }
   // console.log(result.sixth, result);
   return result;
-};
-
-const updateSimpleResult = ({
-  simpleBannerResult,
-  rollResult,
-  successCount,
-  simulationMetrics,
-  isPityReached,
-}: {
-  simpleBannerResult: SimpleBannerResult;
-  rollResult: RollResult;
-  successCount: SuccessCount;
-  simulationMetrics: SimulationMetrics;
-  isPityReached?: boolean;
-}) => {
-  if (rollResult.sixth) {
-    const { index } = rollResult.sixth;
-    simpleBannerResult.bannerResults.sixth[index] = rollResult.sixth;
-  }
-  if (rollResult.isPityRewardFirstObtained) simulationMetrics.isPityRewardFirstObtained = true;
-  if (isPityReached) simulationMetrics.pityRewardObtainedCount++;
-  if (rollResult.isOffBannerHits) simpleBannerResult.statistics.offBannerHits++;
-  if (!rollResult.isOffBannerHits) simpleBannerResult.statistics.pickupObtained++;
-  if (rollResult.isSuccessOnThisTry) successCount.sixth++;
 };
 
 const gachaRateSimulate = (
@@ -406,6 +406,13 @@ const gachaRateSimulate = (
   );
 };
 
+/**
+ * 예상
+ *
+ * 기대값(평균): 60.8 회
+ * 중앙값(median): 57 회
+ * 표준편차(population): 37.75
+ */
 const collabDummy: Dummy = {
   id: 'f8e7d6c5-b4a3-4zz0-9876-54zzzxdedcba',
   name: '근심없는 잠꼬대',
@@ -453,6 +460,13 @@ const collabDummy: Dummy = {
   active: true,
 };
 
+/**
+ * 예상
+ *
+ * 기대값(평균): 145 회, 천장 없을 시 148.3회
+ * 중앙값(median): 125 회
+ * 표준편차(population): 86.86
+ */
 const limitedDummy: Dummy = {
   id: 'f8e7d6c5-b4a3-4zz0-9556-54zzzddedcba',
   name: '허',
@@ -492,6 +506,13 @@ const limitedDummy: Dummy = {
   active: true,
 };
 
+/**
+ * 예상
+ *
+ * 기대값(평균): 66.1 회, 천장 없을 시 69.2회
+ * 중앙값(median): 57 회
+ * 표준편차(population): 47.83
+ */
 const singleDummy: Dummy = {
   id: 'f8e7d6c5-b4a1-4zz0-9876-54zzzddedcba',
   name: '경중집',
@@ -524,6 +545,13 @@ const singleDummy: Dummy = {
 };
 
 // revival => rotation
+/**
+ * 예상
+ *
+ * 기대값(평균): 149 회, 천장 없을 시 207.6회
+ * 중앙값(median): 156 회
+ * 표준편차(population): 60.04
+ */
 const rotationDummy: Dummy = {
   id: 'a1b2c3d4-e5f6-4789-b0c1-d2e3zzzzb6c7',
   name: '로테이션-151',
