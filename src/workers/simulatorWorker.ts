@@ -297,107 +297,109 @@ const gachaRateSimulate = (
             const { targetOperators } = sixth;
             sixth.statistics.totalObtained++;
             simulationMetrics.failedSixthAttempts = 0;
-            switch (gachaType) {
-              case 'collab':
-                {
-                  const collabPity = pities[gachaType];
-                  const pityRewardOperator = sixth.targetOperators[0];
-                  const rollResult = executeSimplePityRoll({
-                    targetOperators,
-                    isPityReached: !pityRewardOperator.isFirstObtained && i === collabPity,
-                    pickupChance,
-                    pickupChanceByEach,
-                    pityRewardOperators: [pityRewardOperator],
-                  });
-                  updateSimpleResult({
-                    rollResult,
-                    simpleBannerResult,
-                    simulationMetrics,
-                    successCount,
-                    stringRarity,
-                  });
-                }
-                break;
-              case 'limited':
-                {
-                  const rollResult = executeSimplePityRoll({
-                    targetOperators,
-                    pickupChance,
-                    pickupChanceByEach,
-                    pityRewardOperators: [sixth.targetOperators[0]],
-                  });
-                  updateSimpleResult({
-                    rollResult,
-                    simpleBannerResult,
-                    simulationMetrics,
-                    successCount,
-                    stringRarity,
-                  });
-                }
-                break;
-              case 'single':
-                {
-                  const singlePity = pities[gachaType];
-                  const pityRewardOperator = sixth.targetOperators[0];
-                  const rollResult = executeSimplePityRoll({
-                    targetOperators,
-                    isPityReached: !pityRewardOperator.isFirstObtained && i > singlePity,
-                    pickupChance,
-                    pickupChanceByEach,
-                    pityRewardOperators: [pityRewardOperator],
-                  });
-                  updateSimpleResult({
-                    rollResult,
-                    simpleBannerResult,
-                    simulationMetrics,
-                    successCount,
-                    stringRarity,
-                  });
-                }
-                break;
-              case 'revival':
-                {
-                  const pityRewardOperators = [
-                    sixth.targetOperators[0],
-                    sixth.targetOperators[1],
-                  ].filter(({ isFirstObtained }) => !isFirstObtained);
-                  const pityObtainedCount = simulationMetrics.pityRewardObtainedCount;
-                  const isRotationPityReached =
-                    pityRewardOperators.length > 0 &&
-                    ((i > 149 && pityObtainedCount < 1) || (i > 299 && pityObtainedCount < 2));
-                  const rollResult = executeSimplePityRoll({
-                    targetOperators,
-                    isPityReached: isRotationPityReached,
-                    pickupChance,
-                    pickupChanceByEach,
-                    pityRewardOperators,
-                  });
-                  updateSimpleResult({
-                    rollResult,
-                    simpleBannerResult,
-                    simulationMetrics,
-                    successCount,
-                    isPityReached: isRotationPityReached,
-                    stringRarity,
-                  });
-                }
-                break;
-              default:
-                {
-                  const rollResult = executeSimplePityRoll({
-                    targetOperators,
-                    pickupChance,
-                    pickupChanceByEach,
-                  });
-                  updateSimpleResult({
-                    rollResult,
-                    simpleBannerResult,
-                    simulationMetrics,
-                    successCount,
-                    stringRarity,
-                  });
-                }
-                break;
+            if (targetOpersCount.sixth > 0) {
+              switch (gachaType) {
+                case 'collab':
+                  {
+                    const collabPity = pities[gachaType];
+                    const pityRewardOperator = sixth.targetOperators[0];
+                    const rollResult = executeSimplePityRoll({
+                      targetOperators,
+                      isPityReached: !pityRewardOperator.isFirstObtained && i === collabPity,
+                      pickupChance,
+                      pickupChanceByEach,
+                      pityRewardOperators: [pityRewardOperator],
+                    });
+                    updateSimpleResult({
+                      rollResult,
+                      simpleBannerResult,
+                      simulationMetrics,
+                      successCount,
+                      stringRarity,
+                    });
+                  }
+                  break;
+                case 'limited':
+                  {
+                    const rollResult = executeSimplePityRoll({
+                      targetOperators,
+                      pickupChance,
+                      pickupChanceByEach,
+                      pityRewardOperators: [sixth.targetOperators[0]],
+                    });
+                    updateSimpleResult({
+                      rollResult,
+                      simpleBannerResult,
+                      simulationMetrics,
+                      successCount,
+                      stringRarity,
+                    });
+                  }
+                  break;
+                case 'single':
+                  {
+                    const singlePity = pities[gachaType];
+                    const pityRewardOperator = sixth.targetOperators[0];
+                    const rollResult = executeSimplePityRoll({
+                      targetOperators,
+                      isPityReached: !pityRewardOperator.isFirstObtained && i > singlePity,
+                      pickupChance,
+                      pickupChanceByEach,
+                      pityRewardOperators: [pityRewardOperator],
+                    });
+                    updateSimpleResult({
+                      rollResult,
+                      simpleBannerResult,
+                      simulationMetrics,
+                      successCount,
+                      stringRarity,
+                    });
+                  }
+                  break;
+                case 'revival':
+                  {
+                    const pityRewardOperators = [
+                      sixth.targetOperators[0],
+                      sixth.targetOperators[1],
+                    ].filter(({ isFirstObtained }) => !isFirstObtained);
+                    const pityObtainedCount = simulationMetrics.pityRewardObtainedCount;
+                    const isRotationPityReached =
+                      pityRewardOperators.length > 0 &&
+                      ((i > 149 && pityObtainedCount < 1) || (i > 299 && pityObtainedCount < 2));
+                    const rollResult = executeSimplePityRoll({
+                      targetOperators,
+                      isPityReached: isRotationPityReached,
+                      pickupChance,
+                      pickupChanceByEach,
+                      pityRewardOperators,
+                    });
+                    updateSimpleResult({
+                      rollResult,
+                      simpleBannerResult,
+                      simulationMetrics,
+                      successCount,
+                      isPityReached: isRotationPityReached,
+                      stringRarity,
+                    });
+                  }
+                  break;
+                default:
+                  {
+                    const rollResult = executeSimplePityRoll({
+                      targetOperators,
+                      pickupChance,
+                      pickupChanceByEach,
+                    });
+                    updateSimpleResult({
+                      rollResult,
+                      simpleBannerResult,
+                      simulationMetrics,
+                      successCount,
+                      stringRarity,
+                    });
+                  }
+                  break;
+              }
             }
           } else {
             // 6성 미당첨
@@ -412,31 +414,33 @@ const gachaRateSimulate = (
               const stringRarity: OperatorRarityForString = 'fifth';
               const { targetOperators } = fifth;
               fifth.statistics.totalObtained++;
-              switch (gachaType) {
-                case 'collab':
-                  {
-                    const unobtainedPityRewards = [
-                      fifth.targetOperators[0],
-                      fifth.targetOperators[1],
-                    ].filter(({ isFirstObtained }) => !isFirstObtained);
-                    const rollResult = executeSimplePityRoll({
-                      targetOperators,
-                      pickupChance: 50,
-                      pickupChanceByEach: 50 / pickupOpersCount.fifth,
-                      isPityReached: unobtainedPityRewards.length === 1,
-                      pityRewardOperators: unobtainedPityRewards,
-                    });
-                    updateSimpleResult({
-                      rollResult,
-                      simpleBannerResult,
-                      simulationMetrics,
-                      successCount,
-                      stringRarity,
-                    });
-                  }
-                  break;
-                default:
-                  break;
+              if (targetOpersCount.fifth > 0) {
+                switch (gachaType) {
+                  case 'collab':
+                    {
+                      const unobtainedPityRewards = [
+                        fifth.targetOperators[0],
+                        fifth.targetOperators[1],
+                      ].filter(({ isFirstObtained }) => !isFirstObtained);
+                      const rollResult = executeSimplePityRoll({
+                        targetOperators,
+                        pickupChance: 50,
+                        pickupChanceByEach: 50 / pickupOpersCount.fifth,
+                        isPityReached: unobtainedPityRewards.length === 1,
+                        pityRewardOperators: unobtainedPityRewards,
+                      });
+                      updateSimpleResult({
+                        rollResult,
+                        simpleBannerResult,
+                        simulationMetrics,
+                        successCount,
+                        stringRarity,
+                      });
+                    }
+                    break;
+                  default:
+                    break;
+                }
               }
             } else if (
               roll < simulationMetrics.adjustedSixthRate + fifthRate + fourthRate &&
