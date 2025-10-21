@@ -28,7 +28,6 @@ interface OperatorResult {
 interface Statistics {
   totalObtained: number;
   pickupObtained: number;
-  offBannerHits: number;
 }
 
 interface SimpleBannerResult {
@@ -65,7 +64,6 @@ interface RollResult {
 const makeStatistics = (): Statistics => ({
   totalObtained: 0,
   pickupObtained: 0,
-  offBannerHits: 0,
 });
 
 const makeTargetOperators = ({
@@ -231,7 +229,6 @@ const gachaRateSimulate = (
     total: {
       simulationRuns,
       successCount: 0,
-      failedCount: 0,
     },
     perBanner: pickupDatas.map(({ id, name, active }) => ({
       id,
@@ -239,9 +236,9 @@ const gachaRateSimulate = (
       active,
       successCount: 0,
       totalRuns: 0,
-      sixth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0, offBannerHit: 0 },
-      fifth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0, offBannerHit: 0 },
-      fourth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0, offBannerHit: 0 },
+      sixth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
+      fifth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
+      fourth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
     })),
   };
   for (let ti = 0; ti < simulationRuns; ti++) {
@@ -609,26 +606,8 @@ const gachaRateSimulate = (
     if (singleSimulationSuccessCount === pickupDatas.length) simulationResult.total.successCount++;
     // 여기까지 해서 시뮬레이션 자체를 반복하는 반복문 한 번 더 만들어야 됨
   }
-  // 여기부터는 시뮬레이션이 전부 끝난 뒤 데이터 정리
-  simulationResult.total.failedCount =
-    simulationResult.total.simulationRuns - simulationResult.total.successCount;
-  simulationResult.perBanner = simulationResult.perBanner.map((banner) => ({
-    ...banner,
-    sixth: {
-      ...banner.sixth,
-      offBannerHit: banner.sixth.totalObtained - banner.sixth.pickupObtained,
-    },
-    fifth: {
-      ...banner.fifth,
-      offBannerHit: banner.fifth.totalObtained - banner.fifth.pickupObtained,
-    },
-    fourth: {
-      ...banner.fourth,
-      offBannerHit: banner.fourth.totalObtained - banner.fourth.pickupObtained,
-    },
-  }));
 
-  return pickupDatas.map(
+  /*   return pickupDatas.map(
     ({
       id,
       additionalResource,
@@ -967,7 +946,7 @@ const gachaRateSimulate = (
       }
       // return { id, name, success: true, gainedOperators: [], totalRuns };
     },
-  );
+  ); */
 };
 
 /**
