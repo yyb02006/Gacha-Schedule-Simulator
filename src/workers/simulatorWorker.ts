@@ -4,7 +4,7 @@ import { OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/t
 export default {} as typeof Worker & { new (): Worker };
 
 const logging = false;
-const testTryCount = 10;
+const testTryCount = 50000;
 
 const pities = {
   collab: 119,
@@ -210,13 +210,19 @@ const calculateOrundum = (
 
 // 재화 소모 시뮬레이션에 필요한 로직은 합성옥 더하기 뺴기일 뿐이니
 // 아무래도 시뮬레이션 종류보다는 기본-세부옵션 차이로 나누는 게 좋을 것 같음
-const gachaRateSimulate = (
-  pickupDatas: Dummy[],
-  gachaGoal: 'allFirst' | 'allMax' | null,
-  isSimpleMode: boolean,
-  isGachaSim: boolean,
-) => {
-  const simulationRuns = 10000;
+const gachaRateSimulate = ({
+  pickupDatas,
+  gachaGoal,
+  isGachaSim,
+  isSimpleMode,
+  simulationRuns,
+}: {
+  pickupDatas: Dummy[];
+  gachaGoal: 'allFirst' | 'allMax' | null;
+  isSimpleMode: boolean;
+  isGachaSim: boolean;
+  simulationRuns: number;
+}) => {
   const sixthRate = 2;
   const fifthRate = 8;
   const fourthRate = 50;
@@ -563,7 +569,11 @@ const gachaRateSimulate = (
               '주사위 눈 :',
               roll,
             );
-          if (successCount.sixth >= simpleMode.targetOpersCount.sixth) {
+          if (
+            successCount.sixth >= simpleMode.targetOpersCount.sixth &&
+            successCount.fifth >= simpleMode.targetOpersCount.fifth &&
+            successCount.fourth >= simpleMode.targetOpersCount.fourth
+          ) {
             simpleBannerResult.totalRuns = i + 1;
             simpleBannerResult.success = true;
             break;
@@ -604,9 +614,8 @@ const gachaRateSimulate = (
     }
     // 배너 전부 성공시 총 성공카운트 1증가
     if (singleSimulationSuccessCount === pickupDatas.length) simulationResult.total.successCount++;
-    // 여기까지 해서 시뮬레이션 자체를 반복하는 반복문 한 번 더 만들어야 됨
   }
-
+  return simulationResult;
   /*   return pickupDatas.map(
     ({
       id,
@@ -952,7 +961,8 @@ const gachaRateSimulate = (
 /**
  * 예상
  *
- * 6성 전부 뽑을 기대값: 190.46 회, 4개일 시 288.33회
+ * 6성 전부 뽑을 기대값: 288.33회
+ * 5성 3/6 뽑을 기대값: 137.5회, 6/6 뽑을 기대값: 183.75회
  * 중앙값(median): 169 회
  * 표준편차(population): ≈ 102.77
  */
@@ -1014,7 +1024,8 @@ const contractDummy: Dummy = {
 /**
  * 예상
  *
- * 6성 전부 뽑을 기대값: 190.46 회, 4개일 시 288.33회
+ * 6성 전부 뽑을 기대값: 190.46 회
+ * 5성 3/3 뽑을 기대값: 114.58회
  * 중앙값(median): 169 회
  * 표준편차(population): ≈ 102.77
  */
@@ -1069,7 +1080,7 @@ const orientDummy: Dummy = {
  * 예상
  *
  * 6성 기대값: 60.8 회
- * 5성 전부 뽑을 기대값: 37.52회
+ * 5성 전부 뽑을 기대값: 37.5회
  * 중앙값(median): 57 회
  * 표준편차(population): 37.75
  */
@@ -1124,6 +1135,7 @@ const collabDummy: Dummy = {
  * 예상
  *
  * 6성 전부 뽑을 기대값: 145 회, 천장 없을 시 148.3회
+ * 5성 1/1 뽑을 기대값: 25회
  * 중앙값(median): 125 회
  * 표준편차(population): 86.86
  */
@@ -1170,6 +1182,7 @@ const limitedDummy: Dummy = {
  * 예상
  *
  * 6성 전부 뽑을 기대값: 66.1 회, 천장 없을 시 69.2회
+ * 5성 2/2 뽑을 기대값: 75회
  * 중앙값(median): 57 회
  * 표준편차(population): 47.83
  */
@@ -1209,6 +1222,7 @@ const singleDummy: Dummy = {
  * 예상
  *
  * 6성 전부 뽑을 기대값: 149 회, 천장 없을 시 207.6회
+ * 5성 3/3 뽑을 기대값: 137.5회
  * 중앙값(median): 156 회
  * 표준편차(population): 60.04
  */
@@ -1272,57 +1286,38 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   if (type !== 'start') return;
 
   const startTime = performance.now();
-  const result = gachaRateSimulate(
-    Array.from({ length: testTryCount }, () => limitedDummy),
+  const result = gachaRateSimulate({
+    pickupDatas: [
+      contractDummy,
+      orientDummy,
+      collabDummy,
+      limitedDummy,
+      singleDummy,
+      rotationDummy,
+    ],
     gachaGoal,
     isSimpleMode,
-    false,
-  );
+    isGachaSim,
+    simulationRuns: testTryCount,
+  });
   const endTime = performance.now();
   const elapsedTime = endTime - startTime;
 
   console.log(`걸린 시간: ${elapsedTime} 밀리초`);
 
-  const getStatistics = (rarity: OperatorRarityForString) => {
-    return result.reduce(
-      (sum, item) => {
-        const totalRuns = sum.totalRuns + item!.totalRuns;
-        const totalObtained =
-          sum.totalObtained + item!.bannerResults[rarity].statistics.totalObtained;
-        return {
-          totalRuns,
-          totalObtained,
-          totalFailed: totalRuns - totalObtained,
-          pickupObtained:
-            sum.pickupObtained + item!.bannerResults[rarity].statistics.pickupObtained,
-          offBannerHits: sum.offBannerHits + item!.bannerResults[rarity].statistics.offBannerHits,
-        };
-      },
-      {
-        totalRuns: 0,
-        totalObtained: 0,
-        totalFailed: 0,
-        pickupObtained: 0,
-        offBannerHits: 0,
-      },
-    );
-  };
-
-  const watchedRarity: OperatorRarityForString = 'fifth';
-
-  const statistics = getStatistics(watchedRarity);
+  const { total, perBanner } = result;
+  const expectedValues = perBanner.map(({ totalRuns, successCount }) => totalRuns / successCount);
 
   console.log(
-    `등장 확률 :`,
-    (statistics.totalObtained / statistics.totalRuns) * 100,
-    '픽업 확률 :',
-    (statistics.pickupObtained / statistics.totalObtained) * 100,
-    '평균 가챠 횟수 :',
-    statistics.totalRuns / testTryCount,
-    '결과 :',
-    JSON.stringify(result, null, 2),
+    `전체 시뮬레이션 횟수 :`,
+    total.simulationRuns,
+    `성공한 시뮬레이션 횟수 :`,
+    total.successCount,
+    '개별 통계 :',
+    JSON.stringify(perBanner, null, 2),
+    '개별 배너 성공 기대값 :',
+    expectedValues,
   );
-  console.log(statistics);
 
   (self as unknown as Worker).postMessage({
     type: 'done',
