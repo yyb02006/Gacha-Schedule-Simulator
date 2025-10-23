@@ -277,7 +277,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       if (!currentBanner) return pickupDatas;
       const operatorCount = currentBanner.operators.length;
       const {
-        pickupDetails: { pickupOpersCount },
+        pickupDetails: { pickupOpersCount, targetOpersCount },
       } = currentBanner;
       const { sixth, fifth } = pickupOpersCount;
       const isFirstOperatorInLimitedBanner =
@@ -297,6 +297,14 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       return modifyBannerDetails(id, (originalPickupData) => ({
         pickupDetails: {
           ...originalPickupData.pickupDetails,
+          targetOpersCount: {
+            ...originalPickupData.pickupDetails.targetOpersCount,
+            [rarities[newRarity]]:
+              currentOperatorsCount[rarities[newRarity]] + 1 >=
+              targetOpersCount[rarities[newRarity]]
+                ? currentOperatorsCount[rarities[newRarity]] + 1
+                : originalPickupData.pickupDetails.targetOpersCount[rarities[newRarity]],
+          },
           pickupOpersCount: {
             ...originalPickupData.pickupDetails.pickupOpersCount,
             [rarities[newRarity]]:
@@ -449,6 +457,13 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
               ? pickupData.pickupDetails
               : {
                   ...pickupData.pickupDetails,
+                  targetOpersCount: {
+                    ...pickupData.pickupDetails.targetOpersCount,
+                    [prevStringRarity]:
+                      pickupData.pickupDetails.targetOpersCount[prevStringRarity] - 1,
+                    [rarities[rarity]]:
+                      pickupData.pickupDetails.targetOpersCount[rarities[rarity]] + 1,
+                  },
                   pickupOpersCount: {
                     ...pickupData.pickupDetails.pickupOpersCount,
                     [prevStringRarity]:
