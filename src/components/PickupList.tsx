@@ -18,7 +18,7 @@ export type Operator = {
   name: string;
   currentQty: number;
   operatorType: OperatorType;
-  targetCount: number | null;
+  targetCount: number;
   rarity: OperatorRarity;
 };
 
