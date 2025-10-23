@@ -54,7 +54,7 @@ const MaxAttempts = ({
       showAttemptsSign
     >
       <TypeSelectionButton
-        name="무제한"
+        name="최대값"
         className="px-3 text-sm"
         onTypeClick={onUnlimitedClick}
         hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
