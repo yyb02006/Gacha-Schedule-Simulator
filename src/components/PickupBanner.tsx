@@ -48,13 +48,14 @@ const MaxAttempts = ({
       currentValue={maxGachaAttempts.toString()}
       name="최대 시도"
       onInputBlur={onInputBlur}
-      className="text-amber-400"
-      max={999}
       isFirstSixthTry={isFirstSixthTry}
+      className="text-amber-400"
+      inputWidth="w-10"
+      max={9999}
       showAttemptsSign
     >
       <TypeSelectionButton
-        name="최대값"
+        name="무제한"
         className="px-3 text-sm"
         onTypeClick={onUnlimitedClick}
         hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
@@ -82,6 +83,7 @@ const MinAttempts = ({
         onInputBlur={onInputBlur}
         isFirstSixthTry={isFirstSixthTry}
         className="text-sky-500"
+        inputWidth="w-10"
         max={999}
         showAttemptsSign
       >
@@ -101,6 +103,7 @@ export const InsetNumberInput = ({
   onInputBlur,
   currentValue,
   name,
+  inputWidth,
   className = '',
   max,
   maxLength,
@@ -113,6 +116,7 @@ export const InsetNumberInput = ({
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
   currentValue: string;
   name: ReactNode;
+  inputWidth?: string;
   className?: string;
   max?: number;
   maxLength?: number;
@@ -179,7 +183,7 @@ export const InsetNumberInput = ({
               if (!e.currentTarget.value) return;
               onInputBlur(e);
             }}
-            className="relative h-full w-8 min-w-0 text-right"
+            className={cls(inputWidth ?? 'w-8', 'relative h-full min-w-0 text-right')}
             max={max}
             maxLength={maxLength}
             value={showAttemptsSign && (isInfinity || firstSixthTry) ? '' : localValue}
@@ -589,6 +593,7 @@ const PreInfoField = ({
   );
 };
 
+// 콜라보의 경우 5성도 한정 가능해야함
 const OperatorBadges = ({
   operator,
   onChangeOperatorDetails,
@@ -1040,7 +1045,11 @@ export default function PickupBanner({
                     operator={operator}
                     onChangeOperatorDetails={updateOperatorDetails}
                     onOperatorDelete={() => {
-                      deleteData({ target: 'operator', operatorId: operator.operatorId });
+                      deleteData({
+                        target: 'operator',
+                        operatorId: operator.operatorId,
+                        rarity: operator.rarity,
+                      });
                     }}
                   />
                 ))}
