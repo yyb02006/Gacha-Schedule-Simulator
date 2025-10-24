@@ -1,8 +1,8 @@
 'use client';
 
 import ScheduleOverview from '#/components/InfomationBanner';
-import { AnimatePresence } from 'motion/react';
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { AnimatePresence, clamp } from 'motion/react';
+import { useReducer, useRef, useState } from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
@@ -13,7 +13,6 @@ import BannerAddModal from '#/components/modals/BannerAddModal';
 import pickupDatas from '#/data/pickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
 import { obtainedTypes, rarityStrings } from '#/constants/variables';
-import { object } from 'motion/react-client';
 
 export type Operator = {
   operatorId: string;
@@ -567,16 +566,16 @@ const prepickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
     data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
 }));
 
-interface GachaSimulationMergedResult {
+export interface GachaSimulationMergedResult {
   total: {
     simulationTry: number;
-    successCount: number;
+    simulationSuccess: number;
     totalGachaRuns: number;
   };
   perBanner: {
     id: string;
     name: string;
-    successCount: number;
+    bannerSuccess: number;
     bannerGachaRuns: number;
     sixth: ObtainedStatistics;
     fifth: ObtainedStatistics;
@@ -633,40 +632,43 @@ export default function PickupList() {
     dispatch({ type: 'addBannerUsePreset', payload });
   };
 
-  useEffect(() => {
-    const numWorkers = navigator.hardwareConcurrency || 4;
-    console.log(numWorkers);
-  }, []);
-
   const [progress, setProgress] = useState(0);
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
 
   const runSimulation = async () => {
     if (isRunning) return;
-    setIsRunning(true);
     const { isMobile, workerCount } = getOptimalWorkerCount();
+    if (workerCount <= 0) return;
+    setIsRunning(true);
     const workers: Worker[] = [];
     const promises: Promise<GachaSimulationMergedResult>[] = [];
     const { simulationTry, probability, showBannerImage, winCondition } = options;
     const {
       current: { gachaGoal, initialResource },
     } = initialInputs;
-    const postMessage: WorkerInput = {
-      type: 'start',
-      payload: {
-        pickupDatas,
-        options: {
-          isGachaSim,
-          isSimpleMode,
-          gachaGoal,
-          initialResource,
-          simulationTry,
-          probability,
-          showBannerImage,
-          winCondition,
+    const expectedTryBySingleCycle = pickupDatas.length * 150;
+    const mobileSimulationTry = Math.floor(10000000 / expectedTryBySingleCycle);
+    const getPostMessage = (index: number): WorkerInput => {
+      const inputTry = isMobile ? mobileSimulationTry : simulationTry;
+      const base = Math.floor(inputTry / workerCount);
+      const remainder = inputTry % workerCount;
+      return {
+        type: 'start',
+        payload: {
+          pickupDatas,
+          options: {
+            isGachaSim,
+            isSimpleMode,
+            gachaGoal,
+            initialResource,
+            simulationTry: index === 0 ? base + remainder : base,
+            probability,
+            showBannerImage,
+            winCondition,
+          },
         },
-      },
+      };
     };
 
     for (let index = 0; index < workerCount; index++) {
@@ -682,20 +684,20 @@ export default function PickupList() {
           resolve(e.data.result);
           worker.terminate(); // 작업 끝나면 종료
         };
-        worker.postMessage(postMessage);
+        worker.postMessage(getPostMessage(index));
       });
       promises.push(promise);
     }
 
     const results = await Promise.all(promises);
 
-    const merged = results.reduce<GachaSimulationMergedResult>(
+    const mergedResult = results.reduce<GachaSimulationMergedResult>(
       (acc, current) => {
         current.perBanner.forEach((currentBanner, index) => {
-          const { successCount, bannerGachaRuns } = currentBanner;
+          const { bannerSuccess, bannerGachaRuns } = currentBanner;
           current.total.totalGachaRuns += bannerGachaRuns;
           if (acc.perBanner[index]) {
-            acc.perBanner[index].successCount += successCount;
+            acc.perBanner[index].bannerSuccess += bannerSuccess;
             acc.perBanner[index].bannerGachaRuns += bannerGachaRuns;
             for (const rarityString of rarityStrings) {
               for (const obtainedType of obtainedTypes) {
@@ -708,7 +710,7 @@ export default function PickupList() {
           }
         });
         acc.total.simulationTry += current.total.simulationTry;
-        acc.total.successCount += current.total.successCount;
+        acc.total.simulationSuccess += current.total.simulationSuccess;
         acc.total.totalGachaRuns += current.total.totalGachaRuns;
 
         return acc;
@@ -716,19 +718,20 @@ export default function PickupList() {
       {
         total: {
           simulationTry: 0,
-          successCount: 0,
+          simulationSuccess: 0,
           totalGachaRuns: 0,
         },
         perBanner: [],
       },
     );
-    console.log(merged);
+    console.log(mergedResult);
+    setResults(mergedResult);
     setIsRunning(false);
   };
 
   return (
     <div className="mt-12 flex space-x-6">
-      <ScheduleOverview />
+      <ScheduleOverview result={results} />
       <div className="flex w-[984px] flex-col items-center space-y-6">
         <div className="mb-12 flex space-x-16">
           <ResetButton onResetClick={() => {}} />
