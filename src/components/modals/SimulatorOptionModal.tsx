@@ -113,7 +113,7 @@ export default function SimulatorOptionModal({
           </div>
           <div className="flex flex-col gap-y-3">
             <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-              시뮬레이션 횟수 제한
+              시뮬레이션 횟수
             </motion.div>
             <InsetNumberInput
               name=""
@@ -123,11 +123,12 @@ export default function SimulatorOptionModal({
                 if (!value) return;
                 setLocalOptions((p) => ({
                   ...p,
-                  maxSimulation: stringToNumber(value),
+                  simulationTry: stringToNumber(value),
                 }));
               }}
-              currentValue={localOptions.maxSimulation.toString()}
-              max={300}
+              currentValue={localOptions.simulationTry.toString()}
+              inputWidth="w-20"
+              max={100000}
               animate
             >
               <motion.div
@@ -146,18 +147,18 @@ export default function SimulatorOptionModal({
               재화 소모 시뮬레이션 실패/성공 기준
             </motion.div>
             <ToggleButton
-              isLeft={localOptions.threshold === 'complete'}
+              isLeft={localOptions.winCondition === 'scheduleComplete'}
               onToggle={(isLeft?: boolean) => {
                 setLocalOptions((p) => ({
                   ...p,
-                  threshold:
+                  winCondition:
                     isLeft === undefined
-                      ? p.threshold === 'complete'
-                        ? 'success'
-                        : 'complete'
+                      ? p.winCondition === 'scheduleComplete'
+                        ? 'allSuccess'
+                        : 'scheduleComplete'
                       : isLeft
-                        ? 'complete'
-                        : 'success',
+                        ? 'scheduleComplete'
+                        : 'allSuccess',
                 }));
               }}
               labels={{ left: '일정 소화 완료시', right: '모든 배너 성공시' }}
