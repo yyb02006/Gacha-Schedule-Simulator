@@ -2,7 +2,7 @@
 
 import ScheduleOverview from '#/components/InfomationBanner';
 import { AnimatePresence } from 'motion/react';
-import { useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
@@ -12,6 +12,8 @@ import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 import BannerAddModal from '#/components/modals/BannerAddModal';
 import pickupDatas from '#/data/pickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
+import { obtainedTypes, rarityStrings } from '#/constants/variables';
+import { object } from 'motion/react-client';
 
 export type Operator = {
   operatorId: string;
@@ -42,6 +44,12 @@ export interface Dummy {
   };
   additionalResource: { simpleMode: number; extendedMode: number };
   active: boolean;
+}
+
+interface ObtainedStatistics {
+  totalObtained: number;
+  pickupObtained: number;
+  targetObtained: number;
 }
 
 export type ActionType =
@@ -79,7 +87,15 @@ export type PickupDatasAction =
         id: string;
       };
     }
-  | { type: 'delete'; payload: { id: string; operatorId?: string; target: 'banner' | 'operator' } }
+  | {
+      type: 'delete';
+      payload: {
+        id: string;
+        operatorId?: string;
+        rarity?: OperatorRarity;
+        target: 'banner' | 'operator';
+      };
+    }
   | { type: 'updateFirstSixTry'; payload: { id: string; isTry: boolean } }
   | {
       type: 'updatePickupCount';
@@ -166,6 +182,22 @@ export const rarities = {
   fifth: 5,
   fourth: 4,
 } as const;
+
+const getOptimalWorkerCount = (): { isMobile: boolean; workerCount: number } => {
+  const cores = navigator.hardwareConcurrency || 4;
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    if (cores <= 8) return { isMobile: true, workerCount: 2 }; // 중, 저급기
+    return { isMobile: true, workerCount: 3 }; // 고급기
+  }
+
+  // PC 환경
+  if (cores <= 4) return { isMobile: false, workerCount: 2 };
+  if (cores <= 8) return { isMobile: false, workerCount: Math.ceil(cores * 0.75) }; // 6개 정도
+  if (cores <= 12) return { isMobile: false, workerCount: Math.ceil(cores * 0.6) }; // 7~8개
+  return { isMobile: false, workerCount: Math.min(Math.ceil(cores * 0.5), 8) }; // 과도한 병렬 방지
+};
 
 const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
   const modifyBannerDetails = (id: string, transform: (pickupData: Dummy) => Partial<Dummy>) =>
@@ -318,20 +350,30 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       }));
     }
     case 'delete': {
-      const { id: bannerId, target, operatorId: payloadOperatorId } = action.payload;
+      const { id: bannerId, target, operatorId: payloadOperatorId, rarity } = action.payload;
       if (target === 'banner') {
         return pickupDatas.filter(({ id }) => id !== action.payload.id);
       } else if (target === 'operator') {
-        return pickupDatas.map((pickupData) =>
-          pickupData.id === bannerId
+        return pickupDatas.map((pickupData) => {
+          if (rarity === undefined) return pickupData;
+          const rarityString = rarities[rarity];
+          const prevTargetOpersCount = pickupData.pickupDetails.targetOpersCount[rarityString];
+          return pickupData.id === bannerId
             ? {
                 ...pickupData,
                 operators: pickupData.operators.filter(
                   ({ operatorId }) => operatorId !== payloadOperatorId,
                 ),
+                pickupDetails: {
+                  ...pickupData.pickupDetails,
+                  targetOpersCount: {
+                    ...pickupData.pickupDetails.targetOpersCount,
+                    [rarityString]: prevTargetOpersCount - 1 < 0 ? 0 : prevTargetOpersCount - 1,
+                  },
+                },
               }
-            : pickupData,
-        );
+            : pickupData;
+        });
       } else {
         return pickupDatas;
       }
@@ -525,12 +567,34 @@ const prepickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
     data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
 }));
 
+interface GachaSimulationMergedResult {
+  total: {
+    simulationTry: number;
+    successCount: number;
+    totalGachaRuns: number;
+  };
+  perBanner: {
+    id: string;
+    name: string;
+    successCount: number;
+    bannerGachaRuns: number;
+    sixth: ObtainedStatistics;
+    fifth: ObtainedStatistics;
+    fourth: ObtainedStatistics;
+  }[];
+}
+
 export interface WorkerInput {
   type: string;
   payload: {
     pickupDatas: Dummy[];
     options: { isGachaSim: boolean; isSimpleMode: boolean } & SimulationOptions & InitialInputs;
   };
+}
+
+export interface WorkerOutput {
+  type: string;
+  result: GachaSimulationMergedResult;
 }
 
 export type InitialInputs = {
@@ -540,8 +604,8 @@ export type InitialInputs = {
 
 export type SimulationOptions = {
   probability: { limited: number; normal: number };
-  maxSimulation: number;
-  threshold: 'success' | 'complete';
+  simulationTry: number;
+  winCondition: 'allSuccess' | 'scheduleComplete';
   showBannerImage: boolean;
 };
 
@@ -551,8 +615,8 @@ export default function PickupList() {
   const [isSimpleMode, setIsSimpleMode] = useState(true);
   const [options, setOptions] = useState<SimulationOptions>({
     probability: { limited: 70, normal: 50 },
-    maxSimulation: 100,
-    threshold: 'complete',
+    simulationTry: 10000,
+    winCondition: 'scheduleComplete',
     showBannerImage: true,
   });
   const initialInputs = useRef<InitialInputs>({
@@ -569,22 +633,25 @@ export default function PickupList() {
     dispatch({ type: 'addBannerUsePreset', payload });
   };
 
+  useEffect(() => {
+    const numWorkers = navigator.hardwareConcurrency || 4;
+    console.log(numWorkers);
+  }, []);
+
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
 
-  const runSimulation = () => {
+  const runSimulation = async () => {
     if (isRunning) return;
     setIsRunning(true);
-    const worker = new Worker(new URL('#/workers/simulatorWorker', import.meta.url), {
-      type: 'module',
-    });
-
-    const { maxSimulation, probability, showBannerImage, threshold } = options;
+    const { isMobile, workerCount } = getOptimalWorkerCount();
+    const workers: Worker[] = [];
+    const promises: Promise<GachaSimulationMergedResult>[] = [];
+    const { simulationTry, probability, showBannerImage, winCondition } = options;
     const {
       current: { gachaGoal, initialResource },
     } = initialInputs;
-
     const postMessage: WorkerInput = {
       type: 'start',
       payload: {
@@ -594,21 +661,69 @@ export default function PickupList() {
           isSimpleMode,
           gachaGoal,
           initialResource,
-          maxSimulation,
+          simulationTry,
           probability,
           showBannerImage,
-          threshold,
+          winCondition,
         },
       },
     };
 
-    worker.postMessage(postMessage);
+    for (let index = 0; index < workerCount; index++) {
+      const worker = new Worker(new URL('#/workers/simulatorWorker', import.meta.url), {
+        type: 'module',
+      });
+      workers.push(worker);
 
-    worker.onmessage = (e) => {
-      setResults(e.data);
-      setIsRunning(false);
-      worker.terminate();
-    };
+      const promise = new Promise<GachaSimulationMergedResult>((resolve) => {
+        worker.onmessage = (
+          e: MessageEvent<{ type: string; result: GachaSimulationMergedResult }>,
+        ) => {
+          resolve(e.data.result);
+          worker.terminate(); // 작업 끝나면 종료
+        };
+        worker.postMessage(postMessage);
+      });
+      promises.push(promise);
+    }
+
+    const results = await Promise.all(promises);
+
+    const merged = results.reduce<GachaSimulationMergedResult>(
+      (acc, current) => {
+        current.perBanner.forEach((currentBanner, index) => {
+          const { successCount, bannerGachaRuns } = currentBanner;
+          current.total.totalGachaRuns += bannerGachaRuns;
+          if (acc.perBanner[index]) {
+            acc.perBanner[index].successCount += successCount;
+            acc.perBanner[index].bannerGachaRuns += bannerGachaRuns;
+            for (const rarityString of rarityStrings) {
+              for (const obtainedType of obtainedTypes) {
+                acc.perBanner[index][rarityString][obtainedType] +=
+                  currentBanner[rarityString][obtainedType];
+              }
+            }
+          } else {
+            acc.perBanner.push(currentBanner);
+          }
+        });
+        acc.total.simulationTry += current.total.simulationTry;
+        acc.total.successCount += current.total.successCount;
+        acc.total.totalGachaRuns += current.total.totalGachaRuns;
+
+        return acc;
+      },
+      {
+        total: {
+          simulationTry: 0,
+          successCount: 0,
+          totalGachaRuns: 0,
+        },
+        perBanner: [],
+      },
+    );
+    console.log(merged);
+    setIsRunning(false);
   };
 
   return (
