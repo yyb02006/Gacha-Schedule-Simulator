@@ -100,3 +100,29 @@ export function clamp(num: number, min = 0, max?: number): number {
   if (max !== undefined && num > max) return max;
   return num;
 }
+
+/**
+ * 주어진 숫자를 소수점 둘째 자리까지 자르고 반환
+ *
+ * @param {number} num - 자를 숫자
+ * @returns {number} 소수점 둘째 자리까지 자른 숫자
+ *
+ * @example
+ * const truncatedNumber = truncateToTwoDecimals(1.2345);
+ * console.log(truncatedNumber); // 1.23
+ *
+ * @example
+ * const truncatedNumber = truncateToTwoDecimals(-1.2345);
+ * console.log(truncatedNumber); // -1.23
+ *
+ * @example
+ * const truncatedNumber = truncateToTwoDecimals(1.2);
+ * console.log(truncatedNumber); // 1.2
+ *
+ * @example
+ * const truncatedNumber = truncateToTwoDecimals(1);
+ * console.log(truncatedNumber); // 1
+ */
+export function truncateToTwoDecimals(num: number): number {
+  return Math.trunc(num * 100) / 100;
+}
