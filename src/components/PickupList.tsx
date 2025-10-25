@@ -701,6 +701,12 @@ export default function PickupList() {
             }
           } else {
             acc.perBanner.push(currentBanner);
+            for (const rarityString of rarityStrings) {
+              for (const obtainedType of obtainedTypes) {
+                acc.total.statistics[rarityString][obtainedType] +=
+                  currentBanner[rarityString][obtainedType];
+              }
+            }
           }
         });
         acc.total.simulationTry += current.total.simulationTry;
