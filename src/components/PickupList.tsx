@@ -1,18 +1,18 @@
 'use client';
 
 import ScheduleOverview from '#/components/InfomationBanner';
-import { AnimatePresence, clamp } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import { useReducer, useRef, useState } from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
 import { useModal } from '#/hooks/useModal';
-import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
+import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
 import BannerAddModal from '#/components/modals/BannerAddModal';
 import pickupDatas from '#/data/pickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
-import { obtainedTypes, rarityStrings } from '#/constants/variables';
+import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
 
 export type Operator = {
   operatorId: string;
@@ -172,15 +172,6 @@ export type PickupDatasAction =
 
 export type ExtractPayloadFromAction<K extends ActionType> =
   Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
-
-export const rarities = {
-  6: 'sixth',
-  5: 'fifth',
-  4: 'fourth',
-  sixth: 6,
-  fifth: 5,
-  fourth: 4,
-} as const;
 
 const getOptimalWorkerCount = (): { isMobile: boolean; workerCount: number } => {
   const cores = navigator.hardwareConcurrency || 4;
@@ -571,6 +562,7 @@ export interface GachaSimulationMergedResult {
     simulationTry: number;
     simulationSuccess: number;
     totalGachaRuns: number;
+    statistics: Record<OperatorRarityForString, ObtainedStatistics>;
   };
   perBanner: {
     id: string;
@@ -703,6 +695,8 @@ export default function PickupList() {
               for (const obtainedType of obtainedTypes) {
                 acc.perBanner[index][rarityString][obtainedType] +=
                   currentBanner[rarityString][obtainedType];
+                acc.total.statistics[rarityString][obtainedType] +=
+                  currentBanner[rarityString][obtainedType];
               }
             }
           } else {
@@ -720,6 +714,11 @@ export default function PickupList() {
           simulationTry: 0,
           simulationSuccess: 0,
           totalGachaRuns: 0,
+          statistics: {
+            sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
+            fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
+            fourth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
+          },
         },
         perBanner: [],
       },
