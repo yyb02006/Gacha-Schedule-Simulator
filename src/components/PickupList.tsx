@@ -736,7 +736,6 @@ export default function PickupList() {
 
   return (
     <div className="mt-12 flex space-x-6">
-      <ScheduleOverview result={results} />
       <div className="flex w-[984px] flex-col items-center space-y-6">
         <div className="mb-12 flex space-x-16">
           <ResetButton onResetClick={() => {}} />
@@ -780,6 +779,7 @@ export default function PickupList() {
         onSave={addBanner}
         onSavePreset={addBannerUsePreset}
       />
+      <ScheduleOverview result={results} />
     </div>
   );
 }
