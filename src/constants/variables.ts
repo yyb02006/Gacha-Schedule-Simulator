@@ -8,3 +8,8 @@ export const rarities = {
   fifth: 5,
   fourth: 4,
 } as const;
+export const obtainedKoreans = {
+  totalObtained: '전체',
+  pickupObtained: '픽업오퍼',
+  targetObtained: '목표오퍼',
+} as const;
