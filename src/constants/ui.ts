@@ -71,3 +71,10 @@ export const BannerBadgeProps = {
     props: { name: '3중 선택 배너', color: 'border-orange-500 text-orange-500' },
   },
 } as const;
+
+export const rarityColor = {
+  sixth: { HEX: '#ff6900', bgColor: 'bg-orange-400', textColor: 'text-orange-400' },
+  fifth: { HEX: '#fe9a00', bgColor: 'bg-amber-400', textColor: 'text-amber-400' },
+  fourth: { HEX: '#a684ff', bgColor: 'bg-violet-400', textColor: 'text-violet-400' },
+  third: { HEX: '#00a6f4', bgColor: 'bg-sky-500', textColor: 'text-sky-500' },
+} as const;
