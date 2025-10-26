@@ -105,24 +105,26 @@ export function clamp(num: number, min = 0, max?: number): number {
  * 주어진 숫자를 소수점 둘째 자리까지 자르고 반환
  *
  * @param {number} num - 자를 숫자
- * @returns {number} 소수점 둘째 자리까지 자른 숫자
+ * @param {number} decimals - 자릿수 (기본: 2)
+ * @returns {number} 소수점 n자리까지 자른 숫자
  *
  * @example
  * const truncatedNumber = truncateToTwoDecimals(1.2345);
  * console.log(truncatedNumber); // 1.23
  *
  * @example
- * const truncatedNumber = truncateToTwoDecimals(-1.2345);
- * console.log(truncatedNumber); // -1.23
+ * const truncatedNumber = truncateToTwoDecimals(1.2345, 3);
+ * console.log(truncatedNumber); // 1.234
  *
  * @example
- * const truncatedNumber = truncateToTwoDecimals(1.2);
- * console.log(truncatedNumber); // 1.2
+ * const truncatedNumber = truncateToTwoDecimals(-1.2);
+ * console.log(truncatedNumber); // -1.2
  *
  * @example
  * const truncatedNumber = truncateToTwoDecimals(1);
  * console.log(truncatedNumber); // 1
  */
-export function truncateToTwoDecimals(num: number): number {
-  return Math.trunc(num * 100) / 100;
+export function truncateToTwoDecimals(num: number, decimals = 2): number {
+  const factor = Math.pow(10, decimals);
+  return Math.round(num * factor) / factor;
 }
