@@ -3,9 +3,11 @@ import BannerAverageCount from '#/components/charts/BannerAverageCount';
 import BannerWinRate from '#/components/charts/BannerWinRate';
 import SimulationResult from '#/components/charts/SimulationResult';
 import TotalGachaResult from '#/components/charts/TotalGachaResult';
+import SimulationResultModal from '#/components/modals/SimulationResultModal';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
 import { motion } from 'motion/react';
+import { useState } from 'react';
 
 // 배너별 성공 시기 통계
 export default function ScheduleOverview({
@@ -15,6 +17,7 @@ export default function ScheduleOverview({
   isGachaSim: boolean;
   result: GachaSimulationMergedResult | null;
 }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <div className="w-[480px] space-y-6">
       <motion.div
@@ -39,15 +42,24 @@ export default function ScheduleOverview({
         </motion.div>
         <TypeSelectionButton
           name="자세히보기"
-          hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-          onTypeClick={() => {}}
+          hoverBackground="linear-gradient(155deg, #bb4d00, #3b372a)"
+          onTypeClick={() => {
+            setIsModalOpen(true);
+          }}
           className="px-4"
         />
       </motion.div>
       <SimulationResult result={result} />
+      <TotalGachaResult result={result} />
       <BannerWinRate result={result} />
       <BannerAverageCount result={result} />
-      <TotalGachaResult result={result} />
+      <SimulationResultModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+        }}
+        result={result}
+      />
     </div>
   );
 }
