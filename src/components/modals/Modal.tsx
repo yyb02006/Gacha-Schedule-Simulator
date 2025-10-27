@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { AnimatePresence, motion, Transition } from 'motion/react';
 import { createPortal } from 'react-dom';
+import SimpleBar from 'simplebar-react';
 
 interface ModalProps {
   children: ReactNode;
@@ -45,18 +46,27 @@ export default function Modal({ children, isOpen, onClose }: ModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                onClose();
-              }
-            }}
             className="fixed top-0 left-0 flex h-screen w-screen items-center justify-center bg-[#00000090]"
           >
-            <div className="relative flex h-screen items-center justify-center py-6">
-              <motion.div className="relative flex max-h-[calc(100vh-48px)] max-w-[960px] flex-col space-y-6 rounded-xl bg-[#202020] p-6">
+            <SimpleBar autoHide={false} className="h-full w-full" style={{ minHeight: 0 }}>
+              <div
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) {
+                    onClose();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    onClose();
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                className="flex h-full w-full justify-center p-4"
+              >
                 {children}
-              </motion.div>
-            </div>
+              </div>
+            </SimpleBar>
           </motion.div>
         )}
       </AnimatePresence>,
