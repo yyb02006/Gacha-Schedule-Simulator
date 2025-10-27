@@ -562,6 +562,7 @@ export interface GachaSimulationMergedResult {
     simulationTry: number;
     simulationSuccess: number;
     totalGachaRuns: number;
+    pityRewardObtained: number;
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
   };
   perBanner: {
@@ -569,6 +570,8 @@ export interface GachaSimulationMergedResult {
     name: string;
     bannerSuccess: number;
     bannerGachaRuns: number;
+    pityRewardObtained: number;
+    bannerHistograms: number[];
     sixth: ObtainedStatistics;
     fifth: ObtainedStatistics;
     fourth: ObtainedStatistics;
@@ -686,11 +689,15 @@ export default function PickupList() {
     const mergedResult = results.reduce<GachaSimulationMergedResult>(
       (acc, current) => {
         current.perBanner.forEach((currentBanner, index) => {
-          const { bannerSuccess, bannerGachaRuns } = currentBanner;
+          const { bannerSuccess, bannerGachaRuns, pityRewardObtained } = currentBanner;
           current.total.totalGachaRuns += bannerGachaRuns;
           if (acc.perBanner[index]) {
             acc.perBanner[index].bannerSuccess += bannerSuccess;
             acc.perBanner[index].bannerGachaRuns += bannerGachaRuns;
+            acc.perBanner[index].pityRewardObtained += pityRewardObtained;
+            for (let i = 0; i < acc.perBanner[index].bannerHistograms.length; i++) {
+              acc.perBanner[index].bannerHistograms[i] += currentBanner.bannerHistograms[i];
+            }
             for (const rarityString of rarityStrings) {
               for (const obtainedType of obtainedTypes) {
                 acc.perBanner[index][rarityString][obtainedType] +=
@@ -709,9 +716,11 @@ export default function PickupList() {
             }
           }
         });
+
         acc.total.simulationTry += current.total.simulationTry;
         acc.total.simulationSuccess += current.total.simulationSuccess;
         acc.total.totalGachaRuns += current.total.totalGachaRuns;
+        acc.total.pityRewardObtained += current.total.pityRewardObtained;
 
         return acc;
       },
@@ -720,6 +729,7 @@ export default function PickupList() {
           simulationTry: 0,
           simulationSuccess: 0,
           totalGachaRuns: 0,
+          pityRewardObtained: 0,
           statistics: {
             sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
             fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
@@ -779,7 +789,7 @@ export default function PickupList() {
         onSave={addBanner}
         onSavePreset={addBannerUsePreset}
       />
-      <ScheduleOverview result={results} />
+      <ScheduleOverview result={results} isGachaSim={isGachaSim} />
     </div>
   );
 }
