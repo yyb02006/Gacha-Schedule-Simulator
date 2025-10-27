@@ -22,10 +22,10 @@ export default function SimulationResult({
   return (
     <motion.div
       variants={cardVariants}
-      whileInView="idle"
-      viewport={{ once: true, amount: 0.5 }}
       transition={{ ...cardTransition, ease: 'easeIn' }}
       initial="exit"
+      animate="idle"
+      exit="exit"
       className="font-S-CoreDream-400 w-full space-y-3 rounded-xl p-4"
     >
       <motion.div
