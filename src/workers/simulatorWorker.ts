@@ -33,6 +33,26 @@ function createRNG(seed = 0x12345678) {
   };
 }
 
+interface SimulationResult {
+  total: {
+    simulationTry: number;
+    simulationSuccess: number;
+    totalGachaRuns: number;
+    pityRewardObtained: number;
+  };
+  perBanner: {
+    id: string;
+    name: string;
+    bannerSuccess: number;
+    bannerGachaRuns: number;
+    pityRewardObtained: number;
+    bannerHistograms: number[];
+    sixth: { totalObtained: number; pickupObtained: number; targetObtained: number };
+    fifth: { totalObtained: number; pickupObtained: number; targetObtained: number };
+    fourth: { totalObtained: number; pickupObtained: number; targetObtained: number };
+  }[];
+}
+
 interface OperatorResult {
   index: number;
   id: string;
@@ -58,6 +78,7 @@ interface BannerResult {
   operators: Record<OperatorRarityForString, OperatorResult[]>;
   statistics: Record<OperatorRarityForString, Statistics>;
   bannerGachaRuns: number;
+  isPityRewardObtained: boolean;
 }
 
 interface SuccessCount {
@@ -72,13 +93,12 @@ interface SimulationMetrics {
   adjustedSixthRate: number;
 }
 
-// const getRollResultnormalSixths = () => {};
-
 interface RollResult {
   obtainedOperator: OperatorResult | null;
   isSuccessOnThisTry: boolean;
   isPickupObtained: boolean;
   isTargetObtained: boolean;
+  isPityRewardObtained: boolean;
 }
 
 const makeStatistics = (): Statistics => ({
@@ -116,15 +136,16 @@ const makeSimpleTargetOperators = ({
 };
 
 // 비순수함수
-const handlePickupRollWin = (obtainedOperator: OperatorResult, result: RollResult) => {
+const handlePickupRollWin = (obtainedOperator: OperatorResult, rollResult: RollResult) => {
   obtainedOperator.currentCount++;
   obtainedOperator.isFirstObtained = true;
   if (obtainedOperator.currentCount >= obtainedOperator.gachaGoalCount)
     obtainedOperator.success = true;
   if (obtainedOperator.currentCount === obtainedOperator.gachaGoalCount)
-    result.isSuccessOnThisTry = true;
-  result.obtainedOperator = obtainedOperator;
-  result.isTargetObtained = true;
+    rollResult.isSuccessOnThisTry = true;
+  rollResult.obtainedOperator = obtainedOperator;
+  rollResult.isTargetObtained = true;
+  rollResult.isPickupObtained = true;
 };
 
 const executePickupRoll = ({
@@ -140,16 +161,18 @@ const executePickupRoll = ({
   pityRewardOperators?: OperatorResult[];
   isPityReached?: boolean;
 }) => {
-  const result: RollResult = {
+  const rollResult: RollResult = {
     obtainedOperator: null,
     isSuccessOnThisTry: false,
     isPickupObtained: false,
     isTargetObtained: false,
+    isPityRewardObtained: false,
   };
   if (isPityReached && pityRewardOperators) {
     // 천장일 시
     logging && console.log('천장');
-    // ㅇㅇㅇㅇㅇㅇㅇ여기 로직 이미 있는 거 제외하고 애초에 굴려야함
+    // 이미 획득한 천장보상 제외하고 획득
+    rollResult.isPityRewardObtained = true;
     const pityRoll = Math.random() * 100;
     const PickupChanceByEachReward = 100 / pityRewardOperators.length;
     for (const [ci, pityRewardOperator] of pityRewardOperators.entries()) {
@@ -159,7 +182,7 @@ const executePickupRoll = ({
       ) {
         // 천장시 확률을 픽업 캐릭터 수만큼 나눈 뒤
         // 각 캐릭터가 자신의 구간에서 당첨됐을 시
-        handlePickupRollWin(pityRewardOperator, result);
+        handlePickupRollWin(pityRewardOperator, rollResult);
         break;
       }
     }
@@ -168,7 +191,6 @@ const executePickupRoll = ({
     const nonePityRoll = Math.random() * 100;
     if (nonePityRoll < pickupChance) {
       // 픽업 당첨
-      result.isPickupObtained = true;
       logging && console.log('픽업 당첨', '/ 확률 :', pickupChance, '주사위 눈 :', nonePityRoll);
       for (const [ci, targetOperator] of targetOperators.entries()) {
         if (
@@ -178,7 +200,7 @@ const executePickupRoll = ({
           // 픽업확률을 픽업 캐릭터 수만큼 나눈 뒤
           // 각 캐릭터가 자신의 구간에서 당첨됐을 시
           logging && console.log('목표 픽업 당첨', '/ 번호 :', ci, '/ 이름 :', targetOperator.name);
-          handlePickupRollWin(targetOperator, result);
+          handlePickupRollWin(targetOperator, rollResult);
           break;
         }
       }
@@ -190,8 +212,8 @@ const executePickupRoll = ({
       logging && console.log('픽뚫 당첨', '/ 확률 :', pickupChance, '주사위 눈 :', nonePityRoll);
     }
   }
-  // logging && console.log(result.sixth, result);
-  return result;
+  // logging && console.log(rollResult.sixth, rollResult);
+  return rollResult;
 };
 
 const updateResult = ({
@@ -209,6 +231,7 @@ const updateResult = ({
 }) => {
   const currentOperators = result.operators[stringRarity];
   const currentStatistics = result.statistics[stringRarity];
+  if (rollResult.isPityRewardObtained) result.isPityRewardObtained = true;
   if (rollResult.obtainedOperator) {
     const { index } = rollResult.obtainedOperator;
     currentOperators[index] = rollResult.obtainedOperator;
@@ -262,23 +285,24 @@ const gachaRateSimulate = ({
   const simulationConfig = { orundum: initialResource, isSimpleMode, isGachaSim };
   // gachasim에서만 쓰이는 result 재화소모 시뮬레이션에서는 어디서 실패했는지 같은 정보가 더 필요
   // 최소 경우 최대 경우 식으로 툭 튀는 기록들 보관할지?
-  // 그래프로도 만들 수 있게?
-  // maxAttempts 2000 제한
   // 천장 보상은 무조건 0번 6성
 
   // 성능 문제도 살짝 더 생각해보자
   // 천장 뱃지 추가로 명시적 천장보상 정의?
-  const simulationResult = {
+  const simulationResult: SimulationResult = {
     total: {
       simulationTry,
-      successCount: 0,
+      simulationSuccess: 0,
       totalGachaRuns: 0,
+      pityRewardObtained: 0,
     },
     perBanner: pickupDatas.map(({ id, name }) => ({
       id,
       name,
-      successCount: 0,
+      bannerSuccess: 0,
       bannerGachaRuns: 0,
+      pityRewardObtained: 0,
+      bannerHistograms: [],
       sixth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
       fifth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
       fourth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
@@ -383,6 +407,7 @@ const gachaRateSimulate = ({
         },
         statistics: { sixth: makeStatistics(), fifth: makeStatistics(), fourth: makeStatistics() },
         bannerGachaRuns: 0,
+        isPityRewardObtained: false,
       };
       const pityRewardOperator = result.operators.sixth[0];
       const successCount: SuccessCount = { sixth: 0, fifth: 0, fourth: 0 };
@@ -393,6 +418,10 @@ const gachaRateSimulate = ({
           if (simulationConfig.orundum < 600) break;
           result.bannerGachaRuns = i + 1;
           simulationConfig.orundum -= 600;
+        }
+        if (simulationResult.perBanner[di].bannerHistograms[i] === undefined) {
+          // 히스토그램의 현재 가챠횟수가 undefined라면 0 삽입
+          simulationResult.perBanner[di].bannerHistograms[i] = 0;
         }
         if (simulationMetrics.failedSixthAttempts >= 50) {
           // 연속 실패횟수 50번 부터 확률 2%씩 증가
@@ -406,7 +435,9 @@ const gachaRateSimulate = ({
           logging && console.log('한정 300천장');
           pityRewardOperator.currentCount++;
           sixStats.pickupObtained++;
+          sixStats.targetObtained++;
           sixStats.totalObtained++;
+          result.isPityRewardObtained = true;
           if (pityRewardOperator.currentCount >= pityRewardOperator.gachaGoalCount)
             pityRewardOperator.success = true;
           if (pityRewardOperator.currentCount === pityRewardOperator.gachaGoalCount)
@@ -649,6 +680,7 @@ const gachaRateSimulate = ({
         ) {
           result.bannerGachaRuns = i + 1;
           result.success = true;
+          simulationResult.perBanner[di].bannerHistograms[i]++;
           break;
         } else if (i + 1 === gachaAttemptsLimit) {
           result.bannerGachaRuns = i + 1;
@@ -658,8 +690,12 @@ const gachaRateSimulate = ({
       // 가챠 배너 완료시 데이터 정리 부분
       logging && console.log('배너 종료');
       if (result.success) {
-        simulationResult.perBanner[di].successCount++;
+        simulationResult.perBanner[di].bannerSuccess++;
         singleSimulationSuccessCount++;
+      }
+      if (result.isPityRewardObtained) {
+        simulationResult.perBanner[di].pityRewardObtained++;
+        simulationResult.total.pityRewardObtained++;
       }
       simulationResult.perBanner[di].bannerGachaRuns += result.bannerGachaRuns;
       const rarityStrings = ['sixth', 'fifth', 'fourth'] as const;
@@ -672,10 +708,12 @@ const gachaRateSimulate = ({
       }
     }
     // 배너 전부 성공시 총 성공카운트 1증가
-    if (singleSimulationSuccessCount === pickupDatas.length) simulationResult.total.successCount++;
+    if (singleSimulationSuccessCount === pickupDatas.length)
+      simulationResult.total.simulationSuccess++;
   }
   /* for (let bi = 0; bi < simulationResult.perBanner.length; bi++) {
     simulationResult.total.totalGachaRuns += simulationResult.perBanner[bi].bannerGachaRuns;
+    simulationResult.total.pityRewardObtained += simulationResult.perBanner[bi].pityRewardObtained;
   } */
   return simulationResult;
 };
@@ -1016,7 +1054,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   const testArray2 = [limitedDummy, limitedDummy];
   const startTime = performance.now();
   const result = gachaRateSimulate({
-    pickupDatas: testArray2,
+    pickupDatas: pickupDatas,
     gachaGoal,
     isSimpleMode,
     isGachaSim,
@@ -1030,7 +1068,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
 
   const { total, perBanner } = result;
   const expectedValues = perBanner.map(
-    ({ bannerGachaRuns, successCount }) => bannerGachaRuns / successCount,
+    ({ bannerGachaRuns, bannerSuccess }) => bannerGachaRuns / bannerSuccess,
   );
 
   /* console.log(
