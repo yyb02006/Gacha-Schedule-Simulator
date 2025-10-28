@@ -1,21 +1,14 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
-import { AnimatePresence, motion, Transition } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
-import SimpleBar from 'simplebar-react';
 
 interface ModalProps {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
 }
-
-const modalTransition: Transition = {
-  duration: 0.4,
-  type: 'spring',
-  bounce: 0.5,
-};
 
 export default function Modal({ children, isOpen, onClose }: ModalProps) {
   const [mounted, setMounted] = useState(false);
@@ -46,27 +39,25 @@ export default function Modal({ children, isOpen, onClose }: ModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 flex h-screen w-screen items-center justify-center bg-[#00000090]"
+            className="fixed top-0 left-0 flex h-screen w-screen justify-center bg-[#00000090]"
           >
-            <SimpleBar autoHide={false} className="h-full w-full" style={{ minHeight: 0 }}>
-              <div
-                onClick={(e) => {
-                  if (e.target === e.currentTarget) {
-                    onClose();
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    onClose();
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                className="flex h-full w-full justify-center p-4"
-              >
-                {children}
-              </div>
-            </SimpleBar>
+            <div
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  onClose();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  onClose();
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              className="flex min-h-screen w-screen justify-center overflow-y-auto p-12"
+            >
+              <div className="my-auto">{children}</div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>,
