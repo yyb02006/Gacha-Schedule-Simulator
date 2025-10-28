@@ -1,3 +1,5 @@
+'use client';
+
 import { Cell, Pie, PieChart, PieLabelRenderProps } from 'recharts';
 
 interface MyLabelLineProps {
