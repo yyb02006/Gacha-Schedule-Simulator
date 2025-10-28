@@ -33,7 +33,7 @@ export default function SimulatorOptionModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="flex h-0 w-[360px] flex-1 flex-col gap-4 gap-y-8 lg:w-[480px]">
+      <div className="flex h-full w-[360px] flex-1 flex-col gap-4 gap-y-8 rounded-xl bg-[#202020] p-6 lg:w-[480px]">
         <div className="flex items-center justify-between">
           <motion.h1
             variants={toOpacityZero}
