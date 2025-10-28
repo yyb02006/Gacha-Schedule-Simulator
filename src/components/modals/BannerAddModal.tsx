@@ -345,43 +345,45 @@ export default function BannerAddModal({
         onClose();
       }}
     >
-      <div className="flex h-0 w-[360px] flex-1 flex-col gap-y-8 lg:w-[480px]">
-        <div className="flex items-center justify-between gap-x-6">
-          <motion.h1
-            variants={toOpacityZero}
-            initial="exit"
-            animate="idle"
-            exit="exit"
-            className="font-S-CoreDream-700 text-2xl"
-          >
-            픽업 배너 <span className="text-amber-400">추가</span>
-          </motion.h1>
-          <CancelButton handleCancel={onClose} />
+      <div className="h-[calc(100vh-96px)] rounded-xl bg-[#202020] p-6">
+        <div className="flex h-full w-[360px] flex-1 flex-col gap-y-8 lg:w-[480px]">
+          <div className="flex items-center justify-between gap-x-6">
+            <motion.h1
+              variants={toOpacityZero}
+              initial="exit"
+              animate="idle"
+              exit="exit"
+              className="font-S-CoreDream-700 text-2xl"
+            >
+              픽업 배너 <span className="text-amber-400">추가</span>
+            </motion.h1>
+            <CancelButton handleCancel={onClose} />
+          </div>
+          <BannerAddTypeToggle
+            isCustomMode={isCustomMode}
+            onTypeClick={() => {
+              setIsCustomMode((p) => !p);
+            }}
+          />
+          {isCustomMode ? (
+            <>
+              <CustomModalContents
+                modalState={modalState}
+                onTypeClick={updateType}
+                onPickupCountChange={updatePickupCount}
+              />
+              <TypeSelectionButton
+                name="추가하기"
+                hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+                onTypeClick={() => {
+                  onSaveClick();
+                }}
+              />
+            </>
+          ) : (
+            <PresetModalContents onPresetClick={onPresetSaveClick} />
+          )}
         </div>
-        <BannerAddTypeToggle
-          isCustomMode={isCustomMode}
-          onTypeClick={() => {
-            setIsCustomMode((p) => !p);
-          }}
-        />
-        {isCustomMode ? (
-          <>
-            <CustomModalContents
-              modalState={modalState}
-              onTypeClick={updateType}
-              onPickupCountChange={updatePickupCount}
-            />
-            <TypeSelectionButton
-              name="추가하기"
-              hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-              onTypeClick={() => {
-                onSaveClick();
-              }}
-            />
-          </>
-        ) : (
-          <PresetModalContents onPresetClick={onPresetSaveClick} />
-        )}
       </div>
     </Modal>
   );
