@@ -42,7 +42,7 @@ export default function ScheduleOverview({
         </motion.div>
         <TypeSelectionButton
           name="자세히보기"
-          hoverBackground="linear-gradient(155deg, #bb4d00, #3b372a)"
+          hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
           onTypeClick={() => {
             setIsModalOpen(true);
           }}
