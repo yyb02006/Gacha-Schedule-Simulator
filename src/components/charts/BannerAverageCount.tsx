@@ -1,8 +1,9 @@
+'use client';
+
+import ChartWrapper from '#/components/charts/ChartWrapper';
 import BrushBarChart from '#/components/charts/SummaryBrushBarChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
 import { truncateToTwoDecimals } from '#/libs/utils';
-import { motion } from 'motion/react';
 import { TooltipContentProps } from 'recharts';
 
 const BannerGachaCountTooltip: React.FC<
@@ -30,22 +31,13 @@ export default function BannerAverageCount({
   result: GachaSimulationMergedResult | null;
 }) {
   return (
-    <motion.div
-      variants={cardVariants}
-      transition={{ ...cardTransition, ease: 'easeIn' }}
-      initial="exit"
-      animate="idle"
-      exit="exit"
-      className="font-S-CoreDream-500 w-full space-y-3 rounded-xl p-4"
+    <ChartWrapper
+      title={
+        <span>
+          <span className="text-amber-400">배너별</span> 평균 가챠횟수
+        </span>
+      }
     >
-      <motion.div
-        variants={toOpacityZero}
-        whileInView="idle"
-        viewport={{ once: true, amount: 0.5 }}
-        initial="exit"
-      >
-        <span className="text-amber-400">배너별</span> 평균 가챠횟수
-      </motion.div>
       {result ? (
         <BrushBarChart
           data={result.perBanner.map(({ name, bannerGachaRuns, bannerSuccess }) => ({
@@ -56,6 +48,6 @@ export default function BannerAverageCount({
           customTooltip={BannerGachaCountTooltip}
         />
       ) : null}
-    </motion.div>
+    </ChartWrapper>
   );
 }

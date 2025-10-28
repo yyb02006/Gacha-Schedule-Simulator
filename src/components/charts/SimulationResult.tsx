@@ -1,8 +1,9 @@
+'use client';
+
+import ChartWrapper from '#/components/charts/ChartWrapper';
 import SummaryDonutChart from '#/components/charts/SummaryDonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
 import { truncateToTwoDecimals } from '#/libs/utils';
-import { motion } from 'motion/react';
 
 export default function SimulationResult({
   result,
@@ -20,30 +21,28 @@ export default function SimulationResult({
           },
         ];
   return (
-    <motion.div
-      variants={cardVariants}
-      transition={{ ...cardTransition, ease: 'easeIn' }}
-      initial="exit"
-      animate="idle"
-      exit="exit"
-      className="font-S-CoreDream-400 w-full space-y-3 rounded-xl p-4"
+    <ChartWrapper
+      title={
+        <span>
+          <span className="text-amber-400">시뮬레이션 </span>통계
+        </span>
+      }
     >
-      <motion.div
-        variants={toOpacityZero}
-        whileInView="idle"
-        viewport={{ once: true, amount: 0.5 }}
-        initial="exit"
-        className="font-S-CoreDream-500"
-      >
-        <span className="text-amber-400">시뮬레이션</span> 결과
-      </motion.div>
       {result ? (
-        <section>
+        <section className="text-sm">
+          <ul className="flex gap-3">
+            <li className="flex items-center gap-1">
+              <div className="size-2 rounded-full bg-amber-400" /> 성공
+            </li>
+            <li className="flex items-center gap-1">
+              <div className="size-2 rounded-full bg-sky-500" /> 실패
+            </li>
+          </ul>
           <SummaryDonutChart
             simulationResultData={simulationResultData}
             fill={['#fe9a00', '#00a6f4']}
           />
-          <div className="space-y-3 text-sm">
+          <div className="space-y-4 text-sm">
             <ul className="space-y-1">
               <li>시뮬레이션 횟수 : {result.total.simulationTry.toLocaleString()} 회</li>
               <li>성공한 시뮬레이션 : {result.total.simulationSuccess.toLocaleString()} 회</li>
@@ -78,6 +77,6 @@ export default function SimulationResult({
           </div>
         </section>
       ) : null}
-    </motion.div>
+    </ChartWrapper>
   );
 }

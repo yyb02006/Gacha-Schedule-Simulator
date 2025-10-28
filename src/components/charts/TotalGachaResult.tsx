@@ -1,10 +1,11 @@
+'use client';
+
+import ChartWrapper from '#/components/charts/ChartWrapper';
 import SummaryDonutChart from '#/components/charts/SummaryDonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { rarityColor } from '#/constants/ui';
 import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
-import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
 import { cls, truncateToTwoDecimals } from '#/libs/utils';
-import { motion } from 'motion/react';
 
 export default function TotalGachaResult({
   result,
@@ -28,23 +29,13 @@ export default function TotalGachaResult({
           },
         ];
   return (
-    <motion.div
-      variants={cardVariants}
-      transition={{ ...cardTransition, ease: 'easeIn' }}
-      initial="exit"
-      animate="idle"
-      exit="exit"
-      className="font-S-CoreDream-400 w-full space-y-3 rounded-xl p-4"
+    <ChartWrapper
+      title={
+        <span>
+          <span className="text-amber-400">전체 가챠 </span>통계
+        </span>
+      }
     >
-      <motion.div
-        variants={toOpacityZero}
-        whileInView="idle"
-        viewport={{ once: true, amount: 0.5 }}
-        initial="exit"
-        className="font-S-CoreDream-500"
-      >
-        <span className="text-amber-400">총 가챠</span> 결과
-      </motion.div>
       {result ? (
         <section className="text-sm">
           <ul className="flex gap-3">
@@ -62,13 +53,65 @@ export default function TotalGachaResult({
             simulationResultData={rarityResultData}
             fill={Object.values(rarityColor).map(({ HEX }) => HEX)}
           />
-          <div className="space-y-3">
-            {rarityStrings.map((rarityString) => (
-              <ul key={rarityString} className="space-y-1">
-                <h1 className={rarityColor[rarityString].textColor}>
-                  {`${rarities[rarityString]}성 결과`} (
+          <div className="flex flex-col flex-wrap gap-4">
+            <div className="flex flex-1 flex-wrap gap-4">
+              <ul className="flex-1 space-y-1 whitespace-nowrap">
+                <h1 className={rarityColor['sixth'].textColor}>
+                  {`${rarities['sixth']}성 결과`} (
                   {truncateToTwoDecimals(
-                    (result.total.statistics[rarityString].totalObtained /
+                    (result.total.statistics['sixth'].totalObtained / result.total.totalGachaRuns) *
+                      100,
+                  )}
+                  %)
+                </h1>
+                {obtainedTypes.map((obtainedType) => (
+                  <li key={obtainedType}>
+                    {obtainedType === 'totalObtained' ? (
+                      <div>
+                        {'총 등장 : '}
+                        {result.total.statistics['sixth'][obtainedType].toLocaleString()} 회{' '}
+                      </div>
+                    ) : (
+                      <div>
+                        {obtainedType === 'pickupObtained' ? '픽업오퍼 등장' : '목표오퍼 등장'} :{' '}
+                        {result.total.statistics['sixth'][obtainedType].toLocaleString()} 회
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <ul className="flex-1 space-y-1 whitespace-nowrap">
+                <h1 className={rarityColor['fifth'].textColor}>
+                  {`${rarities['fifth']}성 결과`} (
+                  {truncateToTwoDecimals(
+                    (result.total.statistics['fifth'].totalObtained / result.total.totalGachaRuns) *
+                      100,
+                  )}
+                  %)
+                </h1>
+                {obtainedTypes.map((obtainedType) => (
+                  <li key={obtainedType}>
+                    {obtainedType === 'totalObtained' ? (
+                      <div>
+                        {'총 등장 : '}
+                        {result.total.statistics['fifth'][obtainedType].toLocaleString()} 회{' '}
+                      </div>
+                    ) : (
+                      <div>
+                        {obtainedType === 'pickupObtained' ? '픽업오퍼 등장' : '목표오퍼 등장'} :{' '}
+                        {result.total.statistics['fifth'][obtainedType].toLocaleString()} 회
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex flex-1 flex-wrap gap-4">
+              <ul className="flex-1 space-y-1 whitespace-nowrap">
+                <h1 className={rarityColor['fourth'].textColor}>
+                  {`${rarities['fourth']}성 결과`} (
+                  {truncateToTwoDecimals(
+                    (result.total.statistics['fourth'].totalObtained /
                       result.total.totalGachaRuns) *
                       100,
                   )}
@@ -79,43 +122,45 @@ export default function TotalGachaResult({
                     {obtainedType === 'totalObtained' ? (
                       <div>
                         {'총 등장 : '}
-                        {result.total.statistics[rarityString][obtainedType]} 회{' '}
+                        {result.total.statistics['fourth'][obtainedType].toLocaleString()} 회{' '}
                       </div>
                     ) : (
                       <div>
                         {obtainedType === 'pickupObtained' ? '픽업오퍼 등장' : '목표오퍼 등장'} :{' '}
-                        {result.total.statistics[rarityString][obtainedType]} 회
+                        {result.total.statistics['fourth'][obtainedType].toLocaleString()} 회
                       </div>
                     )}
                   </li>
                 ))}
               </ul>
-            ))}
-            <div className="space-y-1">
-              <h1 className="text-sky-500">
-                3성 결과 (
-                {truncateToTwoDecimals(
-                  ((result.total.totalGachaRuns -
+              <div className="flex-1 space-y-1 whitespace-nowrap">
+                <h1 className="text-sky-500">
+                  3성 결과 (
+                  {truncateToTwoDecimals(
+                    ((result.total.totalGachaRuns -
+                      result.total.statistics.sixth.totalObtained -
+                      result.total.statistics.fifth.totalObtained -
+                      result.total.statistics.fourth.totalObtained) /
+                      result.total.totalGachaRuns) *
+                      100,
+                  )}
+                  %)
+                </h1>
+                <div>
+                  총 등장 :{' '}
+                  {(
+                    result.total.totalGachaRuns -
                     result.total.statistics.sixth.totalObtained -
                     result.total.statistics.fifth.totalObtained -
-                    result.total.statistics.fourth.totalObtained) /
-                    result.total.totalGachaRuns) *
-                    100,
-                )}
-                %)
-              </h1>
-              <div>
-                총 등장 :{' '}
-                {result.total.totalGachaRuns -
-                  result.total.statistics.sixth.totalObtained -
-                  result.total.statistics.fifth.totalObtained -
-                  result.total.statistics.fourth.totalObtained}{' '}
-                회{' '}
+                    result.total.statistics.fourth.totalObtained
+                  ).toLocaleString()}{' '}
+                  회{' '}
+                </div>
               </div>
             </div>
           </div>
         </section>
       ) : null}
-    </motion.div>
+    </ChartWrapper>
   );
 }
