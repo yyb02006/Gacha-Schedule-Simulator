@@ -43,6 +43,7 @@ export default function DoughnutChart({
   const chartRef = useRef<ChartJS<'doughnut'>>(null);
   const legendRef = useRef<HTMLDivElement>(null);
   const lastChartId = useRef<string | null>(null);
+  const rawDataRef = useRef<number[]>([]);
   const chartData: ChartData<'doughnut'> = {
     labels,
     datasets: [
@@ -71,7 +72,7 @@ export default function DoughnutChart({
   useEffect(() => {
     const chart = chartRef.current;
     const legendEl = legendRef.current;
-    if (!chart || !legendEl || chart.data.datasets[0].borderColor === undefined) return;
+    if (!chart || !legendEl) return;
 
     const dataset = chart.data.datasets[0];
     const bg = dataset.borderColor;
@@ -86,6 +87,12 @@ export default function DoughnutChart({
       colors = [];
     }
 
+    // 원본 데이터 저장 (비율 재계산용)
+    if (!rawDataRef.current.length) {
+      rawDataRef.current = [...(dataset.data as number[])];
+    }
+
+    // 커스텀 범례 HTML 생성
     const legendHTML = colors
       .map((color, i) => {
         const label = chart.data.labels?.[i];
@@ -101,6 +108,7 @@ export default function DoughnutChart({
 
     legendEl.innerHTML = legendHTML;
 
+    // 커스텀 범례 HTML 생성
     const updateLegendState = () => {
       legendEl.querySelectorAll('[data-index]').forEach((el) => {
         const index = Number(el.getAttribute('data-index'));
@@ -114,16 +122,35 @@ export default function DoughnutChart({
       });
     };
 
+    // 데이터 비율 재계산
+    const recalcData = () => {
+      const visibleMask = rawDataRef.current.map((_, i) => chart.getDataVisibility(i));
+      const visibleData = rawDataRef.current.filter((_, i) => visibleMask[i]);
+      const visibleTotal = visibleData.reduce((a, b) => a + b, 0);
+
+      dataset.data = rawDataRef.current.map((v, i) => {
+        console.log(v, visibleTotal, chart.getDataVisibility(i));
+        return chart.getDataVisibility(i) ? v : 0;
+      });
+    };
+
     updateLegendState(); // init
 
     legendEl.querySelectorAll('[data-index]').forEach((el) => {
       el.addEventListener('click', () => {
         const index = Number(el.getAttribute('data-index'));
         chart.toggleDataVisibility(index);
-        chart.update();
+        recalcData();
         updateLegendState();
+        chart.update();
       });
     });
+
+    return () => {
+      legendEl.querySelectorAll('[data-index]').forEach((el) => {
+        el.replaceWith(el.cloneNode(true));
+      });
+    };
   }, []);
 
   const options: ChartOptions<'doughnut'> = {
@@ -174,6 +201,7 @@ export default function DoughnutChart({
 
           const data = tooltip.dataPoints?.[0];
           const borderColor = (data.dataset.borderColor as string[])[data.dataIndex];
+          const total = data.dataset.data.reduce((a, b) => a + b, 0);
 
           tooltipEl.innerHTML = `
             <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 shadow-xl shadow-[#141414]">
@@ -185,8 +213,6 @@ export default function DoughnutChart({
                 .join('')}
             </div>
           `;
-
-          console.log(tooltipEl);
         },
       },
       datalabels: {
@@ -195,14 +221,17 @@ export default function DoughnutChart({
         offset: 10,
         formatter: (value, context) => {
           const dataset = context.chart.data.datasets[0].data as number[];
+          const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
           const totalizedVaule = total ? total : dataset.reduce((a, b) => a + b, 0);
           const percentage = truncateToDecimals((value / totalizedVaule) * 100);
           return percentage > 0 ? `${percentage}%` : null;
         },
         align: (context) => {
+          const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
           return getLabelPosition(context, total);
         },
         anchor: (context) => {
+          const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
           return getLabelPosition(context, total);
         },
       },
@@ -219,7 +248,7 @@ export default function DoughnutChart({
         ref={chartRef}
         data={chartData}
         options={options}
-        plugins={[doughnutConnectorPlugin(total)]}
+        plugins={[doughnutConnectorPlugin()]}
       />
       <div ref={legendRef} className="absolute top-0 left-0 flex gap-3 text-sm" />
     </div>
