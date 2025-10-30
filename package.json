@@ -9,9 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "motion": "^12.23.12",
     "next": "15.5.3",
     "react": "19.1.0",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "19.1.0",
     "recharts": "^3.3.0",
     "simplebar-react": "^3.3.2"
