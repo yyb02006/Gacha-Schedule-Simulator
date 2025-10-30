@@ -3,7 +3,7 @@
 import ChartWrapper from '#/components/charts/ChartWrapper';
 import BrushBarChart from '#/components/charts/SummaryBrushBarChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { truncateToTwoDecimals } from '#/libs/utils';
+import { truncateToDecimals } from '#/libs/utils';
 import { TooltipContentProps } from 'recharts';
 
 const BannerGachaCountTooltip: React.FC<
@@ -25,7 +25,7 @@ const BannerGachaCountTooltip: React.FC<
   );
 };
 
-export default function BannerAverageCount({
+export default function BannerAverageCounts({
   result,
 }: {
   result: GachaSimulationMergedResult | null;
@@ -40,12 +40,17 @@ export default function BannerAverageCount({
     >
       {result ? (
         <BrushBarChart
-          data={result.perBanner.map(({ name, bannerGachaRuns, bannerSuccess }) => ({
-            name,
-            value: truncateToTwoDecimals(bannerGachaRuns / bannerSuccess),
-          }))}
-          totalSimulationTry={result.total.simulationTry}
-          customTooltip={BannerGachaCountTooltip}
+          labels={result.perBanner.map(({ name }) => name)}
+          data={result.perBanner.map(({ bannerGachaRuns, bannerSuccess }) =>
+            truncateToDecimals(bannerGachaRuns / bannerSuccess),
+          )}
+          colors={{
+            backgroundColor: '#fe9a00CC',
+            borderColor: '#fe9a00',
+            hoverBackgroundColor: '#a684ff',
+            hoverBorderColor: '#a684ff',
+          }}
+          tooltipCallback={() => 'test'}
         />
       ) : null}
     </ChartWrapper>

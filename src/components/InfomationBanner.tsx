@@ -1,5 +1,5 @@
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
-import BannerAverageCount from '#/components/charts/BannerAverageCount';
+import BannerAverageCount from '#/components/charts/BannerAverageCounts';
 import BannerWinRate from '#/components/charts/BannerWinRate';
 import SimulationResult from '#/components/charts/SimulationResult';
 import TotalGachaResult from '#/components/charts/TotalGachaResult';
