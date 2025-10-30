@@ -91,9 +91,9 @@ export default function DoughnutChart({
         const label = chart.data.labels?.[i];
         return `
           <div data-index="${i}" class="flex items-center gap-1 cursor-pointer group">
-            <div class="size-2 rounded-full transition-transform group-hover:scale-125"
+            <div class="size-2 rounded-full transition-transform group-hover:scale-[120%]"
               style="background:${color}"/></div>
-            <span class="group-hover:text-black">${label}</span>
+            <span class="text-[#ccc] group-hover:text-[#eaeaea]">${label}</span>
           </div>
         `;
       })
@@ -101,12 +101,27 @@ export default function DoughnutChart({
 
     legendEl.innerHTML = legendHTML;
 
-    // ✅ 클릭 시 dataset 값 토글
+    const updateLegendState = () => {
+      legendEl.querySelectorAll('[data-index]').forEach((el) => {
+        const index = Number(el.getAttribute('data-index'));
+        const visible = chart.getDataVisibility(index);
+
+        if (visible) {
+          el.classList.remove('opacity-40');
+        } else {
+          el.classList.add('opacity-40'); // 비활성화 시 흐리게
+        }
+      });
+    };
+
+    updateLegendState(); // init
+
     legendEl.querySelectorAll('[data-index]').forEach((el) => {
       el.addEventListener('click', () => {
         const index = Number(el.getAttribute('data-index'));
         chart.toggleDataVisibility(index);
         chart.update();
+        updateLegendState();
       });
     });
   }, []);
