@@ -99,7 +99,6 @@ export default function TotalGachaResult({
             labels={rarityResultData.labels}
             backgroundColor={Object.values(rarityColor).map(({ HEX }) => HEX + 'CC')}
             borderColor={Object.values(rarityColor).map(({ HEX }) => HEX)}
-            total={result.total.totalGachaRuns}
             tooltipCallback={tooltip}
           />
           <div className="flex flex-col flex-wrap gap-5">

@@ -52,7 +52,6 @@ export default function SimulationResult({
           <SummaryDonutChart
             data={simulationResultData}
             labels={simulationResultLabels}
-            total={result.total.simulationTry}
             borderColor={['#fe9a00', '#00a6f4']}
             backgroundColor={['#fe9a00CC', '#00a6f4CC']}
             tooltipCallback={tooltip}

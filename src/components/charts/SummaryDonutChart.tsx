@@ -28,14 +28,12 @@ const getLabelPosition = (context: Context, total: number | undefined) => {
 export default function DoughnutChart({
   labels,
   data,
-  total,
   backgroundColor,
   borderColor,
   tooltipCallback,
 }: {
   labels: string[];
   data: number[];
-  total?: number;
   backgroundColor: string | string[];
   borderColor: string | string[];
   tooltipCallback: (data: TooltipItem<'doughnut'>, total: number) => string;
