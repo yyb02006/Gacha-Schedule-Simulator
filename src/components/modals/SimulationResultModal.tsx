@@ -1,19 +1,15 @@
 'use client';
 
 import Modal from '#/components/modals/Modal';
-import { Dispatch, SetStateAction, useState } from 'react';
-import CancelButton from '#/components/buttons/CancelButton';
-import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
-import { InsetNumberInput } from '#/components/PickupBanner';
-import { motion } from 'motion/react';
-import { toOpacityZero } from '#/constants/variants';
-import { GachaSimulationMergedResult, SimulationOptions } from '#/components/PickupList';
-import { stringToNumber } from '#/libs/utils';
-import ToggleButton from '#/components/buttons/ToggleButton';
+import { GachaSimulationMergedResult } from '#/components/PickupList';
 import SimulationResult from '#/components/charts/SimulationResult';
 import BannerWinRate from '#/components/charts/BannerWinRate';
-import BannerAverageCount from '#/components/charts/BannerAverageCount';
+import BannerAverageCount from '#/components/charts/BannerAverageCounts';
 import TotalGachaResult from '#/components/charts/TotalGachaResult';
+import { toOpacityZero } from '#/constants/variants';
+import { motion } from 'motion/react';
+import CancelButton from '#/components/buttons/CancelButton';
+import BannerSuccessTrialCounts from '#/components/charts/BannerSuccessTrialCounts';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -24,12 +20,26 @@ interface SettingsModalProps {
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <section className="h-fit w-[1280px] space-y-6 rounded-xl bg-[#202020] p-6">
-        <h1>Contents</h1>
-        <SimulationResult result={result} />
-        <TotalGachaResult result={result} />
-        <BannerWinRate result={result} />
-        <BannerAverageCount result={result} />
+      <section className="w-[1280px] space-y-6 rounded-xl bg-[#202020] p-6">
+        <div className="flex items-center justify-between">
+          <motion.div
+            variants={toOpacityZero}
+            whileInView="idle"
+            viewport={{ once: true, amount: 0.5 }}
+            initial="exit"
+            className="font-S-CoreDream-700 text-2xl"
+          >
+            <span className="text-amber-400">시뮬레이션</span> 결과
+          </motion.div>
+          <CancelButton handleCancel={onClose} />
+        </div>
+        <div className="grid h-fit w-full grid-cols-2 gap-6">
+          <SimulationResult result={result} />
+          <TotalGachaResult result={result} />
+          <BannerWinRate result={result} />
+          <BannerAverageCount result={result} />
+          <BannerSuccessTrialCounts result={result} />
+        </div>
       </section>
     </Modal>
   );
