@@ -1,10 +1,11 @@
 import { ArcElement, Chart } from 'chart.js';
 
-export const doughnutConnectorPlugin = (total?: number) => ({
+export const doughnutConnectorPlugin = () => ({
   id: 'connectorLines',
   afterDraw(chart: Chart<'doughnut'>) {
     const ctx = chart.ctx;
     const dataset = chart.data.datasets[0];
+    const total = dataset.data.reduce((a, b) => a + b, 0);
     const totalizedValue = total
       ? total
       : (dataset.data as number[]).reduce((sum, val) => sum + val, 0);
