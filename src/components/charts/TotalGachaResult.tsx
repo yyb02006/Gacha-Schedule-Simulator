@@ -4,30 +4,86 @@ import ChartWrapper from '#/components/charts/ChartWrapper';
 import SummaryDonutChart from '#/components/charts/SummaryDonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { rarityColor } from '#/constants/ui';
-import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
-import { cls, truncateToTwoDecimals } from '#/libs/utils';
+import { obtainedTypes, rarities } from '#/constants/variables';
+import { cls, truncateToDecimals } from '#/libs/utils';
+import { OperatorRarityForString } from '#/types/types';
+import { TooltipItem } from 'chart.js';
+
+const tooltip = (data: TooltipItem<'doughnut'>, total: number) => {
+  const stringifiedValue = data?.formattedValue ?? '';
+  const parsedRawValue = data.parsed;
+  const label = data.label;
+  const borderColor = (data.dataset.borderColor as string[])[data.dataIndex];
+
+  return /*html*/ `
+    <div class="font-S-CoreDream-400 space-y-[2px] text-sm">
+      <p>
+        ${label} 등장 횟수 :
+        <span style="color: ${borderColor};">${stringifiedValue} 회</span>
+      </p>
+      <p>
+        ${label} 등장 확률 :
+        <span style="color: ${borderColor};">${truncateToDecimals((parsedRawValue / (total ?? 1)) * 100)}%</span>
+      </p>
+    </div>
+  `;
+};
+
+const RarityResultDetail = ({
+  result,
+  rarity,
+}: {
+  result: GachaSimulationMergedResult;
+  rarity: OperatorRarityForString;
+}) => {
+  return (
+    <ul className="font-S-CoreDream-500 flex-1 space-y-1 text-[15px] whitespace-nowrap">
+      <h1 className={cls(rarityColor[rarity].textColor, 'mb-[10px]')}>
+        {`${rarities[rarity]}성 결과`} (
+        {truncateToDecimals(
+          (result.total.statistics[rarity].totalObtained / result.total.totalGachaRuns) * 100,
+        )}
+        %)
+      </h1>
+      {obtainedTypes.map((obtainedType) => (
+        <li key={obtainedType} className="font-S-CoreDream-400 text-[13px]">
+          {obtainedType === 'totalObtained' ? (
+            <div>
+              {'총 등장 : '}
+              {result.total.statistics[rarity][obtainedType].toLocaleString()} 회{' '}
+            </div>
+          ) : (
+            <div>
+              {obtainedType === 'pickupObtained' ? '픽업오퍼 등장' : '목표오퍼 등장'} :{' '}
+              {result.total.statistics[rarity][obtainedType].toLocaleString()} 회
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+};
 
 export default function TotalGachaResult({
   result,
 }: {
   result: GachaSimulationMergedResult | null;
 }) {
-  const rarityResultData =
-    result === null
-      ? []
-      : [
-          { name: '6성', value: result.total.statistics.sixth.totalObtained },
-          { name: '5성', value: result.total.statistics.fifth.totalObtained },
-          { name: '4성', value: result.total.statistics.fourth.totalObtained },
-          {
-            name: '3성',
-            value:
-              result.total.totalGachaRuns -
+  const rarityResultData = {
+    data:
+      result === null
+        ? []
+        : [
+            result.total.statistics.sixth.totalObtained,
+            result.total.statistics.fifth.totalObtained,
+            result.total.statistics.fourth.totalObtained,
+            result.total.totalGachaRuns -
               result.total.statistics.sixth.totalObtained -
               result.total.statistics.fifth.totalObtained -
               result.total.statistics.fourth.totalObtained,
-          },
-        ];
+          ],
+    labels: ['6성', '5성', '4성', '3성'],
+  };
   return (
     <ChartWrapper
       title={
@@ -38,105 +94,25 @@ export default function TotalGachaResult({
     >
       {result ? (
         <section className="text-sm">
-          <ul className="flex gap-3">
-            {rarityStrings.map((rarityString) => (
-              <li key={rarityString} className="flex items-center gap-1">
-                <div className={cls(rarityColor[rarityString].bgColor, 'size-2 rounded-full')} />
-                {`${rarities[rarityString]}성`}
-              </li>
-            ))}
-            <li className="flex items-center gap-1">
-              <div className="size-2 rounded-full bg-sky-500" /> 3성
-            </li>
-          </ul>
           <SummaryDonutChart
-            simulationResultData={rarityResultData}
-            fill={Object.values(rarityColor).map(({ HEX }) => HEX)}
+            data={rarityResultData.data}
+            labels={rarityResultData.labels}
+            backgroundColor={Object.values(rarityColor).map(({ HEX }) => HEX + 'CC')}
+            borderColor={Object.values(rarityColor).map(({ HEX }) => HEX)}
+            total={result.total.totalGachaRuns}
+            tooltipCallback={tooltip}
           />
-          <div className="flex flex-col flex-wrap gap-4">
+          <div className="flex flex-col flex-wrap gap-5">
             <div className="flex flex-1 flex-wrap gap-4">
-              <ul className="flex-1 space-y-1 whitespace-nowrap">
-                <h1 className={rarityColor['sixth'].textColor}>
-                  {`${rarities['sixth']}성 결과`} (
-                  {truncateToTwoDecimals(
-                    (result.total.statistics['sixth'].totalObtained / result.total.totalGachaRuns) *
-                      100,
-                  )}
-                  %)
-                </h1>
-                {obtainedTypes.map((obtainedType) => (
-                  <li key={obtainedType}>
-                    {obtainedType === 'totalObtained' ? (
-                      <div>
-                        {'총 등장 : '}
-                        {result.total.statistics['sixth'][obtainedType].toLocaleString()} 회{' '}
-                      </div>
-                    ) : (
-                      <div>
-                        {obtainedType === 'pickupObtained' ? '픽업오퍼 등장' : '목표오퍼 등장'} :{' '}
-                        {result.total.statistics['sixth'][obtainedType].toLocaleString()} 회
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              <ul className="flex-1 space-y-1 whitespace-nowrap">
-                <h1 className={rarityColor['fifth'].textColor}>
-                  {`${rarities['fifth']}성 결과`} (
-                  {truncateToTwoDecimals(
-                    (result.total.statistics['fifth'].totalObtained / result.total.totalGachaRuns) *
-                      100,
-                  )}
-                  %)
-                </h1>
-                {obtainedTypes.map((obtainedType) => (
-                  <li key={obtainedType}>
-                    {obtainedType === 'totalObtained' ? (
-                      <div>
-                        {'총 등장 : '}
-                        {result.total.statistics['fifth'][obtainedType].toLocaleString()} 회{' '}
-                      </div>
-                    ) : (
-                      <div>
-                        {obtainedType === 'pickupObtained' ? '픽업오퍼 등장' : '목표오퍼 등장'} :{' '}
-                        {result.total.statistics['fifth'][obtainedType].toLocaleString()} 회
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
+              <RarityResultDetail rarity="sixth" result={result} />
+              <RarityResultDetail rarity="fifth" result={result} />
             </div>
             <div className="flex flex-1 flex-wrap gap-4">
-              <ul className="flex-1 space-y-1 whitespace-nowrap">
-                <h1 className={rarityColor['fourth'].textColor}>
-                  {`${rarities['fourth']}성 결과`} (
-                  {truncateToTwoDecimals(
-                    (result.total.statistics['fourth'].totalObtained /
-                      result.total.totalGachaRuns) *
-                      100,
-                  )}
-                  %)
-                </h1>
-                {obtainedTypes.map((obtainedType) => (
-                  <li key={obtainedType}>
-                    {obtainedType === 'totalObtained' ? (
-                      <div>
-                        {'총 등장 : '}
-                        {result.total.statistics['fourth'][obtainedType].toLocaleString()} 회{' '}
-                      </div>
-                    ) : (
-                      <div>
-                        {obtainedType === 'pickupObtained' ? '픽업오퍼 등장' : '목표오퍼 등장'} :{' '}
-                        {result.total.statistics['fourth'][obtainedType].toLocaleString()} 회
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              <div className="flex-1 space-y-1 whitespace-nowrap">
-                <h1 className="text-sky-500">
+              <RarityResultDetail rarity="fourth" result={result} />
+              <div className="font-S-CoreDream-500 flex-1 space-y-1 text-[15px] whitespace-nowrap">
+                <h1 className="mb-[10px] text-sky-500">
                   3성 결과 (
-                  {truncateToTwoDecimals(
+                  {truncateToDecimals(
                     ((result.total.totalGachaRuns -
                       result.total.statistics.sixth.totalObtained -
                       result.total.statistics.fifth.totalObtained -
@@ -146,7 +122,7 @@ export default function TotalGachaResult({
                   )}
                   %)
                 </h1>
-                <div>
+                <div className="font-S-CoreDream-400 text-[13px]">
                   총 등장 :{' '}
                   {(
                     result.total.totalGachaRuns -

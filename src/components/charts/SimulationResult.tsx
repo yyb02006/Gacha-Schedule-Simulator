@@ -3,7 +3,28 @@
 import ChartWrapper from '#/components/charts/ChartWrapper';
 import SummaryDonutChart from '#/components/charts/SummaryDonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { truncateToTwoDecimals } from '#/libs/utils';
+import { truncateToDecimals } from '#/libs/utils';
+import { TooltipItem } from 'chart.js';
+
+const tooltip = (data: TooltipItem<'doughnut'>, total: number) => {
+  const stringifiedValue = data?.formattedValue ?? '';
+  const parsedRawValue = data.parsed;
+  const label = data.label;
+  const borderColor = (data.dataset.borderColor as string[])[data.dataIndex];
+
+  return /*html*/ `
+    <div class="font-S-CoreDream-400 space-y-[2px] text-sm">
+      <p>
+        ${label}한 시뮬레이션 :
+        <span style="color: ${borderColor};">${stringifiedValue} 회</span>
+      </p>
+      <p>
+        ${label} 확률 :
+        <span style="color: ${borderColor};">${truncateToDecimals((parsedRawValue / (total ?? 1)) * 100)}%</span>
+      </p>
+    </div>
+  `;
+};
 
 export default function SimulationResult({
   result,
@@ -14,12 +35,10 @@ export default function SimulationResult({
     result === null
       ? []
       : [
-          { name: '성공', value: result.total.simulationSuccess },
-          {
-            name: '실패',
-            value: result.total.simulationTry - result.total.simulationSuccess,
-          },
+          result.total.simulationSuccess,
+          result.total.simulationTry - result.total.simulationSuccess,
         ];
+  const simulationResultLabels = ['성공', '실패'];
   return (
     <ChartWrapper
       title={
@@ -30,17 +49,13 @@ export default function SimulationResult({
     >
       {result ? (
         <section className="text-sm">
-          <ul className="flex gap-3">
-            <li className="flex items-center gap-1">
-              <div className="size-2 rounded-full bg-amber-400" /> 성공
-            </li>
-            <li className="flex items-center gap-1">
-              <div className="size-2 rounded-full bg-sky-500" /> 실패
-            </li>
-          </ul>
           <SummaryDonutChart
-            simulationResultData={simulationResultData}
-            fill={['#fe9a00', '#00a6f4']}
+            data={simulationResultData}
+            labels={simulationResultLabels}
+            total={result.total.simulationTry}
+            borderColor={['#fe9a00', '#00a6f4']}
+            backgroundColor={['#fe9a00CC', '#00a6f4CC']}
+            tooltipCallback={tooltip}
           />
           <div className="space-y-4 text-sm">
             <ul className="space-y-1">
@@ -48,7 +63,7 @@ export default function SimulationResult({
               <li>성공한 시뮬레이션 : {result.total.simulationSuccess.toLocaleString()} 회</li>
               <li className="text-amber-400">
                 일정 소화 성공률 :{' '}
-                {truncateToTwoDecimals(
+                {truncateToDecimals(
                   (result.total.simulationSuccess / result.total.simulationTry) * 100,
                 )}
                 %
@@ -68,7 +83,7 @@ export default function SimulationResult({
               <li>천장 획득 횟수 : {result.total.pityRewardObtained.toLocaleString()} 회</li>
               <li className="text-amber-400">
                 시뮬레이션 당 천장 획득 횟수 :{' '}
-                {truncateToTwoDecimals(
+                {truncateToDecimals(
                   result.total.pityRewardObtained / result.total.simulationTry,
                 ).toLocaleString()}{' '}
                 회
