@@ -1,5 +1,6 @@
 'use client';
 
+import Brush from '#/components/charts/Brush';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,12 +12,23 @@ import {
   TooltipItem,
   ChartOptions,
   ChartData,
+  LineElement,
+  PointElement,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
-interface BrushBarChartProps {
+interface BarChartProps {
   labels: string[];
   data: number[];
   colors: Record<
@@ -26,12 +38,12 @@ interface BrushBarChartProps {
   tooltipCallback: (data: TooltipItem<'bar'>, total: number) => string;
 }
 
-export default function BrushBarChart({
+const BarChart = ({
   labels,
   data,
   colors: { backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor },
   tooltipCallback,
-}: BrushBarChartProps) {
+}: BarChartProps) => {
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
   const chartData: ChartData<'bar'> = {
     labels,
@@ -55,28 +67,47 @@ export default function BrushBarChart({
     ],
   };
 
+  const baseTicksProps = {
+    maxRotation: 25,
+    crossAlign: 'center',
+    align: 'center',
+    padding: -2,
+    labelOffset: 6,
+    autoSkip: false,
+  } as const;
+
   const options: ChartOptions<'bar'> = {
     responsive: true,
     plugins: {
       legend: { display: false },
-      tooltip: { enabled: true },
+      tooltip: {
+        enabled: true,
+        mode: 'index', // x축 "열(column)" 단위로 hover 인식
+        intersect: false, // 바 위가 아니라, 그 열 전체 hover 가능
+      },
       datalabels: { display: false },
     },
     scales: {
       x: {
         grid: {
-          display: true,
+          display: false,
           color: '#3c3c3c',
         },
-        ticks: {
-          maxRotation: 25,
-          crossAlign: 'center',
-          align: 'center',
-          padding: -2,
-          labelOffset: 6,
-        },
+        ticks:
+          data.length > 20
+            ? {
+                ...baseTicksProps,
+                callback:
+                  data.length > 20
+                    ? function (_, index) {
+                        const step = 10; // 원하는 간격
+                        return index % step === 0 ? index : '';
+                      }
+                    : undefined,
+              }
+            : baseTicksProps,
         afterFit: (axis) => {
-          // 축 박스 높이를 줄여서 라벨이 위로(차트 쪽으로) 붙게 함
+          // 축 박스 높이를 줄여서 -padding 보전
           axis.height = axis.height > 60 ? 60 : axis.height + 2;
         },
       },
@@ -89,11 +120,14 @@ export default function BrushBarChart({
       },
     },
   };
+  return <Bar data={chartData} options={options} />;
+};
 
+export default function BrushBarChart({ labels, data, colors, tooltipCallback }: BarChartProps) {
   return (
     <div className="space-y-2">
-      <Bar data={chartData} options={options} />
-      <Bar data={chartData} options={options} />
+      <BarChart labels={labels} data={data} colors={colors} tooltipCallback={tooltipCallback} />
+      <Brush labels={labels} data={data} colors={colors} />
     </div>
   );
 }
