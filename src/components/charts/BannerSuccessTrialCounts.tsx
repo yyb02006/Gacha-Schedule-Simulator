@@ -26,9 +26,9 @@ export default function BannerSuccessTrialCounts({
           )}
           data={result.perBanner[0].bannerHistograms.map((value) => value)}
           colors={{
-            backgroundColor: '#fe9a00',
+            backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
-            hoverBackgroundColor: '#a684ff',
+            hoverBackgroundColor: '#a684ffCC',
             hoverBorderColor: '#a684ff',
           }}
           tooltipCallback={() => 'dev'}

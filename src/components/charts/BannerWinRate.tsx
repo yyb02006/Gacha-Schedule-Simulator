@@ -20,7 +20,7 @@ export default function BannerWinRate({ result }: { result: GachaSimulationMerge
           colors={{
             backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
-            hoverBackgroundColor: '#a684ff',
+            hoverBackgroundColor: '#a684ffCC',
             hoverBorderColor: '#a684ff',
           }}
           tooltipCallback={() => 'test'}
