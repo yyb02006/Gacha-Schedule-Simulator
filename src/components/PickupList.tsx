@@ -686,6 +686,7 @@ export default function PickupList() {
 
     const results = await Promise.all(promises);
 
+    // 인덱스 넣고 더하는 과정에서 acc에 존재하지 않는 배열 길이가 나오면 undefined + number이므로 NaN이 되어버림
     const mergedResult = results.reduce<GachaSimulationMergedResult>(
       (acc, current) => {
         current.perBanner.forEach((currentBanner, index) => {
@@ -696,7 +697,9 @@ export default function PickupList() {
             acc.perBanner[index].bannerGachaRuns += bannerGachaRuns;
             acc.perBanner[index].pityRewardObtained += pityRewardObtained;
             for (let i = 0; i < acc.perBanner[index].bannerHistograms.length; i++) {
-              acc.perBanner[index].bannerHistograms[i] += currentBanner.bannerHistograms[i];
+              const a = acc.perBanner[index].bannerHistograms[i] ?? 0;
+              const b = currentBanner.bannerHistograms[i] ?? 0;
+              acc.perBanner[index].bannerHistograms[i] = a + b;
             }
             for (const rarityString of rarityStrings) {
               for (const obtainedType of obtainedTypes) {
