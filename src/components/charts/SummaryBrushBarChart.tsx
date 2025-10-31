@@ -93,6 +93,7 @@ const BarChart = ({
           display: false,
           color: '#3c3c3c',
         },
+        border: { color: '#3c3c3c' },
         ticks:
           data.length > 20
             ? {
@@ -115,10 +116,12 @@ const BarChart = ({
         grid: {
           color: '#3c3c3c',
         },
+        border: { color: '#3c3c3c', dash: [4, 4] },
         beginAtZero: true,
         ticks: { maxTicksLimit: 6 },
       },
     },
+    interaction: { mode: 'index', intersect: false },
   };
   return <Bar data={chartData} options={options} />;
 };
