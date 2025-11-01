@@ -25,11 +25,15 @@ export default function BannerSuccessTrialCounts({
             (_, index) => `${index}`,
           )}
           data={result.perBanner[0].bannerHistograms.map((value) => value)}
-          colors={{
+          barChartColors={{
             backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
             hoverBackgroundColor: '#a684ffCC',
             hoverBorderColor: '#a684ff',
+          }}
+          brushColor={{
+            backgroundColor: '#a684ffCC',
+            borderColor: '#a684ff',
           }}
           tooltipCallback={() => 'dev'}
         />

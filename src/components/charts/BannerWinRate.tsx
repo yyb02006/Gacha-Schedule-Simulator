@@ -17,11 +17,15 @@ export default function BannerWinRate({ result }: { result: GachaSimulationMerge
         <BrushBarChart
           labels={result.perBanner.map(({ name }) => name)}
           data={result.perBanner.map(({ bannerSuccess }) => bannerSuccess)}
-          colors={{
+          barChartColors={{
             backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
             hoverBackgroundColor: '#a684ffCC',
             hoverBorderColor: '#a684ff',
+          }}
+          brushColor={{
+            backgroundColor: '#a684ffCC',
+            borderColor: '#a684ff',
           }}
           tooltipCallback={() => 'test'}
         />

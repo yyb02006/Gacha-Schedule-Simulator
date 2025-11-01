@@ -24,11 +24,15 @@ export default function BannerAverageCounts({
           data={result.perBanner.map(({ bannerGachaRuns, bannerSuccess }) =>
             truncateToDecimals(bannerGachaRuns / bannerSuccess),
           )}
-          colors={{
+          barChartColors={{
             backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
             hoverBackgroundColor: '#a684ffCC',
             hoverBorderColor: '#a684ff',
+          }}
+          brushColor={{
+            backgroundColor: '#a684ffCC',
+            borderColor: '#a684ff',
           }}
           tooltipCallback={() => 'test'}
         />
