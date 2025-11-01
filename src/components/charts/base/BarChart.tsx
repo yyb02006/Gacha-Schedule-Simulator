@@ -55,7 +55,6 @@ export default function BarChart({
 }: BarChartProps) {
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
   const chartRef = useRef<ChartJS<'bar'>>(null);
-  console.log((chartRef.current?.canvas.width ?? 560) / 8);
 
   const chartData: ChartData<'bar'> = {
     labels,
