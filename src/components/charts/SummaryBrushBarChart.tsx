@@ -14,7 +14,10 @@ import {
   ChartData,
   LineElement,
   PointElement,
+  CartesianScaleOptions,
+  Plugin,
 } from 'chart.js';
+import { useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(
@@ -27,6 +30,26 @@ ChartJS.register(
   Tooltip,
   Legend,
 );
+
+const adaptiveTickSpacing: Plugin<'bar'> = {
+  id: 'adaptiveTickSpacing',
+  afterLayout(chart) {
+    const axis = chart.scales.x;
+    if (!axis || axis.type !== 'category') return;
+
+    const rotated = axis.labelRotation !== 0;
+    const tickOpts = (axis.options as CartesianScaleOptions).ticks;
+
+    const newPadding = rotated ? -2 : 4;
+    const newLabelOffset = rotated ? 6 : 0;
+
+    if (tickOpts.padding !== newPadding || tickOpts.labelOffset !== newLabelOffset) {
+      tickOpts.padding = newPadding;
+      tickOpts.labelOffset = newLabelOffset;
+      chart.update('none');
+    }
+  },
+};
 
 interface BarChartProps {
   labels: string[];
@@ -58,6 +81,7 @@ const BarChart = ({
         borderWidth: data.length > 20 ? 0 : 2,
         hoverBorderWidth: 0,
         categoryPercentage,
+        minBarLength: data.length < 50 ? 10 : data.length < 150 ? 5 : 3,
         borderRadius: (context) => {
           const chart = context.chart;
           const meta = chart.getDatasetMeta(context.datasetIndex);
@@ -109,7 +133,12 @@ const BarChart = ({
             : baseTicksProps,
         afterFit: (axis) => {
           // 축 박스 높이를 줄여서 -padding 보전
-          axis.height = axis.height > 60 ? 60 : axis.height + 2;
+          if (!axis || axis.type !== 'category') return;
+
+          const rotated = axis.labelRotation !== 0;
+
+          const compensatedHeight = rotated ? 2 : -4;
+          axis.height = axis.height + compensatedHeight;
         },
       },
       y: {
@@ -123,14 +152,37 @@ const BarChart = ({
     },
     interaction: { mode: 'index', intersect: false },
   };
-  return <Bar data={chartData} options={options} />;
+
+  return <Bar data={chartData} options={options} plugins={[adaptiveTickSpacing]} />;
 };
 
 export default function BrushBarChart({ labels, data, colors, tooltipCallback }: BarChartProps) {
+  const [selection, setSelection] = useState({ start: 0, end: 1 });
+
+  const startIndex = Math.floor((data.length - 1) * selection.start);
+  const endIndex = Math.ceil((data.length - 1) * selection.end);
+
+  const filteredLabels = labels.slice(startIndex, endIndex);
+  const filteredData = data.slice(startIndex, endIndex);
+
   return (
     <div className="space-y-2">
-      <BarChart labels={labels} data={data} colors={colors} tooltipCallback={tooltipCallback} />
-      <Brush labels={labels} data={data} colors={colors} />
+      <BarChart
+        labels={filteredLabels}
+        data={filteredData}
+        colors={colors}
+        tooltipCallback={tooltipCallback}
+      />
+      <Brush
+        labels={labels}
+        data={data}
+        colors={{
+          backgroundColor: colors.hoverBackgroundColor,
+          borderColor: colors.hoverBackgroundColor,
+        }}
+        selection={selection}
+        setSelection={setSelection}
+      />
     </div>
   );
 }
