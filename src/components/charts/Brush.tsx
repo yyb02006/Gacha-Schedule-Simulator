@@ -235,25 +235,33 @@ export default function Brush({
     const canvas = chartRef.current?.canvas;
     if (!canvas) return;
 
+    if (chartRef.current === null) return;
+    const rect = canvas.getBoundingClientRect();
+    const { left, right } = chartRef.current.chartArea;
+    const startX = left + (right - left) * selection.start;
+    const endX = left + (right - left) * selection.end;
+
     const handleMouseDown = (e: MouseEvent) => {
-      if (chartRef.current === null) return;
-      const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const { left, right } = chartRef.current.chartArea;
-      const startX = left + (right - left) * selection.start;
-      const endX = left + (right - left) * selection.end;
 
       // 핸들 근처 클릭 시
-      if (Math.abs(x - startX) < 8) setDragging('start');
-      else if (Math.abs(x - endX) < 8) setDragging('end');
+      if (Math.abs(x - startX) < 10) setDragging('start');
+      else if (Math.abs(x - endX) < 10) setDragging('end');
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!dragging || chartRef.current === null) return;
-      const rect = canvas.getBoundingClientRect();
+      if (chartRef.current === null) return;
       const x = e.clientX - rect.left;
-      const { left, right } = chartRef.current.chartArea;
       const newRatio = (x - left) / (right - left);
+
+      if (!dragging) {
+        if (Math.abs(x - startX) < 10 || Math.abs(x - endX) < 10) {
+          chartRef.current.canvas.style.cursor = 'ew-resize';
+        } else {
+          chartRef.current.canvas.style.cursor = 'default';
+        }
+        return; // 드래그 중이 아니면 여기서 종료
+      }
 
       if (dragging === 'start')
         setSelection((s) => ({ ...s, start: Math.max(0, Math.min(newRatio, s.end - 0.01)) }));
