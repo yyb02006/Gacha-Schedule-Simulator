@@ -119,7 +119,7 @@ export default function BarChart({
           }
 
           // Tooltip 숨김 처리
-          if (tooltip.opacity === 0 || !tooltip.body) {
+          if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
             tooltipEl.style.opacity = '0';
             lastChartId.current = null;
             return;
@@ -211,6 +211,7 @@ export default function BarChart({
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current !== newIndex) {
         hoveredIndexRef.current = newIndex;
+
         chart.update();
       }
     };
