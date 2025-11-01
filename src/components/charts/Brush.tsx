@@ -291,8 +291,8 @@ export default function Brush({
       }
 
       if (dragging === 'start')
-        setSelection((s) => ({ ...s, start: Math.max(0, Math.min(newRatio, s.end - 0.01)) }));
-      else setSelection((s) => ({ ...s, end: Math.min(1, Math.max(newRatio, s.start + 0.01)) }));
+        setSelection((s) => ({ ...s, start: Math.max(0, Math.min(newRatio, s.end - 0.1)) }));
+      else setSelection((s) => ({ ...s, end: Math.min(1, Math.max(newRatio, s.start + 0.1)) }));
     };
 
     const handleMouseUp = () => setDragging(null);
