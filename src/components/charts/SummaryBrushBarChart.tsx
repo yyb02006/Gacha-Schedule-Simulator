@@ -159,8 +159,8 @@ const BarChart = ({
 export default function BrushBarChart({ labels, data, colors, tooltipCallback }: BarChartProps) {
   const [selection, setSelection] = useState({ start: 0, end: 1 });
 
-  const startIndex = Math.floor((data.length - 1) * selection.start);
-  const endIndex = Math.ceil((data.length - 1) * selection.end);
+  const startIndex = Math.round((data.length - 1) * selection.start);
+  const endIndex = Math.round((data.length - 1) * selection.end) + 1;
 
   const filteredLabels = labels.slice(startIndex, endIndex);
   const filteredData = data.slice(startIndex, endIndex);
