@@ -2,8 +2,6 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  Tooltip,
-  Legend,
   ChartOptions,
   ChartData,
   LineElement,
@@ -15,16 +13,7 @@ import {
 import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 
-ChartJS.register(
-  LineElement,
-  PointElement,
-  LinearScale,
-  CategoryScale,
-  Decimation,
-  Tooltip,
-  Legend,
-  Filler,
-);
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Decimation, Filler);
 
 const brushBackground = (brushBackground: string): Plugin<'line'> => ({
   id: 'customBackground',
