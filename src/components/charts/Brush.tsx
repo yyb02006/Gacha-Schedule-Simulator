@@ -45,24 +45,38 @@ const brushPlugin = (
     start: number;
     end: number;
   }>,
-  { handleWidth, handleColor }: { handleWidth: number; handleColor: string },
+  {
+    fontSize,
+    handle: { handleColor, handlePadding, handleWidth },
+  }: {
+    fontSize: number;
+    background: string;
+    handle: {
+      handleWidth: number;
+      handlePadding: number;
+      handleColor: string;
+    };
+  },
 ): Plugin<'line'> => ({
   id: 'brushSelection',
   afterDraw(chart) {
     const { ctx, chartArea } = chart;
     const { left, right, top, bottom } = chartArea;
+    const handleMovementArea = {
+      left: left + handleWidth / 2,
+      right: right - handleWidth / 2,
+      top: top - handlePadding,
+      bottom: bottom + handlePadding,
+    };
 
     const { start, end } = selectionRef.current;
 
-    // 왼쪽 끝 좌표 (양쪽 좌표가 바 두께 절반만큼 안쪽으로 들어온 브러쉬 구간)
-    const brushRangeStartCoord = left + handleWidth / 2;
-
     // 전체 너비 (양쪽 좌표가 바 두께 절반만큼 안쪽으로 들어온 브러쉬 구간)
-    const brushRangeWidth = right - left - handleWidth;
+    const brushRangeWidth = handleMovementArea.right - handleMovementArea.left;
 
     // 브러쉬 선택 구간 (예시: x 20%~60%)
-    const currentStartX = brushRangeStartCoord + brushRangeWidth * start;
-    const currentEndX = brushRangeStartCoord + brushRangeWidth * end;
+    const currentStartX = handleMovementArea.left + brushRangeWidth * start;
+    const currentEndX = handleMovementArea.left + brushRangeWidth * end;
 
     // 두 핸들이 같은 인덱스를 가리키고 있는지
     const scale = chart.scales.x;
@@ -77,10 +91,10 @@ const brushPlugin = (
 
     // 핸들 표시
     [currentStartX, currentEndX].forEach((x, currentIndex) => {
-      const height = bottom - top + 6;
+      const handleHeight = bottom - top + handlePadding * 2;
       const handleRadius = 3; // 둥근 정도
       const centerRadius = 8; // 가운데 원 반지름
-      const centerY = top - 3 + height / 2;
+      const centerY = top - handlePadding + handleHeight / 2;
 
       ctx.save();
       ctx.fillStyle = handleColor;
@@ -92,34 +106,34 @@ const brushPlugin = (
 
       // Path 그리기
       ctx.beginPath();
-      ctx.moveTo(x - handleWidth / 2 + handleRadius, top - 3);
-      ctx.lineTo(x + handleWidth / 2 - handleRadius, top - 3);
+      ctx.moveTo(x - handleWidth / 2 + handleRadius, handleMovementArea.top);
+      ctx.lineTo(x + handleWidth / 2 - handleRadius, handleMovementArea.top);
       ctx.quadraticCurveTo(
         x + handleWidth / 2,
-        top - 3,
+        handleMovementArea.top,
         x + handleWidth / 2,
-        top - 3 + handleRadius,
+        handleMovementArea.top + handleRadius,
       );
-      ctx.lineTo(x + handleWidth / 2, top - 3 + height - handleRadius);
+      ctx.lineTo(x + handleWidth / 2, handleMovementArea.top + handleHeight - handleRadius);
       ctx.quadraticCurveTo(
         x + handleWidth / 2,
-        top - 3 + height,
+        handleMovementArea.top + handleHeight,
         x + handleWidth / 2 - handleRadius,
-        top - 3 + height,
+        handleMovementArea.top + handleHeight,
       );
-      ctx.lineTo(x - handleWidth / 2 + handleRadius, top - 3 + height);
+      ctx.lineTo(x - handleWidth / 2 + handleRadius, handleMovementArea.top + handleHeight);
       ctx.quadraticCurveTo(
         x - handleWidth / 2,
-        top - 3 + height,
+        handleMovementArea.top + handleHeight,
         x - handleWidth / 2,
-        top - 3 + height - handleRadius,
+        handleMovementArea.top + handleHeight - handleRadius,
       );
-      ctx.lineTo(x - handleWidth / 2, top - 3 + handleRadius);
+      ctx.lineTo(x - handleWidth / 2, handleMovementArea.top + handleRadius);
       ctx.quadraticCurveTo(
         x - handleWidth / 2,
-        top - 3,
+        handleMovementArea.top,
         x - handleWidth / 2 + handleRadius,
-        top - 3,
+        handleMovementArea.top,
       );
       ctx.closePath();
 
@@ -129,6 +143,7 @@ const brushPlugin = (
       ctx.fill();
       ctx.restore();
 
+      // 핸들 가운데 원 Path 가운데 원 Path
       ctx.save();
       ctx.fillStyle = '#eaeaea';
       ctx.beginPath();
@@ -140,23 +155,23 @@ const brushPlugin = (
       if (chart.data.labels) {
         const totalPoints = chart.data.labels.length;
         // x 좌표 -> index 변환
-        const testChartWidth = right - left - 6;
-        const currentHandleWidth = x - left - 3;
-        const tickIndex = Math.round((currentHandleWidth / testChartWidth) * (totalPoints - 1));
+        const availableRange = handleMovementArea.right - handleMovementArea.left;
+        const handlePosFromLeft = x - handleMovementArea.left;
+        const tickIndex = Math.round((handlePosFromLeft / availableRange) * (totalPoints - 1));
         const label = chart.data.labels[tickIndex] as string;
 
         ctx.save();
-        ctx.font = '12px sans-serif';
+        ctx.font = `${fontSize}px S-CoreDream-400, sans-serif`;
         const textWidth = ctx.measureText(label).width;
         const textPadding = 4;
 
         let textX = x;
-        const textY = currentIndex === 0 ? centerY + height / 2 : centerY - height / 2;
+        const textY =
+          currentIndex === 0 ? handleMovementArea.bottom + fontSize : handleMovementArea.top;
 
         // 텍스트가 서로 같은 인덱스일 때 (첫 번째 핸들에만 적용)
         if (isSame) {
           textX = currentStartX + (currentEndX - currentStartX) / 2;
-          console.log(left, currentStartX);
         }
 
         // 텍스트가 오른쪽 경계를 벗어나면 왼쪽으로 이동
@@ -169,9 +184,9 @@ const brushPlugin = (
           textX = left + textWidth / 2 + textPadding;
         }
 
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = '#eaeaea';
         ctx.textAlign = 'center';
-        ctx.textBaseline = currentIndex === 0 ? 'top' : 'bottom';
+        ctx.textBaseline = currentIndex === 0 ? 'alphabetic' : 'bottom';
         ctx.fillText(label, textX, textY);
         ctx.restore();
       }
@@ -203,8 +218,9 @@ export default function Brush({
   const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
   const selectionRef = useRef(selection);
   const brushConfigRef = useRef({
+    fontSize: 12,
     background: '#3c3c3c',
-    handle: { handleWidth: 6, handleColor: '#fe9a00' },
+    handle: { handleWidth: 6, handlePadding: 3, handleColor: '#fe9a00' },
   });
 
   const chartData: ChartData<'line'> = {
@@ -291,8 +307,8 @@ export default function Brush({
       }
 
       if (dragging === 'start')
-        setSelection((s) => ({ ...s, start: Math.max(0, Math.min(newRatio, s.end - 0.1)) }));
-      else setSelection((s) => ({ ...s, end: Math.min(1, Math.max(newRatio, s.start + 0.1)) }));
+        setSelection((s) => ({ ...s, start: Math.max(0, Math.min(newRatio, s.end - 0.05)) }));
+      else setSelection((s) => ({ ...s, end: Math.min(1, Math.max(newRatio, s.start + 0.05)) }));
     };
 
     const handleMouseUp = () => setDragging(null);
@@ -320,7 +336,7 @@ export default function Brush({
         options={options}
         plugins={[
           brushBackground(brushConfigRef.current.background),
-          brushPlugin(selectionRef, brushConfigRef.current.handle),
+          brushPlugin(selectionRef, brushConfigRef.current),
         ]}
       />
     </div>
