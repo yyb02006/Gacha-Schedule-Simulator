@@ -10,17 +10,10 @@ import {
   PointElement,
   Decimation,
   Filler,
+  Plugin,
 } from 'chart.js';
+import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-
-interface BrushProps {
-  labels: string[];
-  data: number[];
-  colors: Record<
-    'backgroundColor' | 'borderColor' | 'hoverBackgroundColor' | 'hoverBorderColor',
-    string | string[]
-  >;
-}
 
 ChartJS.register(
   LineElement,
@@ -33,21 +26,97 @@ ChartJS.register(
   Filler,
 );
 
+const brushBackground = (brushBackground: string): Plugin<'line'> => ({
+  id: 'customBackground',
+  beforeDraw(chart) {
+    const { ctx, chartArea } = chart;
+    const { left, top, right, bottom } = chartArea;
+
+    // 차트 내부 영역 배경색
+    ctx.save();
+    ctx.fillStyle = brushBackground; // 원하는 색
+    ctx.fillRect(left, top, right - left, bottom - top);
+    ctx.restore();
+  },
+});
+
+const brushPlugin = (
+  selectionRef: RefObject<{
+    start: number;
+    end: number;
+  }>,
+  { handleWidth, handleColor }: { handleWidth: number; handleColor: string },
+): Plugin<'line'> => ({
+  id: 'brushSelection',
+  afterDraw(chart) {
+    const { ctx, chartArea } = chart;
+    const { left, right, top, bottom } = chartArea;
+
+    const { start, end } = selectionRef.current;
+
+    // 왼쪽 끝 좌표 (양쪽 좌표가 바 두께 절반만큼 안쪽으로 들어온 브러쉬 구간)
+    const brushRangeStartCoord = left + handleWidth / 2;
+
+    // 전체 너비 (양쪽 좌표가 바 두께 절반만큼 안쪽으로 들어온 브러쉬 구간)
+    const brushRangeWidth = right - left - handleWidth;
+
+    // 브러쉬 선택 구간 (예시: x 20%~60%)
+    const currentStartX = brushRangeStartCoord + brushRangeWidth * start;
+    const currentendX = brushRangeStartCoord + brushRangeWidth * end;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillRect(currentStartX, top, currentendX - currentStartX, bottom - top);
+    ctx.restore();
+
+    // 핸들 표시
+    [currentStartX, currentendX].forEach((x) => {
+      ctx.fillStyle = handleColor;
+      ctx.fillRect(x - handleWidth / 2, top, handleWidth, bottom - top);
+    });
+  },
+});
+
+interface BrushProps {
+  labels: string[];
+  data: number[];
+  colors: Record<'backgroundColor' | 'borderColor', string | string[]>;
+  selection: { start: number; end: number };
+  setSelection: Dispatch<
+    SetStateAction<{
+      start: number;
+      end: number;
+    }>
+  >;
+}
+
 export default function Brush({
   labels,
   data,
-  colors: { backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor },
+  colors: { backgroundColor, borderColor },
+  selection,
+  setSelection,
 }: BrushProps) {
+  const chartRef = useRef<ChartJS<'line'>>(null);
+  const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
+  const selectionRef = useRef(selection);
+  const brushConfigRef = useRef({
+    background: '#3c3c3c',
+    handle: { handleWidth: 6, handleColor: '#ffd044' },
+  });
+
   const chartData: ChartData<'line'> = {
     labels,
     datasets: [
       {
         label: '배너 데이터',
         data,
-        backgroundColor: hoverBackgroundColor,
-        borderColor: hoverBorderColor,
+        backgroundColor,
+        borderColor,
+        borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 0,
+        clip: { left: 0, right: 0, top: 0, bottom: 0 },
         fill: true,
         tension: data.length < 100 ? 0.3 : data.length < 200 ? 0.65 : 1,
       },
@@ -59,26 +128,20 @@ export default function Brush({
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
-      tooltip: { enabled: true },
+      tooltip: { enabled: false },
       datalabels: { display: false },
       decimation: { enabled: true, algorithm: 'lttb', samples: 100 },
     },
     scales: {
       x: {
         grid: {
-          display: false,
-          color: '#3c3c3c',
+          display: true,
+          color: '#535353',
+          drawTicks: false,
         },
         ticks: {
-          maxRotation: 25,
-          crossAlign: 'center',
-          align: 'center',
-          padding: -2,
-          labelOffset: 6,
-        },
-        afterFit: (axis) => {
-          // 축 박스 높이를 줄여서 -padding 보전
-          axis.height = axis.height > 60 ? 60 : axis.height + 2;
+          display: false,
+          maxTicksLimit: data.length > 20 ? Math.ceil(data.length / 10) : undefined,
         },
       },
       y: {
@@ -86,14 +149,70 @@ export default function Brush({
           display: false,
           color: '#3c3c3c',
         },
+        grace: '10%',
         beginAtZero: true,
-        ticks: { maxTicksLimit: 6 },
+        ticks: { maxTicksLimit: 6, color: '#555' },
       },
     },
   };
+
+  useEffect(() => {
+    const canvas = chartRef.current?.canvas;
+    if (!canvas) return;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      if (chartRef.current === null) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const { left, right } = chartRef.current.chartArea;
+      const startX = left + (right - left) * selection.start;
+      const endX = left + (right - left) * selection.end;
+
+      // 핸들 근처 클릭 시
+      if (Math.abs(x - startX) < 8) setDragging('start');
+      else if (Math.abs(x - endX) < 8) setDragging('end');
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragging || chartRef.current === null) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const { left, right } = chartRef.current.chartArea;
+      const newRatio = (x - left) / (right - left);
+
+      if (dragging === 'start')
+        setSelection((s) => ({ ...s, start: Math.max(0, Math.min(newRatio, s.end - 0.01)) }));
+      else setSelection((s) => ({ ...s, end: Math.min(1, Math.max(newRatio, s.start + 0.01)) }));
+    };
+
+    const handleMouseUp = () => setDragging(null);
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      canvas.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [selection, dragging, setSelection]);
+
+  useEffect(() => {
+    selectionRef.current = selection;
+  }, [selection, selectionRef]);
+
   return (
-    <div className="h-[100px]">
-      <Line data={chartData} options={options} style={{ backgroundColor: '#404040' }} />
+    <div className="h-[60px]">
+      <Line
+        ref={chartRef}
+        data={chartData}
+        options={options}
+        plugins={[
+          brushBackground(brushConfigRef.current.background),
+          brushPlugin(selectionRef, brushConfigRef.current.handle),
+        ]}
+      />
     </div>
   );
 }
