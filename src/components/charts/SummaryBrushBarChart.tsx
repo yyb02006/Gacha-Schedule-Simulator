@@ -17,7 +17,7 @@ import {
   CartesianScaleOptions,
   Plugin,
 } from 'chart.js';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(
@@ -68,6 +68,9 @@ const BarChart = ({
   tooltipCallback,
 }: BarChartProps) => {
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
+  const chartRef = useRef<ChartJS<'bar'>>(null);
+  console.log((chartRef.current?.canvas.width ?? 560) / 8);
+
   const chartData: ChartData<'bar'> = {
     labels,
     datasets: [
@@ -81,6 +84,7 @@ const BarChart = ({
         borderWidth: data.length > 20 ? 0 : 2,
         hoverBorderWidth: 0,
         categoryPercentage,
+        maxBarThickness: (chartRef.current?.canvas.width ?? 560) / 8,
         minBarLength: data.length < 50 ? 10 : data.length < 150 ? 5 : 3,
         borderRadius: (context) => {
           const chart = context.chart;
@@ -153,7 +157,7 @@ const BarChart = ({
     interaction: { mode: 'index', intersect: false },
   };
 
-  return <Bar data={chartData} options={options} plugins={[adaptiveTickSpacing]} />;
+  return <Bar ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />;
 };
 
 export default function BrushBarChart({ labels, data, colors, tooltipCallback }: BarChartProps) {
