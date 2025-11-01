@@ -173,7 +173,7 @@ const brushPlugin = (
           textX = left + textWidth / 2 + textPadding;
         }
 
-        ctx.fillStyle = '#eaeaea';
+        ctx.fillStyle = '#ffb900';
         ctx.textAlign = 'center';
         ctx.textBaseline = currentIndex === 0 ? 'alphabetic' : 'bottom';
         ctx.fillText(label, textX, textY);
