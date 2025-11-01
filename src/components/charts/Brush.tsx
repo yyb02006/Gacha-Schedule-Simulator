@@ -62,15 +62,21 @@ const brushPlugin = (
 
     // 브러쉬 선택 구간 (예시: x 20%~60%)
     const currentStartX = brushRangeStartCoord + brushRangeWidth * start;
-    const currentendX = brushRangeStartCoord + brushRangeWidth * end;
+    const currentEndX = brushRangeStartCoord + brushRangeWidth * end;
+
+    // 두 핸들이 같은 인덱스를 가리키고 있는지
+    const scale = chart.scales.x;
+    const isSame =
+      Math.floor(scale.getValueForPixel(currentStartX) ?? 0) ===
+      Math.floor(scale.getValueForPixel(currentEndX) ?? 0);
 
     ctx.save();
     ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-    ctx.fillRect(currentStartX, top, currentendX - currentStartX, bottom - top);
+    ctx.fillRect(currentStartX, top, currentEndX - currentStartX, bottom - top);
     ctx.restore();
 
     // 핸들 표시
-    [currentStartX, currentendX].forEach((x) => {
+    [currentStartX, currentEndX].forEach((x, currentIndex) => {
       const height = bottom - top + 6;
       const handleRadius = 3; // 둥근 정도
       const centerRadius = 8; // 가운데 원 반지름
@@ -134,18 +140,39 @@ const brushPlugin = (
       if (chart.data.labels) {
         const totalPoints = chart.data.labels.length;
         // x 좌표 -> index 변환
-        const scale = chart.scales.x;
-        const index = Math.floor(scale.getValueForPixel(x) ?? 0);
-        // console.log(index);
-        const clampedIndex = Math.max(0, Math.min(totalPoints - 1, index));
-        const label = chart.data.labels[clampedIndex];
+        const testChartWidth = right - left - 6;
+        const currentHandleWidth = x - left - 3;
+        const tickIndex = Math.round((currentHandleWidth / testChartWidth) * (totalPoints - 1));
+        const label = chart.data.labels[tickIndex] as string;
 
         ctx.save();
-        ctx.fillStyle = '#fff';
         ctx.font = '12px sans-serif';
+        const textWidth = ctx.measureText(label).width;
+        const textPadding = 4;
+
+        let textX = x;
+        const textY = currentIndex === 0 ? centerY + height / 2 : centerY - height / 2;
+
+        // 텍스트가 서로 같은 인덱스일 때 (첫 번째 핸들에만 적용)
+        if (isSame) {
+          textX = currentStartX + (currentEndX - currentStartX) / 2;
+          console.log(left, currentStartX);
+        }
+
+        // 텍스트가 오른쪽 경계를 벗어나면 왼쪽으로 이동
+        if (textX + textWidth / 2 > right - textPadding) {
+          textX = right - textWidth / 2 - textPadding;
+        }
+
+        // 텍스트가 왼쪽 경계를 벗어나면 오른쪽으로 이동
+        if (textX - textWidth / 2 < left + textPadding) {
+          textX = left + textWidth / 2 + textPadding;
+        }
+
+        ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(label as string, x, centerY);
+        ctx.textBaseline = currentIndex === 0 ? 'top' : 'bottom';
+        ctx.fillText(label, textX, textY);
         ctx.restore();
       }
     });
@@ -191,7 +218,7 @@ export default function Brush({
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 0,
-        clip: { left: 0, right: 0, top: 0, bottom: 0 },
+        clip: { left: 0, right: 0, top: 50, bottom: 0 },
         fill: true,
         tension: data.length < 100 ? 0.3 : data.length < 200 ? 0.65 : 1,
       },
@@ -201,6 +228,7 @@ export default function Brush({
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
+    layout: { padding: { top: 20, bottom: 20 } },
     plugins: {
       legend: { display: false },
       tooltip: { enabled: false },
@@ -224,7 +252,6 @@ export default function Brush({
           display: false,
           color: '#3c3c3c',
         },
-        grace: '10%',
         beginAtZero: true,
         ticks: { maxTicksLimit: 6, color: '#555' },
       },
@@ -286,7 +313,7 @@ export default function Brush({
   }, [selection, selectionRef]);
 
   return (
-    <div className="h-[60px]">
+    <div className="h-[70px]">
       <Line
         ref={chartRef}
         data={chartData}
