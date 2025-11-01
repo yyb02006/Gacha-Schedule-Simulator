@@ -122,12 +122,7 @@ export default function DonutChart({
 
     // 데이터 비율 재계산
     const recalcData = () => {
-      const visibleMask = rawDataRef.current.map((_, i) => chart.getDataVisibility(i));
-      const visibleData = rawDataRef.current.filter((_, i) => visibleMask[i]);
-      const visibleTotal = visibleData.reduce((a, b) => a + b, 0);
-
       dataset.data = rawDataRef.current.map((v, i) => {
-        console.log(v, visibleTotal, chart.getDataVisibility(i));
         return chart.getDataVisibility(i) ? v : 0;
       });
     };
@@ -198,12 +193,12 @@ export default function DonutChart({
           const body = tooltip.body;
 
           const data = tooltip.dataPoints?.[0];
-          const borderColor = (data.dataset.borderColor as string[])[data.dataIndex];
+          const textColor = (data.dataset.borderColor as string[])[data.dataIndex];
           const total = data.dataset.data.reduce((a, b) => a + b, 0);
 
           tooltipEl.innerHTML = `
             <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 shadow-xl shadow-[#141414]">
-              ${title.map((t) => `<p style="color: ${borderColor}" class="text-lg">${t}</p>`).join('')}
+              ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
               ${body
                 .map((b, i) => {
                   return tooltipCallback(data, total ?? 1);
