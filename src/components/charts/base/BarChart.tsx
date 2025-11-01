@@ -11,8 +11,9 @@ import {
   Title,
   Tooltip,
   Legend,
+  ScriptableScaleContext,
 } from 'chart.js';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend);
@@ -56,6 +57,7 @@ export default function BarChart({
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
   const chartRef = useRef<ChartJS<'bar'>>(null);
   const lastChartId = useRef<string | null>(null);
+  const hoveredIndexRef = useRef<number | null>(null);
 
   const chartData: ChartData<'bar'> = {
     labels,
@@ -88,10 +90,14 @@ export default function BarChart({
     padding: -2,
     labelOffset: 6,
     autoSkip: false,
+    color: (ctx: ScriptableScaleContext) => {
+      return ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666';
+    },
   } as const;
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
+    animation: { duration: 200 },
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -165,15 +171,14 @@ export default function BarChart({
           data.length > 20
             ? {
                 ...baseTicksProps,
-                callback:
-                  data.length > 20
-                    ? function (_, index) {
-                        const step = 10; // 원하는 간격
-                        return index % step === 0 ? index : '';
-                      }
-                    : undefined,
+                callback: function (_, index) {
+                  const step = 10; // 원하는 간격
+                  return index % step === 0 ? index : '';
+                },
               }
-            : baseTicksProps,
+            : {
+                ...baseTicksProps,
+              },
         afterFit: (axis) => {
           // 축 박스 높이를 줄여서 -padding 보전
           if (!axis || axis.type !== 'category') return;
@@ -195,6 +200,24 @@ export default function BarChart({
     },
     interaction: { mode: 'index', intersect: false },
   };
+
+  useEffect(() => {
+    const canvas = chartRef.current?.canvas;
+    const chart = chartRef.current;
+    if (!canvas || !chart) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const elements = chart.getElementsAtEventForMode(e, 'nearest', { intersect: false }, false);
+      const newIndex = elements.length > 0 ? elements[0].index : null;
+      if (hoveredIndexRef.current !== newIndex) {
+        hoveredIndexRef.current = newIndex;
+        chart.update();
+      }
+    };
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+    return () => canvas.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   return <Bar ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />;
 }
