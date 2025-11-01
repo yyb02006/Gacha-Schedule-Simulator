@@ -1,7 +1,7 @@
 'use client';
 
-import ChartWrapper from '#/components/charts/ChartWrapper';
-import SummaryDonutChart from '#/components/charts/SummaryDonutChart';
+import ChartWrapper from '#/components/charts/base/ChartWrapper';
+import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { rarityColor } from '#/constants/ui';
 import { obtainedTypes, rarities } from '#/constants/variables';
@@ -94,7 +94,7 @@ export default function TotalGachaResult({
     >
       {result ? (
         <section className="text-sm">
-          <SummaryDonutChart
+          <DonutChart
             data={rarityResultData.data}
             labels={rarityResultData.labels}
             backgroundColor={Object.values(rarityColor).map(({ HEX }) => HEX + 'CC')}

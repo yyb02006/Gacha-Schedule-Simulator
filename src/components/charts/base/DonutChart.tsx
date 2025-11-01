@@ -25,7 +25,7 @@ const getLabelPosition = (context: Context, total: number | undefined) => {
   return percentage < 5 ? 'end' : 'center';
 };
 
-export default function DoughnutChart({
+export default function DonutChart({
   labels,
   data,
   backgroundColor,

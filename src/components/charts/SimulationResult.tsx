@@ -1,7 +1,7 @@
 'use client';
 
-import ChartWrapper from '#/components/charts/ChartWrapper';
-import SummaryDonutChart from '#/components/charts/SummaryDonutChart';
+import ChartWrapper from '#/components/charts/base/ChartWrapper';
+import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { truncateToDecimals } from '#/libs/utils';
 import { TooltipItem } from 'chart.js';
@@ -49,7 +49,7 @@ export default function SimulationResult({
     >
       {result ? (
         <section className="text-sm">
-          <SummaryDonutChart
+          <DonutChart
             data={simulationResultData}
             labels={simulationResultLabels}
             borderColor={['#fe9a00', '#00a6f4']}

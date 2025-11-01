@@ -1,7 +1,7 @@
 'use client';
 
-import BarChart from '#/components/charts/BarChart';
-import Brush from '#/components/charts/Brush';
+import BarChart from '#/components/charts/base/BarChart';
+import Brush from '#/components/charts/base/Brush';
 import { TooltipItem } from 'chart.js';
 import { useState } from 'react';
 

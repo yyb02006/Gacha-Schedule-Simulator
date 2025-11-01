@@ -1,7 +1,7 @@
 'use client';
 
-import ChartWrapper from '#/components/charts/ChartWrapper';
-import BrushBarChart from '#/components/charts/SummaryBrushBarChart';
+import ChartWrapper from '#/components/charts/base/ChartWrapper';
+import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 
 export default function BannerSuccessTrialCounts({
