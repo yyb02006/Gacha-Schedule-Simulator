@@ -272,8 +272,8 @@ export default function Brush({
       const x = e.clientX - rect.left;
 
       // 핸들 근처 클릭 시
-      if (Math.abs(x - startX) < 10) setDragging('start');
-      else if (Math.abs(x - endX) < 10) setDragging('end');
+      if (Math.abs(x - endX) < 10) setDragging('end');
+      else if (Math.abs(x - startX) < 10) setDragging('start');
     };
 
     const handleMouseMove = (e: MouseEvent) => {
