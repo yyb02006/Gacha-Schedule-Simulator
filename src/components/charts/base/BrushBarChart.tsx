@@ -13,6 +13,7 @@ interface BrushBarChartProps {
     string | string[]
   >;
   brushColor: Record<'backgroundColor' | 'borderColor', string | string[]>;
+  totalSuccesses: number;
   tooltipCallback: (data: TooltipItem<'bar'>, total: number) => string;
 }
 
@@ -21,6 +22,7 @@ export default function BrushBarChart({
   data,
   barChartColors,
   brushColor,
+  totalSuccesses,
   tooltipCallback,
 }: BrushBarChartProps) {
   const [selection, setSelection] = useState({ start: 0, end: 1 });
@@ -37,6 +39,7 @@ export default function BrushBarChart({
         labels={filteredLabels}
         data={filteredData}
         colors={barChartColors}
+        totalSuccesses={totalSuccesses}
         tooltipCallback={tooltipCallback}
       />
       <Brush

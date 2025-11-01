@@ -59,6 +59,7 @@ export default function BannerSuccessTrialCounts({
             backgroundColor: '#a684ffCC',
             borderColor: '#a684ff',
           }}
+          totalSuccesses={result.perBanner[0].bannerSuccess}
           tooltipCallback={tooltip}
         />
       ) : null}

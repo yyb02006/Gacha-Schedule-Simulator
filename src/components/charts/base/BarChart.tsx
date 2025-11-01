@@ -45,6 +45,7 @@ interface BarChartProps {
     'backgroundColor' | 'borderColor' | 'hoverBackgroundColor' | 'hoverBorderColor',
     string | string[]
   >;
+  totalSuccesses: number;
   tooltipCallback: (data: TooltipItem<'bar'>, total: number) => string;
 }
 
@@ -52,6 +53,7 @@ export default function BarChart({
   labels,
   data,
   colors: { backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor },
+  totalSuccesses,
   tooltipCallback,
 }: BarChartProps) {
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
@@ -144,14 +146,12 @@ export default function BarChart({
           const data = tooltip.dataPoints?.[0];
           const textColor = data.dataset.borderColor;
 
-          const total = (data.dataset.data as number[]).reduce((a, b) => a + b, 0);
-
           tooltipEl.innerHTML = `
             <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 shadow-xl shadow-[#141414]">
               ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}번째 가챠</p>`).join('')}
               ${body
                 .map((b, i) => {
-                  return tooltipCallback(data, total ?? 1);
+                  return tooltipCallback(data, totalSuccesses ?? 1);
                 })
                 .join('')}
             </div>
