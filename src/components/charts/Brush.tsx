@@ -71,8 +71,83 @@ const brushPlugin = (
 
     // 핸들 표시
     [currentStartX, currentendX].forEach((x) => {
+      const height = bottom - top + 6;
+      const handleRadius = 3; // 둥근 정도
+      const centerRadius = 8; // 가운데 원 반지름
+      const centerY = top - 3 + height / 2;
+
+      ctx.save();
       ctx.fillStyle = handleColor;
-      ctx.fillRect(x - handleWidth / 2, top, handleWidth, bottom - top);
+
+      ctx.shadowColor = 'rgba(0,0,0,0.4)'; // 그림자 색
+      ctx.shadowBlur = 6; // 흐림 정도
+      ctx.shadowOffsetX = 0; // X 방향 오프셋
+      ctx.shadowOffsetY = 2;
+
+      // Path 그리기
+      ctx.beginPath();
+      ctx.moveTo(x - handleWidth / 2 + handleRadius, top - 3);
+      ctx.lineTo(x + handleWidth / 2 - handleRadius, top - 3);
+      ctx.quadraticCurveTo(
+        x + handleWidth / 2,
+        top - 3,
+        x + handleWidth / 2,
+        top - 3 + handleRadius,
+      );
+      ctx.lineTo(x + handleWidth / 2, top - 3 + height - handleRadius);
+      ctx.quadraticCurveTo(
+        x + handleWidth / 2,
+        top - 3 + height,
+        x + handleWidth / 2 - handleRadius,
+        top - 3 + height,
+      );
+      ctx.lineTo(x - handleWidth / 2 + handleRadius, top - 3 + height);
+      ctx.quadraticCurveTo(
+        x - handleWidth / 2,
+        top - 3 + height,
+        x - handleWidth / 2,
+        top - 3 + height - handleRadius,
+      );
+      ctx.lineTo(x - handleWidth / 2, top - 3 + handleRadius);
+      ctx.quadraticCurveTo(
+        x - handleWidth / 2,
+        top - 3,
+        x - handleWidth / 2 + handleRadius,
+        top - 3,
+      );
+      ctx.closePath();
+
+      // 핸들 가운데 원 Path
+      ctx.moveTo(x + centerRadius, centerY);
+      ctx.arc(x, centerY, centerRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.fillStyle = '#eaeaea';
+      ctx.beginPath();
+      ctx.arc(x, centerY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 현재 틱 라벨 찾기
+      if (chart.data.labels) {
+        const totalPoints = chart.data.labels.length;
+        // x 좌표 -> index 변환
+        const scale = chart.scales.x;
+        const index = Math.floor(scale.getValueForPixel(x) ?? 0);
+        // console.log(index);
+        const clampedIndex = Math.max(0, Math.min(totalPoints - 1, index));
+        const label = chart.data.labels[clampedIndex];
+
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label as string, x, centerY);
+        ctx.restore();
+      }
     });
   },
 });
@@ -102,7 +177,7 @@ export default function Brush({
   const selectionRef = useRef(selection);
   const brushConfigRef = useRef({
     background: '#3c3c3c',
-    handle: { handleWidth: 6, handleColor: '#ffd044' },
+    handle: { handleWidth: 6, handleColor: '#fe9a00' },
   });
 
   const chartData: ChartData<'line'> = {
