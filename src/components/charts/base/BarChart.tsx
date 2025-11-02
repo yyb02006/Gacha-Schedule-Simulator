@@ -127,7 +127,7 @@ export default function BarChart({
         intersect: false, // 바 위가 아니라, 그 열 전체 hover 가능
         external: (context) => {
           const { chart, tooltip } = context;
-          const chartId = chart.canvas.id;
+          const chartId = chart.id;
 
           const canvasParent = chart.canvas.parentElement;
           if (!canvasParent) return;

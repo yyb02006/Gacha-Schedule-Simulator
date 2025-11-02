@@ -157,7 +157,7 @@ export default function DonutChart({
         position: 'nearest',
         external: (context) => {
           const { chart, tooltip } = context;
-          const chartId = chart.canvas.id;
+          const chartId = chart.id;
 
           let tooltipEl = document.getElementById('custom-tooltip') as HTMLDivElement;
           if (!tooltipEl) {
