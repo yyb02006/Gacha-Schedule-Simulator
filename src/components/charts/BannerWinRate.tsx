@@ -6,26 +6,56 @@ import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { TooltipItem } from 'chart.js';
 import { truncateToDecimals } from '#/libs/utils';
 
-const tooltip = (data: TooltipItem<'bar'>, total: number) => {
+export interface CreateTooltipLiteralPorps {
+  title: string[];
+  textColor: string;
+  body: {
+    before: string[];
+    lines: string[];
+    after: string[];
+  }[];
+  data: TooltipItem<'bar'>;
+  total: number;
+}
+
+export type CreateTooltipLiteral = ({
+  title,
+  textColor,
+  body,
+  data,
+  total,
+}: CreateTooltipLiteralPorps) => string;
+
+const createTooltipLiteral = ({
+  title,
+  textColor,
+  body,
+  data,
+  total,
+}: CreateTooltipLiteralPorps) => {
   const stringifiedValue = data?.formattedValue ?? '';
-  const label = data.label;
+  const parsedRawValue = typeof data.parsed === 'number' ? data.parsed : total;
   const borderColor = data.dataset.borderColor;
-  const sumUpToCurrent = (data.dataset.data as number[])
-    .slice(0, data.dataIndex + 1)
-    .reduce((a, b) => a + b, 0);
 
   return /*html*/ `
-    <div class="font-S-CoreDream-400 space-y-[2px] text-sm">
-      <p>
-        ${label}회차 성공 횟수 :
-        <span style="color: ${borderColor};">${stringifiedValue} 회</span>
-      </p>
-      <p>
-        누적 성공 비율 :
-        <span style="color: ${borderColor};">${truncateToDecimals((sumUpToCurrent / total) * 100)}%</span>
-      </p>
-    </div>
-  `;
+  <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 shadow-xl shadow-[#141414]">
+  ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+  ${body
+    .map((b, i) => {
+      return /*html*/ `<div key={i} class="font-S-CoreDream-400 space-y-[2px] text-sm whitespace-nowrap">
+          <p>
+            배너 성공 횟수 :<span style="color: ${borderColor};">${stringifiedValue} 회</span>
+          </p>
+          <p>
+            배너 성공률 :
+            <span style="color: ${borderColor};">
+              ${truncateToDecimals((parsedRawValue / total) * 100)}%
+            </span>
+          </p>
+        </div>`;
+    })
+    .join('')}
+</div>`;
 };
 
 export default function BannerWinRate({ result }: { result: GachaSimulationMergedResult | null }) {
@@ -51,8 +81,9 @@ export default function BannerWinRate({ result }: { result: GachaSimulationMerge
             backgroundColor: '#a684ffCC',
             borderColor: '#a684ff',
           }}
-          totalSuccesses={result.perBanner[0].bannerSuccess}
-          tooltipCallback={tooltip}
+          total={result.total.simulationTry}
+          padding={16}
+          tooltipCallback={createTooltipLiteral}
         />
       ) : null}
     </ChartWrapper>
