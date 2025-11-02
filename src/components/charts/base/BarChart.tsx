@@ -109,7 +109,7 @@ export default function BarChart({
     transitions: { active: { animation: { duration: 100 } } },
     layout: { padding: { top: padding, left: padding, bottom: 0, right: padding } },
     onHover: (_, elements, chart) => {
-      const index = elements[0].index ?? 0;
+      const index = elements[0]?.index ?? 0;
       if (hoveredIndexRef.current === index) {
         chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
         chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
