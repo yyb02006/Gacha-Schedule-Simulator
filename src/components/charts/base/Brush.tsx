@@ -188,6 +188,7 @@ interface BrushProps {
   data: number[];
   colors: Record<'backgroundColor' | 'borderColor', string | string[]>;
   selection: { start: number; end: number };
+  padding: number;
   setSelection: Dispatch<
     SetStateAction<{
       start: number;
@@ -201,6 +202,7 @@ export default function Brush({
   data,
   colors: { backgroundColor, borderColor },
   selection,
+  padding,
   setSelection,
 }: BrushProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
@@ -233,7 +235,7 @@ export default function Brush({
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
-    layout: { padding: { top: 20, bottom: 20 } },
+    layout: { padding: { top: 20, bottom: 20 + padding, right: padding, left: padding } },
     plugins: {
       legend: { display: false },
       tooltip: { enabled: false },
@@ -318,7 +320,7 @@ export default function Brush({
   }, [selection, selectionRef]);
 
   return (
-    <div className="h-[70px]">
+    <div className="h-[86px]">
       <Line
         ref={chartRef}
         data={chartData}

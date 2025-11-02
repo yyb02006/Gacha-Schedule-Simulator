@@ -48,7 +48,7 @@ export default function SimulationResult({
       }
     >
       {result ? (
-        <section className="text-sm">
+        <div className="p-4 text-sm">
           <DonutChart
             data={simulationResultData}
             labels={simulationResultLabels}
@@ -89,7 +89,7 @@ export default function SimulationResult({
               </li>
             </ul>
           </div>
-        </section>
+        </div>
       ) : null}
     </ChartWrapper>
   );

@@ -1,8 +1,8 @@
 'use client';
 
+import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
 import BarChart from '#/components/charts/base/BarChart';
 import Brush from '#/components/charts/base/Brush';
-import { TooltipItem } from 'chart.js';
 import { useState } from 'react';
 
 interface BrushBarChartProps {
@@ -13,8 +13,9 @@ interface BrushBarChartProps {
     string | string[]
   >;
   brushColor: Record<'backgroundColor' | 'borderColor', string | string[]>;
-  totalSuccesses: number;
-  tooltipCallback: (data: TooltipItem<'bar'>, total: number) => string;
+  total: number;
+  padding: number;
+  tooltipCallback: CreateTooltipLiteral;
 }
 
 export default function BrushBarChart({
@@ -22,7 +23,8 @@ export default function BrushBarChart({
   data,
   barChartColors,
   brushColor,
-  totalSuccesses,
+  total,
+  padding,
   tooltipCallback,
 }: BrushBarChartProps) {
   const [selection, setSelection] = useState({ start: 0, end: 1 });
@@ -34,12 +36,14 @@ export default function BrushBarChart({
   const filteredData = data.slice(startIndex, endIndex);
 
   return (
-    <div className="space-y-2">
+    <div className="relative space-y-1">
       <BarChart
         labels={filteredLabels}
         data={filteredData}
         colors={barChartColors}
-        totalSuccesses={totalSuccesses}
+        total={total}
+        startIndex={startIndex}
+        padding={padding}
         tooltipCallback={tooltipCallback}
       />
       <Brush
@@ -47,6 +51,7 @@ export default function BrushBarChart({
         data={data}
         colors={brushColor}
         selection={selection}
+        padding={padding}
         setSelection={setSelection}
       />
     </div>

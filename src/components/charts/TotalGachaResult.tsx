@@ -93,7 +93,7 @@ export default function TotalGachaResult({
       }
     >
       {result ? (
-        <section className="text-sm">
+        <div className="p-4 text-sm">
           <DonutChart
             data={rarityResultData.data}
             labels={rarityResultData.labels}
@@ -134,7 +134,7 @@ export default function TotalGachaResult({
               </div>
             </div>
           </div>
-        </section>
+        </div>
       ) : null}
     </ChartWrapper>
   );
