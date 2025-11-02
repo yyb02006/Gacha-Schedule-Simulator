@@ -108,7 +108,7 @@ export default function BarChart({
     animation: { duration: 200 },
     layout: { padding: { top: padding, left: padding, bottom: 0, right: padding } },
     onHover: (_, elements, chart) => {
-      const [{ index }] = elements;
+      const index = elements[0].index ?? 0;
       if (hoveredIndexRef.current === index) {
         chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
         chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
@@ -238,6 +238,9 @@ export default function BarChart({
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current !== newIndex) {
         hoveredIndexRef.current = newIndex;
+
+        chart.update();
+      } else if (!chart.tooltip?.active) {
         chart.tooltip?.setActiveElements(elements, {
           x: e.offsetX,
           y: e.offsetY,
