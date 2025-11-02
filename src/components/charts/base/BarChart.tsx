@@ -1,6 +1,8 @@
+'use client';
+
+import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
 import {
   Chart as ChartJS,
-  TooltipItem,
   ChartOptions,
   ChartData,
   CartesianScaleOptions,
@@ -45,15 +47,19 @@ interface BarChartProps {
     'backgroundColor' | 'borderColor' | 'hoverBackgroundColor' | 'hoverBorderColor',
     string | string[]
   >;
-  totalSuccesses: number;
-  tooltipCallback: (data: TooltipItem<'bar'>, total: number) => string;
+  total: number;
+  startIndex: number;
+  padding: number;
+  tooltipCallback: CreateTooltipLiteral;
 }
 
 export default function BarChart({
   labels,
   data,
   colors: { backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor },
-  totalSuccesses,
+  total,
+  startIndex,
+  padding,
   tooltipCallback,
 }: BarChartProps) {
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
@@ -68,8 +74,8 @@ export default function BarChart({
         label: '배너 데이터',
         data,
         backgroundColor,
-        hoverBackgroundColor,
         borderColor,
+        hoverBackgroundColor,
         hoverBorderColor,
         borderWidth: data.length > 20 ? 0 : 2,
         hoverBorderWidth: 0,
@@ -100,6 +106,19 @@ export default function BarChart({
   const options: ChartOptions<'bar'> = {
     responsive: true,
     animation: { duration: 200 },
+    layout: { padding: { top: padding, left: padding, bottom: 0, right: padding } },
+    onHover: (_, elements, chart) => {
+      const [{ index }] = elements;
+      if (hoveredIndexRef.current === index) {
+        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
+        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
+      } else {
+        chart.data.datasets[0].hoverBackgroundColor = backgroundColor;
+        chart.data.datasets[0].hoverBorderColor = borderColor;
+      }
+      chart.update();
+    },
+    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'mouseenter'],
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -110,12 +129,15 @@ export default function BarChart({
           const { chart, tooltip } = context;
           const chartId = chart.canvas.id;
 
-          let tooltipEl = document.getElementById('custom-tooltip') as HTMLDivElement;
-          if (!tooltipEl) {
+          const canvasParent = chart.canvas.parentElement;
+          if (!canvasParent) return;
+
+          let tooltipEl = canvasParent?.querySelector('#custom-tooltip') as HTMLDivElement;
+          if (!tooltipEl && canvasParent) {
             tooltipEl = document.createElement('div');
             tooltipEl.id = 'custom-tooltip';
             tooltipEl.className = 'absolute z-50 pointer-events-none';
-            document.body.appendChild(tooltipEl);
+            canvasParent.appendChild(tooltipEl);
           }
 
           // Tooltip 숨김 처리
@@ -125,16 +147,18 @@ export default function BarChart({
             return;
           }
 
-          const rect = chart.canvas.getBoundingClientRect();
-          const x = tooltip.caretX ?? rect.width / 2;
-          const y = tooltip.caretY ?? rect.height / 2;
+          const canvasRect = chart.canvas.getBoundingClientRect();
+          const parentRect = canvasParent.getBoundingClientRect();
+
+          // parent 내부 좌표로 변환
+          const x = (tooltip.caretX ?? canvasRect.width / 2) + (canvasRect.left - parentRect.left);
+          const y = (tooltip.caretY ?? canvasRect.height / 2) + (canvasRect.top - parentRect.top);
 
           const sameChart = lastChartId.current === chartId;
 
-          // 차트 이동 감지
           tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
-          tooltipEl.style.left = rect.left + window.scrollX + x + 'px';
-          tooltipEl.style.top = rect.top + window.scrollY + y + 'px';
+          tooltipEl.style.left = `${x + 6}px`;
+          tooltipEl.style.top = `${y}px`;
           tooltipEl.style.opacity = '1';
 
           lastChartId.current = chartId;
@@ -142,20 +166,17 @@ export default function BarChart({
           // 내용 업데이트
           const title = tooltip.title || [];
           const body = tooltip.body;
-
           const data = tooltip.dataPoints?.[0];
-          const textColor = data.dataset.borderColor;
+          const textColor =
+            typeof data.dataset.borderColor === 'string' ? data.dataset.borderColor : '#ffb900';
 
-          tooltipEl.innerHTML = `
-            <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 shadow-xl shadow-[#141414]">
-              ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}번째 가챠</p>`).join('')}
-              ${body
-                .map((b, i) => {
-                  return tooltipCallback(data, totalSuccesses ?? 1);
-                })
-                .join('')}
-            </div>
-          `;
+          tooltipEl.innerHTML = tooltipCallback({
+            body,
+            data,
+            textColor,
+            title,
+            total,
+          });
         },
       },
       datalabels: { display: false },
@@ -173,7 +194,13 @@ export default function BarChart({
                 ...baseTicksProps,
                 callback: function (_, index) {
                   const step = 10; // 원하는 간격
-                  return index % step === 0 ? index : '';
+                  return startIndex === 0 && index === 0
+                    ? 1
+                    : index === 0
+                      ? startIndex + index + 1
+                      : index % step === 9
+                        ? startIndex + index + 1
+                        : '';
                 },
               }
             : {
@@ -207,17 +234,31 @@ export default function BarChart({
     if (!canvas || !chart) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const elements = chart.getElementsAtEventForMode(e, 'nearest', { intersect: false }, false);
+      const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current !== newIndex) {
         hoveredIndexRef.current = newIndex;
-
+        chart.tooltip?.setActiveElements(elements, {
+          x: e.offsetX,
+          y: e.offsetY,
+        });
         chart.update();
       }
     };
 
+    const handleMouseLeave = () => {
+      if (hoveredIndexRef.current !== null) {
+        hoveredIndexRef.current = null;
+        chart.update(); // <- 즉시 리렌더 (ticks.color 재평가)
+      }
+    };
+
     canvas.addEventListener('mousemove', handleMouseMove);
-    return () => canvas.removeEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
+    };
   }, []);
 
   return <Bar ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />;
