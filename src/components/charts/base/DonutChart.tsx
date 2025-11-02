@@ -132,7 +132,14 @@ export default function DonutChart({
     legendEl.querySelectorAll('[data-index]').forEach((el) => {
       el.addEventListener('click', () => {
         const index = Number(el.getAttribute('data-index'));
+        const isCurrentDataVisible = chart.getDataVisibility(index);
+        const total = dataset.data.reduce((a, b) => a + b, 0);
+        const currentData = dataset.data[index];
+
+        if (currentData === total && isCurrentDataVisible) return;
+
         chart.toggleDataVisibility(index);
+
         recalcData();
         updateLegendState();
         chart.update();
