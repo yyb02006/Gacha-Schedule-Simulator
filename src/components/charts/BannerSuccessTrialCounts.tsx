@@ -35,7 +35,7 @@ const createTooltipLiteralClosure =
     `;
     })
     .join('')}
-</div>`;
+  </div>`;
   };
 
 export default function BannerSuccessTrialCounts({
