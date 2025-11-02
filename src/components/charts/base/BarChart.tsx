@@ -105,7 +105,6 @@ export default function BarChart({
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
-    animation: { duration: 200 },
     layout: { padding: { top: padding, left: padding, bottom: 0, right: padding } },
     onHover: (_, elements, chart) => {
       const index = elements[0].index ?? 0;
@@ -151,14 +150,36 @@ export default function BarChart({
           const parentRect = canvasParent.getBoundingClientRect();
 
           // parent 내부 좌표로 변환
-          const x = (tooltip.caretX ?? canvasRect.width / 2) + (canvasRect.left - parentRect.left);
-          const y = (tooltip.caretY ?? canvasRect.height / 2) + (canvasRect.top - parentRect.top);
+          const caretX = tooltip.caretX ?? canvasRect.width / 2;
+          const caretY = tooltip.caretY ?? canvasRect.height / 2;
+          const baseX = caretX + (canvasRect.left - parentRect.left);
+          const baseY = caretY + (canvasRect.top - parentRect.top);
 
           const sameChart = lastChartId.current === chartId;
 
+          // ----- 위치 계산 -----
+          const tooltipWidth = tooltipEl.offsetWidth || 140; // 대략 기본 너비
+          const tooltipHeight = tooltipEl.offsetHeight || 60;
+
+          const chartWidth = canvasRect.width;
+          const chartHeight = canvasRect.height;
+
+          let finalX = baseX + 6; // 기본: 오른쪽
+          let finalY = baseY;
+
+          // 오른쪽 공간이 부족하면 왼쪽으로 렌더링
+          if (caretX + tooltipWidth + 12 > chartWidth) {
+            finalX = baseX - tooltipWidth - 6;
+          }
+
+          // 아래쪽 공간이 부족하면 위로 렌더링
+          if (caretY + tooltipHeight + 12 > chartHeight) {
+            finalY = baseY - tooltipHeight - 6;
+          }
+
           tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
-          tooltipEl.style.left = `${x + 6}px`;
-          tooltipEl.style.top = `${y}px`;
+          tooltipEl.style.left = `${finalX}px`;
+          tooltipEl.style.top = `${finalY}px`;
           tooltipEl.style.opacity = '1';
 
           lastChartId.current = chartId;
@@ -238,15 +259,13 @@ export default function BarChart({
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current !== newIndex) {
         hoveredIndexRef.current = newIndex;
-
-        chart.update();
       } else if (!chart.tooltip?.active) {
         chart.tooltip?.setActiveElements(elements, {
-          x: e.offsetX,
-          y: e.offsetY,
+          x: null,
+          y: null,
         });
-        chart.update();
       }
+      chart.update();
     };
 
     const handleMouseLeave = () => {
