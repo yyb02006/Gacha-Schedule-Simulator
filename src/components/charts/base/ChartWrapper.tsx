@@ -18,14 +18,14 @@ export default function ChartWrapper({
       initial="exit"
       animate="idle"
       exit="exit"
-      className="w-full space-y-4 rounded-xl p-4"
+      className={'w-full rounded-xl'}
     >
       <motion.div
         variants={toOpacityZero}
         whileInView="idle"
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
-        className="font-S-CoreDream-500 text-lg"
+        className="font-S-CoreDream-500 p-4 text-lg"
       >
         {title}
       </motion.div>
