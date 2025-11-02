@@ -105,6 +105,8 @@ export default function BarChart({
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
+    animation: { duration: 200 },
+    transitions: { active: { animation: { duration: 100 } } },
     layout: { padding: { top: padding, left: padding, bottom: 0, right: padding } },
     onHover: (_, elements, chart) => {
       const index = elements[0].index ?? 0;
@@ -117,7 +119,6 @@ export default function BarChart({
       }
       chart.update();
     },
-    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove', 'mouseenter'],
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -259,13 +260,13 @@ export default function BarChart({
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current !== newIndex) {
         hoveredIndexRef.current = newIndex;
+        chart.update();
       } else if (!chart.tooltip?.active) {
         chart.tooltip?.setActiveElements(elements, {
           x: null,
           y: null,
         });
       }
-      chart.update();
     };
 
     const handleMouseLeave = () => {
