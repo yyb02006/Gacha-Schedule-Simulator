@@ -696,9 +696,10 @@ export default function PickupList() {
             acc.perBanner[index].bannerSuccess += bannerSuccess;
             acc.perBanner[index].bannerGachaRuns += bannerGachaRuns;
             acc.perBanner[index].pityRewardObtained += pityRewardObtained;
-            for (let i = 0; i < acc.perBanner[index].bannerHistograms.length; i++) {
+            for (let i = 0; i < currentBanner.bannerHistograms.length; i++) {
               const a = acc.perBanner[index].bannerHistograms[i] ?? 0;
               const b = currentBanner.bannerHistograms[i] ?? 0;
+
               acc.perBanner[index].bannerHistograms[i] = a + b;
             }
             for (const rarityString of rarityStrings) {
