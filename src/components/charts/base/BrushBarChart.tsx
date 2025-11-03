@@ -16,6 +16,7 @@ interface BrushBarChartProps {
   total: number;
   padding: number;
   enableBrush: boolean;
+  isPercentYAxis?: boolean;
   barChartHeight?: `h-[${number}px]`;
   brushHeight?: `h-[${number}px]`;
   tooltipCallback: CreateTooltipLiteral;
@@ -29,6 +30,7 @@ export default function BrushBarChart({
   total,
   padding,
   enableBrush,
+  isPercentYAxis = false,
   barChartHeight,
   brushHeight,
   tooltipCallback,
@@ -51,6 +53,7 @@ export default function BrushBarChart({
         startIndex={startIndex}
         padding={padding}
         enableBrush={enableBrush}
+        isPercentYAxis={isPercentYAxis}
         height={barChartHeight}
         tooltipCallback={tooltipCallback}
       />

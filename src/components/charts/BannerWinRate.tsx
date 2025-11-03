@@ -94,6 +94,7 @@ export default function BannerWinRate({
           total={result.total.simulationTry}
           padding={16}
           enableBrush={enableBrush}
+          isPercentYAxis={true}
           barChartHeight={barChartHeight}
           brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteral}

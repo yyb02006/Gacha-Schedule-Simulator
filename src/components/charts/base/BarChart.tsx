@@ -1,6 +1,7 @@
 'use client';
 
 import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
+import { truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
   ChartOptions,
@@ -51,6 +52,7 @@ interface BarChartProps {
   startIndex: number;
   padding: number;
   enableBrush: boolean;
+  isPercentYAxis: boolean;
   height?: `h-[${number}px]`;
   tooltipCallback: CreateTooltipLiteral;
 }
@@ -63,6 +65,7 @@ export default function BarChart({
   startIndex,
   padding,
   enableBrush,
+  isPercentYAxis,
   height,
   tooltipCallback,
 }: BarChartProps) {
@@ -70,6 +73,9 @@ export default function BarChart({
   const chartRef = useRef<ChartJS<'bar'>>(null);
   const lastChartId = useRef<string | null>(null);
   const hoveredIndexRef = useRef<number | null>(null);
+  const {
+    current: { stepGap },
+  } = useRef({ stepGap: 10 });
 
   const chartData: ChartData<'bar'> = {
     labels,
@@ -217,24 +223,18 @@ export default function BarChart({
           color: '#3c3c3c',
         },
         border: { color: '#3c3c3c' },
-        ticks:
-          data.length > 20
-            ? {
-                ...baseTicksProps,
-                callback: function (_, index) {
-                  const step = 10; // 원하는 간격
-                  return startIndex === 0 && index === 0
-                    ? 1
-                    : index === 0
-                      ? startIndex + index + 1
-                      : index % step === 9
-                        ? startIndex + index + 1
-                        : '';
-                },
-              }
-            : {
-                ...baseTicksProps,
-              },
+        ticks: {
+          ...baseTicksProps,
+          callback: function (value, index) {
+            return data.length > 20
+              ? startIndex === 0 && index === 0
+                ? 1
+                : index === 0 || index % stepGap === 9
+                  ? startIndex + index + 1
+                  : ''
+              : value;
+          },
+        },
         afterFit: (axis) => {
           // 축 박스 높이를 줄여서 -padding 보전
           if (!axis || axis.type !== 'category') return;
@@ -251,7 +251,14 @@ export default function BarChart({
         },
         border: { color: '#3c3c3c', dash: [4, 4] },
         beginAtZero: true,
-        ticks: { maxTicksLimit: 6 },
+        ticks: {
+          maxTicksLimit: 6,
+          callback: (value) => {
+            return typeof value === 'number' && isPercentYAxis
+              ? `${truncateToDecimals((value / total) * 100, 1)}%`
+              : value;
+          },
+        },
       },
     },
     interaction: { mode: 'index', intersect: false },
