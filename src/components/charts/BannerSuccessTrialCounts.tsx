@@ -61,8 +61,8 @@ export default function BannerSuccessTrialCounts({
           barChartColors={{
             backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
-            hoverBackgroundColor: '#a684ffCC',
-            hoverBorderColor: '#a684ff',
+            hoverBackgroundColor: '#8e51ffCC',
+            hoverBorderColor: '#8e51ff',
           }}
           brushColor={{
             backgroundColor: '#8e51ffCC',
