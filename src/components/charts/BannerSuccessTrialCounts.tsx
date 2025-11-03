@@ -54,10 +54,10 @@ export default function BannerSuccessTrialCounts({
       {bannerResult ? (
         <BrushBarChart
           labels={Array.from(
-            { length: bannerResult.bannerHistograms.length },
+            { length: bannerResult.bannerHistogram.length },
             (_, index) => `${index + 1}`,
           )}
-          data={bannerResult.bannerHistograms.map((value) => value)}
+          data={bannerResult.bannerHistogram.map((value) => value)}
           barChartColors={{
             backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
@@ -73,7 +73,7 @@ export default function BannerSuccessTrialCounts({
           enableBrush={enableBrush}
           barChartHeight={barChartHeight}
           brushHeight={brushHeight}
-          tooltipCallback={createTooltipLiteralClosure(bannerResult.bannerHistograms)}
+          tooltipCallback={createTooltipLiteralClosure(bannerResult.bannerHistogram)}
         />
       ) : null}
     </ChartWrapper>

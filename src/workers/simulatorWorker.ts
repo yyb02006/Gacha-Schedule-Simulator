@@ -46,7 +46,7 @@ interface SimulationResult {
     bannerSuccess: number;
     bannerGachaRuns: number;
     pityRewardObtained: number;
-    bannerHistograms: number[];
+    bannerHistogram: number[];
     sixth: { totalObtained: number; pickupObtained: number; targetObtained: number };
     fifth: { totalObtained: number; pickupObtained: number; targetObtained: number };
     fourth: { totalObtained: number; pickupObtained: number; targetObtained: number };
@@ -302,7 +302,7 @@ const gachaRateSimulate = ({
       bannerSuccess: 0,
       bannerGachaRuns: 0,
       pityRewardObtained: 0,
-      bannerHistograms: [],
+      bannerHistogram: [],
       sixth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
       fifth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
       fourth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
@@ -419,9 +419,9 @@ const gachaRateSimulate = ({
           result.bannerGachaRuns = i + 1;
           simulationConfig.orundum -= 600;
         }
-        if (simulationResult.perBanner[di].bannerHistograms[i] === undefined) {
+        if (simulationResult.perBanner[di].bannerHistogram[i] === undefined) {
           // 히스토그램의 현재 가챠횟수가 undefined라면 0 삽입
-          simulationResult.perBanner[di].bannerHistograms[i] = 0;
+          simulationResult.perBanner[di].bannerHistogram[i] = 0;
         }
         if (simulationMetrics.failedSixthAttempts >= 50) {
           // 연속 실패횟수 50번 부터 확률 2%씩 증가
@@ -680,7 +680,7 @@ const gachaRateSimulate = ({
         ) {
           result.bannerGachaRuns = i + 1;
           result.success = true;
-          simulationResult.perBanner[di].bannerHistograms[i]++;
+          simulationResult.perBanner[di].bannerHistogram[i]++;
           break;
         } else if (i + 1 === gachaAttemptsLimit) {
           result.bannerGachaRuns = i + 1;
