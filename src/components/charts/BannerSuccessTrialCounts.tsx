@@ -2,7 +2,7 @@
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import BrushBarChart from '#/components/charts/base/BrushBarChart';
-import { GachaSimulationMergedResult } from '#/components/PickupList';
+import { BannerResult } from '#/components/PickupList';
 import { stringToNumber, truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralPorps } from '#/components/charts/BannerWinRate';
 
@@ -39,12 +39,12 @@ const createTooltipLiteralClosure =
   };
 
 export default function BannerSuccessTrialCounts({
-  result,
+  bannerResult,
   barChartHeight,
   brushHeight,
   enableBrush = true,
 }: {
-  result: GachaSimulationMergedResult | null;
+  bannerResult: BannerResult | null;
   barChartHeight?: `h-[${number}px]`;
   brushHeight?: `h-[${number}px]`;
   enableBrush?: boolean;
@@ -57,13 +57,13 @@ export default function BannerSuccessTrialCounts({
         </span>
       }
     >
-      {result && result.perBanner[0] ? (
+      {bannerResult ? (
         <BrushBarChart
           labels={Array.from(
-            { length: result.perBanner[0].bannerHistograms.length },
+            { length: bannerResult.bannerHistograms.length },
             (_, index) => `${index + 1}`,
           )}
-          data={result.perBanner[0].bannerHistograms.map((value) => value)}
+          data={bannerResult.bannerHistograms.map((value) => value)}
           barChartColors={{
             backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
@@ -74,12 +74,12 @@ export default function BannerSuccessTrialCounts({
             backgroundColor: '#a684ffCC',
             borderColor: '#a684ff',
           }}
-          total={result.perBanner[0].bannerSuccess}
+          total={bannerResult.bannerSuccess}
           padding={16}
           enableBrush={enableBrush}
           barChartHeight={barChartHeight}
           brushHeight={brushHeight}
-          tooltipCallback={createTooltipLiteralClosure(result.perBanner[0].bannerHistograms)}
+          tooltipCallback={createTooltipLiteralClosure(bannerResult.bannerHistograms)}
         />
       ) : null}
     </ChartWrapper>

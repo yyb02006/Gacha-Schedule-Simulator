@@ -51,6 +51,18 @@ interface ObtainedStatistics {
   targetObtained: number;
 }
 
+export interface BannerResult {
+  id: string;
+  name: string;
+  bannerSuccess: number;
+  bannerGachaRuns: number;
+  pityRewardObtained: number;
+  bannerHistograms: number[];
+  sixth: ObtainedStatistics;
+  fifth: ObtainedStatistics;
+  fourth: ObtainedStatistics;
+}
+
 export type ActionType =
   | 'addBanner'
   | 'addBannerUsePreset'

@@ -18,7 +18,7 @@ interface SettingsModalProps {
 }
 
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
-  return (
+  return result ? (
     <Modal isOpen={isOpen} onClose={onClose}>
       <section className="w-[1280px] space-y-6 rounded-xl bg-[#202020] p-6">
         <div className="flex items-center justify-between">
@@ -49,9 +49,9 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <span className="text-amber-400">배너별</span> 평균 가챠 성공 시점
         </motion.div>
         <div className="flex flex-col gap-6">
-          <BannerSuccessTrialCounts result={result} />
+          <BannerSuccessTrialCounts bannerResult={result.perBanner[0]} />
         </div>
       </section>
     </Modal>
-  );
+  ) : null;
 }
