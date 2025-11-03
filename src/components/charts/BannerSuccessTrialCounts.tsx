@@ -17,7 +17,7 @@ const createTooltipLiteralClosure =
       .reduce((a, b) => a + b, 0);
 
     return /*html*/ `
-  <div class="space-y-3 rounded-xl bg-[#202020] opacity-85 px-4 py-3 shadow-xl shadow-[#141414]">
+  <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
   ${title.map((t) => /*html*/ `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
     .map((b, i) => {
