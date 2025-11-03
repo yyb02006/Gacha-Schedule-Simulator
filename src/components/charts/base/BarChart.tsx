@@ -165,7 +165,14 @@ export default function BarChart({
         chartThrottledUpated();
       }
     },
-    [hoverBackgroundColor, hoverBorderColor, backgroundColor, borderColor, chartThrottledUpated],
+    [
+      hoverBackgroundColor,
+      hoverBorderColor,
+      backgroundColor,
+      borderColor,
+      chartThrottledUpated,
+      chartThrottledDraw,
+    ],
   );
 
   const chartData: ChartData<'bar'> = {
@@ -195,7 +202,7 @@ export default function BarChart({
   const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: !height,
-    animation: { duration: 200 },
+    animation: { duration: data.length < 500 ? 200 : undefined },
     transitions: { active: { animation: { duration: 50 } } },
     layout: {
       padding: { top: padding, left: padding, bottom: enableBrush ? 0 : padding, right: padding },
@@ -307,7 +314,7 @@ export default function BarChart({
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [chartThrottledUpated]);
+  }, [chartThrottledUpated, chartThrottledDraw]);
 
   return (
     <div className={height}>

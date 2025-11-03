@@ -10,6 +10,7 @@ import {
   Filler,
   Plugin,
 } from 'chart.js';
+import { throttled } from 'chart.js/helpers';
 import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 
@@ -215,6 +216,22 @@ export default function Brush({
     background: '#333333',
     handle: { handleWidth: 6, handlePadding: 3, handleColor: '#fe9a00' },
   });
+  const brushThrottledUpated = useRef(
+    throttled((newRatio: number, dragging: 'start' | 'end') => {
+      const newSelection =
+        dragging === 'start'
+          ? (s: { start: number; end: number }) => ({
+              ...s,
+              start: Math.max(0, Math.min(newRatio, s.end - 0.05)),
+            })
+          : (s: { start: number; end: number }) => ({
+              ...s,
+              end: Math.min(1, Math.max(newRatio, s.start + 0.05)),
+            });
+      setSelection(newSelection);
+    }, 100),
+  ).current;
+  const dragAnimationRef = useRef<number | null>(null);
 
   const chartData: ChartData<'line'> = {
     labels,
@@ -299,9 +316,12 @@ export default function Brush({
         return; // 드래그 중이 아니면 여기서 종료
       }
 
-      if (dragging === 'start')
-        setSelection((s) => ({ ...s, start: Math.max(0, Math.min(newRatio, s.end - 0.05)) }));
-      else setSelection((s) => ({ ...s, end: Math.min(1, Math.max(newRatio, s.start + 0.05)) }));
+      if (dragAnimationRef.current === null) {
+        dragAnimationRef.current = requestAnimationFrame(() => {
+          brushThrottledUpated(newRatio, dragging);
+          dragAnimationRef.current = null;
+        });
+      }
     };
 
     const handleMouseUp = () => setDragging(null);
@@ -315,7 +335,7 @@ export default function Brush({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [selection, dragging, setSelection]);
+  }, [selection, dragging, setSelection, brushThrottledUpated]);
 
   useEffect(() => {
     selectionRef.current = selection;
