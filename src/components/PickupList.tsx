@@ -13,6 +13,7 @@ import BannerAddModal from '#/components/modals/BannerAddModal';
 import pickupDatas from '#/data/pickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
 import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
+import { getPercentileIndex } from '#/libs/utils';
 
 export type Operator = {
   operatorId: string;
@@ -57,7 +58,7 @@ export interface BannerResult {
   bannerSuccess: number;
   bannerGachaRuns: number;
   pityRewardObtained: number;
-  bannerHistograms: number[];
+  bannerHistogram: number[];
   sixth: ObtainedStatistics;
   fifth: ObtainedStatistics;
   fourth: ObtainedStatistics;
@@ -582,8 +583,12 @@ export interface GachaSimulationMergedResult {
     name: string;
     bannerSuccess: number;
     bannerGachaRuns: number;
+    successPercentileIndex: number;
+    cumulativeCount: number;
+    minIndex: number;
+    maxIndex: number;
     pityRewardObtained: number;
-    bannerHistograms: number[];
+    bannerHistogram: number[];
     sixth: ObtainedStatistics;
     fifth: ObtainedStatistics;
     fourth: ObtainedStatistics;
@@ -699,7 +704,7 @@ export default function PickupList() {
     const results = await Promise.all(promises);
 
     // 인덱스 넣고 더하는 과정에서 acc에 존재하지 않는 배열 길이가 나오면 undefined + number이므로 NaN이 되어버림
-    const mergedResult = results.reduce<GachaSimulationMergedResult>(
+    const preMergedResult = results.reduce<GachaSimulationMergedResult>(
       (acc, current) => {
         current.perBanner.forEach((currentBanner, index) => {
           const { bannerSuccess, bannerGachaRuns, pityRewardObtained } = currentBanner;
@@ -708,11 +713,11 @@ export default function PickupList() {
             acc.perBanner[index].bannerSuccess += bannerSuccess;
             acc.perBanner[index].bannerGachaRuns += bannerGachaRuns;
             acc.perBanner[index].pityRewardObtained += pityRewardObtained;
-            for (let i = 0; i < currentBanner.bannerHistograms.length; i++) {
-              const a = acc.perBanner[index].bannerHistograms[i] ?? 0;
-              const b = currentBanner.bannerHistograms[i] ?? 0;
+            for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
+              const a = acc.perBanner[index].bannerHistogram[i] ?? 0;
+              const b = currentBanner.bannerHistogram[i] ?? 0;
 
-              acc.perBanner[index].bannerHistograms[i] = a + b;
+              acc.perBanner[index].bannerHistogram[i] = a + b;
             }
             for (const rarityString of rarityStrings) {
               for (const obtainedType of obtainedTypes) {
@@ -755,6 +760,23 @@ export default function PickupList() {
         perBanner: [],
       },
     );
+    const mergedResult: GachaSimulationMergedResult = {
+      total: preMergedResult.total,
+      perBanner: preMergedResult.perBanner.map((bannerResult) => {
+        const { cumulative, cutoffIndex } = getPercentileIndex(
+          bannerResult.bannerHistogram,
+          bannerResult.bannerSuccess,
+          0.99,
+        );
+        return {
+          ...bannerResult,
+          successPercentileIndex: cutoffIndex,
+          cumulativeCount: cumulative,
+          minIndex: Math.min(bannerResult.bannerHistogram.findIndex((value) => value > 0)),
+          maxIndex: Math.min(bannerResult.bannerHistogram.findLastIndex((value) => value > 0)),
+        };
+      }),
+    };
     console.log(mergedResult);
     setResults(mergedResult);
     setIsRunning(false);
