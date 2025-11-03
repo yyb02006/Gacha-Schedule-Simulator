@@ -73,8 +73,8 @@ export default function BannerAverageCounts({
             hoverBorderColor: '#a684ff',
           }}
           brushColor={{
-            backgroundColor: '#a684ffCC',
-            borderColor: '#a684ff',
+            backgroundColor: '#8e51ffCC',
+            borderColor: '#8e51ff',
           }}
           total={data.reduce((a, b) => a + b, 0)}
           padding={16}

@@ -74,7 +74,7 @@ const brushPlugin = (
       Math.floor(scale.getValueForPixel(currentEndX) ?? 0);
 
     ctx.save();
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.fillRect(currentStartX, top, currentEndX - currentStartX, bottom - top);
     ctx.restore();
 
@@ -212,7 +212,7 @@ export default function Brush({
   const selectionRef = useRef(selection);
   const brushConfigRef = useRef({
     fontSize: 12,
-    background: '#3c3c3c',
+    background: '#333333',
     handle: { handleWidth: 6, handlePadding: 3, handleColor: '#fe9a00' },
   });
 

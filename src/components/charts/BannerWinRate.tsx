@@ -88,8 +88,8 @@ export default function BannerWinRate({
             hoverBorderColor: '#a684ff',
           }}
           brushColor={{
-            backgroundColor: '#a684ffCC',
-            borderColor: '#a684ff',
+            backgroundColor: '#8e51ffCC',
+            borderColor: '#8e51ff',
           }}
           total={result.total.simulationTry}
           padding={16}
