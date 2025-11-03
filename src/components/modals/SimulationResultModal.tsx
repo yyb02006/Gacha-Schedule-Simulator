@@ -49,7 +49,13 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <span className="text-amber-500">배너별</span> 평균 가챠 성공 시점
         </motion.div>
         <div className="flex flex-col gap-6">
-          <BannerSuccessTrialCounts bannerResult={result.perBanner[0]} />
+          {result.perBanner.map((bannerResult) => (
+            <BannerSuccessTrialCounts
+              key={bannerResult.id}
+              bannerResult={bannerResult}
+              barChartHeight="h-[400px]"
+            />
+          ))}
         </div>
       </section>
     </Modal>
