@@ -50,13 +50,7 @@ export default function BannerSuccessTrialCounts({
   enableBrush?: boolean;
 }) {
   return (
-    <ChartWrapper
-      title={
-        <span>
-          <span className="text-amber-500">배너별</span> 평균 가챠 성공 시점
-        </span>
-      }
-    >
+    <ChartWrapper title={<span className="text-amber-400">{bannerResult?.name}</span>}>
       {bannerResult ? (
         <BrushBarChart
           labels={Array.from(
@@ -71,8 +65,8 @@ export default function BannerSuccessTrialCounts({
             hoverBorderColor: '#a684ff',
           }}
           brushColor={{
-            backgroundColor: '#a684ffCC',
-            borderColor: '#a684ff',
+            backgroundColor: '#8e51ffCC',
+            borderColor: '#8e51ff',
           }}
           total={bannerResult.bannerSuccess}
           padding={16}
