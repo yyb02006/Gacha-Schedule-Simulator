@@ -128,3 +128,43 @@ export function truncateToDecimals(num: number, decimals = 2): number {
   const factor = Math.pow(10, decimals);
   return Math.round(num * factor) / factor;
 }
+
+/**
+ * 주어진 히스토그램에서 누적 합 기준으로 특정 퍼센타일(cutoff) 인덱스를 반환
+ *
+ * @param {number[]} histogram - 각 구간의 값(횟수) 배열
+ * @param {number} total - 히스토그램 전체 합
+ * @param {number} percentile - 컷오프할 퍼센타일 (0~1 범위)
+ * @returns {{ cumulative: number; cutoffIndex: number }}
+ *          cumulative: 컷오프 지점까지의 누적 합
+ *          cutoffIndex: 해당 퍼센타일을 넘는 최초 인덱스
+ *
+ * @throws {Error} percentile이 0~1 범위를 벗어나면 예외 발생
+ *
+ * @example
+ * const histogram = [1, 2, 3, 4];
+ * const total = histogram.reduce((a, b) => a + b, 0);
+ * const result = getPercentileIndex(histogram, total, 0.25);
+ * console.log(result); // { cumulative: 3, cutoffIndex: 1 }
+ *
+ * @example
+ * // 뒤에서부터 누적합으로 10%를 초과하는 지점 찾기
+ * const result = getPercentileIndex(histogram, total, 0.1);
+ * console.log(result); // { cumulative: 4, cutoffIndex: 2 }
+ */
+export const getPercentileIndex = (histogram: number[], total: number, percentile: number) => {
+  if (percentile < 0 || percentile > 1) {
+    throw new Error('percentile must be between 0 and 1');
+  }
+
+  let cumulative = 0;
+  let cutoffIndex = histogram.length;
+  for (let i = histogram.length - 1; i >= 0; i--) {
+    cumulative += histogram[i];
+    if (cumulative / total >= 1 - percentile) {
+      cutoffIndex = i;
+      break;
+    }
+  }
+  return { cumulative, cutoffIndex };
+};
