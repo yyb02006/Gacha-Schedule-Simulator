@@ -161,13 +161,13 @@ export default function BarChart({
 
           // ----- 위치 계산 -----
           const tooltipWidth = tooltipEl.offsetWidth || 140; // 대략 기본 너비
-          const tooltipHeight = tooltipEl.offsetHeight || 60;
+          // const tooltipHeight = tooltipEl.offsetHeight || 60;
 
           const chartWidth = canvasRect.width;
-          const chartHeight = canvasRect.height;
+          // const chartHeight = canvasRect.height;
 
           let finalX = baseX + 6; // 기본: 오른쪽
-          let finalY = baseY;
+          // let finalY = baseY;
 
           // 오른쪽 공간이 부족하면 왼쪽으로 렌더링
           if (caretX + tooltipWidth + 12 > chartWidth) {
@@ -175,13 +175,13 @@ export default function BarChart({
           }
 
           // 아래쪽 공간이 부족하면 위로 렌더링
-          if (caretY + tooltipHeight + 12 > chartHeight) {
+          /* if (caretY + tooltipHeight + 12 > chartHeight) {
             finalY = baseY - tooltipHeight - 6;
-          }
+          } */
 
           tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
           tooltipEl.style.left = `${finalX}px`;
-          tooltipEl.style.top = `${finalY}px`;
+          tooltipEl.style.top = `${baseY}px`;
           tooltipEl.style.opacity = '1';
 
           lastChartId.current = chartId;
