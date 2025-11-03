@@ -26,8 +26,8 @@
 }
 
 @theme {
-  --font-S-CoreDream-100: 'S-CoreDream-100', sans-serif;
   --font-S-CoreDream-200: 'S-CoreDream-200', sans-serif;
+  --font-S-CoreDream-300: 'S-CoreDream-300', sans-serif;
   --font-S-CoreDream-400: 'S-CoreDream-400', sans-serif;
   --font-S-CoreDream-500: 'S-CoreDream-500', sans-serif;
   --font-S-CoreDream-700: 'S-CoreDream-700', sans-serif;
