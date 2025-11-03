@@ -225,14 +225,18 @@ export default function BarChart({
         border: { color: '#3c3c3c' },
         ticks: {
           ...baseTicksProps,
-          callback: function (value, index) {
-            return data.length > 20
-              ? startIndex === 0 && index === 0
+          font: { family: 'S-CoreDream-300', size: 11 },
+          callback: (value, index) => {
+            const isValueSring = typeof value === 'string';
+            if (data.length > 20) {
+              return startIndex === 0 && index === 0
                 ? 1
                 : index === 0 || index % stepGap === 9
                   ? startIndex + index + 1
-                  : ''
-              : value;
+                  : '';
+            } else {
+              return isValueSring ? value : labels[value];
+            }
           },
         },
         afterFit: (axis) => {
