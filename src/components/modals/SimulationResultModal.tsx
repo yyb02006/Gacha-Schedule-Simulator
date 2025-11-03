@@ -38,6 +38,17 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <TotalGachaResult result={result} />
           <BannerWinRate result={result} />
           <BannerAverageCount result={result} />
+        </div>
+        <motion.div
+          variants={toOpacityZero}
+          whileInView="idle"
+          viewport={{ once: true, amount: 0.5 }}
+          initial="exit"
+          className="font-S-CoreDream-700 pt-4 text-2xl"
+        >
+          <span className="text-amber-400">배너별</span> 평균 가챠 성공 시점
+        </motion.div>
+        <div className="flex flex-col gap-6">
           <BannerSuccessTrialCounts result={result} />
         </div>
       </section>
