@@ -14,9 +14,12 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipModel,
+  ChartEvent,
+  ActiveElement,
 } from 'chart.js';
-import { debounce } from 'chart.js/helpers';
-import { useEffect, useRef } from 'react';
+import { throttled } from 'chart.js/helpers';
+import { useCallback, useEffect, useRef } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend);
@@ -76,6 +79,94 @@ export default function BarChart({
   const {
     current: { stepGap },
   } = useRef({ stepGap: 10 });
+  const chartThrottledUpated = useRef(
+    throttled(() => {
+      if (chartRef.current) chartRef.current.update();
+    }, 100),
+  ).current;
+  const chartThrottledDraw = useRef(
+    throttled(() => {
+      if (chartRef.current) chartRef.current.draw();
+    }, 200),
+  ).current;
+
+  const externalTooltipHandler = useCallback(
+    (context: { chart: ChartJS; tooltip: TooltipModel<'bar'> }) => {
+      const { chart, tooltip } = context;
+      const chartId = chart.id;
+      const canvasParent = chart.canvas.parentElement;
+      if (!canvasParent) return;
+
+      let tooltipEl = canvasParent.querySelector('#custom-tooltip') as HTMLDivElement;
+      if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.id = 'custom-tooltip';
+        tooltipEl.className = 'absolute z-50 pointer-events-none';
+        canvasParent.appendChild(tooltipEl);
+      }
+
+      if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
+        tooltipEl.style.opacity = '0';
+        lastChartId.current = null;
+        return;
+      }
+
+      const canvasRect = chart.canvas.getBoundingClientRect();
+      const parentRect = canvasParent.getBoundingClientRect();
+      const caretX = tooltip.caretX ?? canvasRect.width / 2;
+      const caretY = tooltip.caretY ?? canvasRect.height / 2;
+      const baseX = caretX + (canvasRect.left - parentRect.left);
+      const baseY = caretY + (canvasRect.top - parentRect.top);
+
+      const sameChart = lastChartId.current === chartId;
+      const tooltipWidth = tooltipEl.offsetWidth || 140;
+      let finalX = baseX + 6;
+      if (caretX + tooltipWidth + 12 > canvasRect.width) finalX = baseX - tooltipWidth - 6;
+
+      tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
+      tooltipEl.style.left = `${finalX}px`;
+      tooltipEl.style.top = `${baseY}px`;
+      tooltipEl.style.opacity = '1';
+      lastChartId.current = chartId;
+
+      // 내용 업데이트
+      const title = tooltip.title || [];
+      const body = tooltip.body;
+      const dataPoint = tooltip.dataPoints?.[0];
+      const textColor =
+        typeof dataPoint.dataset.borderColor === 'string'
+          ? dataPoint.dataset.borderColor
+          : '#ffb900';
+
+      tooltipEl.innerHTML = tooltipCallback({
+        body,
+        data: dataPoint,
+        textColor,
+        title,
+        total,
+      });
+    },
+    [tooltipCallback, total],
+  );
+
+  const onHoverHandler = useCallback(
+    (_: ChartEvent, elements: ActiveElement[], chart: ChartJS<'bar'>) => {
+      const index = elements[0]?.index ?? 0;
+      if (hoveredIndexRef.current === index) {
+        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
+        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
+      } else {
+        chart.data.datasets[0].hoverBackgroundColor = backgroundColor;
+        chart.data.datasets[0].hoverBorderColor = borderColor;
+      }
+      if (chart.data.datasets[0].data.length > 20) {
+        chartThrottledDraw();
+      } else {
+        chartThrottledUpated();
+      }
+    },
+    [hoverBackgroundColor, hoverBorderColor, backgroundColor, borderColor, chartThrottledUpated],
+  );
 
   const chartData: ChartData<'bar'> = {
     labels,
@@ -105,102 +196,18 @@ export default function BarChart({
     responsive: true,
     maintainAspectRatio: !height,
     animation: { duration: 200 },
-    transitions: { active: { animation: { duration: 100 } } },
+    transitions: { active: { animation: { duration: 50 } } },
     layout: {
       padding: { top: padding, left: padding, bottom: enableBrush ? 0 : padding, right: padding },
     },
-    onHover: (_, elements, chart) => {
-      const index = elements[0]?.index ?? 0;
-      if (hoveredIndexRef.current === index) {
-        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
-        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
-      } else {
-        chart.data.datasets[0].hoverBackgroundColor = backgroundColor;
-        chart.data.datasets[0].hoverBorderColor = borderColor;
-      }
-      chart.update();
-    },
+    onHover: onHoverHandler,
     plugins: {
       legend: { display: false },
       tooltip: {
         enabled: false,
         mode: 'index', // x축 "열(column)" 단위로 hover 인식
         intersect: false, // 바 위가 아니라, 그 열 전체 hover 가능
-        external: (context) => {
-          const { chart, tooltip } = context;
-          const chartId = chart.id;
-
-          const canvasParent = chart.canvas.parentElement;
-          if (!canvasParent) return;
-
-          let tooltipEl = canvasParent?.querySelector('#custom-tooltip') as HTMLDivElement;
-          if (!tooltipEl && canvasParent) {
-            tooltipEl = document.createElement('div');
-            tooltipEl.id = 'custom-tooltip';
-            tooltipEl.className = 'absolute z-50 pointer-events-none';
-            canvasParent.appendChild(tooltipEl);
-          }
-
-          // Tooltip 숨김 처리
-          if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
-            tooltipEl.style.opacity = '0';
-            lastChartId.current = null;
-            return;
-          }
-
-          const canvasRect = chart.canvas.getBoundingClientRect();
-          const parentRect = canvasParent.getBoundingClientRect();
-
-          // parent 내부 좌표로 변환
-          const caretX = tooltip.caretX ?? canvasRect.width / 2;
-          const caretY = tooltip.caretY ?? canvasRect.height / 2;
-          const baseX = caretX + (canvasRect.left - parentRect.left);
-          const baseY = caretY + (canvasRect.top - parentRect.top);
-
-          const sameChart = lastChartId.current === chartId;
-
-          // ----- 위치 계산 -----
-          const tooltipWidth = tooltipEl.offsetWidth || 140; // 대략 기본 너비
-          // const tooltipHeight = tooltipEl.offsetHeight || 60;
-
-          const chartWidth = canvasRect.width;
-          // const chartHeight = canvasRect.height;
-
-          let finalX = baseX + 6; // 기본: 오른쪽
-          // let finalY = baseY;
-
-          // 오른쪽 공간이 부족하면 왼쪽으로 렌더링
-          if (caretX + tooltipWidth + 12 > chartWidth) {
-            finalX = baseX - tooltipWidth - 6;
-          }
-
-          // 아래쪽 공간이 부족하면 위로 렌더링
-          /* if (caretY + tooltipHeight + 12 > chartHeight) {
-            finalY = baseY - tooltipHeight - 6;
-          } */
-
-          tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
-          tooltipEl.style.left = `${finalX}px`;
-          tooltipEl.style.top = `${baseY}px`;
-          tooltipEl.style.opacity = '1';
-
-          lastChartId.current = chartId;
-
-          // 내용 업데이트
-          const title = tooltip.title || [];
-          const body = tooltip.body;
-          const data = tooltip.dataPoints?.[0];
-          const textColor =
-            typeof data.dataset.borderColor === 'string' ? data.dataset.borderColor : '#ffb900';
-
-          tooltipEl.innerHTML = tooltipCallback({
-            body,
-            data,
-            textColor,
-            title,
-            total,
-          });
-        },
+        external: externalTooltipHandler,
       },
       datalabels: { display: false },
     },
@@ -222,10 +229,11 @@ export default function BarChart({
           color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
           callback: (value, index) => {
             const isValueSring = typeof value === 'string';
+            const gapMultiplier = Math.min(Math.ceil(data.length / 199), 10);
             if (data.length > 20) {
               return startIndex === 0 && index === 0
                 ? 1
-                : index === 0 || index % stepGap === 9
+                : index === 0 || index % (stepGap * gapMultiplier) === stepGap * gapMultiplier - 1
                   ? startIndex + index + 1
                   : '';
             } else {
@@ -268,22 +276,22 @@ export default function BarChart({
     const chart = chartRef.current;
     if (!canvas || !chart) return;
 
-    const debouncedUpdate = debounce(() => {
-      chart.update();
-    }, 500);
-
     const handleMouseMove = (e: MouseEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current !== newIndex) {
         hoveredIndexRef.current = newIndex;
-        debouncedUpdate();
-      } else if (!chart.tooltip?.active) {
+        if (chart.data.datasets[0].data.length > 20) {
+          chartThrottledDraw();
+        } else {
+          chartThrottledUpated();
+        }
+      } /* else if (!chart.tooltip?.active) {
         chart.tooltip?.setActiveElements(elements, {
           x: null,
           y: null,
         });
-      }
+      } */
     };
 
     const handleMouseLeave = () => {
@@ -299,7 +307,7 @@ export default function BarChart({
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, []);
+  }, [chartThrottledUpated]);
 
   return (
     <div className={height}>
