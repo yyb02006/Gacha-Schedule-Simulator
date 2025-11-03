@@ -14,8 +14,8 @@ import {
   Title,
   Tooltip,
   Legend,
-  ScriptableScaleContext,
 } from 'chart.js';
+import { debounce } from 'chart.js/helpers';
 import { useEffect, useRef } from 'react';
 import { Bar } from 'react-chartjs-2';
 
@@ -268,12 +268,16 @@ export default function BarChart({
     const chart = chartRef.current;
     if (!canvas || !chart) return;
 
+    const debouncedUpdate = debounce(() => {
+      chart.update();
+    }, 500);
+
     const handleMouseMove = (e: MouseEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current !== newIndex) {
         hoveredIndexRef.current = newIndex;
-        chart.update();
+        debouncedUpdate();
       } else if (!chart.tooltip?.active) {
         chart.tooltip?.setActiveElements(elements, {
           x: null,
