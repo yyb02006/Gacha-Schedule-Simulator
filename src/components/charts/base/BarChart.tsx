@@ -101,18 +101,6 @@ export default function BarChart({
     ],
   };
 
-  const baseTicksProps = {
-    maxRotation: 25,
-    crossAlign: 'center',
-    align: 'center',
-    padding: -2,
-    labelOffset: 6,
-    autoSkip: false,
-    color: (ctx: ScriptableScaleContext) => {
-      return ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666';
-    },
-  } as const;
-
   const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: !height,
@@ -224,8 +212,14 @@ export default function BarChart({
         },
         border: { color: '#3c3c3c' },
         ticks: {
-          ...baseTicksProps,
+          maxRotation: 25,
+          crossAlign: 'center',
+          align: 'center',
+          padding: -2,
+          labelOffset: 6,
+          autoSkip: false,
           font: { family: 'S-CoreDream-300', size: 11 },
+          color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
           callback: (value, index) => {
             const isValueSring = typeof value === 'string';
             if (data.length > 20) {
