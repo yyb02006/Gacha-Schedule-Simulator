@@ -50,6 +50,7 @@ interface BarChartProps {
   total: number;
   startIndex: number;
   padding: number;
+  height?: `h-[${number}px]`;
   tooltipCallback: CreateTooltipLiteral;
 }
 
@@ -60,6 +61,7 @@ export default function BarChart({
   total,
   startIndex,
   padding,
+  height,
   tooltipCallback,
 }: BarChartProps) {
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
@@ -105,6 +107,7 @@ export default function BarChart({
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
+    maintainAspectRatio: !!height,
     animation: { duration: 200 },
     transitions: { active: { animation: { duration: 100 } } },
     layout: { padding: { top: padding, left: padding, bottom: 0, right: padding } },
@@ -284,5 +287,9 @@ export default function BarChart({
     };
   }, []);
 
-  return <Bar ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />;
+  return (
+    <div className={height}>
+      <Bar ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />
+    </div>
+  );
 }

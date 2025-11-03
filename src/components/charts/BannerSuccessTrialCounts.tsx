@@ -40,8 +40,14 @@ const createTooltipLiteralClosure =
 
 export default function BannerSuccessTrialCounts({
   result,
+  barChartHeight,
+  brushHeight,
+  enableBrush = true,
 }: {
   result: GachaSimulationMergedResult | null;
+  barChartHeight?: `h-[${number}px]`;
+  brushHeight?: `h-[${number}px]`;
+  enableBrush?: boolean;
 }) {
   return (
     <ChartWrapper
@@ -51,7 +57,6 @@ export default function BannerSuccessTrialCounts({
         </span>
       }
     >
-      {/* 여기는 상위 컴포넌트에서 미리 result가 존재하는지 보고 보내는 게 맞을듯? */}
       {result && result.perBanner[0] ? (
         <BrushBarChart
           labels={Array.from(
@@ -71,6 +76,9 @@ export default function BannerSuccessTrialCounts({
           }}
           total={result.perBanner[0].bannerSuccess}
           padding={16}
+          enableBrush={enableBrush}
+          barChartHeight={barChartHeight}
+          brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteralClosure(result.perBanner[0].bannerHistograms)}
         />
       ) : null}

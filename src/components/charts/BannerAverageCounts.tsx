@@ -40,8 +40,14 @@ const createTooltipLiteral = ({
 
 export default function BannerAverageCounts({
   result,
+  barChartHeight,
+  brushHeight,
+  enableBrush = true,
 }: {
   result: GachaSimulationMergedResult | null;
+  barChartHeight?: `h-[${number}px]`;
+  brushHeight?: `h-[${number}px]`;
+  enableBrush?: boolean;
 }) {
   const data = result
     ? result.perBanner.map(({ bannerGachaRuns, bannerSuccess }) =>
@@ -72,6 +78,9 @@ export default function BannerAverageCounts({
           }}
           total={data.reduce((a, b) => a + b, 0)}
           padding={16}
+          enableBrush={enableBrush}
+          barChartHeight={barChartHeight}
+          brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteral}
         />
       ) : null}

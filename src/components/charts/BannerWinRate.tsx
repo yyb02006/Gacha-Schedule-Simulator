@@ -58,7 +58,17 @@ const createTooltipLiteral = ({
 </div>`;
 };
 
-export default function BannerWinRate({ result }: { result: GachaSimulationMergedResult | null }) {
+export default function BannerWinRate({
+  result,
+  barChartHeight,
+  brushHeight,
+  enableBrush = true,
+}: {
+  result: GachaSimulationMergedResult | null;
+  barChartHeight?: `h-[${number}px]`;
+  brushHeight?: `h-[${number}px]`;
+  enableBrush?: boolean;
+}) {
   return (
     <ChartWrapper
       title={
@@ -83,6 +93,9 @@ export default function BannerWinRate({ result }: { result: GachaSimulationMerge
           }}
           total={result.total.simulationTry}
           padding={16}
+          enableBrush={enableBrush}
+          barChartHeight={barChartHeight}
+          brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteral}
         />
       ) : null}

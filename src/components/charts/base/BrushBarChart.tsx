@@ -15,6 +15,9 @@ interface BrushBarChartProps {
   brushColor: Record<'backgroundColor' | 'borderColor', string | string[]>;
   total: number;
   padding: number;
+  enableBrush: boolean;
+  barChartHeight?: `h-[${number}px]`;
+  brushHeight?: `h-[${number}px]`;
   tooltipCallback: CreateTooltipLiteral;
 }
 
@@ -25,6 +28,9 @@ export default function BrushBarChart({
   brushColor,
   total,
   padding,
+  enableBrush,
+  barChartHeight,
+  brushHeight,
   tooltipCallback,
 }: BrushBarChartProps) {
   const [selection, setSelection] = useState({ start: 0, end: 1 });
@@ -44,16 +50,20 @@ export default function BrushBarChart({
         total={total}
         startIndex={startIndex}
         padding={padding}
+        height={barChartHeight}
         tooltipCallback={tooltipCallback}
       />
-      <Brush
-        labels={labels}
-        data={data}
-        colors={brushColor}
-        selection={selection}
-        padding={padding}
-        setSelection={setSelection}
-      />
+      {enableBrush && (
+        <Brush
+          labels={labels}
+          data={data}
+          colors={brushColor}
+          selection={selection}
+          padding={padding}
+          height={brushHeight}
+          setSelection={setSelection}
+        />
+      )}
     </div>
   );
 }
