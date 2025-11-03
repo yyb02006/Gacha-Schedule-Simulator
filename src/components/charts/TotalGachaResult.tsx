@@ -46,7 +46,7 @@ const RarityResultDetail = ({
         %)
       </h1>
       {obtainedTypes.map((obtainedType) => (
-        <li key={obtainedType} className="font-S-CoreDream-400 text-[13px]">
+        <li key={obtainedType} className="font-S-CoreDream-300 text-[13px]">
           {obtainedType === 'totalObtained' ? (
             <div>
               {'총 등장 : '}
@@ -121,7 +121,7 @@ export default function TotalGachaResult({
                   )}
                   %)
                 </h1>
-                <div className="font-S-CoreDream-400 text-[13px]">
+                <div className="font-S-CoreDream-300 text-[13px]">
                   총 등장 :{' '}
                   {(
                     result.total.totalGachaRuns -

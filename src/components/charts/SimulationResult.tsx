@@ -56,11 +56,11 @@ export default function SimulationResult({
             backgroundColor={['#fe9a00CC', '#00a6f4CC']}
             tooltipCallback={tooltip}
           />
-          <div className="space-y-4 text-sm">
+          <div className="font-S-CoreDream-300 space-y-4 text-sm">
             <ul className="space-y-1">
               <li>시뮬레이션 횟수 : {result.total.simulationTry.toLocaleString()} 회</li>
               <li>성공한 시뮬레이션 : {result.total.simulationSuccess.toLocaleString()} 회</li>
-              <li className="text-amber-400">
+              <li className="font-S-CoreDream-400 text-amber-400">
                 일정 소화 성공률 :{' '}
                 {truncateToDecimals(
                   (result.total.simulationSuccess / result.total.simulationTry) * 100,
@@ -70,7 +70,7 @@ export default function SimulationResult({
             </ul>
             <ul className="space-y-1">
               <li>총 가챠 횟수 : {result.total.totalGachaRuns.toLocaleString()} 회</li>
-              <li className="text-amber-400">
+              <li className="font-S-CoreDream-400 text-amber-400">
                 시뮬레이션 당 평균 가챠횟수 :{' '}
                 {Math.floor(
                   result.total.totalGachaRuns / result.total.simulationTry,
@@ -80,7 +80,7 @@ export default function SimulationResult({
             </ul>
             <ul className="space-y-1">
               <li>천장 획득 횟수 : {result.total.pityRewardObtained.toLocaleString()} 회</li>
-              <li className="text-amber-400">
+              <li className="font-S-CoreDream-400 text-amber-400">
                 시뮬레이션 당 천장 획득 횟수 :{' '}
                 {truncateToDecimals(
                   result.total.pityRewardObtained / result.total.simulationTry,
