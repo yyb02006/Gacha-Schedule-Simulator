@@ -18,7 +18,7 @@ const createTooltipLiteral = ({
   const borderColor = data.dataset.borderColor;
 
   return /*html*/ `
-  <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 shadow-xl shadow-[#141414]">
+  <div class="space-y-3 rounded-xl bg-[#202020] opacity-85 px-4 py-3 shadow-xl shadow-[#141414]">
   ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
     .map((b, i) => {
