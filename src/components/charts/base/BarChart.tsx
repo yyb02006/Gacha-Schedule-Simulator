@@ -257,6 +257,7 @@ export default function BarChart({
         beginAtZero: true,
         ticks: {
           maxTicksLimit: 6,
+          font: { family: 'S-CoreDream-300', size: 12 },
           callback: (value) => {
             return typeof value === 'number' && isPercentYAxis
               ? `${truncateToDecimals((value / total) * 100, 1)}%`
