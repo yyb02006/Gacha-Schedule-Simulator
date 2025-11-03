@@ -51,8 +51,8 @@ export default function ScheduleOverview({
       </motion.div>
       <SimulationResult result={result} />
       <TotalGachaResult result={result} />
-      <BannerWinRate result={result} />
-      <BannerAverageCount result={result} />
+      <BannerWinRate result={result} enableBrush={false} barChartHeight="h-[240px]" />
+      <BannerAverageCount result={result} enableBrush={false} barChartHeight="h-[240px]" />
       <SimulationResultModal
         isOpen={isModalOpen}
         onClose={() => {

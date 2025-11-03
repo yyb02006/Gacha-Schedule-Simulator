@@ -50,6 +50,7 @@ interface BarChartProps {
   total: number;
   startIndex: number;
   padding: number;
+  enableBrush: boolean;
   height?: `h-[${number}px]`;
   tooltipCallback: CreateTooltipLiteral;
 }
@@ -61,6 +62,7 @@ export default function BarChart({
   total,
   startIndex,
   padding,
+  enableBrush,
   height,
   tooltipCallback,
 }: BarChartProps) {
@@ -107,10 +109,12 @@ export default function BarChart({
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
-    maintainAspectRatio: !!height,
+    maintainAspectRatio: !height,
     animation: { duration: 200 },
     transitions: { active: { animation: { duration: 100 } } },
-    layout: { padding: { top: padding, left: padding, bottom: 0, right: padding } },
+    layout: {
+      padding: { top: padding, left: padding, bottom: enableBrush ? 0 : padding, right: padding },
+    },
     onHover: (_, elements, chart) => {
       const index = elements[0]?.index ?? 0;
       if (hoveredIndexRef.current === index) {

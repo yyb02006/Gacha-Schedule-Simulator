@@ -50,6 +50,7 @@ export default function BrushBarChart({
         total={total}
         startIndex={startIndex}
         padding={padding}
+        enableBrush={enableBrush}
         height={barChartHeight}
         tooltipCallback={tooltipCallback}
       />
