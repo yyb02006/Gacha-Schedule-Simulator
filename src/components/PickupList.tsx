@@ -57,11 +57,26 @@ export interface BannerResult {
   name: string;
   bannerSuccess: number;
   bannerGachaRuns: number;
+  successIndexUntilCutoff: number;
+  cumulativeUntilCutoff: number;
+  minIndex: number;
+  maxIndex: number;
   pityRewardObtained: number;
   bannerHistogram: number[];
   sixth: ObtainedStatistics;
   fifth: ObtainedStatistics;
   fourth: ObtainedStatistics;
+}
+
+export interface GachaSimulationMergedResult {
+  total: {
+    simulationTry: number;
+    simulationSuccess: number;
+    totalGachaRuns: number;
+    pityRewardObtained: number;
+    statistics: Record<OperatorRarityForString, ObtainedStatistics>;
+  };
+  perBanner: BannerResult[];
 }
 
 export type ActionType =
@@ -570,31 +585,6 @@ const prepickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
     data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
 }));
 
-export interface GachaSimulationMergedResult {
-  total: {
-    simulationTry: number;
-    simulationSuccess: number;
-    totalGachaRuns: number;
-    pityRewardObtained: number;
-    statistics: Record<OperatorRarityForString, ObtainedStatistics>;
-  };
-  perBanner: {
-    id: string;
-    name: string;
-    bannerSuccess: number;
-    bannerGachaRuns: number;
-    successPercentileIndex: number;
-    cumulativeCount: number;
-    minIndex: number;
-    maxIndex: number;
-    pityRewardObtained: number;
-    bannerHistogram: number[];
-    sixth: ObtainedStatistics;
-    fifth: ObtainedStatistics;
-    fourth: ObtainedStatistics;
-  }[];
-}
-
 export interface WorkerInput {
   type: string;
   payload: {
@@ -770,8 +760,8 @@ export default function PickupList() {
         );
         return {
           ...bannerResult,
-          successPercentileIndex: cutoffIndex,
-          cumulativeCount: cumulative,
+          successIndexUntilCutoff: cutoffIndex,
+          cumulativeUntilCutoff: bannerResult.bannerSuccess - cumulative,
           minIndex: Math.min(bannerResult.bannerHistogram.findIndex((value) => value > 0)),
           maxIndex: Math.min(bannerResult.bannerHistogram.findLastIndex((value) => value > 0)),
         };
