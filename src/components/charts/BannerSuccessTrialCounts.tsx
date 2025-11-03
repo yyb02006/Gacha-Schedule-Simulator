@@ -45,8 +45,8 @@ export default function BannerSuccessTrialCounts({
   enableBrush = true,
 }: {
   bannerResult: BannerResult | null;
-  barChartHeight?: `h-[${number}px]`;
-  brushHeight?: `h-[${number}px]`;
+  barChartHeight?: string;
+  brushHeight?: string;
   enableBrush?: boolean;
 }) {
   return (

@@ -45,8 +45,8 @@ export default function BannerAverageCounts({
   enableBrush = true,
 }: {
   result: GachaSimulationMergedResult | null;
-  barChartHeight?: `h-[${number}px]`;
-  brushHeight?: `h-[${number}px]`;
+  barChartHeight?: string;
+  brushHeight?: string;
   enableBrush?: boolean;
 }) {
   const data = result

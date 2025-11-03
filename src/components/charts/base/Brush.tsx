@@ -189,7 +189,7 @@ interface BrushProps {
   colors: Record<'backgroundColor' | 'borderColor', string | string[]>;
   selection: { start: number; end: number };
   padding: number;
-  height?: `h-[${number}px]`;
+  height?: string;
   setSelection: Dispatch<
     SetStateAction<{
       start: number;

@@ -53,7 +53,7 @@ interface BarChartProps {
   padding: number;
   enableBrush: boolean;
   isPercentYAxis: boolean;
-  height?: `h-[${number}px]`;
+  height?: string;
   tooltipCallback: CreateTooltipLiteral;
 }
 

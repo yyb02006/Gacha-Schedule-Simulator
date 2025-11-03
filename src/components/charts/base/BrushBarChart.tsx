@@ -17,8 +17,8 @@ interface BrushBarChartProps {
   padding: number;
   enableBrush: boolean;
   isPercentYAxis?: boolean;
-  barChartHeight?: `h-[${number}px]`;
-  brushHeight?: `h-[${number}px]`;
+  barChartHeight?: string;
+  brushHeight?: string;
   tooltipCallback: CreateTooltipLiteral;
 }
 
