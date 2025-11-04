@@ -17,6 +17,7 @@ interface BrushBarChartProps {
   padding: number;
   enableBrush: boolean;
   cutoffIndex?: number;
+  cutoffPercentage?: number;
   isPercentYAxis?: boolean;
   barChartHeight?: string;
   brushHeight?: string;
@@ -32,12 +33,13 @@ export default function BrushBarChart({
   padding,
   enableBrush,
   cutoffIndex,
+  cutoffPercentage = 100,
   isPercentYAxis = false,
   barChartHeight,
   brushHeight,
   tooltipCallback,
 }: BrushBarChartProps) {
-  const cutoffRatio = cutoffIndex !== undefined ? cutoffIndex / data.length : 1;
+  const cutoffRatio = cutoffIndex !== undefined ? (cutoffIndex + 1) / data.length : 1;
   const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
   const [selection, setSelection] = useState({
     start: 0,
@@ -74,6 +76,7 @@ export default function BrushBarChart({
           selection={selection}
           padding={padding}
           cutoffRatio={cutoffRatio}
+          cutoffPercentage={cutoffPercentage}
           height={brushHeight}
           setSelection={setSelection}
         />

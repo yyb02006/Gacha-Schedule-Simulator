@@ -72,6 +72,7 @@ export default function BannerSuccessTrialCounts({
           padding={16}
           enableBrush={enableBrush}
           cutoffIndex={bannerResult.successIndexUntilCutoff}
+          cutoffPercentage={bannerResult.cumulativeUntilCutoff / bannerResult.bannerSuccess}
           barChartHeight={barChartHeight}
           brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteralClosure(bannerResult.bannerHistogram)}

@@ -1,3 +1,4 @@
+import { truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -37,10 +38,16 @@ const brushPlugin = (
   }>,
   {
     fontSize,
+    thresholdXRatio,
+    thresholdColor = '#ff5252',
+    thresholdLabel = '99%',
     handle: { handleColor, handlePadding, handleWidth },
   }: {
     fontSize: number;
     background: string;
+    thresholdXRatio: number;
+    thresholdColor: string;
+    thresholdLabel: string;
     handle: {
       handleWidth: number;
       handlePadding: number;
@@ -78,6 +85,27 @@ const brushPlugin = (
     ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
     ctx.fillRect(currentStartX, top, currentEndX - currentStartX, bottom - top);
     ctx.restore();
+
+    if (thresholdXRatio !== 1) {
+      const thresholdX =
+        handleMovementArea.left + brushRangeWidth * Math.min(Math.max(thresholdXRatio, 0.01), 0.99);
+
+      ctx.save();
+      ctx.strokeStyle = thresholdColor;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(thresholdX, top);
+      ctx.lineTo(thresholdX, bottom);
+      ctx.stroke();
+
+      // 라벨 표시
+      ctx.fillStyle = thresholdColor;
+      ctx.font = `11px S-CoreDream-400, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(thresholdLabel, thresholdX, top - 6);
+      ctx.restore();
+    }
 
     // 핸들 표시
     [currentStartX, currentEndX].forEach((x, currentIndex) => {
@@ -190,7 +218,8 @@ interface BrushProps {
   colors: Record<'backgroundColor' | 'borderColor', string | string[]>;
   selection: { start: number; end: number };
   padding: number;
-  cutoffPoint: number;
+  cutoffRatio: number;
+  cutoffPercentage: number;
   height?: string;
   setSelection: Dispatch<
     SetStateAction<{
@@ -206,7 +235,8 @@ export default function Brush({
   colors: { backgroundColor, borderColor },
   selection,
   padding,
-  cutoffPoint,
+  cutoffRatio,
+  cutoffPercentage,
   height,
   setSelection,
 }: BrushProps) {
@@ -216,6 +246,9 @@ export default function Brush({
   const brushConfigRef = useRef({
     fontSize: 12,
     background: '#333333',
+    thresholdXRatio: cutoffRatio,
+    thresholdColor: '#ff5252',
+    thresholdLabel: `${truncateToDecimals(cutoffPercentage * 100)}%`,
     handle: { handleWidth: 6, handlePadding: 3, handleColor: '#fe9a00' },
   });
   const selectionRef = useRef({
@@ -224,8 +257,8 @@ export default function Brush({
   });
   const brushThrottledUpdate = useRef(
     throttled((newRatio: number, dragging: 'start' | 'end') => {
-      if (selectionRef.current.end <= cutoffPoint || data.length > 500) {
-        const newSelection =
+      if (selectionRef.current.end <= cutoffRatio || data.length < 400) {
+        const updateSelection =
           dragging === 'start'
             ? (s: { start: number; end: number }) => ({
                 ...s,
@@ -235,7 +268,7 @@ export default function Brush({
                 ...s,
                 end: Math.min(1, Math.max(newRatio, s.start + BRUSH_MIN_WIDTH_RATIO)),
               });
-        setSelection(newSelection);
+        setSelection(updateSelection);
       }
     }, 100),
   ).current;
@@ -293,15 +326,16 @@ export default function Brush({
 
   useEffect(() => {
     const canvas = chartRef.current?.canvas;
-    if (!canvas) return;
+    if (!canvas || chartRef.current === null) return;
 
-    if (chartRef.current === null) return;
-    const rect = canvas.getBoundingClientRect();
-    const { left, right } = chartRef.current.chartArea;
+    const { left, right, top, bottom } = chartRef.current.chartArea;
     const startX = left + (right - left) * selectionRef.current.start;
     const endX = left + (right - left) * selectionRef.current.end;
 
-    const handleMouseDown = (e: MouseEvent) => {
+    const handleMouseDown = (e: PointerEvent) => {
+      // 포인터 아이디를 캡쳐해서 릴리즈하기 전까지 전역으로 추적
+      const rect = canvas.getBoundingClientRect();
+      canvas.setPointerCapture(e.pointerId);
       const x = e.clientX - rect.left;
 
       // 핸들 근처 클릭 시
@@ -309,14 +343,19 @@ export default function Brush({
       else if (Math.abs(x - startX) < 10) setDragging('start');
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e: PointerEvent) => {
       if (chartRef.current === null) return;
+      const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
       const newRatio = (x - left) / (right - left);
+      const isInChartArea = x > left && x < right && y < bottom && y > top;
 
       if (!dragging) {
         if (Math.abs(x - startX) < 10 || Math.abs(x - endX) < 10) {
           chartRef.current.canvas.style.cursor = 'ew-resize';
+        } else if (isInChartArea) {
+          chartRef.current.canvas.style.cursor = 'pointer';
         } else {
           chartRef.current.canvas.style.cursor = 'default';
         }
@@ -335,24 +374,62 @@ export default function Brush({
         }
         chartRef.current.draw();
 
-        // 길이가 99% 아래면 실시간 업데이트, 길이가 99% 위면 배치업데이트
+        // 누적값이 99% 아래인 구간에서는 실시간 업데이트, 99% 위인 구간에서는 배치업데이트
         brushThrottledUpdate(newRatio, dragging);
       }
     };
 
-    const handleMouseUp = () => {
-      setDragging(null);
-      setSelection({ start: selectionRef.current.start, end: selectionRef.current.end });
+    const handleMouseUp = (e: PointerEvent) => {
+      canvas.releasePointerCapture(e.pointerId);
+      if (dragging !== null) {
+        setSelection((p) => ({ ...p, [dragging]: selectionRef.current[dragging] }));
+        setDragging(null);
+      }
     };
 
-    canvas.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    const handleClick = (e: MouseEvent) => {
+      if (chartRef.current === null) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const newRatio = (x - left) / (right - left);
+      const distanceFromStart = Math.abs(newRatio - selectionRef.current.start);
+      const distanceFromEnd = Math.abs(newRatio - selectionRef.current.end);
+      const isCloserToStart = distanceFromStart < distanceFromEnd;
+
+      if (isCloserToStart) {
+        selectionRef.current.start = Math.max(
+          0,
+          Math.min(newRatio, selectionRef.current.end - BRUSH_MIN_WIDTH_RATIO),
+        );
+      } else {
+        selectionRef.current.end = Math.min(
+          1,
+          Math.max(newRatio, selectionRef.current.start + BRUSH_MIN_WIDTH_RATIO),
+        );
+      }
+      const updateSelection = isCloserToStart
+        ? (s: { start: number; end: number }) => ({
+            ...s,
+            start: Math.max(0, Math.min(newRatio, s.end - BRUSH_MIN_WIDTH_RATIO)),
+          })
+        : (s: { start: number; end: number }) => ({
+            ...s,
+            end: Math.min(1, Math.max(newRatio, s.start + BRUSH_MIN_WIDTH_RATIO)),
+          });
+      setSelection(updateSelection);
+      chartRef.current.draw();
+    };
+
+    canvas.addEventListener('click', handleClick);
+    canvas.addEventListener('pointerdown', handleMouseDown);
+    canvas.addEventListener('pointermove', handleMouseMove);
+    canvas.addEventListener('pointerup', handleMouseUp);
 
     return () => {
-      canvas.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      canvas.removeEventListener('click', handleClick);
+      canvas.removeEventListener('pointerdown', handleMouseDown);
+      canvas.removeEventListener('pointermove', handleMouseMove);
+      canvas.removeEventListener('pointerup', handleMouseUp);
     };
   }, [selection, dragging, setSelection, brushThrottledUpdate]);
 
