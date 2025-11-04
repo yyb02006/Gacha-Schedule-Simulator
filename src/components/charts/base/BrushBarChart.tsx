@@ -16,6 +16,7 @@ interface BrushBarChartProps {
   total: number;
   padding: number;
   enableBrush: boolean;
+  cutoffIndex: number;
   initialSelectionEnd?: number;
   isPercentYAxis?: boolean;
   barChartHeight?: string;
@@ -31,6 +32,7 @@ export default function BrushBarChart({
   total,
   padding,
   enableBrush,
+  cutoffIndex,
   initialSelectionEnd,
   isPercentYAxis = false,
   barChartHeight,
@@ -56,8 +58,10 @@ export default function BrushBarChart({
         colors={barChartColors}
         total={total}
         startIndex={startIndex}
+        endIndex={endIndex}
         padding={padding}
         enableBrush={enableBrush}
+        cutoffIndex={cutoffIndex}
         isPercentYAxis={isPercentYAxis}
         height={barChartHeight}
         tooltipCallback={tooltipCallback}
@@ -69,6 +73,7 @@ export default function BrushBarChart({
           colors={brushColor}
           selection={selection}
           padding={padding}
+          cutoffPoint={initialSelectionEnd ?? 1}
           height={brushHeight}
           setSelection={setSelection}
         />
