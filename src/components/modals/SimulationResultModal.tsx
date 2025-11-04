@@ -10,11 +10,64 @@ import { toOpacityZero } from '#/constants/variants';
 import { motion } from 'motion/react';
 import CancelButton from '#/components/buttons/CancelButton';
 import BannerSuccessTrialCounts from '#/components/charts/BannerSuccessTrialCounts';
+import { useEffect, useRef, useState } from 'react';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   result: GachaSimulationMergedResult | null;
+}
+
+function LazyRender({
+  children,
+  minHeight = 300,
+}: {
+  children: React.ReactNode;
+  minHeight?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(entry.target); // 한 번만 트리거
+        }
+      },
+      {
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="flex w-full items-center justify-center" style={{ minHeight }}>
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="w-full"
+        >
+          {children}
+        </motion.div>
+      ) : (
+        <div
+          className="w-full animate-pulse rounded-lg bg-neutral-800/50"
+          style={{ height: minHeight }}
+        />
+      )}
+    </div>
+  );
 }
 
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
@@ -34,10 +87,18 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <CancelButton handleCancel={onClose} />
         </div>
         <div className="grid h-fit w-full grid-cols-2 gap-6">
-          <SimulationResult result={result} />
-          <TotalGachaResult result={result} />
-          <BannerWinRate result={result} />
-          <BannerAverageCount result={result} />
+          <LazyRender>
+            <SimulationResult result={result} />
+          </LazyRender>
+          <LazyRender>
+            <TotalGachaResult result={result} />
+          </LazyRender>
+          <LazyRender>
+            <BannerWinRate result={result} />
+          </LazyRender>
+          <LazyRender>
+            <BannerAverageCount result={result} />
+          </LazyRender>
         </div>
         <motion.div
           variants={toOpacityZero}
@@ -50,11 +111,9 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
         </motion.div>
         <div className="flex flex-col gap-6">
           {result.perBanner.map((bannerResult) => (
-            <BannerSuccessTrialCounts
-              key={bannerResult.id}
-              bannerResult={bannerResult}
-              barChartHeight="h-[400px]"
-            />
+            <LazyRender key={bannerResult.id}>
+              <BannerSuccessTrialCounts bannerResult={bannerResult} barChartHeight="h-[400px]" />
+            </LazyRender>
           ))}
         </div>
       </section>
