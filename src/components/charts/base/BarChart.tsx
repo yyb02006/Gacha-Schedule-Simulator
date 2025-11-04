@@ -15,11 +15,9 @@ import {
   Tooltip,
   Legend,
   TooltipModel,
-  ChartEvent,
-  ActiveElement,
 } from 'chart.js';
 import { throttled } from 'chart.js/helpers';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend);
@@ -55,6 +53,7 @@ interface BarChartProps {
   startIndex: number;
   padding: number;
   enableBrush: boolean;
+  cutoffIndex: number;
   isPercentYAxis: boolean;
   height?: string;
   tooltipCallback: CreateTooltipLiteral;
@@ -68,10 +67,12 @@ export default function BarChart({
   startIndex,
   padding,
   enableBrush,
+  cutoffIndex,
   isPercentYAxis,
   height,
   tooltipCallback,
 }: BarChartProps) {
+  const [hasRendered, setHasRendered] = useState(false);
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
   const chartRef = useRef<ChartJS<'bar'>>(null);
   const lastChartId = useRef<string | null>(null);
@@ -176,8 +177,11 @@ export default function BarChart({
   const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: !height,
-    animation: { duration: 200 },
-    transitions: { active: { animation: { duration: data.length > 20 ? 0 : 50 } } },
+    animation: hasRendered ? { duration: 200 } : false,
+    animations: { x: { duration: data.length <= cutoffIndex ? 300 : 1000 } },
+    transitions: {
+      active: { animation: { duration: data.length > 20 ? 0 : 50 } },
+    },
     layout: {
       padding: { top: padding, left: padding, bottom: enableBrush ? 0 : padding, right: padding },
     },
@@ -301,7 +305,21 @@ export default function BarChart({
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [chartThrottledUpdate, chartThrottledDraw]);
+  }, [
+    chartThrottledUpdate,
+    chartThrottledDraw,
+    backgroundColor,
+    borderColor,
+    hoverBackgroundColor,
+    hoverBorderColor,
+    data.length,
+  ]);
+
+  useEffect(() => {
+    if (chartRef.current) {
+      requestAnimationFrame(() => setHasRendered(true));
+    }
+  }, []);
 
   return (
     <div className={height}>
