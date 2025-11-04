@@ -79,7 +79,7 @@ export default function BarChart({
   const {
     current: { stepGap },
   } = useRef({ stepGap: 10 });
-  const chartThrottledUpated = useRef(
+  const chartThrottledUpdate = useRef(
     throttled(() => {
       if (chartRef.current) chartRef.current.update();
     }, 100),
@@ -149,32 +149,6 @@ export default function BarChart({
     [tooltipCallback, total],
   );
 
-  const onHoverHandler = useCallback(
-    (_: ChartEvent, elements: ActiveElement[], chart: ChartJS<'bar'>) => {
-      const index = elements[0]?.index ?? 0;
-      if (hoveredIndexRef.current === index) {
-        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
-        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
-      } else {
-        chart.data.datasets[0].hoverBackgroundColor = backgroundColor;
-        chart.data.datasets[0].hoverBorderColor = borderColor;
-      }
-      if (chart.data.datasets[0].data.length > 20) {
-        chartThrottledDraw();
-      } else {
-        chartThrottledUpated();
-      }
-    },
-    [
-      hoverBackgroundColor,
-      hoverBorderColor,
-      backgroundColor,
-      borderColor,
-      chartThrottledUpated,
-      chartThrottledDraw,
-    ],
-  );
-
   const chartData: ChartData<'bar'> = {
     labels,
     datasets: [
@@ -202,12 +176,11 @@ export default function BarChart({
   const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: !height,
-    animation: { duration: data.length < 500 ? 200 : undefined },
-    transitions: { active: { animation: { duration: 50 } } },
+    animation: { duration: 200 },
+    transitions: { active: { animation: { duration: data.length > 20 ? 0 : 50 } } },
     layout: {
       padding: { top: padding, left: padding, bottom: enableBrush ? 0 : padding, right: padding },
     },
-    onHover: onHoverHandler,
     plugins: {
       legend: { display: false },
       tooltip: {
@@ -286,19 +259,33 @@ export default function BarChart({
     const handleMouseMove = (e: MouseEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
-      if (hoveredIndexRef.current !== newIndex) {
+      if (hoveredIndexRef.current === null && hoveredIndexRef.current !== newIndex) {
+        // Enter
+        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
+        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
         hoveredIndexRef.current = newIndex;
-        if (chart.data.datasets[0].data.length > 20) {
+        chart.update();
+      } else if (newIndex !== null && hoveredIndexRef.current !== newIndex) {
+        // Move
+        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
+        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
+        hoveredIndexRef.current = newIndex;
+        if (data.length > 20) {
           chartThrottledDraw();
         } else {
-          chartThrottledUpated();
+          chartThrottledUpdate();
         }
-      } /* else if (!chart.tooltip?.active) {
+      } else if (newIndex === null && hoveredIndexRef.current !== newIndex) {
+        // Leave
+        chart.data.datasets[0].hoverBackgroundColor = backgroundColor;
+        chart.data.datasets[0].hoverBorderColor = borderColor;
+        hoveredIndexRef.current = newIndex;
         chart.tooltip?.setActiveElements(elements, {
           x: null,
           y: null,
         });
-      } */
+        chart.update();
+      }
     };
 
     const handleMouseLeave = () => {
@@ -314,11 +301,17 @@ export default function BarChart({
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [chartThrottledUpated, chartThrottledDraw]);
+  }, [chartThrottledUpdate, chartThrottledDraw]);
 
   return (
     <div className={height}>
-      <Bar ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />
+      <Bar
+        ref={chartRef}
+        data={chartData}
+        options={options}
+        plugins={[adaptiveTickSpacing]}
+        // updateMode="none"
+      />
     </div>
   );
 }
