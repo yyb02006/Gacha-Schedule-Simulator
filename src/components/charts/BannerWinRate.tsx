@@ -35,22 +35,21 @@ const createTooltipLiteral = ({
 }: CreateTooltipLiteralPorps) => {
   const stringifiedValue = data?.formattedValue ?? '';
   const parsedRawValue = typeof data.parsed === 'number' ? data.parsed : total;
-  const borderColor = data.dataset.borderColor;
 
   return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
   ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
     .map((b, i) => {
-      return /*html*/ `<div key={i} class="font-S-CoreDream-400 space-y-[2px] text-sm whitespace-nowrap">
+      return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
           <p>
             배너 성공률 :
-            <span style="color: ${borderColor};">
+            <span style="color: ${textColor};" class="font-S-CoreDream-400">
               ${truncateToDecimals((parsedRawValue / total) * 100)}%
             </span>
           </p>
           <p>
-            배너 성공 횟수 :<span style="color: ${borderColor};">${stringifiedValue} 회</span>
+            배너 성공 횟수 :<span style="color: ${textColor};" class="font-S-CoreDream-400">${stringifiedValue} 회</span>
           </p>
         </div>`;
     })
