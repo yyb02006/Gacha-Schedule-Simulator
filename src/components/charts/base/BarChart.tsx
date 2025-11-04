@@ -54,8 +54,8 @@ interface BarChartProps {
   endIndex: number;
   padding: number;
   enableBrush: boolean;
-  cutoffIndex: number;
   isPercentYAxis: boolean;
+  cutoffIndex?: number;
   height?: string;
   tooltipCallback: CreateTooltipLiteral;
 }
@@ -69,8 +69,8 @@ export default function BarChart({
   endIndex,
   padding,
   enableBrush,
-  cutoffIndex,
   isPercentYAxis,
+  cutoffIndex,
   height,
   tooltipCallback,
 }: BarChartProps) {
@@ -180,7 +180,12 @@ export default function BarChart({
     responsive: true,
     maintainAspectRatio: !height,
     animation: hasRendered ? { duration: 200 } : false,
-    animations: { x: { duration: endIndex <= cutoffIndex || data.length > 500 ? 300 : 1000 } },
+    animations: {
+      x: {
+        duration:
+          (cutoffIndex !== undefined && endIndex <= cutoffIndex) || data.length > 500 ? 300 : 1000,
+      },
+    },
     transitions: {
       active: { animation: { duration: data.length > 20 ? 0 : 50 } },
     },

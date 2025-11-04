@@ -71,9 +71,6 @@ export default function BannerSuccessTrialCounts({
           total={bannerResult.bannerSuccess}
           padding={16}
           enableBrush={enableBrush}
-          initialSelectionEnd={
-            bannerResult.successIndexUntilCutoff / bannerResult.bannerHistogram.length
-          }
           cutoffIndex={bannerResult.successIndexUntilCutoff}
           barChartHeight={barChartHeight}
           brushHeight={brushHeight}
