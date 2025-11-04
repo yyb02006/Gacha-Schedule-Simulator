@@ -224,7 +224,7 @@ export default function Brush({
   });
   const brushThrottledUpdate = useRef(
     throttled((newRatio: number, dragging: 'start' | 'end') => {
-      if (selectionRef.current.end <= cutoffPoint) {
+      if (selectionRef.current.end <= cutoffPoint || data.length > 500) {
         const newSelection =
           dragging === 'start'
             ? (s: { start: number; end: number }) => ({

@@ -180,7 +180,7 @@ export default function BarChart({
     responsive: true,
     maintainAspectRatio: !height,
     animation: hasRendered ? { duration: 200 } : false,
-    animations: { x: { duration: endIndex <= cutoffIndex ? 300 : 1000 } },
+    animations: { x: { duration: endIndex <= cutoffIndex || data.length > 500 ? 300 : 1000 } },
     transitions: {
       active: { animation: { duration: data.length > 20 ? 0 : 50 } },
     },
