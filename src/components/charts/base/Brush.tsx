@@ -190,6 +190,7 @@ interface BrushProps {
   colors: Record<'backgroundColor' | 'borderColor', string | string[]>;
   selection: { start: number; end: number };
   padding: number;
+  cutoffPoint: number;
   height?: string;
   setSelection: Dispatch<
     SetStateAction<{
@@ -205,33 +206,39 @@ export default function Brush({
   colors: { backgroundColor, borderColor },
   selection,
   padding,
+  cutoffPoint,
   height,
   setSelection,
 }: BrushProps) {
   const chartRef = useRef<ChartJS<'line'>>(null);
   const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
-  const selectionRef = useRef(selection);
+  const BRUSH_MIN_WIDTH_RATIO = 0.05;
   const brushConfigRef = useRef({
     fontSize: 12,
     background: '#333333',
     handle: { handleWidth: 6, handlePadding: 3, handleColor: '#fe9a00' },
   });
-  const brushThrottledUpated = useRef(
+  const selectionRef = useRef({
+    start: 0,
+    end: data.length > 300 && selection.end !== undefined ? selection.end : 1,
+  });
+  const brushThrottledUpdate = useRef(
     throttled((newRatio: number, dragging: 'start' | 'end') => {
-      const newSelection =
-        dragging === 'start'
-          ? (s: { start: number; end: number }) => ({
-              ...s,
-              start: Math.max(0, Math.min(newRatio, s.end - 0.05)),
-            })
-          : (s: { start: number; end: number }) => ({
-              ...s,
-              end: Math.min(1, Math.max(newRatio, s.start + 0.05)),
-            });
-      setSelection(newSelection);
+      if (selectionRef.current.end <= cutoffPoint) {
+        const newSelection =
+          dragging === 'start'
+            ? (s: { start: number; end: number }) => ({
+                ...s,
+                start: Math.max(0, Math.min(newRatio, s.end - BRUSH_MIN_WIDTH_RATIO)),
+              })
+            : (s: { start: number; end: number }) => ({
+                ...s,
+                end: Math.min(1, Math.max(newRatio, s.start + BRUSH_MIN_WIDTH_RATIO)),
+              });
+        setSelection(newSelection);
+      }
     }, 100),
   ).current;
-  const dragAnimationRef = useRef<number | null>(null);
 
   const chartData: ChartData<'line'> = {
     labels,
@@ -291,8 +298,8 @@ export default function Brush({
     if (chartRef.current === null) return;
     const rect = canvas.getBoundingClientRect();
     const { left, right } = chartRef.current.chartArea;
-    const startX = left + (right - left) * selection.start;
-    const endX = left + (right - left) * selection.end;
+    const startX = left + (right - left) * selectionRef.current.start;
+    const endX = left + (right - left) * selectionRef.current.end;
 
     const handleMouseDown = (e: MouseEvent) => {
       const x = e.clientX - rect.left;
@@ -314,17 +321,29 @@ export default function Brush({
           chartRef.current.canvas.style.cursor = 'default';
         }
         return; // 드래그 중이 아니면 여기서 종료
-      }
+      } else {
+        if (dragging === 'start') {
+          selectionRef.current.start = Math.max(
+            0,
+            Math.min(newRatio, selectionRef.current.end - BRUSH_MIN_WIDTH_RATIO),
+          );
+        } else if (dragging === 'end') {
+          selectionRef.current.end = Math.min(
+            1,
+            Math.max(newRatio, selectionRef.current.start + BRUSH_MIN_WIDTH_RATIO),
+          );
+        }
+        chartRef.current.draw();
 
-      if (dragAnimationRef.current === null) {
-        dragAnimationRef.current = requestAnimationFrame(() => {
-          brushThrottledUpated(newRatio, dragging);
-          dragAnimationRef.current = null;
-        });
+        // 길이가 99% 아래면 실시간 업데이트, 길이가 99% 위면 배치업데이트
+        brushThrottledUpdate(newRatio, dragging);
       }
     };
 
-    const handleMouseUp = () => setDragging(null);
+    const handleMouseUp = () => {
+      setDragging(null);
+      setSelection({ start: selectionRef.current.start, end: selectionRef.current.end });
+    };
 
     canvas.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
@@ -335,11 +354,7 @@ export default function Brush({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [selection, dragging, setSelection, brushThrottledUpated]);
-
-  useEffect(() => {
-    selectionRef.current = selection;
-  }, [selection, selectionRef]);
+  }, [selection, dragging, setSelection, brushThrottledUpdate]);
 
   return (
     <div className={height || 'h-[86px]'}>

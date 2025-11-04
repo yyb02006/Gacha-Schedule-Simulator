@@ -51,6 +51,7 @@ interface BarChartProps {
   >;
   total: number;
   startIndex: number;
+  endIndex: number;
   padding: number;
   enableBrush: boolean;
   cutoffIndex: number;
@@ -65,6 +66,7 @@ export default function BarChart({
   colors: { backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor },
   total,
   startIndex,
+  endIndex,
   padding,
   enableBrush,
   cutoffIndex,
@@ -178,7 +180,7 @@ export default function BarChart({
     responsive: true,
     maintainAspectRatio: !height,
     animation: hasRendered ? { duration: 200 } : false,
-    animations: { x: { duration: data.length <= cutoffIndex ? 300 : 1000 } },
+    animations: { x: { duration: endIndex <= cutoffIndex ? 300 : 1000 } },
     transitions: {
       active: { animation: { duration: data.length > 20 ? 0 : 50 } },
     },
