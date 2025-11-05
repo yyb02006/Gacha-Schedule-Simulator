@@ -334,13 +334,40 @@ export default function Brush({
 
     const handleMouseDown = (e: PointerEvent) => {
       // 포인터 아이디를 캡쳐해서 릴리즈하기 전까지 전역으로 추적
+      if (chartRef.current === null) return;
       const rect = canvas.getBoundingClientRect();
       canvas.setPointerCapture(e.pointerId);
       const x = e.clientX - rect.left;
+      const newRatio = (x - left) / (right - left);
+      const distanceFromStart = Math.abs(newRatio - selectionRef.current.start);
+      const distanceFromEnd = Math.abs(newRatio - selectionRef.current.end);
+      const isCloserToStart = distanceFromStart < distanceFromEnd;
+
+      if (isCloserToStart) {
+        selectionRef.current.start = Math.max(
+          0,
+          Math.min(newRatio, selectionRef.current.end - BRUSH_MIN_WIDTH_RATIO),
+        );
+      } else {
+        selectionRef.current.end = Math.min(
+          1,
+          Math.max(newRatio, selectionRef.current.start + BRUSH_MIN_WIDTH_RATIO),
+        );
+      }
+      const updateSelection = isCloserToStart
+        ? (s: { start: number; end: number }) => ({
+            ...s,
+            start: Math.max(0, Math.min(newRatio, s.end - BRUSH_MIN_WIDTH_RATIO)),
+          })
+        : (s: { start: number; end: number }) => ({
+            ...s,
+            end: Math.min(1, Math.max(newRatio, s.start + BRUSH_MIN_WIDTH_RATIO)),
+          });
 
       // 핸들 근처 클릭 시
-      if (Math.abs(x - endX) < 10) setDragging('end');
-      else if (Math.abs(x - startX) < 10) setDragging('start');
+      if (!isCloserToStart) setDragging('end');
+      else if (isCloserToStart) setDragging('start');
+      setSelection(updateSelection);
     };
 
     const handleMouseMove = (e: PointerEvent) => {
@@ -387,46 +414,11 @@ export default function Brush({
       }
     };
 
-    const handleClick = (e: MouseEvent) => {
-      if (chartRef.current === null) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const newRatio = (x - left) / (right - left);
-      const distanceFromStart = Math.abs(newRatio - selectionRef.current.start);
-      const distanceFromEnd = Math.abs(newRatio - selectionRef.current.end);
-      const isCloserToStart = distanceFromStart < distanceFromEnd;
-
-      if (isCloserToStart) {
-        selectionRef.current.start = Math.max(
-          0,
-          Math.min(newRatio, selectionRef.current.end - BRUSH_MIN_WIDTH_RATIO),
-        );
-      } else {
-        selectionRef.current.end = Math.min(
-          1,
-          Math.max(newRatio, selectionRef.current.start + BRUSH_MIN_WIDTH_RATIO),
-        );
-      }
-      const updateSelection = isCloserToStart
-        ? (s: { start: number; end: number }) => ({
-            ...s,
-            start: Math.max(0, Math.min(newRatio, s.end - BRUSH_MIN_WIDTH_RATIO)),
-          })
-        : (s: { start: number; end: number }) => ({
-            ...s,
-            end: Math.min(1, Math.max(newRatio, s.start + BRUSH_MIN_WIDTH_RATIO)),
-          });
-      setSelection(updateSelection);
-      chartRef.current.draw();
-    };
-
-    canvas.addEventListener('click', handleClick);
     canvas.addEventListener('pointerdown', handleMouseDown);
     canvas.addEventListener('pointermove', handleMouseMove);
     canvas.addEventListener('pointerup', handleMouseUp);
 
     return () => {
-      canvas.removeEventListener('click', handleClick);
       canvas.removeEventListener('pointerdown', handleMouseDown);
       canvas.removeEventListener('pointermove', handleMouseMove);
       canvas.removeEventListener('pointerup', handleMouseUp);
