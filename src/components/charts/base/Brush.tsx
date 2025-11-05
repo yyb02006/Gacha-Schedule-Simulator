@@ -220,6 +220,8 @@ interface BrushProps {
   padding: number;
   cutoffRatio: number;
   cutoffPercentage: number;
+  total?: number;
+  isPercentYAxis?: boolean;
   height?: string;
   setSelection: Dispatch<
     SetStateAction<{
@@ -237,6 +239,8 @@ export default function Brush({
   padding,
   cutoffRatio,
   cutoffPercentage,
+  total,
+  isPercentYAxis,
   height,
   setSelection,
 }: BrushProps) {
@@ -319,7 +323,15 @@ export default function Brush({
           color: '#3c3c3c',
         },
         beginAtZero: true,
-        ticks: { maxTicksLimit: 6, color: '#555' },
+        ticks: {
+          maxTicksLimit: 6,
+          color: '#555',
+          callback: (value) => {
+            return typeof value === 'number' && isPercentYAxis && total
+              ? `${truncateToDecimals((value / total) * 100, 1)}%`
+              : value;
+          },
+        },
       },
     },
   };
