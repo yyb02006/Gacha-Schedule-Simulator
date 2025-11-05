@@ -1,3 +1,5 @@
+'use client';
+
 import { truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
