@@ -10,7 +10,7 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 
 // 배너별 성공 시기 통계
-export default function ScheduleOverview({
+export default function InfomationBanner({
   isGachaSim,
   result,
 }: {
