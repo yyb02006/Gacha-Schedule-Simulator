@@ -107,12 +107,16 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           initial="exit"
           className="font-S-CoreDream-700 pt-4 text-2xl"
         >
-          <span className="text-amber-500">배너별</span> 평균 가챠 성공 시점
+          <span className="text-amber-500">배너별</span> 성공 기록 통계
         </motion.div>
         <div className="flex flex-col gap-6">
           {result.perBanner.map((bannerResult) => (
             <LazyRender key={bannerResult.id}>
-              <BannerSuccessTrialCounts bannerResult={bannerResult} barChartHeight="h-[400px]" />
+              <BannerSuccessTrialCounts
+                bannerResult={bannerResult}
+                simulationTry={result.total.simulationTry}
+                barChartHeight="h-[400px]"
+              />
             </LazyRender>
           ))}
         </div>
