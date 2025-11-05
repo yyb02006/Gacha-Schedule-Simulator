@@ -213,8 +213,6 @@ export default function BarChart({
           maxRotation: 25,
           crossAlign: 'center',
           align: 'center',
-          padding: -2,
-          labelOffset: 6,
           autoSkip: false,
           font: { family: 'S-CoreDream-300', size: 11 },
           color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
