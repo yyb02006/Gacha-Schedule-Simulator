@@ -761,7 +761,7 @@ export default function PickupList() {
         return {
           ...bannerResult,
           successIndexUntilCutoff: cutoffIndex,
-          cumulativeUntilCutoff: bannerResult.bannerSuccess - cumulative,
+          cumulativeUntilCutoff: cumulative,
           minIndex: Math.min(bannerResult.bannerHistogram.findIndex((value) => value > 0)),
           maxIndex: Math.min(bannerResult.bannerHistogram.findLastIndex((value) => value > 0)),
         };
