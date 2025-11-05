@@ -57,7 +57,7 @@ export default function BannerAverageCounts({
     <ChartWrapper
       title={
         <span>
-          <span className="text-amber-400">배너별</span> 평균 가챠횟수
+          <span className="text-amber-400">배너별</span> 성공 기대값
         </span>
       }
     >
