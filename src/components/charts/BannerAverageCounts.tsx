@@ -4,7 +4,7 @@ import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { truncateToDecimals } from '#/libs/utils';
-import { CreateTooltipLiteralPorps } from '#/components/charts/BannerWinRate';
+import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 
 const createTooltipLiteral = ({
   title,
@@ -12,7 +12,7 @@ const createTooltipLiteral = ({
   body,
   data,
   total,
-}: CreateTooltipLiteralPorps) => {
+}: CreateTooltipLiteralProps<'bar'>) => {
   const stringifiedValue = data?.formattedValue ?? '';
   const rawValue = data.raw as number;
 
@@ -39,12 +39,12 @@ const createTooltipLiteral = ({
 
 export default function BannerAverageCounts({
   result,
-  barChartHeight,
+  chartHeight,
   brushHeight,
   enableBrush = true,
 }: {
   result: GachaSimulationMergedResult | null;
-  barChartHeight?: string;
+  chartHeight?: string;
   brushHeight?: string;
   enableBrush?: boolean;
 }) {
@@ -78,7 +78,7 @@ export default function BannerAverageCounts({
           total={data.reduce((a, b) => a + b, 0)}
           padding={16}
           enableBrush={enableBrush}
-          barChartHeight={barChartHeight}
+          chartHeight={chartHeight}
           brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteral}
         />

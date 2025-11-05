@@ -57,7 +57,7 @@ interface BarChartProps {
   isPercentYAxis: boolean;
   cutoffIndex?: number;
   height?: string;
-  tooltipCallback: CreateTooltipLiteral;
+  tooltipCallback: CreateTooltipLiteral<'bar'>;
 }
 
 export default function BarChart({
@@ -163,7 +163,7 @@ export default function BarChart({
         hoverBackgroundColor,
         hoverBorderColor,
         borderWidth: data.length > 20 ? 0 : 2,
-        hoverBorderWidth: 0,
+        hoverBorderWidth: data.length > 20 ? 0 : 2,
         categoryPercentage,
         maxBarThickness: (chartRef.current?.canvas.width ?? 560) / 8,
         minBarLength: data.length < 50 ? 10 : data.length < 150 ? 5 : 3,

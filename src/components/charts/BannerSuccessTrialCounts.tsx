@@ -3,14 +3,14 @@
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { BannerResult } from '#/components/PickupList';
 import { truncateToDecimals } from '#/libs/utils';
-import { CreateTooltipLiteralPorps } from '#/components/charts/BannerWinRate';
+import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { useState } from 'react';
 import Brush from '#/components/charts/base/Brush';
 import BarChart from '#/components/charts/base/BarChart';
 
 const createTooltipLiteralClosure =
   (originalHistogram: number[]) =>
-  ({ title, textColor, body, data, total }: CreateTooltipLiteralPorps) => {
+  ({ title, textColor, body, data, total }: CreateTooltipLiteralProps<'bar'>) => {
     const stringifiedValue = data?.formattedValue ?? '';
     const rawValue = data.raw as number;
     const sumUpToCurrent = originalHistogram
@@ -56,13 +56,13 @@ export default function BannerSuccessTrialCounts({
     pityRewardObtained,
   },
   simulationTry,
-  barChartHeight,
+  chartHeight,
   brushHeight,
   enableBrush = true,
 }: {
   bannerResult: BannerResult;
   simulationTry: number;
-  barChartHeight?: string;
+  chartHeight?: string;
   brushHeight?: string;
   enableBrush?: boolean;
 }) {
@@ -150,7 +150,7 @@ export default function BannerSuccessTrialCounts({
           enableBrush={enableBrush}
           cutoffIndex={successIndexUntilCutoff}
           isPercentYAxis={false}
-          height={barChartHeight}
+          height={chartHeight}
           tooltipCallback={createTooltipLiteralClosure(bannerHistogram)}
         />
         {enableBrush && (

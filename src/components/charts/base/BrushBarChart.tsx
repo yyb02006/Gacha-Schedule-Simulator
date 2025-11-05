@@ -19,9 +19,9 @@ interface BrushBarChartProps {
   cutoffIndex?: number;
   cutoffPercentage?: number;
   isPercentYAxis?: boolean;
-  barChartHeight?: string;
+  chartHeight?: string;
   brushHeight?: string;
-  tooltipCallback: CreateTooltipLiteral;
+  tooltipCallback: CreateTooltipLiteral<'bar'>;
 }
 
 export default function BrushBarChart({
@@ -35,7 +35,7 @@ export default function BrushBarChart({
   cutoffIndex,
   cutoffPercentage = 100,
   isPercentYAxis = false,
-  barChartHeight,
+  chartHeight,
   brushHeight,
   tooltipCallback,
 }: BrushBarChartProps) {
@@ -65,7 +65,7 @@ export default function BrushBarChart({
         enableBrush={enableBrush}
         cutoffIndex={cutoffIndex}
         isPercentYAxis={isPercentYAxis}
-        height={barChartHeight}
+        height={chartHeight}
         tooltipCallback={tooltipCallback}
       />
       {enableBrush && (

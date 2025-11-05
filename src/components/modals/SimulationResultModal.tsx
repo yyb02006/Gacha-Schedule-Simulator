@@ -115,7 +115,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               <BannerSuccessTrialCounts
                 bannerResult={bannerResult}
                 simulationTry={result.total.simulationTry}
-                barChartHeight="h-[400px]"
+                chartHeight="h-[400px]"
               />
             </LazyRender>
           ))}
