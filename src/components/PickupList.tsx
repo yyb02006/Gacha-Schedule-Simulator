@@ -63,6 +63,8 @@ export interface BannerResult {
   maxIndex: number;
   pityRewardObtained: number;
   bannerHistogram: number[];
+  actualEntryCount: number;
+  bannerStartingCurrency: number;
   sixth: ObtainedStatistics;
   fifth: ObtainedStatistics;
   fourth: ObtainedStatistics;
@@ -697,12 +699,20 @@ export default function PickupList() {
     const preMergedResult = results.reduce<GachaSimulationMergedResult>(
       (acc, current) => {
         current.perBanner.forEach((currentBanner, index) => {
-          const { bannerSuccess, bannerGachaRuns, pityRewardObtained } = currentBanner;
+          const {
+            bannerSuccess,
+            bannerGachaRuns,
+            pityRewardObtained,
+            actualEntryCount,
+            bannerStartingCurrency,
+          } = currentBanner;
           current.total.totalGachaRuns += bannerGachaRuns;
           if (acc.perBanner[index]) {
             acc.perBanner[index].bannerSuccess += bannerSuccess;
             acc.perBanner[index].bannerGachaRuns += bannerGachaRuns;
             acc.perBanner[index].pityRewardObtained += pityRewardObtained;
+            acc.perBanner[index].actualEntryCount += actualEntryCount;
+            acc.perBanner[index].bannerStartingCurrency += bannerStartingCurrency;
             for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
               const a = acc.perBanner[index].bannerHistogram[i] ?? 0;
               const b = currentBanner.bannerHistogram[i] ?? 0;

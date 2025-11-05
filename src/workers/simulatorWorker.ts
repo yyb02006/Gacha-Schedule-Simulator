@@ -45,8 +45,10 @@ interface SimulationResult {
     name: string;
     bannerSuccess: number;
     bannerGachaRuns: number;
-    pityRewardObtained: number;
     bannerHistogram: number[];
+    pityRewardObtained: number;
+    actualEntryCount: number;
+    bannerStartingCurrency: number;
     sixth: { totalObtained: number; pickupObtained: number; targetObtained: number };
     fifth: { totalObtained: number; pickupObtained: number; targetObtained: number };
     fourth: { totalObtained: number; pickupObtained: number; targetObtained: number };
@@ -301,8 +303,10 @@ const gachaRateSimulate = ({
       name,
       bannerSuccess: 0,
       bannerGachaRuns: 0,
-      pityRewardObtained: 0,
       bannerHistogram: [],
+      pityRewardObtained: 0,
+      actualEntryCount: 0,
+      bannerStartingCurrency: 0,
       sixth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
       fifth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
       fourth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
@@ -322,7 +326,9 @@ const gachaRateSimulate = ({
         operators,
         pickupDetails: { pickupChance, pickupOpersCount, simpleMode },
       } = pickupDatas[di];
+      // 배너 셋팅 시작 시 추가 오리지늄 계산 및 계산된 오리지늄을 배너 시작 재화에 할당
       calculateOrundum(simulationConfig, additionalResource);
+      simulationResult.perBanner[di].bannerStartingCurrency += simulationConfig.orundum;
       const pity = pities[gachaType];
       const simulationMetrics: SimulationMetrics = {
         pityRewardObtainedCount: 0,
@@ -418,6 +424,10 @@ const gachaRateSimulate = ({
           if (simulationConfig.orundum < 600) break;
           result.bannerGachaRuns = i + 1;
           simulationConfig.orundum -= 600;
+        }
+        if (i === 0) {
+          // 배너 실제 진입 시 카운트 증가
+          simulationResult.perBanner[di].actualEntryCount++;
         }
         if (simulationResult.perBanner[di].bannerHistogram[i] === undefined) {
           // 히스토그램의 현재 가챠횟수가 undefined라면 0 삽입
