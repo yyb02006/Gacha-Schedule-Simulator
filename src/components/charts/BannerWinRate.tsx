@@ -1,12 +1,94 @@
 'use client';
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
-import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { TooltipItem } from 'chart.js';
+import { ChartType, TooltipItem } from 'chart.js';
 import { truncateToDecimals } from '#/libs/utils';
+import Brush from '#/components/charts/base/Brush';
+import { useState } from 'react';
+import LineChart from '#/components/charts/base/LineChart';
 
-export interface CreateTooltipLiteralPorps {
+interface BrushLineChartProps {
+  labels: string[];
+  data: number[];
+  barChartColors: Record<
+    'backgroundColor' | 'borderColor' | 'hoverBackgroundColor' | 'hoverBorderColor',
+    string | string[]
+  >;
+  brushColor: Record<'backgroundColor' | 'borderColor', string | string[]>;
+  total: number;
+  padding: number;
+  enableBrush: boolean;
+  cutoffIndex?: number;
+  cutoffPercentage?: number;
+  isPercentYAxis?: boolean;
+  chartHeight?: string;
+  brushHeight?: string;
+  tooltipCallback: CreateTooltipLiteral<'line'>;
+}
+
+const BrushLineChart = ({
+  labels,
+  data,
+  barChartColors,
+  brushColor,
+  total,
+  padding,
+  enableBrush,
+  cutoffIndex,
+  cutoffPercentage = 100,
+  isPercentYAxis = false,
+  chartHeight,
+  brushHeight,
+  tooltipCallback,
+}: BrushLineChartProps) => {
+  const cutoffRatio = cutoffIndex !== undefined ? (cutoffIndex + 1) / data.length : 1;
+  const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
+  const [selection, setSelection] = useState({
+    start: 0,
+    end: initialSelectionEnd,
+  });
+
+  const startIndex = Math.round((data.length - 1) * selection.start);
+  const endIndex = Math.round((data.length - 1) * selection.end) + 1;
+
+  const filteredLabels = labels.slice(startIndex, endIndex);
+  const filteredData = data.slice(startIndex, endIndex);
+
+  return (
+    <div className="relative space-y-1">
+      <LineChart
+        labels={filteredLabels}
+        data={filteredData}
+        colors={barChartColors}
+        total={total}
+        startIndex={startIndex}
+        endIndex={endIndex}
+        padding={padding}
+        enableBrush={enableBrush}
+        cutoffIndex={cutoffIndex}
+        isPercentYAxis={isPercentYAxis}
+        height={chartHeight}
+        tooltipCallback={tooltipCallback}
+      />
+      {enableBrush && (
+        <Brush
+          labels={labels}
+          data={data}
+          colors={brushColor}
+          selection={selection}
+          padding={padding}
+          cutoffRatio={cutoffRatio}
+          cutoffPercentage={cutoffPercentage}
+          height={brushHeight}
+          setSelection={setSelection}
+        />
+      )}
+    </div>
+  );
+};
+
+export interface CreateTooltipLiteralProps<T extends ChartType> {
   title: string[];
   textColor: string;
   body: {
@@ -14,17 +96,17 @@ export interface CreateTooltipLiteralPorps {
     lines: string[];
     after: string[];
   }[];
-  data: TooltipItem<'bar'>;
+  data: TooltipItem<T>;
   total: number;
 }
 
-export type CreateTooltipLiteral = ({
+export type CreateTooltipLiteral<T extends ChartType> = ({
   title,
   textColor,
   body,
   data,
   total,
-}: CreateTooltipLiteralPorps) => string;
+}: CreateTooltipLiteralProps<T>) => string;
 
 const createTooltipLiteral = ({
   title,
@@ -32,7 +114,7 @@ const createTooltipLiteral = ({
   body,
   data,
   total,
-}: CreateTooltipLiteralPorps) => {
+}: CreateTooltipLiteralProps<'line'>) => {
   const stringifiedValue = data?.formattedValue ?? '';
   const parsedRawValue = typeof data.parsed === 'number' ? data.parsed : total;
 
@@ -59,12 +141,12 @@ const createTooltipLiteral = ({
 
 export default function BannerWinRate({
   result,
-  barChartHeight,
+  chartHeight,
   brushHeight,
   enableBrush = true,
 }: {
   result: GachaSimulationMergedResult | null;
-  barChartHeight?: string;
+  chartHeight?: string;
   brushHeight?: string;
   enableBrush?: boolean;
 }) {
@@ -77,7 +159,7 @@ export default function BannerWinRate({
       }
     >
       {result ? (
-        <BrushBarChart
+        <BrushLineChart
           labels={result.perBanner.map(({ name }) => name)}
           data={result.perBanner.map(({ bannerSuccess }) => bannerSuccess)}
           barChartColors={{
@@ -94,7 +176,7 @@ export default function BannerWinRate({
           padding={16}
           enableBrush={enableBrush}
           isPercentYAxis={true}
-          barChartHeight={barChartHeight}
+          chartHeight={chartHeight}
           brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteral}
         />
