@@ -160,11 +160,11 @@ export const getPercentileIndex = (histogram: number[], total: number, percentil
   let cumulative = 0;
   let cutoffIndex = histogram.length;
   for (let i = histogram.length - 1; i >= 0; i--) {
-    cumulative += histogram[i];
     if (cumulative / total >= 1 - percentile) {
       cutoffIndex = i;
       break;
     }
+    cumulative += histogram[i];
   }
   return { cumulative, cutoffIndex };
 };
