@@ -80,6 +80,8 @@ const BrushLineChart = ({
           padding={padding}
           cutoffRatio={cutoffRatio}
           cutoffPercentage={cutoffPercentage}
+          isPercentYAxis={isPercentYAxis}
+          total={total}
           height={brushHeight}
           setSelection={setSelection}
         />
@@ -154,7 +156,7 @@ export default function BannerWinRate({
     <ChartWrapper
       title={
         <span>
-          <span className="text-amber-400">배너별 </span>성공률
+          <span className="text-amber-400">배너별 </span>성공률 흐름
         </span>
       }
     >
@@ -163,7 +165,7 @@ export default function BannerWinRate({
           labels={result.perBanner.map(({ name }) => name)}
           data={result.perBanner.map(({ bannerSuccess }) => bannerSuccess)}
           barChartColors={{
-            backgroundColor: '#fe9a00CC',
+            backgroundColor: '#fe9a0099',
             borderColor: '#fe9a00',
             hoverBackgroundColor: '#8e51ffCC',
             hoverBorderColor: '#8e51ff',
