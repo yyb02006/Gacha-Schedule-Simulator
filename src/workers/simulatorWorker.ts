@@ -45,7 +45,8 @@ interface SimulationResult {
     id: string;
     name: string;
     bannerSuccess: number;
-    bannerGachaRuns: number;
+    bannerTotalGachaRuns: number;
+    bannerWinGachaRuns: number;
     bannerHistogram: number[];
     pityRewardObtained: number;
     actualEntryCount: number;
@@ -305,7 +306,8 @@ const gachaRateSimulate = ({
       id,
       name,
       bannerSuccess: 0,
-      bannerGachaRuns: 0,
+      bannerTotalGachaRuns: 0,
+      bannerWinGachaRuns: 0,
       bannerHistogram: [],
       pityRewardObtained: 0,
       actualEntryCount: 0,
@@ -698,6 +700,7 @@ const gachaRateSimulate = ({
           simulationResult.perBanner[di].bannerHistogram[i]++;
           break;
         } else if (i + 1 === gachaAttemptsLimit) {
+          // 조건 완료하지 못한 채 최대값 달성 시 가챠 중지
           result.bannerGachaRuns = i + 1;
           break;
         }
@@ -706,13 +709,14 @@ const gachaRateSimulate = ({
       logging && console.log('배너 종료');
       if (result.success) {
         simulationResult.perBanner[di].bannerSuccess++;
+        simulationResult.perBanner[di].bannerWinGachaRuns += result.bannerGachaRuns;
         singleSimulationSuccessCount++;
       }
       if (result.isPityRewardObtained) {
         simulationResult.perBanner[di].pityRewardObtained++;
         simulationResult.total.pityRewardObtained++;
       }
-      simulationResult.perBanner[di].bannerGachaRuns += result.bannerGachaRuns;
+      simulationResult.perBanner[di].bannerTotalGachaRuns += result.bannerGachaRuns;
       const rarityStrings = ['sixth', 'fifth', 'fourth'] as const;
       for (const rarityString of rarityStrings) {
         const obtainedTypes = ['totalObtained', 'pickupObtained', 'targetObtained'] as const;
@@ -1083,7 +1087,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
 
   const { total, perBanner } = result;
   const expectedValues = perBanner.map(
-    ({ bannerGachaRuns, bannerSuccess }) => bannerGachaRuns / bannerSuccess,
+    ({ bannerWinGachaRuns, bannerSuccess }) => bannerWinGachaRuns / bannerSuccess,
   );
 
   /* console.log(

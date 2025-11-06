@@ -56,7 +56,8 @@ export interface BannerResult {
   id: string;
   name: string;
   bannerSuccess: number;
-  bannerGachaRuns: number;
+  bannerTotalGachaRuns: number;
+  bannerWinGachaRuns: number;
   successIndexUntilCutoff: number;
   cumulativeUntilCutoff: number;
   minIndex: number;
@@ -703,16 +704,18 @@ export default function PickupList() {
         current.perBanner.forEach((currentBanner, index) => {
           const {
             bannerSuccess,
-            bannerGachaRuns,
+            bannerTotalGachaRuns,
+            bannerWinGachaRuns,
             pityRewardObtained,
             actualEntryCount,
             bannerStartingCurrency,
             additionalResource,
           } = currentBanner;
-          current.total.totalGachaRuns += bannerGachaRuns;
+          current.total.totalGachaRuns += bannerTotalGachaRuns;
           if (acc.perBanner[index]) {
             acc.perBanner[index].bannerSuccess += bannerSuccess;
-            acc.perBanner[index].bannerGachaRuns += bannerGachaRuns;
+            acc.perBanner[index].bannerTotalGachaRuns += bannerTotalGachaRuns;
+            acc.perBanner[index].bannerWinGachaRuns += bannerWinGachaRuns;
             acc.perBanner[index].pityRewardObtained += pityRewardObtained;
             acc.perBanner[index].actualEntryCount += actualEntryCount;
             acc.perBanner[index].bannerStartingCurrency += bannerStartingCurrency;
