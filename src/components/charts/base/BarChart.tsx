@@ -37,6 +37,7 @@ const adaptiveTickSpacing: Plugin<'bar'> = {
     if (tickOpts.padding !== newPadding || tickOpts.labelOffset !== newLabelOffset) {
       tickOpts.padding = newPadding;
       tickOpts.labelOffset = newLabelOffset;
+      // 옵션객체에 해당 레이아웃 프로퍼티의 초기값이 없어서 key가 없더라도 update함수를 사용하면 이전 레이아웃을 트랜지션 대상으로 등록 함 => layout diff 계산 가능
       chart.update('none');
     }
   },
@@ -214,6 +215,9 @@ export default function BarChart({
           crossAlign: 'center',
           align: 'center',
           autoSkip: false,
+          // 옵션 객체 프로퍼티에 값이 들어가면 그 레이아웃은 key를 가지게 되어서 이후 update('none')으로 업데이트 되어도 트랜지션이 작동함 => layout diff 계산 가능
+          padding: -2,
+          labelOffset: 6,
           font: { family: 'S-CoreDream-300', size: 11 },
           color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
           callback: (value, index) => {
