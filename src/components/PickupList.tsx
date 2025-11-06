@@ -65,6 +65,7 @@ export interface BannerResult {
   bannerHistogram: number[];
   actualEntryCount: number;
   bannerStartingCurrency: number;
+  additionalResource: number;
   sixth: ObtainedStatistics;
   fifth: ObtainedStatistics;
   fourth: ObtainedStatistics;
@@ -76,6 +77,7 @@ export interface GachaSimulationMergedResult {
     simulationSuccess: number;
     totalGachaRuns: number;
     pityRewardObtained: number;
+    initialResource: number;
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
   };
   perBanner: BannerResult[];
@@ -705,6 +707,7 @@ export default function PickupList() {
             pityRewardObtained,
             actualEntryCount,
             bannerStartingCurrency,
+            additionalResource,
           } = currentBanner;
           current.total.totalGachaRuns += bannerGachaRuns;
           if (acc.perBanner[index]) {
@@ -713,6 +716,7 @@ export default function PickupList() {
             acc.perBanner[index].pityRewardObtained += pityRewardObtained;
             acc.perBanner[index].actualEntryCount += actualEntryCount;
             acc.perBanner[index].bannerStartingCurrency += bannerStartingCurrency;
+            acc.perBanner[index].additionalResource = additionalResource;
             for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
               const a = acc.perBanner[index].bannerHistogram[i] ?? 0;
               const b = currentBanner.bannerHistogram[i] ?? 0;
@@ -742,6 +746,7 @@ export default function PickupList() {
         acc.total.simulationSuccess += current.total.simulationSuccess;
         acc.total.totalGachaRuns += current.total.totalGachaRuns;
         acc.total.pityRewardObtained += current.total.pityRewardObtained;
+        acc.total.initialResource = current.total.initialResource;
 
         return acc;
       },
@@ -751,6 +756,7 @@ export default function PickupList() {
           simulationSuccess: 0,
           totalGachaRuns: 0,
           pityRewardObtained: 0,
+          initialResource: 0,
           statistics: {
             sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
             fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },

@@ -39,6 +39,7 @@ interface SimulationResult {
     simulationSuccess: number;
     totalGachaRuns: number;
     pityRewardObtained: number;
+    initialResource: number;
   };
   perBanner: {
     id: string;
@@ -49,6 +50,7 @@ interface SimulationResult {
     pityRewardObtained: number;
     actualEntryCount: number;
     bannerStartingCurrency: number;
+    additionalResource: number;
     sixth: { totalObtained: number; pickupObtained: number; targetObtained: number };
     fifth: { totalObtained: number; pickupObtained: number; targetObtained: number };
     fourth: { totalObtained: number; pickupObtained: number; targetObtained: number };
@@ -297,8 +299,9 @@ const gachaRateSimulate = ({
       simulationSuccess: 0,
       totalGachaRuns: 0,
       pityRewardObtained: 0,
+      initialResource,
     },
-    perBanner: pickupDatas.map(({ id, name }) => ({
+    perBanner: pickupDatas.map(({ id, name }, index) => ({
       id,
       name,
       bannerSuccess: 0,
@@ -307,6 +310,8 @@ const gachaRateSimulate = ({
       pityRewardObtained: 0,
       actualEntryCount: 0,
       bannerStartingCurrency: 0,
+      additionalResource:
+        pickupDatas[index].additionalResource[isSimpleMode ? 'simpleMode' : 'extendedMode'],
       sixth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
       fifth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
       fourth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
