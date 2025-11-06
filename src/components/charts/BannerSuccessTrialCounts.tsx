@@ -4,9 +4,10 @@ import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { BannerResult } from '#/components/PickupList';
 import { truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
-import { useState } from 'react';
+import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import Brush from '#/components/charts/base/Brush';
 import BarChart from '#/components/charts/base/BarChart';
+import { Chart as ChartJS } from 'chart.js';
 
 const createTooltipLiteralClosure =
   (originalHistogram: number[]) =>
@@ -43,6 +44,64 @@ const createTooltipLiteralClosure =
   </div>`;
   };
 
+const Legend = ({
+  bannerSuccess,
+  bannerGachaRuns,
+  pityRewardObtained,
+  maxIndex,
+  minIndex,
+  dispatchRef,
+}: {
+  bannerSuccess: number;
+  bannerGachaRuns: number;
+  pityRewardObtained: number;
+  maxIndex: number;
+  minIndex: number;
+  dispatchRef: RefObject<Dispatch<SetStateAction<number[]>> | null>;
+}) => {
+  const [filteredData, setFilteredData] = useState<number[]>([]);
+  useEffect(() => {
+    dispatchRef.current = setFilteredData;
+  }, [dispatchRef]);
+  return (
+    <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-[13px]">
+      <div>
+        구간 누적 확률 :{' '}
+        <span className="font-S-CoreDream-500 text-amber-500">
+          {truncateToDecimals((filteredData.reduce((a, b) => a + b, 0) / bannerSuccess) * 100)}%
+        </span>
+      </div>
+      {/* <div>
+    성공 횟수 : <span className="font-S-CoreDream-500 text-amber-500">{bannerSuccess}회</span>
+  </div> */}
+      <div>
+        성공 기대값 :{' '}
+        <span className="font-S-CoreDream-500 text-amber-500">
+          {truncateToDecimals(bannerGachaRuns / bannerSuccess)}회
+        </span>
+      </div>
+      {/* <div>
+    천장 도달 횟수 :{' '}
+    <span className="font-S-CoreDream-500 text-amber-500">{pityRewardObtained}회</span>
+  </div> */}
+      <div>
+        천장 도달 확률 :{' '}
+        <span className="font-S-CoreDream-500 text-amber-500">
+          {truncateToDecimals((pityRewardObtained / bannerSuccess) * 100)}%
+        </span>
+      </div>
+      <div>
+        최장 성공 차수 :{' '}
+        <span className="font-S-CoreDream-500 text-amber-500">{maxIndex + 1}회</span>
+      </div>
+      <div>
+        최단 성공 차수 :{' '}
+        <span className="font-S-CoreDream-500 text-amber-500">{minIndex + 1}회</span>
+      </div>
+    </div>
+  );
+};
+
 export default function BannerSuccessTrialCounts({
   bannerResult: {
     name,
@@ -67,22 +126,31 @@ export default function BannerSuccessTrialCounts({
   enableBrush?: boolean;
 }) {
   const padding = 16;
+  const { data, labels } = useRef({
+    data: bannerHistogram,
+    labels: Array.from({ length: bannerHistogram.length }, (_, index) => `${index + 1}`),
+  }).current;
+  const mainChartRef = useRef<ChartJS<'bar', (number | [number, number] | null)[], unknown> | null>(
+    null,
+  );
+  const dispatchRef = useRef<Dispatch<SetStateAction<number[]>>>(null);
+
   const cutoffRatio =
     successIndexUntilCutoff !== undefined
       ? successIndexUntilCutoff / (bannerHistogram.length - 1)
       : 1;
-  const initialSelectionEnd = bannerHistogram.length > 300 ? cutoffRatio : 1;
-  const [selection, setSelection] = useState({
+
+  const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
+
+  const selection = useRef({
     start: 0,
     end: initialSelectionEnd,
-  });
-  const labels = Array.from({ length: bannerHistogram.length }, (_, index) => `${index + 1}`);
+  }).current;
+  const selectionIndex = useRef({
+    start: 0,
+    end: Math.round((data.length - 1) * initialSelectionEnd) + 1,
+  }).current;
 
-  const startIndex = Math.round((bannerHistogram.length - 1) * selection.start);
-  const endIndex = Math.round((bannerHistogram.length - 1) * selection.end) + 1;
-
-  const filteredLabels = labels.slice(startIndex, endIndex);
-  const filteredData = bannerHistogram.slice(startIndex, endIndex);
   return (
     <ChartWrapper
       title={
@@ -98,75 +166,49 @@ export default function BannerSuccessTrialCounts({
         </div>
       }
     >
-      <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-[13px]">
-        <div>
-          구간 누적 확률 :{' '}
-          <span className="font-S-CoreDream-500 text-amber-500">
-            {truncateToDecimals((filteredData.reduce((a, b) => a + b, 0) / bannerSuccess) * 100)}%
-          </span>
-        </div>
-        {/* <div>
-          성공 횟수 : <span className="font-S-CoreDream-500 text-amber-500">{bannerSuccess}회</span>
-        </div> */}
-        <div>
-          성공 기대값 :{' '}
-          <span className="font-S-CoreDream-500 text-amber-500">
-            {truncateToDecimals(bannerGachaRuns / bannerSuccess)}회
-          </span>
-        </div>
-        {/* <div>
-          천장 도달 횟수 :{' '}
-          <span className="font-S-CoreDream-500 text-amber-500">{pityRewardObtained}회</span>
-        </div> */}
-        <div>
-          천장 도달 확률 :{' '}
-          <span className="font-S-CoreDream-500 text-amber-500">
-            {truncateToDecimals((pityRewardObtained / bannerSuccess) * 100)}%
-          </span>
-        </div>
-        <div>
-          최장 성공 차수 :{' '}
-          <span className="font-S-CoreDream-500 text-amber-500">{maxIndex + 1}회</span>
-        </div>
-        <div>
-          최단 성공 차수 :{' '}
-          <span className="font-S-CoreDream-500 text-amber-500">{minIndex + 1}회</span>
-        </div>
-      </div>
+      <Legend
+        bannerGachaRuns={bannerGachaRuns}
+        bannerSuccess={bannerSuccess}
+        dispatchRef={dispatchRef}
+        maxIndex={maxIndex}
+        minIndex={minIndex}
+        pityRewardObtained={pityRewardObtained}
+      />
       <div className="relative space-y-1">
         <BarChart
-          labels={filteredLabels}
-          data={filteredData}
+          labels={labels}
+          data={data}
           colors={{
             backgroundColor: '#fe9a00CC',
             borderColor: '#fe9a00',
             hoverBackgroundColor: '#8e51ffCC',
             hoverBorderColor: '#8e51ff',
           }}
+          selectionIndex={selectionIndex}
           total={bannerSuccess}
-          startIndex={startIndex}
-          endIndex={endIndex}
           padding={padding}
           enableBrush={enableBrush}
           cutoffIndex={successIndexUntilCutoff}
-          isPercentYAxis={false}
           height={chartHeight}
           tooltipCallback={createTooltipLiteralClosure(bannerHistogram)}
+          mainChartRef={mainChartRef}
         />
         {enableBrush && (
           <Brush
             labels={labels}
-            data={bannerHistogram}
+            data={data}
+            mainChartRef={mainChartRef}
+            selection={selection}
+            selectionIndex={selectionIndex}
             colors={{
               backgroundColor: '#8e51ffCC',
               borderColor: '#8e51ff',
             }}
-            selection={selection}
             padding={padding}
             cutoffRatio={cutoffRatio}
             cutoffPercentage={cumulativeUntilCutoff / bannerSuccess}
             height={brushHeight}
-            setSelection={setSelection}
+            dispatchRef={dispatchRef}
           />
         )}
       </div>

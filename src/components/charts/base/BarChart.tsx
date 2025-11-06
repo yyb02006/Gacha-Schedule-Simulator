@@ -1,6 +1,6 @@
 'use client';
 
-import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
+import { CreateTooltipLiteral, CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
@@ -15,9 +15,10 @@ import {
   Tooltip,
   Legend,
   TooltipModel,
+  ChartType,
 } from 'chart.js';
 import { throttled } from 'chart.js/helpers';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { RefObject, useEffect, useRef, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend);
@@ -37,11 +38,77 @@ const adaptiveTickSpacing: Plugin<'bar'> = {
     if (tickOpts.padding !== newPadding || tickOpts.labelOffset !== newLabelOffset) {
       tickOpts.padding = newPadding;
       tickOpts.labelOffset = newLabelOffset;
-      // 옵션객체에 해당 레이아웃 프로퍼티의 초기값이 없어서 key가 없더라도 update함수를 사용하면 이전 레이아웃을 트랜지션 대상으로 등록 함 => layout diff 계산 가능
-      chart.update('none');
     }
   },
 };
+
+export type TooltipCallback<T extends ChartType> = (props: CreateTooltipLiteralProps<T>) => string;
+
+const externalTooltipHandler =
+  ({
+    lastChartId,
+    hoveredIndexRef,
+    total,
+    tooltipCallback,
+  }: {
+    lastChartId: RefObject<string | null>;
+    hoveredIndexRef: RefObject<number | null>;
+    total: number;
+    tooltipCallback: TooltipCallback<'bar'>;
+  }) =>
+  (context: { chart: ChartJS; tooltip: TooltipModel<'bar'> }) => {
+    const { chart, tooltip } = context;
+    const chartId = chart.id;
+    const canvasParent = chart.canvas.parentElement;
+    if (!canvasParent) return;
+
+    let tooltipEl = canvasParent.querySelector('#custom-tooltip') as HTMLDivElement;
+    if (!tooltipEl) {
+      tooltipEl = document.createElement('div');
+      tooltipEl.id = 'custom-tooltip';
+      tooltipEl.className = 'absolute z-50 pointer-events-none';
+      canvasParent.appendChild(tooltipEl);
+    }
+
+    if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
+      tooltipEl.style.opacity = '0';
+      lastChartId.current = null;
+      return;
+    }
+
+    const canvasRect = chart.canvas.getBoundingClientRect();
+    const parentRect = canvasParent.getBoundingClientRect();
+    const caretX = tooltip.caretX ?? canvasRect.width / 2;
+    const caretY = tooltip.caretY ?? canvasRect.height / 2;
+    const baseX = caretX + (canvasRect.left - parentRect.left);
+    const baseY = caretY + (canvasRect.top - parentRect.top);
+
+    const sameChart = lastChartId.current === chartId;
+    const tooltipWidth = tooltipEl.offsetWidth || 140;
+    let finalX = baseX + 6;
+    if (caretX + tooltipWidth + 12 > canvasRect.width) finalX = baseX - tooltipWidth - 6;
+
+    tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
+    tooltipEl.style.left = `${finalX}px`;
+    tooltipEl.style.top = `${baseY}px`;
+    tooltipEl.style.opacity = '1';
+    lastChartId.current = chartId;
+
+    // 내용 업데이트
+    const title = tooltip.title || [];
+    const body = tooltip.body;
+    const dataPoint = tooltip.dataPoints?.[0];
+    const textColor =
+      typeof dataPoint.dataset.borderColor === 'string' ? dataPoint.dataset.borderColor : '#ffb900';
+
+    tooltipEl.innerHTML = tooltipCallback({
+      body,
+      data: dataPoint,
+      textColor,
+      title,
+      total,
+    });
+  };
 
 interface BarChartProps {
   labels: string[];
@@ -50,12 +117,15 @@ interface BarChartProps {
     'backgroundColor' | 'borderColor' | 'hoverBackgroundColor' | 'hoverBorderColor',
     string | string[]
   >;
+  mainChartRef: RefObject<ChartJS<'bar', (number | [number, number] | null)[], unknown> | null>;
+  selectionIndex: {
+    start: number;
+    end: number;
+  };
   total: number;
-  startIndex: number;
-  endIndex: number;
   padding: number;
   enableBrush: boolean;
-  isPercentYAxis: boolean;
+  isPercentYAxis?: boolean;
   cutoffIndex?: number;
   height?: string;
   tooltipCallback: CreateTooltipLiteral<'bar'>;
@@ -65,9 +135,9 @@ export default function BarChart({
   labels,
   data,
   colors: { backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor },
+  mainChartRef,
+  selectionIndex,
   total,
-  startIndex,
-  endIndex,
   padding,
   enableBrush,
   isPercentYAxis,
@@ -93,65 +163,6 @@ export default function BarChart({
       if (chartRef.current) chartRef.current.draw();
     }, 200),
   ).current;
-
-  const externalTooltipHandler = useCallback(
-    (context: { chart: ChartJS; tooltip: TooltipModel<'bar'> }) => {
-      const { chart, tooltip } = context;
-      const chartId = chart.id;
-      const canvasParent = chart.canvas.parentElement;
-      if (!canvasParent) return;
-
-      let tooltipEl = canvasParent.querySelector('#custom-tooltip') as HTMLDivElement;
-      if (!tooltipEl) {
-        tooltipEl = document.createElement('div');
-        tooltipEl.id = 'custom-tooltip';
-        tooltipEl.className = 'absolute z-50 pointer-events-none';
-        canvasParent.appendChild(tooltipEl);
-      }
-
-      if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
-        tooltipEl.style.opacity = '0';
-        lastChartId.current = null;
-        return;
-      }
-
-      const canvasRect = chart.canvas.getBoundingClientRect();
-      const parentRect = canvasParent.getBoundingClientRect();
-      const caretX = tooltip.caretX ?? canvasRect.width / 2;
-      const caretY = tooltip.caretY ?? canvasRect.height / 2;
-      const baseX = caretX + (canvasRect.left - parentRect.left);
-      const baseY = caretY + (canvasRect.top - parentRect.top);
-
-      const sameChart = lastChartId.current === chartId;
-      const tooltipWidth = tooltipEl.offsetWidth || 140;
-      let finalX = baseX + 6;
-      if (caretX + tooltipWidth + 12 > canvasRect.width) finalX = baseX - tooltipWidth - 6;
-
-      tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
-      tooltipEl.style.left = `${finalX}px`;
-      tooltipEl.style.top = `${baseY}px`;
-      tooltipEl.style.opacity = '1';
-      lastChartId.current = chartId;
-
-      // 내용 업데이트
-      const title = tooltip.title || [];
-      const body = tooltip.body;
-      const dataPoint = tooltip.dataPoints?.[0];
-      const textColor =
-        typeof dataPoint.dataset.borderColor === 'string'
-          ? dataPoint.dataset.borderColor
-          : '#ffb900';
-
-      tooltipEl.innerHTML = tooltipCallback({
-        body,
-        data: dataPoint,
-        textColor,
-        title,
-        total,
-      });
-    },
-    [tooltipCallback, total],
-  );
 
   const chartData: ChartData<'bar'> = {
     labels,
@@ -184,7 +195,9 @@ export default function BarChart({
     animations: {
       x: {
         duration:
-          (cutoffIndex !== undefined && endIndex <= cutoffIndex) || data.length > 500 ? 300 : 1000,
+          (cutoffIndex !== undefined && selectionIndex.end <= cutoffIndex) || data.length > 500
+            ? 300
+            : 1000,
       },
     },
     transitions: {
@@ -199,7 +212,7 @@ export default function BarChart({
         enabled: false,
         mode: 'index', // x축 "열(column)" 단위로 hover 인식
         intersect: false, // 바 위가 아니라, 그 열 전체 hover 가능
-        external: externalTooltipHandler,
+        external: externalTooltipHandler({ lastChartId, hoveredIndexRef, total, tooltipCallback }),
       },
       datalabels: { display: false },
     },
@@ -212,6 +225,7 @@ export default function BarChart({
         border: { color: '#3c3c3c' },
         ticks: {
           maxRotation: 25,
+          minRotation: 0,
           crossAlign: 'center',
           align: 'center',
           autoSkip: false,
@@ -224,24 +238,24 @@ export default function BarChart({
             const isValueSring = typeof value === 'string';
             const gapMultiplier = Math.min(Math.ceil(data.length / 199), 10);
             if (data.length > 20) {
-              return startIndex === 0 && index === 0
+              return selectionIndex.start === 0 && index === 0
                 ? 1
                 : index === 0 || index % (stepGap * gapMultiplier) === stepGap * gapMultiplier - 1
-                  ? startIndex + index + 1
+                  ? selectionIndex.start + index + 1
                   : '';
             } else {
               return isValueSring ? value : labels[value];
             }
           },
         },
-        afterFit: (axis) => {
+        afterFit: (scale) => {
           // 축 박스 높이를 줄여서 -padding 보전
-          if (!axis || axis.type !== 'category') return;
+          if (!scale || scale.type !== 'category') return;
 
-          const rotated = axis.labelRotation !== 0;
+          const rotated = scale.labelRotation !== 0;
 
           const compensatedHeight = rotated ? 2 : -4;
-          axis.height = axis.height + compensatedHeight;
+          scale.height = scale.height + compensatedHeight;
         },
       },
       y: {
@@ -269,7 +283,7 @@ export default function BarChart({
     const chart = chartRef.current;
     if (!canvas || !chart) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e: PointerEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current === null && hoveredIndexRef.current !== newIndex) {
@@ -308,11 +322,11 @@ export default function BarChart({
       }
     };
 
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
+    canvas.addEventListener('pointermove', handleMouseMove);
+    canvas.addEventListener('pointerleave', handleMouseLeave);
     return () => {
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      canvas.removeEventListener('pointermove', handleMouseMove);
+      canvas.removeEventListener('pointerleave', handleMouseLeave);
     };
   }, [
     chartThrottledUpdate,
@@ -325,20 +339,15 @@ export default function BarChart({
   ]);
 
   useEffect(() => {
+    mainChartRef.current = chartRef.current;
     if (chartRef.current) {
-      requestAnimationFrame(() => setHasRendered(true));
+      setHasRendered(true);
     }
-  }, []);
+  }, [mainChartRef]);
 
   return (
     <div className={height}>
-      <Bar
-        ref={chartRef}
-        data={chartData}
-        options={options}
-        plugins={[adaptiveTickSpacing]}
-        // updateMode="none"
-      />
+      <Bar ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />
     </div>
   );
 }

@@ -3,7 +3,8 @@
 import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
 import BarChart from '#/components/charts/base/BarChart';
 import Brush from '#/components/charts/base/Brush';
-import { useState } from 'react';
+import { useRef } from 'react';
+import { Chart as ChartJS } from 'chart.js';
 
 interface BrushBarChartProps {
   labels: string[];
@@ -39,28 +40,44 @@ export default function BrushBarChart({
   brushHeight,
   tooltipCallback,
 }: BrushBarChartProps) {
+  const mainChartRef = useRef<ChartJS<'bar', (number | [number, number] | null)[], unknown> | null>(
+    null,
+  );
+  // const dispatchRef = useRef<Dispatch<SetStateAction<number[]>>>(null);
+
   const cutoffRatio = cutoffIndex !== undefined ? (cutoffIndex + 1) / data.length : 1;
+
   const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
-  const [selection, setSelection] = useState({
+
+  const selection = useRef({
     start: 0,
     end: initialSelectionEnd,
-  });
+  }).current;
+  const selectionIndex = useRef({
+    start: 0,
+    end: Math.round((data.length - 1) * initialSelectionEnd) + 1,
+  }).current;
 
-  const startIndex = Math.round((data.length - 1) * selection.start);
+  /* const [selection, setSelection] = useState({
+    start: 0,
+    end: initialSelectionEnd,
+  }); */
+
+  /* const startIndex = Math.round((data.length - 1) * selection.start);
   const endIndex = Math.round((data.length - 1) * selection.end) + 1;
 
   const filteredLabels = labels.slice(startIndex, endIndex);
-  const filteredData = data.slice(startIndex, endIndex);
+  const filteredData = data.slice(startIndex, endIndex); */
 
   return (
     <div className="relative space-y-1">
       <BarChart
-        labels={filteredLabels}
-        data={filteredData}
+        labels={labels}
+        data={data}
+        mainChartRef={mainChartRef}
+        selectionIndex={selectionIndex}
         colors={barChartColors}
         total={total}
-        startIndex={startIndex}
-        endIndex={endIndex}
         padding={padding}
         enableBrush={enableBrush}
         cutoffIndex={cutoffIndex}
@@ -72,13 +89,16 @@ export default function BrushBarChart({
         <Brush
           labels={labels}
           data={data}
-          colors={brushColor}
+          mainChartRef={mainChartRef}
+          selectionIndex={selectionIndex}
           selection={selection}
-          padding={padding}
+          colors={brushColor}
           cutoffRatio={cutoffRatio}
           cutoffPercentage={cutoffPercentage}
+          padding={padding}
           height={brushHeight}
-          setSelection={setSelection}
+          isPercentYAxis={isPercentYAxis}
+          total={total}
         />
       )}
     </div>
