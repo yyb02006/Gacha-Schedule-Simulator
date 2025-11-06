@@ -3,14 +3,7 @@
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { cls, truncateToDecimals } from '#/libs/utils';
 import { doughnutConnectorPlugin } from '#/plugins/chartJsPlugin';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  ChartData,
-  ChartOptions,
-  TooltipItem,
-} from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip, ChartData, ChartOptions } from 'chart.js';
 import ChartDataLabels, { Context } from 'chartjs-plugin-datalabels';
 import { useEffect, useRef } from 'react';
 import { Doughnut } from 'react-chartjs-2';
@@ -32,7 +25,6 @@ export default function DonutChart({
   backgroundColor,
   borderColor,
   legendPosition = 'top',
-  gapX = 'gap-x-4',
   createLegendHTML,
   tooltipCallback,
 }: {
@@ -41,7 +33,6 @@ export default function DonutChart({
   backgroundColor: string | string[];
   borderColor: string | string[];
   legendPosition?: 'top' | 'bottom';
-  gapX?: string;
   createLegendHTML: (labels: string[], colors: string[], values: number[]) => string;
   tooltipCallback: (data: CreateTooltipLiteralProps<'doughnut'>) => string;
 }) {
@@ -266,14 +257,7 @@ export default function DonutChart({
 
   return (
     <div className="relative flex size-full flex-col">
-      <div
-        ref={legendRef}
-        className={cls(
-          legendPosition === 'bottom' ? 'order-2' : '',
-          gapX,
-          'relative top-0 left-0 flex flex-wrap gap-y-1 text-sm',
-        )}
-      />
+      <div ref={legendRef} className={cls(legendPosition === 'bottom' ? 'order-2' : '')} />
       <div className="-mt-5">
         <Doughnut
           ref={chartRef}

@@ -103,19 +103,19 @@ const tooltip = ({
 
 const createLegendHTML = (labels: string[], colors: string[], values: number[]) => {
   const total = values.reduce((a, b) => a + b, 0);
-  return labels
+  return `<div class="flex flex-wrap gap-y-[6px] gap-x-6 text-sm">${labels
     .map((label, i) => {
       const color = colors[i];
       const percentage = truncateToDecimals((values[i] / total) * 100);
       return `
-      <div data-index="${i}" class="flex items-center gap-1 cursor-pointer group">
+      <div data-index="${i}" class="flex items-center gap-x-1 cursor-pointer group">
         <div class="size-2 rounded-full transition-transform group-hover:scale-[120%]"
           style="background:${color}"/></div>
         <span class="text-[#ccc] font-S-CoreDream-300 group-hover:text-[#eaeaea]">${label} <span style="color: ${color};" class="font-S-CoreDream-500">(${percentage}%)</span></span>
       </div>
     `;
     })
-    .join('');
+    .join('')}</div>`;
 };
 
 export default function BannerEVShareRate({
@@ -123,6 +123,23 @@ export default function BannerEVShareRate({
 }: {
   result: GachaSimulationMergedResult | null;
 }) {
+  const bannerResults =
+    result !== null
+      ? result.perBanner
+          .map(({ bannerGachaRuns, bannerSuccess, name }) => ({
+            data: bannerGachaRuns / bannerSuccess,
+            label: name,
+          }))
+          .sort((a, b) => b.data - a.data)
+      : [];
+  const { data, labels } = bannerResults.reduce<{ data: number[]; labels: string[] }>(
+    (acc, current) => {
+      acc.data.push(current.data);
+      acc.labels.push(current.label);
+      return acc;
+    },
+    { data: [], labels: [] },
+  );
   return (
     <ChartWrapper
       title={
@@ -134,16 +151,13 @@ export default function BannerEVShareRate({
       {result ? (
         <div className="p-4 text-sm">
           <DonutChart
-            data={result.perBanner
-              .map(({ bannerGachaRuns, bannerSuccess }) => bannerGachaRuns / bannerSuccess)
-              .sort((a, b) => b - a)}
-            labels={result.perBanner.map(({ name }) => name)}
+            data={data}
+            labels={labels}
             backgroundColor={colors[Math.ceil(result.perBanner.length / 5) - 1].map(
               (HEX) => HEX + 'CC',
             )}
             borderColor={colors[Math.ceil(result.perBanner.length / 5) - 1].map((HEX) => HEX)}
             legendPosition="top"
-            gapX="gap-x-6"
             createLegendHTML={createLegendHTML}
             tooltipCallback={tooltip}
           />
