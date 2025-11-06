@@ -1,5 +1,6 @@
 'use client';
 
+import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
@@ -7,27 +8,55 @@ import { rarityColor } from '#/constants/ui';
 import { obtainedTypes, rarities } from '#/constants/variables';
 import { cls, truncateToDecimals } from '#/libs/utils';
 import { OperatorRarityForString } from '#/types/types';
-import { TooltipItem } from 'chart.js';
 
-const tooltip = (data: TooltipItem<'doughnut'>, total: number) => {
+const tooltip = ({
+  title,
+  textColor,
+  body,
+  data,
+  total,
+}: CreateTooltipLiteralProps<'doughnut'>) => {
   const stringifiedValue = data?.formattedValue ?? '';
   const parsedRawValue = data.parsed;
   const label = data.label;
   const borderColor = (data.dataset.borderColor as string[])[data.dataIndex];
 
   return /*html*/ `
-    <div class="font-S-CoreDream-400 space-y-[2px] text-sm">
-      <p>
-        ${label} 등장 횟수 :
-        <span style="color: ${borderColor};">${stringifiedValue} 회</span>
-      </p>
-      <p>
-        ${label} 등장 확률 :
-        <span style="color: ${borderColor};">${truncateToDecimals((parsedRawValue / (total ?? 1)) * 100)}%</span>
-      </p>
+    <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 opacity-90 shadow-xl shadow-[#141414]">
+      ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+      ${body
+        .map((b, i) => {
+          return /*html*/ `
+          <div class="font-S-CoreDream-300 space-y-[2px] text-sm">
+            <p>
+              ${label} 등장 횟수 :
+              <span style="color: ${borderColor};">${stringifiedValue} 회</span>
+            </p>
+            <p>
+              ${label} 등장 확률 :
+              <span style="color: ${borderColor};">${truncateToDecimals((parsedRawValue / (total ?? 1)) * 100)}%</span>
+            </p>
+          </div>
+        `;
+        })
+        .join('')}
     </div>
   `;
 };
+
+const createLegendHTML = (labels: string[], colors: string[]) =>
+  labels
+    .map((label, i) => {
+      const color = colors[i];
+      return `
+        <div data-index="${i}" class="flex items-center gap-1 cursor-pointer group">
+          <div class="size-2 rounded-full transition-transform group-hover:scale-[120%]"
+            style="background:${color}"/></div>
+          <span class="text-[#ccc] group-hover:text-[#eaeaea]">${label}</span>
+        </div>
+      `;
+    })
+    .join('');
 
 const RarityResultDetail = ({
   result,
@@ -99,6 +128,7 @@ export default function TotalGachaResult({
             labels={rarityResultData.labels}
             backgroundColor={Object.values(rarityColor).map(({ HEX }) => HEX + 'CC')}
             borderColor={Object.values(rarityColor).map(({ HEX }) => HEX)}
+            createLegendHTML={createLegendHTML}
             tooltipCallback={tooltip}
           />
           <div className="flex flex-col flex-wrap gap-5">

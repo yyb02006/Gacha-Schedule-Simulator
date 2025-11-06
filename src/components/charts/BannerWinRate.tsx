@@ -156,7 +156,7 @@ export default function BannerWinRate({
     <ChartWrapper
       title={
         <span>
-          <span className="text-amber-400">배너별 </span>성공률 흐름
+          배너별 <span className="text-amber-400">성공률 흐름</span>
         </span>
       }
     >

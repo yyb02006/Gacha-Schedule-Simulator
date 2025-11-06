@@ -23,11 +23,11 @@ const createTooltipLiteral = ({
     .map((b, i) => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
           <p>
-            평균 가챠 횟수 : <span style="color: ${textColor};" class="font-S-CoreDream-400">${stringifiedValue} 회</span>
+            성공 시 기대값 : <span style="color: ${textColor};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
           </p>
           <p>
             배너 비중 :
-            <span style="color: ${textColor};" class="font-S-CoreDream-400">
+            <span style="color: ${textColor};" class="font-S-CoreDream-500">
               ${truncateToDecimals((rawValue / total) * 100)}%
             </span>
           </p>
@@ -57,7 +57,7 @@ export default function BannerAverageCounts({
     <ChartWrapper
       title={
         <span>
-          <span className="text-amber-400">배너별</span> 성공 기대값
+          배너별 <span className="text-amber-400">성공 시 기대값</span>
         </span>
       }
     >
