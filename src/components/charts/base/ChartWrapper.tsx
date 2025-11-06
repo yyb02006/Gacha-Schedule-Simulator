@@ -18,7 +18,7 @@ export default function ChartWrapper({
       initial="exit"
       animate="idle"
       exit="exit"
-      className={'w-full rounded-xl'}
+      className="w-full rounded-xl"
     >
       <motion.div
         variants={toOpacityZero}
