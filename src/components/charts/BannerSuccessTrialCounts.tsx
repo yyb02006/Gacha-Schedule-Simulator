@@ -46,14 +46,14 @@ const createTooltipLiteralClosure =
 
 const Legend = ({
   bannerSuccess,
-  bannerGachaRuns,
+  bannerWinGachaRuns,
   pityRewardObtained,
   maxIndex,
   minIndex,
   dispatchRef,
 }: {
   bannerSuccess: number;
-  bannerGachaRuns: number;
+  bannerWinGachaRuns: number;
   pityRewardObtained: number;
   maxIndex: number;
   minIndex: number;
@@ -77,7 +77,7 @@ const Legend = ({
       <div>
         성공 기대값 :{' '}
         <span className="font-S-CoreDream-500 text-amber-500">
-          {truncateToDecimals(bannerGachaRuns / bannerSuccess)}회
+          {truncateToDecimals(bannerWinGachaRuns / bannerSuccess)}회
         </span>
       </div>
       {/* <div>
@@ -105,7 +105,7 @@ const Legend = ({
 export default function BannerSuccessTrialCounts({
   bannerResult: {
     name,
-    bannerGachaRuns,
+    bannerWinGachaRuns,
     bannerSuccess,
     bannerHistogram,
     cumulativeUntilCutoff,
@@ -167,7 +167,7 @@ export default function BannerSuccessTrialCounts({
       }
     >
       <Legend
-        bannerGachaRuns={bannerGachaRuns}
+        bannerWinGachaRuns={bannerWinGachaRuns}
         bannerSuccess={bannerSuccess}
         dispatchRef={dispatchRef}
         maxIndex={maxIndex}

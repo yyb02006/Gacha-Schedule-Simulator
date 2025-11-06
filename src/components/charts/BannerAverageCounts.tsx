@@ -49,8 +49,8 @@ export default function BannerAverageCounts({
   enableBrush?: boolean;
 }) {
   const data = result
-    ? result.perBanner.map(({ bannerGachaRuns, bannerSuccess }) =>
-        truncateToDecimals(bannerGachaRuns / bannerSuccess),
+    ? result.perBanner.map(({ bannerWinGachaRuns, bannerSuccess }) =>
+        truncateToDecimals(bannerWinGachaRuns / bannerSuccess),
       )
     : [];
   return (

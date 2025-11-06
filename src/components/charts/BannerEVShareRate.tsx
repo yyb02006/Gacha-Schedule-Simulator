@@ -126,8 +126,8 @@ export default function BannerEVShareRate({
   const bannerResults =
     result !== null
       ? result.perBanner
-          .map(({ bannerGachaRuns, bannerSuccess, name }) => ({
-            data: bannerGachaRuns / bannerSuccess,
+          .map(({ bannerWinGachaRuns, bannerSuccess, name }) => ({
+            data: bannerWinGachaRuns / bannerSuccess,
             label: name,
           }))
           .sort((a, b) => b.data - a.data)
