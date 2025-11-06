@@ -1,6 +1,7 @@
 'use client';
 
-import { truncateToDecimals } from '#/libs/utils';
+import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import { cls, truncateToDecimals } from '#/libs/utils';
 import { doughnutConnectorPlugin } from '#/plugins/chartJsPlugin';
 import {
   Chart as ChartJS,
@@ -30,13 +31,19 @@ export default function DonutChart({
   data,
   backgroundColor,
   borderColor,
+  legendPosition = 'top',
+  gapX = 'gap-x-4',
+  createLegendHTML,
   tooltipCallback,
 }: {
   labels: string[];
   data: number[];
   backgroundColor: string | string[];
   borderColor: string | string[];
-  tooltipCallback: (data: TooltipItem<'doughnut'>, total: number) => string;
+  legendPosition?: 'top' | 'bottom';
+  gapX?: string;
+  createLegendHTML: (labels: string[], colors: string[], values: number[]) => string;
+  tooltipCallback: (data: CreateTooltipLiteralProps<'doughnut'>) => string;
 }) {
   const chartRef = useRef<ChartJS<'doughnut'>>(null);
   const legendRef = useRef<HTMLDivElement>(null);
@@ -90,23 +97,22 @@ export default function DonutChart({
       rawDataRef.current = [...(dataset.data as number[])];
     }
 
-    // 커스텀 범례 HTML 생성
-    const legendHTML = colors
-      .map((color, i) => {
-        const label = chart.data.labels?.[i];
-        return `
-          <div data-index="${i}" class="flex items-center gap-1 cursor-pointer group">
-            <div class="size-2 rounded-full transition-transform group-hover:scale-[120%]"
-              style="background:${color}"/></div>
-            <span class="text-[#ccc] group-hover:text-[#eaeaea]">${label}</span>
-          </div>
-        `;
-      })
-      .join('');
+    // 데이터 비율 재계산
+    const recalcData = () => {
+      dataset.data = rawDataRef.current.map((v, i) => {
+        return chart.getDataVisibility(i) ? v : 0;
+      });
+    };
 
-    legendEl.innerHTML = legendHTML;
+    const labels = chart.data.labels as string[];
 
-    // 커스텀 범례 HTML 생성
+    if (labels) {
+      // 커스텀 범례 HTML 생성
+      const legendHTML = createLegendHTML(labels, colors, dataset.data);
+      legendEl.innerHTML = legendHTML;
+    }
+
+    // 커스텀 범례 HTML 업데이트
     const updateLegendState = () => {
       legendEl.querySelectorAll('[data-index]').forEach((el) => {
         const index = Number(el.getAttribute('data-index'));
@@ -117,13 +123,6 @@ export default function DonutChart({
         } else {
           el.classList.add('opacity-40'); // 비활성화 시 흐리게
         }
-      });
-    };
-
-    // 데이터 비율 재계산
-    const recalcData = () => {
-      dataset.data = rawDataRef.current.map((v, i) => {
-        return chart.getDataVisibility(i) ? v : 0;
       });
     };
 
@@ -151,7 +150,7 @@ export default function DonutChart({
         el.replaceWith(el.cloneNode(true));
       });
     };
-  }, []);
+  }, [createLegendHTML]);
 
   const options: ChartOptions<'doughnut'> = {
     rotation: 270,
@@ -229,16 +228,13 @@ export default function DonutChart({
           const textColor = (data.dataset.borderColor as string[])[data.dataIndex];
           const total = data.dataset.data.reduce((a, b) => a + b, 0);
 
-          tooltipEl.innerHTML = `
-            <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 shadow-xl shadow-[#141414]">
-              ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
-              ${body
-                .map((b, i) => {
-                  return tooltipCallback(data, total ?? 1);
-                })
-                .join('')}
-            </div>
-          `;
+          tooltipEl.innerHTML = tooltipCallback({
+            title,
+            textColor,
+            body,
+            data,
+            total: total ?? 1,
+          });
         },
       },
       datalabels: {
@@ -269,14 +265,23 @@ export default function DonutChart({
   };
 
   return (
-    <div className="relative size-full">
-      <Doughnut
-        ref={chartRef}
-        data={chartData}
-        options={options}
-        plugins={[doughnutConnectorPlugin()]}
+    <div className="relative flex size-full flex-col">
+      <div
+        ref={legendRef}
+        className={cls(
+          legendPosition === 'bottom' ? 'order-2' : '',
+          gapX,
+          'relative top-0 left-0 flex flex-wrap gap-y-1 text-sm',
+        )}
       />
-      <div ref={legendRef} className="absolute top-0 left-0 flex gap-3 text-sm" />
+      <div className="-mt-5">
+        <Doughnut
+          ref={chartRef}
+          data={chartData}
+          options={options}
+          plugins={[doughnutConnectorPlugin()]}
+        />
+      </div>
     </div>
   );
 }
