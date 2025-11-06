@@ -43,7 +43,6 @@ export default function BrushBarChart({
   const mainChartRef = useRef<ChartJS<'bar', (number | [number, number] | null)[], unknown> | null>(
     null,
   );
-  // const dispatchRef = useRef<Dispatch<SetStateAction<number[]>>>(null);
 
   const cutoffRatio = cutoffIndex !== undefined ? (cutoffIndex + 1) / data.length : 1;
 
@@ -57,17 +56,6 @@ export default function BrushBarChart({
     start: 0,
     end: Math.round((data.length - 1) * initialSelectionEnd) + 1,
   }).current;
-
-  /* const [selection, setSelection] = useState({
-    start: 0,
-    end: initialSelectionEnd,
-  }); */
-
-  /* const startIndex = Math.round((data.length - 1) * selection.start);
-  const endIndex = Math.round((data.length - 1) * selection.end) + 1;
-
-  const filteredLabels = labels.slice(startIndex, endIndex);
-  const filteredData = data.slice(startIndex, endIndex); */
 
   return (
     <div className="relative space-y-1">

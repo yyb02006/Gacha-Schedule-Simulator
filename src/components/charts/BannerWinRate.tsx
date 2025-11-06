@@ -2,11 +2,12 @@
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { ChartType, TooltipItem } from 'chart.js';
+import { ChartType, Point, TooltipItem } from 'chart.js';
 import { truncateToDecimals } from '#/libs/utils';
 import Brush from '#/components/charts/base/Brush';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import LineChart from '#/components/charts/base/LineChart';
+import { Chart as ChartJS } from 'chart.js';
 
 interface BrushLineChartProps {
   labels: string[];
@@ -42,28 +43,30 @@ const BrushLineChart = ({
   brushHeight,
   tooltipCallback,
 }: BrushLineChartProps) => {
+  const mainChartRef = useRef<ChartJS<'line', (number | Point | null)[], unknown> | null>(null);
+
   const cutoffRatio = cutoffIndex !== undefined ? (cutoffIndex + 1) / data.length : 1;
+
   const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
-  const [selection, setSelection] = useState({
+
+  const selection = useRef({
     start: 0,
     end: initialSelectionEnd,
-  });
-
-  const startIndex = Math.round((data.length - 1) * selection.start);
-  const endIndex = Math.round((data.length - 1) * selection.end) + 1;
-
-  const filteredLabels = labels.slice(startIndex, endIndex);
-  const filteredData = data.slice(startIndex, endIndex);
+  }).current;
+  const selectionIndex = useRef({
+    start: 0,
+    end: Math.round((data.length - 1) * initialSelectionEnd) + 1,
+  }).current;
 
   return (
     <div className="relative space-y-1">
       <LineChart
-        labels={filteredLabels}
-        data={filteredData}
+        labels={labels}
+        data={data}
+        mainChartRef={mainChartRef}
+        selectionIndex={selectionIndex}
         colors={barChartColors}
         total={total}
-        startIndex={startIndex}
-        endIndex={endIndex}
         padding={padding}
         enableBrush={enableBrush}
         cutoffIndex={cutoffIndex}
@@ -75,15 +78,16 @@ const BrushLineChart = ({
         <Brush
           labels={labels}
           data={data}
-          colors={brushColor}
+          mainChartRef={mainChartRef}
+          selectionIndex={selectionIndex}
           selection={selection}
-          padding={padding}
+          colors={brushColor}
           cutoffRatio={cutoffRatio}
           cutoffPercentage={cutoffPercentage}
+          padding={padding}
+          height={brushHeight}
           isPercentYAxis={isPercentYAxis}
           total={total}
-          height={brushHeight}
-          setSelection={setSelection}
         />
       )}
     </div>
