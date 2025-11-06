@@ -144,7 +144,7 @@ export default function BannerEVShareRate({
     <ChartWrapper
       title={
         <span>
-          배너별 <span className="text-amber-400">성공 시 가챠 횟수 점유율</span>
+          배너별 <span className="text-amber-400">기대값 점유율</span>
         </span>
       }
     >
