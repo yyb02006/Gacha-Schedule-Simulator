@@ -11,6 +11,7 @@ import { motion } from 'motion/react';
 import CancelButton from '#/components/buttons/CancelButton';
 import BannerSuccessTrialCounts from '#/components/charts/BannerSuccessTrialCounts';
 import { useEffect, useRef, useState } from 'react';
+import BannerEVShareRate from '#/components/charts/BannerEVShareRate';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -56,7 +57,7 @@ function LazyRender({
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="w-full"
+          className="h-full w-full"
         >
           {children}
         </motion.div>
@@ -98,6 +99,9 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           </LazyRender>
           <LazyRender>
             <BannerAverageCount result={result} />
+          </LazyRender>
+          <LazyRender>
+            <BannerEVShareRate result={result} />
           </LazyRender>
         </div>
         <motion.div
