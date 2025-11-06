@@ -101,7 +101,15 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
             <BannerAverageCount result={result} />
           </LazyRender>
           <LazyRender>
-            <BannerEVShareRate result={result} />
+            <BannerEVShareRate
+              result={{
+                ...result,
+                perBanner: result.perBanner.map((bannerResult, index) => ({
+                  ...bannerResult,
+                  name: `${index + 1}. ${bannerResult.name}`,
+                })),
+              }}
+            />
           </LazyRender>
         </div>
         <motion.div
