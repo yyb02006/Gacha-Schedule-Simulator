@@ -177,7 +177,7 @@ export default function LineChart({
         pointHoverRadius: 3,
         pointBackgroundColor: borderColor,
         pointStyle: 'circle',
-        clip: { left: 0, right: 0, top: 50, bottom: 0 },
+        clip: { left: 6, right: 6, top: 50, bottom: 0 },
         fill: true,
         tension: data.length < 100 ? 0.3 : data.length < 200 ? 0.65 : 1,
       },
