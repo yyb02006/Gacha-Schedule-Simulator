@@ -5,6 +5,8 @@ import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { BannerResult, GachaSimulationMergedResult } from '#/components/PickupList';
 import { truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
+import { ChartRef } from '#/components/charts/base/Brush';
 
 const createTooltipLiteral =
   (bannerResults: BannerResult[]) =>
@@ -21,13 +23,13 @@ const createTooltipLiteral =
             진입 시 합성옥 : <span style="color: ${textColor};" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
           </p>
           <p>
-            소모 합성옥 :
+            평균 소모 합성옥 :
             <span style="color: ${textColor};" class="font-S-CoreDream-500">
               ${truncateToDecimals(bannerResults[data.dataIndex].bannerWinGachaRuns / bannerResults[data.dataIndex].bannerSuccess, 0) * 600} 합성옥
             </span>
           </p>
           <p>
-            누적 소모 합성옥 :
+            누적 평균 소모 합성옥 :
             <span style="color: ${textColor};" class="font-S-CoreDream-500">
               ${
                 truncateToDecimals(
@@ -45,6 +47,51 @@ const createTooltipLiteral =
   </div>`;
   };
 
+export interface LegendData<T extends 'bar' | 'line'> {
+  chart: ChartRef<T> | null;
+  selectionIndex: { start: number; end: number } | null;
+}
+
+const Legend = ({
+  result,
+  dispatchRef,
+}: {
+  result: GachaSimulationMergedResult;
+  dispatchRef: RefObject<Dispatch<SetStateAction<LegendData<'bar'>>> | null>;
+}) => {
+  const [legendData, setLegendData] = useState<LegendData<'bar'>>({
+    chart: null,
+    selectionIndex: null,
+  });
+  const { cumulative, remained } = result.perBanner
+    .slice(legendData.selectionIndex?.start, legendData.selectionIndex?.end)
+    .reduce(
+      (a, b) => {
+        a.cumulative += b.additionalResource;
+        a.remained =
+          a.remained +
+          b.additionalResource -
+          truncateToDecimals(b.bannerWinGachaRuns / b.bannerSuccess, 0) * 600;
+        return a;
+      },
+      { cumulative: result.total.initialResource, remained: result.total.initialResource },
+    );
+  useEffect(() => {
+    dispatchRef.current = setLegendData;
+  }, [dispatchRef]);
+  return (
+    <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-sm">
+      <div>
+        평균 누적 합성옥 : <span className="font-S-CoreDream-500 text-red-400">{cumulative}</span>
+      </div>
+      <div>
+        평균 잔여 합성옥 :{' '}
+        <span className="font-S-CoreDream-500 text-red-400">{remained >= 0 ? remained : 0}</span>
+      </div>
+    </div>
+  );
+};
+
 export default function BannerEntryCurrency({
   result,
   chartHeight,
@@ -60,6 +107,7 @@ export default function BannerEntryCurrency({
   const data = result
     ? result.perBanner.map(({ bannerStartingCurrency }) => bannerStartingCurrency)
     : [];
+  const dispatchRef = useRef<Dispatch<SetStateAction<LegendData<'bar'>>>>(null);
   return (
     <ChartWrapper
       title={
@@ -82,13 +130,16 @@ export default function BannerEntryCurrency({
             backgroundColor: '#8e51ffCC',
             borderColor: '#8e51ff',
           }}
+          dispatchRef={dispatchRef}
           total={data.reduce((a, b) => a + b, 0)}
           padding={16}
           enableBrush={enableBrush}
           chartHeight={chartHeight}
           brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteral(result.perBanner)}
-        />
+        >
+          <Legend result={result} dispatchRef={dispatchRef} />
+        </BrushBarChart>
       ) : null}
     </ChartWrapper>
   );
