@@ -82,10 +82,10 @@ const Legend = ({
   return (
     <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-sm">
       <div>
-        평균 누적 합성옥 : <span className="font-S-CoreDream-500 text-red-400">{cumulative}</span>
+        누적 합성옥 : <span className="font-S-CoreDream-500 text-red-400">{cumulative}</span>
       </div>
       <div>
-        평균 잔여 합성옥 :{' '}
+        잔여 합성옥 :{' '}
         <span className="font-S-CoreDream-500 text-red-400">{remained >= 0 ? remained : 0}</span>
       </div>
     </div>
