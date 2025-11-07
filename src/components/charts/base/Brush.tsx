@@ -468,7 +468,7 @@ export default function Brush<T extends PartialChartType>({
       canvas.removeEventListener('pointermove', handleMouseMove);
       canvas.removeEventListener('pointerup', handleMouseUp);
     };
-  }, [dragging, throttledChartUpdate, chartUpdate]);
+  }, [dragging, throttledChartUpdate, chartUpdate, selection]);
 
   return (
     <div className={height || 'h-[86px]'}>
