@@ -40,6 +40,7 @@ interface SimulationResult {
     totalGachaRuns: number;
     pityRewardObtained: number;
     initialResource: number;
+    mode: 'currency' | 'try';
   };
   perBanner: {
     id: string;
@@ -301,6 +302,7 @@ const gachaRateSimulate = ({
       totalGachaRuns: 0,
       pityRewardObtained: 0,
       initialResource,
+      mode: isGachaSim === true ? 'currency' : 'try',
     },
     perBanner: pickupDatas.map(({ id, name }, index) => ({
       id,

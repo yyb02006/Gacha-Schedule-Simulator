@@ -79,6 +79,7 @@ export interface GachaSimulationMergedResult {
     totalGachaRuns: number;
     pityRewardObtained: number;
     initialResource: number;
+    mode: 'currency' | 'try';
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
   };
   perBanner: BannerResult[];
@@ -749,7 +750,6 @@ export default function PickupList() {
         acc.total.simulationSuccess += current.total.simulationSuccess;
         acc.total.totalGachaRuns += current.total.totalGachaRuns;
         acc.total.pityRewardObtained += current.total.pityRewardObtained;
-        acc.total.initialResource = current.total.initialResource;
 
         return acc;
       },
@@ -759,7 +759,8 @@ export default function PickupList() {
           simulationSuccess: 0,
           totalGachaRuns: 0,
           pityRewardObtained: 0,
-          initialResource: 0,
+          initialResource: results[0].total.initialResource,
+          mode: results[0].total.mode,
           statistics: {
             sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
             fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
