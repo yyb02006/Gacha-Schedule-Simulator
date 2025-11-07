@@ -3,10 +3,11 @@
 import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
 import BarChart from '#/components/charts/base/BarChart';
 import Brush from '#/components/charts/base/Brush';
-import { useRef } from 'react';
+import { Dispatch, ReactNode, RefObject, SetStateAction, useRef } from 'react';
 import { Chart as ChartJS } from 'chart.js';
+import { LegendData } from '#/components/charts/BannerEntryCurrency';
 
-interface BrushBarChartProps {
+interface BrushBarChartProps<T extends 'bar' | 'line'> {
   labels: string[];
   data: number[];
   barChartColors: Record<
@@ -14,9 +15,11 @@ interface BrushBarChartProps {
     string | string[]
   >;
   brushColor: Record<'backgroundColor' | 'borderColor', string | string[]>;
+  dispatchRef?: RefObject<Dispatch<SetStateAction<LegendData<T>>> | null>;
   total: number;
   padding: number;
   enableBrush: boolean;
+  children?: ReactNode;
   cutoffIndex?: number;
   cutoffPercentage?: number;
   isPercentYAxis?: boolean;
@@ -30,16 +33,18 @@ export default function BrushBarChart({
   data,
   barChartColors,
   brushColor,
+  dispatchRef,
   total,
   padding,
   enableBrush,
+  children,
   cutoffIndex,
   cutoffPercentage = 100,
   isPercentYAxis = false,
   chartHeight,
   brushHeight,
   tooltipCallback,
-}: BrushBarChartProps) {
+}: BrushBarChartProps<'bar'>) {
   const mainChartRef = useRef<ChartJS<'bar', (number | [number, number] | null)[], unknown> | null>(
     null,
   );
@@ -58,37 +63,41 @@ export default function BrushBarChart({
   }).current;
 
   return (
-    <div className="relative space-y-1">
-      <BarChart
-        labels={labels}
-        data={data}
-        mainChartRef={mainChartRef}
-        selectionIndex={selectionIndex}
-        colors={barChartColors}
-        total={total}
-        padding={padding}
-        enableBrush={enableBrush}
-        cutoffIndex={cutoffIndex}
-        isPercentYAxis={isPercentYAxis}
-        height={chartHeight}
-        tooltipCallback={tooltipCallback}
-      />
-      {enableBrush && (
-        <Brush
+    <>
+      {children}
+      <div className="relative space-y-1">
+        <BarChart
           labels={labels}
           data={data}
           mainChartRef={mainChartRef}
           selectionIndex={selectionIndex}
-          selection={selection}
-          colors={brushColor}
-          cutoffRatio={cutoffRatio}
-          cutoffPercentage={cutoffPercentage}
-          padding={padding}
-          height={brushHeight}
-          isPercentYAxis={isPercentYAxis}
+          colors={barChartColors}
           total={total}
+          padding={padding}
+          enableBrush={enableBrush}
+          cutoffIndex={cutoffIndex}
+          isPercentYAxis={isPercentYAxis}
+          height={chartHeight}
+          tooltipCallback={tooltipCallback}
         />
-      )}
-    </div>
+        {enableBrush && (
+          <Brush
+            labels={labels}
+            data={data}
+            mainChartRef={mainChartRef}
+            selectionIndex={selectionIndex}
+            selection={selection}
+            dispatchRef={dispatchRef}
+            colors={brushColor}
+            cutoffRatio={cutoffRatio}
+            cutoffPercentage={cutoffPercentage}
+            padding={padding}
+            height={brushHeight}
+            isPercentYAxis={isPercentYAxis}
+            total={total}
+          />
+        )}
+      </div>
+    </>
   );
 }
