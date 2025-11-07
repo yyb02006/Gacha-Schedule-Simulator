@@ -42,7 +42,7 @@ const tooltip = ({
 };
 
 const createLegendHTML = (labels: string[], colors: string[]) =>
-  labels
+  `<div class="flex flex-wrap gap-y-[6px] gap-x-4 text-sm">${labels
     .map((label, i) => {
       const color = colors[i];
       return `
@@ -53,7 +53,7 @@ const createLegendHTML = (labels: string[], colors: string[]) =>
         </div>
       `;
     })
-    .join('');
+    .join('')}</div>`;
 
 export default function SimulationResult({
   result,
