@@ -132,12 +132,12 @@ const createTooltipLiteral = ({
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
           <p>
             배너 성공률 :
-            <span style="color: ${textColor};" class="font-S-CoreDream-400">
+            <span style="color: ${textColor};" class="font-S-CoreDream-500">
               ${truncateToDecimals((parsedRawValue / total) * 100)}%
             </span>
           </p>
           <p>
-            배너 성공 횟수 :<span style="color: ${textColor};" class="font-S-CoreDream-400">${stringifiedValue} 회</span>
+            배너 성공 횟수 : <span style="color: ${textColor};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
           </p>
         </div>`;
     })
