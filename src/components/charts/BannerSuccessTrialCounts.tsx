@@ -8,6 +8,7 @@ import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from
 import Brush from '#/components/charts/base/Brush';
 import BarChart from '#/components/charts/base/BarChart';
 import { Chart as ChartJS } from 'chart.js';
+import { LegendData } from '#/components/charts/BannerEntryCurrency';
 
 const createTooltipLiteralClosure =
   (originalHistogram: number[]) =>
@@ -45,6 +46,8 @@ const createTooltipLiteralClosure =
   };
 
 const Legend = ({
+  data,
+  labels,
   bannerSuccess,
   bannerWinGachaRuns,
   pityRewardObtained,
@@ -52,16 +55,22 @@ const Legend = ({
   minIndex,
   dispatchRef,
 }: {
+  data: number[];
+  labels: string[];
   bannerSuccess: number;
   bannerWinGachaRuns: number;
   pityRewardObtained: number;
   maxIndex: number;
   minIndex: number;
-  dispatchRef: RefObject<Dispatch<SetStateAction<number[]>> | null>;
+  dispatchRef: RefObject<Dispatch<SetStateAction<LegendData<'bar'>>> | null>;
 }) => {
-  const [filteredData, setFilteredData] = useState<number[]>([]);
+  const [legendData, setLegendData] = useState<LegendData<'bar'>>({
+    chart: null,
+    selectionIndex: null,
+  });
+  const filteredData = data.slice(legendData.selectionIndex?.start, legendData.selectionIndex?.end);
   useEffect(() => {
-    dispatchRef.current = setFilteredData;
+    dispatchRef.current = setLegendData;
   }, [dispatchRef]);
   return (
     <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-[13px]">
@@ -133,7 +142,7 @@ export default function BannerSuccessTrialCounts({
   const mainChartRef = useRef<ChartJS<'bar', (number | [number, number] | null)[], unknown> | null>(
     null,
   );
-  const dispatchRef = useRef<Dispatch<SetStateAction<number[]>>>(null);
+  const dispatchRef = useRef<Dispatch<SetStateAction<LegendData<'bar'>>>>(null);
 
   const cutoffRatio =
     successIndexUntilCutoff !== undefined
@@ -167,6 +176,8 @@ export default function BannerSuccessTrialCounts({
       }
     >
       <Legend
+        data={data}
+        labels={labels}
         bannerWinGachaRuns={bannerWinGachaRuns}
         bannerSuccess={bannerSuccess}
         dispatchRef={dispatchRef}
