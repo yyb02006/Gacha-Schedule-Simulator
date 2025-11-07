@@ -171,8 +171,8 @@ export default function BannerWinRate({
           barChartColors={{
             backgroundColor: '#fe9a0099',
             borderColor: '#fe9a00',
-            hoverBackgroundColor: '#8e51ffCC',
-            hoverBorderColor: '#8e51ff',
+            hoverBackgroundColor: '#ff3f42cc',
+            hoverBorderColor: '#ff3f42',
           }}
           brushColor={{
             backgroundColor: '#8e51ffCC',
