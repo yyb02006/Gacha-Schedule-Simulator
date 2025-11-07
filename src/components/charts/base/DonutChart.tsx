@@ -1,7 +1,7 @@
 'use client';
 
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
-import { cls, truncateToDecimals } from '#/libs/utils';
+import { truncateToDecimals } from '#/libs/utils';
 import { doughnutConnectorPlugin } from '#/plugins/chartJsPlugin';
 import { Chart as ChartJS, ArcElement, Tooltip, ChartData, ChartOptions } from 'chart.js';
 import ChartDataLabels, { Context } from 'chartjs-plugin-datalabels';
@@ -38,8 +38,8 @@ export default function DonutChart({
 }) {
   const chartRef = useRef<ChartJS<'doughnut'>>(null);
   const legendRef = useRef<HTMLDivElement>(null);
-  const lastChartId = useRef<string | null>(null);
   const rawDataRef = useRef<number[]>([]);
+  const lastChartId = useRef<string | null>(null);
   const chartData: ChartData<'doughnut'> = {
     labels,
     datasets: [
@@ -71,6 +71,7 @@ export default function DonutChart({
     if (!chart || !legendEl) return;
 
     const dataset = chart.data.datasets[0];
+    const data = dataset.data as number[];
     const bg = dataset.borderColor;
 
     let colors: string[] = [];
@@ -85,7 +86,7 @@ export default function DonutChart({
 
     // 원본 데이터 저장 (비율 재계산용)
     if (!rawDataRef.current.length) {
-      rawDataRef.current = [...(dataset.data as number[])];
+      rawDataRef.current = [...data];
     }
 
     // 데이터 비율 재계산
@@ -99,7 +100,7 @@ export default function DonutChart({
 
     if (labels) {
       // 커스텀 범례 HTML 생성
-      const legendHTML = createLegendHTML(labels, colors, dataset.data);
+      const legendHTML = createLegendHTML(labels, colors, data);
       legendEl.innerHTML = legendHTML;
     }
 
@@ -123,8 +124,8 @@ export default function DonutChart({
       el.addEventListener('click', () => {
         const index = Number(el.getAttribute('data-index'));
         const isCurrentDataVisible = chart.getDataVisibility(index);
-        const total = dataset.data.reduce((a, b) => a + b, 0);
-        const currentData = dataset.data[index];
+        const total = data.reduce((a, b) => a + b, 0);
+        const currentData = data[index];
 
         if (currentData === total && isCurrentDataVisible) return;
 
@@ -257,7 +258,7 @@ export default function DonutChart({
 
   return (
     <div className="relative flex size-full flex-col">
-      <div ref={legendRef} className={cls(legendPosition === 'bottom' ? 'order-2' : '')} />
+      <div ref={legendRef} className={legendPosition === 'bottom' ? 'order-2' : ''} />
       <div className="-mt-5">
         <Doughnut
           ref={chartRef}
