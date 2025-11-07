@@ -5,7 +5,7 @@ import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { ChartType, Point, TooltipItem } from 'chart.js';
 import { truncateToDecimals } from '#/libs/utils';
 import Brush from '#/components/charts/base/Brush';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import LineChart from '#/components/charts/base/LineChart';
 import { Chart as ChartJS } from 'chart.js';
 
