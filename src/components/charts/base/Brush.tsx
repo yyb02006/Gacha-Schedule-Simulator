@@ -1,5 +1,6 @@
 'use client';
 
+import { LegendData } from '#/components/charts/BannerEntryCurrency';
 import { truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
@@ -221,7 +222,11 @@ type ChartDataType<T extends 'bar' | 'line'> = T extends 'bar'
   ? (number | [number, number] | null)[]
   : (number | Point | null)[];
 
-type ChartRef<T extends 'bar' | 'line'> = RefObject<ChartJS<T, ChartDataType<T>, unknown> | null>;
+export type ChartRef<T extends 'bar' | 'line'> = RefObject<ChartJS<
+  T,
+  ChartDataType<T>,
+  unknown
+> | null>;
 
 interface BaseBrushProps<T extends PartialChartType> {
   labels: string[];
@@ -240,7 +245,7 @@ interface BaseBrushProps<T extends PartialChartType> {
   cutoffRatio: number;
   cutoffPercentage: number;
   height?: string;
-  dispatchRef?: RefObject<Dispatch<SetStateAction<number[]>> | null>;
+  dispatchRef?: RefObject<Dispatch<SetStateAction<LegendData<T>>> | null>;
 }
 
 // isPercentYAxis 없으면 값은 undefined고 without으로 확정되기 때문에 total은 선택형이 됨
@@ -300,7 +305,7 @@ export default function Brush<T extends PartialChartType>({
       mainChartRef.current.update();
 
       if (dispatchRef?.current) {
-        dispatchRef.current(data.slice(selectionIndex.start, selectionIndex.end));
+        dispatchRef.current({ chart: mainChartRef, selectionIndex });
       }
     }
   }).current;
@@ -322,7 +327,7 @@ export default function Brush<T extends PartialChartType>({
       }
 
       if (dispatchRef?.current) {
-        dispatchRef.current(data.slice(selectionIndex.start, selectionIndex.end));
+        dispatchRef.current({ chart: mainChartRef, selectionIndex });
       }
     }, 100),
   ).current;
