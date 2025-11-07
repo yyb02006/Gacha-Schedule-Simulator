@@ -12,6 +12,7 @@ import CancelButton from '#/components/buttons/CancelButton';
 import BannerSuccessTrialCounts from '#/components/charts/BannerSuccessTrialCounts';
 import { useEffect, useRef, useState } from 'react';
 import BannerEVShareRate from '#/components/charts/BannerEVShareRate';
+import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -95,7 +96,10 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
             <TotalGachaResult result={result} />
           </LazyRender>
           <LazyRender>
-            <BannerWinRate result={result} />
+            <BannerWinRate result={result} chartHeight="h-[400px]" />
+          </LazyRender>
+          <LazyRender>
+            <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
           </LazyRender>
           <LazyRender>
             <BannerAverageCount result={result} />
