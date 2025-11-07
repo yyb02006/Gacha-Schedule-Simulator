@@ -264,6 +264,7 @@ export default function BarChart({
         },
         border: { color: '#3c3c3c', dash: [4, 4] },
         beginAtZero: true,
+        max: isPercentYAxis ? total : undefined,
         ticks: {
           maxTicksLimit: 6,
           font: { family: 'S-CoreDream-300', size: 12 },
