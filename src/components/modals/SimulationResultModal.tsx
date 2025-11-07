@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from 'react';
 import BannerEVShareRate from '#/components/charts/BannerEVShareRate';
 import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
 import BannerPreEVSuccess from '#/components/charts/BannerBannerPreEVSuccess';
+import ExpectedCumulativeConsumption from '#/components/charts/ExpectedCumulativeConsumption';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -99,14 +100,20 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <LazyRender>
             <BannerWinRate result={result} chartHeight="h-[400px]" />
           </LazyRender>
+          {result.total.mode === 'try' ? (
+            <LazyRender>
+              <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
+            </LazyRender>
+          ) : (
+            <LazyRender>
+              <ExpectedCumulativeConsumption result={result} chartHeight="h-[400px]" />
+            </LazyRender>
+          )}
           <LazyRender>
-            <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
+            <BannerAverageCount result={result} chartHeight="h-[400px]" />
           </LazyRender>
           <LazyRender>
-            <BannerAverageCount result={result} />
-          </LazyRender>
-          <LazyRender>
-            <BannerPreEVSuccess result={result} />
+            <BannerPreEVSuccess result={result} chartHeight="h-[400px]" />
           </LazyRender>
           <LazyRender>
             <BannerEVShareRate
