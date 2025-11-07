@@ -13,6 +13,7 @@ import BannerSuccessTrialCounts from '#/components/charts/BannerSuccessTrialCoun
 import { useEffect, useRef, useState } from 'react';
 import BannerEVShareRate from '#/components/charts/BannerEVShareRate';
 import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
+import BannerPreEVSuccess from '#/components/charts/BannerBannerPreEVSuccess';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -103,6 +104,9 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           </LazyRender>
           <LazyRender>
             <BannerAverageCount result={result} />
+          </LazyRender>
+          <LazyRender>
+            <BannerPreEVSuccess result={result} />
           </LazyRender>
           <LazyRender>
             <BannerEVShareRate
