@@ -53,7 +53,7 @@ const createTooltipLiteral = ({
 
 const Legend = () => {
   return (
-    <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-sm">
+    <div className="font-S-CoreDream-300 flex flex-wrap gap-4 px-4 text-sm">
       <div className="flex items-center gap-x-1 text-sm">
         <div className="size-2 rounded-full bg-[#51a2ff]" />
         도달 성공 확률
