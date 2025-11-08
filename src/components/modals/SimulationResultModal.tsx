@@ -100,7 +100,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <LazyRender>
             <BannerWinRate result={result} chartHeight="h-[400px]" />
           </LazyRender>
-          {result.total.mode === 'try' ? (
+          {result.total.gachaMode === 'try' ? (
             <LazyRender>
               <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
             </LazyRender>

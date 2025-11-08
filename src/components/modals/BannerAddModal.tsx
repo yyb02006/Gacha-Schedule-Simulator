@@ -110,7 +110,7 @@ const reducer = (
               pickupOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
               targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
             }
-          : gachaType === 'revival' || gachaType === 'collab'
+          : gachaType === 'rotation' || gachaType === 'collab'
             ? {
                 pickupOpersCount: { sixth: 1, fourth: 0, fifth: 0 },
                 targetOpersCount: { sixth: 1, fourth: 0, fifth: 0 },

@@ -144,24 +144,24 @@ export default function SimulatorOptionModal({
           </div>
           <div className="flex flex-col gap-y-3">
             <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-              재화 소모 시뮬레이션 실패/성공 기준
+              N회차 시뮬레이션 중 배너 실패 시 동작
             </motion.div>
             <ToggleButton
-              isLeft={localOptions.winCondition === 'scheduleComplete'}
+              isLeft={localOptions.bannerFailureAction === 'continueExecution'}
               onToggle={(isLeft?: boolean) => {
                 setLocalOptions((p) => ({
                   ...p,
-                  winCondition:
+                  bannerFailureAction:
                     isLeft === undefined
-                      ? p.winCondition === 'scheduleComplete'
-                        ? 'allSuccess'
-                        : 'scheduleComplete'
+                      ? p.bannerFailureAction === 'continueExecution'
+                        ? 'interruption'
+                        : 'continueExecution'
                       : isLeft
-                        ? 'scheduleComplete'
-                        : 'allSuccess',
+                        ? 'continueExecution'
+                        : 'interruption',
                 }));
               }}
-              labels={{ left: '일정 소화 완료시', right: '모든 배너 성공시' }}
+              labels={{ left: '끝까지 진행', right: '해당 회차 중단' }}
               className="h-[36px]"
             />
           </div>
