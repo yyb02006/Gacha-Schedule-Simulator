@@ -65,6 +65,7 @@ export interface BannerResult {
   pityRewardObtained: number;
   bannerHistogram: number[];
   actualEntryCount: number;
+  interruptionCount: number | null;
   bannerStartingCurrency: number;
   additionalResource: number;
   currencyShortageFailure: number;
@@ -81,7 +82,7 @@ export interface GachaSimulationMergedResult {
     totalGachaRuns: number;
     pityRewardObtained: number;
     initialResource: number;
-    mode: 'currency' | 'try';
+    gachaMode: 'currency' | 'try';
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
   };
   perBanner: BannerResult[];
@@ -611,10 +612,12 @@ export type InitialInputs = {
   initialResource: number;
 };
 
+export type BannerFailureAction = 'interruption' | 'continueExecution';
+
 export type SimulationOptions = {
   probability: { limited: number; normal: number };
   simulationTry: number;
-  winCondition: 'allSuccess' | 'scheduleComplete';
+  bannerFailureAction: BannerFailureAction;
   showBannerImage: boolean;
 };
 
@@ -625,7 +628,7 @@ export default function PickupList() {
   const [options, setOptions] = useState<SimulationOptions>({
     probability: { limited: 70, normal: 50 },
     simulationTry: 10000,
-    winCondition: 'scheduleComplete',
+    bannerFailureAction: 'continueExecution',
     showBannerImage: true,
   });
   const initialInputs = useRef<InitialInputs>({
@@ -653,7 +656,7 @@ export default function PickupList() {
     setIsRunning(true);
     const workers: Worker[] = [];
     const promises: Promise<GachaSimulationMergedResult>[] = [];
-    const { simulationTry, probability, showBannerImage, winCondition } = options;
+    const { simulationTry, probability, showBannerImage, bannerFailureAction } = options;
     const {
       current: { gachaGoal, initialResource },
     } = initialInputs;
@@ -675,7 +678,7 @@ export default function PickupList() {
             simulationTry: index === 0 ? base + remainder : base,
             probability,
             showBannerImage,
-            winCondition,
+            bannerFailureAction,
           },
         },
       };
@@ -715,6 +718,7 @@ export default function PickupList() {
             additionalResource,
             currencyShortageFailure,
             maxAttemptsFailure,
+            interruptionCount,
           } = currentBanner;
           current.total.totalGachaRuns += bannerTotalGachaRuns;
           if (acc.perBanner[index]) {
@@ -726,6 +730,9 @@ export default function PickupList() {
             acc.perBanner[index].bannerStartingCurrency += bannerStartingCurrency;
             acc.perBanner[index].currencyShortageFailure += currencyShortageFailure;
             acc.perBanner[index].maxAttemptsFailure += maxAttemptsFailure;
+            if (acc.perBanner[index].interruptionCount !== null && interruptionCount !== null) {
+              acc.perBanner[index].interruptionCount += interruptionCount;
+            }
             acc.perBanner[index].additionalResource = additionalResource;
             for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
               const a = acc.perBanner[index].bannerHistogram[i] ?? 0;
@@ -766,7 +773,7 @@ export default function PickupList() {
           totalGachaRuns: 0,
           pityRewardObtained: 0,
           initialResource: results[0].total.initialResource,
-          mode: results[0].total.mode,
+          gachaMode: results[0].total.gachaMode,
           statistics: {
             sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
             fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
