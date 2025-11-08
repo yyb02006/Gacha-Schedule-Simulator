@@ -37,13 +37,13 @@ const createTooltipLiteral = ({
     .map((b, i) => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
           <p>
-            ${datasets[i].dataset.label}${datasets[i].dataset.label === '성공' ? '률' : ' 실패율'} :
+            ${datasets[i].dataset.label} 확률 :
             <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">
               ${truncateToDecimals(((datasets[i].parsed.y !== null ? datasets[i].parsed.y : total) / total) * 100)}%
             </span>
           </p>
           <p>
-            실패 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
+            ${datasets[i].dataset.label} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
           </p>
         </div>`;
     })
@@ -56,21 +56,17 @@ const Legend = () => {
     <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-sm">
       <div className="flex items-center gap-x-1 text-sm">
         <div className="size-2 rounded-full bg-[#51a2ff]" />
-        성공률
+        도달 성공 확률
       </div>
       <div className="flex items-center gap-x-1 text-sm">
         <div className="size-2 rounded-full bg-[#fe9a00]" />
-        재화부족 실패율
-      </div>
-      <div className="flex items-center gap-x-1 text-sm">
-        <div className="size-2 rounded-full bg-[#ff5e5e]" />
-        횟수부족 실패율
+        일정 중단 확률
       </div>
     </div>
   );
 };
 
-export default function BannerWinRate({
+export default function GachaSurvivalProbability({
   result,
   chartHeight,
   brushHeight,
@@ -111,18 +107,18 @@ export default function BannerWinRate({
         color: {
           backgroundColor: '#ff5e5ecc',
           borderColor: '#ff5e5e',
-          hoverBackgroundColor: '#f53939cc',
-          hoverBorderColor: '#f53939',
+          hoverBackgroundColor: '#ef4444cc',
+          hoverBorderColor: '#ef4444',
         },
       },
       {
-        label: '횟수부족',
+        label: '한계도달',
         data: datas.bar[1],
         color: {
           backgroundColor: '#fe9a00cc',
           borderColor: '#fe9a00',
-          hoverBackgroundColor: '#d86c00cc',
-          hoverBorderColor: '#d86c00',
+          hoverBackgroundColor: '#e17100cc',
+          hoverBorderColor: '#e17100',
         },
       },
     ],
@@ -133,8 +129,8 @@ export default function BannerWinRate({
         color: {
           backgroundColor: '#51a2ffcc',
           borderColor: '#51a2ff',
-          hoverBackgroundColor: '#024ef3cc',
-          hoverBorderColor: '#024ef3',
+          hoverBackgroundColor: '#155dfccc',
+          hoverBorderColor: '#155dfc',
         },
       },
     ],
@@ -143,40 +139,31 @@ export default function BannerWinRate({
     <ChartWrapper
       title={
         <span>
-          배너별 <span className="text-amber-400">성공 / 실패 비율</span>
+          가챠일정 중 <span className="text-amber-400">도착 / 중단 확률</span>
         </span>
       }
     >
       {result ? (
         <BrushBarLineChart
           labels={labels}
-          primaryData={[6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500]}
+          primaryData={[10000, 9220, 8600, 8500, 7700, 6200, 4300, 3600, 2700, 2000, 1300]}
           fullDatas={{
-            line: [],
-            bar: [
+            line: [
               {
-                data: [6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500],
-                label: '성공',
+                data: [10000, 9220, 8600, 8500, 7700, 6200, 4300, 3600, 2700, 2000, 1300],
+                label: '도달 성공',
                 color: {
                   backgroundColor: '#51a2ffcc',
                   borderColor: '#51a2ff',
-                  hoverBackgroundColor: '#2b7fffcc',
-                  hoverBorderColor: '#2b7fff',
+                  hoverBackgroundColor: '#fe9a00ccc',
+                  hoverBorderColor: '#fe9a00',
                 },
               },
+            ],
+            bar: [
               {
-                data: [2000, 600, 300, 5000, 1000, 6000, 5000, 500, 0, 2600, 1000],
-                label: '재화부족',
-                color: {
-                  backgroundColor: '#ff5e5ecc',
-                  borderColor: '#ff5e5e',
-                  hoverBackgroundColor: '#ef4444cc',
-                  hoverBorderColor: '#ef4444',
-                },
-              },
-              {
-                data: [1300, 200, 4100, 1900, 300, 2400, 2200, 500, 0, 3000, 500],
-                label: '횟수부족',
+                data: [780, 620, 100, 800, 1500, 1900, 700, 900, 700, 700, 0],
+                label: '일정 중단',
                 color: {
                   backgroundColor: '#fe9a00cc',
                   borderColor: '#fe9a00',
