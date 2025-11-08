@@ -336,6 +336,8 @@ const gachaRateSimulate = ({
     let singleSimulationSuccessCount = 0;
     for (let di = 0; di < pickupDatas.length; di++) {
       const currentBanner = simulationResult.perBanner[di];
+      // 일단 입장 카운트 박고 시작
+      currentBanner.actualEntryCount++;
       const {
         id,
         additionalResource,
@@ -455,10 +457,6 @@ const gachaRateSimulate = ({
           }
           result.bannerGachaRuns = i + 1;
           simulationConfig.orundum -= 600;
-        }
-        if (i === 0) {
-          // 배너 실제 진입 시 카운트 증가
-          currentBanner.actualEntryCount++;
         }
         if (currentBanner.bannerHistogram[i] === undefined) {
           // 히스토그램의 현재 가챠횟수가 undefined라면 0 삽입
