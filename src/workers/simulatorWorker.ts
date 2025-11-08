@@ -51,7 +51,6 @@ interface SimulationResult {
     bannerHistogram: number[];
     pityRewardObtained: number;
     actualEntryCount: number;
-    interruptionCount: number | null;
     bannerStartingCurrency: number;
     additionalResource: number;
     currencyShortageFailure: number;
@@ -321,7 +320,6 @@ const gachaRateSimulate = ({
       bannerHistogram: [],
       pityRewardObtained: 0,
       actualEntryCount: 0,
-      interruptionCount: bannerFailureAction === 'interruption' ? 0 : null,
       bannerStartingCurrency: 0,
       currencyShortageFailure: 0,
       maxAttemptsFailure: 0,
@@ -753,8 +751,7 @@ const gachaRateSimulate = ({
         }
       }
       // 중단 옵션 활성화 시 이번 시뮬레이션 순회 종료
-      if (!result.success && currentBanner.interruptionCount !== null) {
-        currentBanner.interruptionCount++;
+      if (!result.success && bannerFailureAction === 'interruption') {
         break;
       }
     }
