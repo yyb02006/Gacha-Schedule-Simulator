@@ -67,6 +67,8 @@ export interface BannerResult {
   actualEntryCount: number;
   bannerStartingCurrency: number;
   additionalResource: number;
+  currencyShortageFailure: number;
+  maxAttemptsFailure: number;
   sixth: ObtainedStatistics;
   fifth: ObtainedStatistics;
   fourth: ObtainedStatistics;
@@ -711,6 +713,8 @@ export default function PickupList() {
             actualEntryCount,
             bannerStartingCurrency,
             additionalResource,
+            currencyShortageFailure,
+            maxAttemptsFailure,
           } = currentBanner;
           current.total.totalGachaRuns += bannerTotalGachaRuns;
           if (acc.perBanner[index]) {
@@ -720,6 +724,8 @@ export default function PickupList() {
             acc.perBanner[index].pityRewardObtained += pityRewardObtained;
             acc.perBanner[index].actualEntryCount += actualEntryCount;
             acc.perBanner[index].bannerStartingCurrency += bannerStartingCurrency;
+            acc.perBanner[index].currencyShortageFailure += currencyShortageFailure;
+            acc.perBanner[index].maxAttemptsFailure += maxAttemptsFailure;
             acc.perBanner[index].additionalResource = additionalResource;
             for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
               const a = acc.perBanner[index].bannerHistogram[i] ?? 0;

@@ -53,6 +53,8 @@ interface SimulationResult {
     actualEntryCount: number;
     bannerStartingCurrency: number;
     additionalResource: number;
+    currencyShortageFailure: number;
+    maxAttemptsFailure: number;
     sixth: { totalObtained: number; pickupObtained: number; targetObtained: number };
     fifth: { totalObtained: number; pickupObtained: number; targetObtained: number };
     fourth: { totalObtained: number; pickupObtained: number; targetObtained: number };
@@ -85,6 +87,7 @@ interface BannerResult {
   statistics: Record<OperatorRarityForString, Statistics>;
   bannerGachaRuns: number;
   isPityRewardObtained: boolean;
+  failure: 'currency' | 'limit' | null;
 }
 
 interface SuccessCount {
@@ -314,6 +317,8 @@ const gachaRateSimulate = ({
       pityRewardObtained: 0,
       actualEntryCount: 0,
       bannerStartingCurrency: 0,
+      currencyShortageFailure: 0,
+      maxAttemptsFailure: 0,
       additionalResource:
         pickupDatas[index].additionalResource[isSimpleMode ? 'simpleMode' : 'extendedMode'],
       sixth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
@@ -423,6 +428,7 @@ const gachaRateSimulate = ({
         statistics: { sixth: makeStatistics(), fifth: makeStatistics(), fourth: makeStatistics() },
         bannerGachaRuns: 0,
         isPityRewardObtained: false,
+        failure: null,
       };
       const pityRewardOperator = result.operators.sixth[0];
       const successCount: SuccessCount = { sixth: 0, fifth: 0, fourth: 0 };
@@ -430,7 +436,10 @@ const gachaRateSimulate = ({
       for (let i = 0; i < gachaAttemptsLimit; i++) {
         if (!isGachaSim) {
           // 재화 다 떨어지면 가챠 중지
-          if (simulationConfig.orundum < 600) break;
+          if (simulationConfig.orundum < 600) {
+            result.failure = 'currency';
+            break;
+          }
           result.bannerGachaRuns = i + 1;
           simulationConfig.orundum -= 600;
         }
@@ -704,6 +713,7 @@ const gachaRateSimulate = ({
         } else if (i + 1 === gachaAttemptsLimit) {
           // 조건 완료하지 못한 채 최대값 달성 시 가챠 중지
           result.bannerGachaRuns = i + 1;
+          result.failure = 'limit';
           break;
         }
       }
@@ -713,6 +723,10 @@ const gachaRateSimulate = ({
         simulationResult.perBanner[di].bannerSuccess++;
         simulationResult.perBanner[di].bannerWinGachaRuns += result.bannerGachaRuns;
         singleSimulationSuccessCount++;
+      } else if (result.failure === 'currency') {
+        simulationResult.perBanner[di].currencyShortageFailure++;
+      } else if (result.failure === 'limit') {
+        simulationResult.perBanner[di].maxAttemptsFailure++;
       }
       if (result.isPityRewardObtained) {
         simulationResult.perBanner[di].pityRewardObtained++;
