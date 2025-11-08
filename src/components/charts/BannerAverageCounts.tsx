@@ -8,26 +8,26 @@ import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 
 const createTooltipLiteral = ({
   title,
-  textColor,
+  textColors,
   body,
-  data,
+  datasets,
   total,
 }: CreateTooltipLiteralProps<'bar'>) => {
-  const stringifiedValue = data?.formattedValue ?? '';
-  const rawValue = data.raw as number;
+  const stringifiedValue = datasets[0].formattedValue ?? '';
+  const rawValue = datasets[0].raw as number;
 
   return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
-  ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+  ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
     .map((b, i) => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
           <p>
-            성공 시 기대값 : <span style="color: ${textColor};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
+            성공 시 기대값 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
           </p>
           <p>
             배너 비중 :
-            <span style="color: ${textColor};" class="font-S-CoreDream-500">
+            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
               ${truncateToDecimals((rawValue / total) * 100)}%
             </span>
           </p>

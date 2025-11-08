@@ -9,21 +9,21 @@ import { obtainedTypes, rarities } from '#/constants/variables';
 import { cls, truncateToDecimals } from '#/libs/utils';
 import { OperatorRarityForString } from '#/types/types';
 
-const tooltip = ({
+const createTooltipLiteral = ({
   title,
-  textColor,
+  textColors,
   body,
-  data,
+  datasets,
   total,
 }: CreateTooltipLiteralProps<'doughnut'>) => {
-  const stringifiedValue = data?.formattedValue ?? '';
-  const parsedRawValue = data.parsed;
-  const label = data.label;
-  const borderColor = (data.dataset.borderColor as string[])[data.dataIndex];
+  const stringifiedValue = datasets[0].formattedValue ?? '';
+  const parsedRawValue = datasets[0].parsed;
+  const label = datasets[0].label;
+  const borderColor = (datasets[0].dataset.borderColor as string[])[datasets[0].dataIndex];
 
   return /*html*/ `
     <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 opacity-90 shadow-xl shadow-[#141414]">
-      ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+      ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
       ${body
         .map((b, i) => {
           return /*html*/ `
@@ -129,7 +129,7 @@ export default function TotalGachaResult({
             backgroundColor={Object.values(rarityColor).map(({ HEX }) => HEX + 'CC')}
             borderColor={Object.values(rarityColor).map(({ HEX }) => HEX)}
             createLegendHTML={createLegendHTML}
-            tooltipCallback={tooltip}
+            tooltipCallback={createTooltipLiteral}
           />
           <div className="flex flex-col flex-wrap gap-5">
             <div className="flex flex-1 flex-wrap gap-4">

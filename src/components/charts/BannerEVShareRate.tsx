@@ -67,20 +67,20 @@ const colors = [
   ],
 ];
 
-const tooltip = ({
+const createTooltipLiteral = ({
   title,
-  textColor,
+  textColors,
   body,
-  data,
+  datasets,
   total,
 }: CreateTooltipLiteralProps<'doughnut'>) => {
-  const stringifiedValue = data?.formattedValue ?? '';
-  const parsedRawValue = data.parsed;
-  const borderColor = (data.dataset.borderColor as string[])[data.dataIndex];
+  const stringifiedValue = datasets[0].formattedValue ?? '';
+  const parsedRawValue = datasets[0].parsed;
+  const borderColor = (datasets[0].dataset.borderColor as string[])[datasets[0].dataIndex];
 
   return /*html*/ `
     <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 opacity-90 shadow-xl shadow-[#141414]">
-      ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+      ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
       ${body
         .map((b, i) => {
           return /*html*/ `
@@ -159,7 +159,7 @@ export default function BannerEVShareRate({
             borderColor={colors[Math.ceil(result.perBanner.length / 5) - 1].map((HEX) => HEX)}
             legendPosition="top"
             createLegendHTML={createLegendHTML}
-            tooltipCallback={tooltip}
+            tooltipCallback={createTooltipLiteral}
           />
         </div>
       ) : null}

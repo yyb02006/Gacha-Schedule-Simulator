@@ -4,52 +4,46 @@ import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { ChartType, TooltipItem } from 'chart.js';
 import { truncateToDecimals } from '#/libs/utils';
-import BrushLineChart from '#/components/charts/base/BrushLineChart';
+import BrushBarLineChart from '#/components/charts/base/BrushBarLineChart';
+import { BarLineChartData } from '#/components/charts/base/BarLineChart';
 
 export interface CreateTooltipLiteralProps<T extends ChartType> {
   title: string[];
-  textColor: string;
+  textColors: string[];
   body: {
     before: string[];
     lines: string[];
     after: string[];
   }[];
-  data: TooltipItem<T>;
+  datasets: TooltipItem<T>[];
   total: number;
 }
 
-export type CreateTooltipLiteral<T extends ChartType> = ({
-  title,
-  textColor,
-  body,
-  data,
-  total,
-}: CreateTooltipLiteralProps<T>) => string;
+export type CreateTooltipLiteral<T extends ChartType> = (
+  props: CreateTooltipLiteralProps<T>,
+) => string;
 
 const createTooltipLiteral = ({
   title,
-  textColor,
+  textColors,
   body,
-  data,
+  datasets,
   total,
-}: CreateTooltipLiteralProps<'line'>) => {
-  const stringifiedValue = data?.formattedValue ?? '';
-  const parsedRawValue = typeof data.parsed === 'number' ? data.parsed : total;
-
+}: CreateTooltipLiteralProps<'bar' | 'line'>) => {
   return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
-  ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+  ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
     .map((b, i) => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
           <p>
-            배너 성공률 :
-            <span style="color: ${textColor};" class="font-S-CoreDream-500">
-              ${truncateToDecimals((parsedRawValue / total) * 100)}%
+            ${datasets[i].dataset.label}${datasets[i].dataset.label === '성공' ? '률' : ' 실패율'} :
+            <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">
+              ${truncateToDecimals(((datasets[i].parsed.y !== null ? datasets[i].parsed.y : total) / total) * 100)}%
             </span>
           </p>
           <p>
-            배너 성공 횟수 : <span style="color: ${textColor};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
+            ${datasets[i].dataset.label} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
           </p>
         </div>`;
     })
@@ -68,6 +62,64 @@ export default function BannerWinRate({
   brushHeight?: string;
   enableBrush?: boolean;
 }) {
+  const { labels, datas } = result
+    ? result.perBanner.reduce<{
+        labels: string[];
+        datas: { bar: number[][]; line: number[][] };
+      }>(
+        (acc, { name, currencyShortageFailure, maxAttemptsFailure, bannerSuccess }) => {
+          acc.labels.push(name);
+          const safePush = <T,>(arr: T[][], index: number, value: T) => {
+            if (arr[index]) {
+              arr[index].push(value);
+            } else {
+              arr[index] = [value];
+            }
+          };
+          safePush(acc.datas.line, 0, bannerSuccess);
+          safePush(acc.datas.bar, 0, currencyShortageFailure);
+          safePush(acc.datas.bar, 1, maxAttemptsFailure);
+          return acc;
+        },
+        { labels: [], datas: { bar: [], line: [] } },
+      )
+    : { labels: [], datas: { bar: [], line: [] } };
+  const fullDatas: BarLineChartData = {
+    bar: [
+      {
+        label: '재화부족',
+        data: datas.bar[0],
+        color: {
+          backgroundColor: '#ff5e5ecc',
+          borderColor: '#ff5e5e',
+          hoverBackgroundColor: '#ef4444cc',
+          hoverBorderColor: '#ef4444',
+        },
+      },
+      {
+        label: '한계도달',
+        data: datas.bar[1],
+        color: {
+          backgroundColor: '#fe9a00cc',
+          borderColor: '#fe9a00',
+          hoverBackgroundColor: '#e17100cc',
+          hoverBorderColor: '#e17100',
+        },
+      },
+    ],
+    line: [
+      {
+        label: '성공',
+        data: datas.line[0],
+        color: {
+          backgroundColor: '#51a2ffcc',
+          borderColor: '#51a2ff',
+          hoverBackgroundColor: '#155dfccc',
+          hoverBorderColor: '#155dfc',
+        },
+      },
+    ],
+  };
   return (
     <ChartWrapper
       title={
@@ -77,14 +129,44 @@ export default function BannerWinRate({
       }
     >
       {result ? (
-        <BrushLineChart
-          labels={result.perBanner.map(({ name }) => name)}
-          data={result.perBanner.map(({ bannerSuccess }) => bannerSuccess)}
-          barChartColors={{
-            backgroundColor: '#fe9a0099',
-            borderColor: '#fe9a00',
-            hoverBackgroundColor: '#ff3f42cc',
-            hoverBorderColor: '#ff3f42',
+        <BrushBarLineChart
+          labels={labels}
+          primaryData={[6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500]}
+          fullDatas={{
+            line: [
+              {
+                data: [6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500],
+                label: '성공',
+                color: {
+                  backgroundColor: '#51a2ffcc',
+                  borderColor: '#51a2ff',
+                  hoverBackgroundColor: '#fe9a00ccc',
+                  hoverBorderColor: '#fe9a00',
+                },
+              },
+            ],
+            bar: [
+              {
+                data: [2000, 600, 300, 5000, 1000, 6000, 5000, 500, 0, 2600, 1000],
+                label: '재화부족',
+                color: {
+                  backgroundColor: '#ff5e5ecc',
+                  borderColor: '#ff5e5e',
+                  hoverBackgroundColor: '#ef4444cc',
+                  hoverBorderColor: '#ef4444',
+                },
+              },
+              {
+                data: [1300, 200, 4100, 1900, 300, 2400, 2200, 500, 0, 3000, 500],
+                label: '한계도달',
+                color: {
+                  backgroundColor: '#fe9a00cc',
+                  borderColor: '#fe9a00',
+                  hoverBackgroundColor: '#e17100cc',
+                  hoverBorderColor: '#e17100',
+                },
+              },
+            ],
           }}
           brushColor={{
             backgroundColor: '#8e51ffCC',

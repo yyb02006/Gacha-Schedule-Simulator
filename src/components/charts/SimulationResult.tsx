@@ -6,21 +6,21 @@ import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { truncateToDecimals } from '#/libs/utils';
 
-const tooltip = ({
+const createTooltipLiteral = ({
   title,
-  textColor,
+  textColors,
   body,
-  data,
+  datasets,
   total,
 }: CreateTooltipLiteralProps<'doughnut'>) => {
-  const stringifiedValue = data?.formattedValue ?? '';
-  const parsedRawValue = data.parsed;
-  const label = data.label;
-  const borderColor = (data.dataset.borderColor as string[])[data.dataIndex];
+  const stringifiedValue = datasets[0].formattedValue ?? '';
+  const parsedRawValue = datasets[0].parsed;
+  const label = datasets[0].label;
+  const borderColor = (datasets[0].dataset.borderColor as string[])[datasets[0].dataIndex];
 
   return /*html*/ `
     <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 opacity-90 shadow-xl shadow-[#141414]">
-      ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+      ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
       ${body
         .map((b, i) => {
           return /*html*/ `
@@ -84,7 +84,7 @@ export default function SimulationResult({
             borderColor={['#fe9a00', '#00a6f4']}
             backgroundColor={['#fe9a00CC', '#00a6f4CC']}
             createLegendHTML={createLegendHTML}
-            tooltipCallback={tooltip}
+            tooltipCallback={createTooltipLiteral}
           />
           <div className="font-S-CoreDream-300 space-y-4 text-sm">
             <ul className="space-y-1">

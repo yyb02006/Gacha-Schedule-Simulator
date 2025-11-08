@@ -2,54 +2,39 @@
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { ChartType, TooltipItem } from 'chart.js';
+import { ChartType } from 'chart.js';
 import { truncateToDecimals } from '#/libs/utils';
 import BrushBarChart from '#/components/charts/base/BrushBarChart';
+import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 
-export interface CreateTooltipLiteralProps<T extends ChartType> {
-  title: string[];
-  textColor: string;
-  body: {
-    before: string[];
-    lines: string[];
-    after: string[];
-  }[];
-  data: TooltipItem<T>;
-  total: number;
-}
-
-export type CreateTooltipLiteral<T extends ChartType> = ({
-  title,
-  textColor,
-  body,
-  data,
-  total,
-}: CreateTooltipLiteralProps<T>) => string;
+export type CreateTooltipLiteral<T extends ChartType> = (
+  props: CreateTooltipLiteralProps<T>,
+) => string;
 
 const createTooltipLiteral =
   (result: GachaSimulationMergedResult) =>
-  ({ title, textColor, body, data, total }: CreateTooltipLiteralProps<'bar'>) => {
-    const parsedRawValue = typeof data.parsed.y === 'number' ? data.parsed.y : total;
+  ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
+    const parsedRawValue = typeof datasets[0].parsed.y === 'number' ? datasets[0].parsed.y : total;
 
-    const { bannerWinGachaRuns, bannerSuccess } = result.perBanner[data.dataIndex];
+    const { bannerWinGachaRuns, bannerSuccess } = result.perBanner[datasets[0].dataIndex];
 
     return /*html*/ `
     <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
-    ${title.map((t) => `<p style="color: ${textColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+    ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
     ${body
       .map((b, i) => {
         return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
             <p>
               기대값 도달 전 성공률 :
-              <span style="color: ${textColor};" class="font-S-CoreDream-500">
+              <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
                 ${truncateToDecimals((parsedRawValue / total) * 100)}%
               </span>
             </p>
             <p>
-              배너 성공률 : <span style="color: ${textColor};" class="font-S-CoreDream-500">${truncateToDecimals((bannerSuccess / total) * 100, 2)}%</span>
+              배너 성공률 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals((bannerSuccess / total) * 100, 2)}%</span>
             </p>
             <p>
-              성공 시 기대값 : <span style="color: ${textColor};" class="font-S-CoreDream-500">${truncateToDecimals(bannerWinGachaRuns / bannerSuccess, 2)} 회</span>
+              성공 시 기대값 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(bannerWinGachaRuns / bannerSuccess, 2)} 회</span>
             </p>
           </div>`;
       })

@@ -10,33 +10,33 @@ import BarChart from '#/components/charts/base/BarChart';
 import { Chart as ChartJS } from 'chart.js';
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
 
-const createTooltipLiteralClosure =
+const createTooltipLiteral =
   (originalHistogram: number[]) =>
-  ({ title, textColor, body, data, total }: CreateTooltipLiteralProps<'bar'>) => {
-    const stringifiedValue = data?.formattedValue ?? '';
-    const rawValue = data.raw as number;
+  ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
+    const stringifiedValue = datasets[0].formattedValue ?? '';
+    const rawValue = datasets[0].raw as number;
     const sumUpToCurrent = originalHistogram
-      .slice(0, data.dataIndex + 1)
+      .slice(0, datasets[0].dataIndex + 1)
       .reduce((a, b) => a + b, 0);
 
     return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
-  ${title.map((t) => /*html*/ `<p class="text-lg font-S-CoreDream-500"><span style="color: ${textColor};">${t}</span>차</p>`).join('')}
+  ${title.map((t) => /*html*/ `<p class="text-lg font-S-CoreDream-500"><span style="color: ${textColors[0]};">${t}</span>차</p>`).join('')}
   ${body
     .map((b, i) => {
       return /*html*/ `
       <div class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
         <p>
           현재 차수 성공 횟수 :
-          <span style="color: ${textColor};" class="font-S-CoreDream-400">${stringifiedValue} 회</span>
+          <span style="color: ${textColors[0]};" class="font-S-CoreDream-400">${stringifiedValue} 회</span>
         </p>
         <p>
           현재 차수 비중 :
-          <span style="color: ${textColor};" class="font-S-CoreDream-400">${truncateToDecimals((rawValue / total) * 100)}%</span>
+          <span style="color: ${textColors[0]};" class="font-S-CoreDream-400">${truncateToDecimals((rawValue / total) * 100)}%</span>
         </p>
         <p>
           누적 확률 :
-          <span style="color: ${textColor};" class="font-S-CoreDream-400">${truncateToDecimals((sumUpToCurrent / total) * 100)}%</span>
+          <span style="color: ${textColors[0]};" class="font-S-CoreDream-400">${truncateToDecimals((sumUpToCurrent / total) * 100)}%</span>
         </p>
       </div>
     `;
@@ -201,7 +201,7 @@ export default function BannerSuccessTrialCounts({
           enableBrush={enableBrush}
           cutoffIndex={successIndexUntilCutoff}
           height={chartHeight}
-          tooltipCallback={createTooltipLiteralClosure(bannerHistogram)}
+          tooltipCallback={createTooltipLiteral(bannerHistogram)}
           mainChartRef={mainChartRef}
         />
         {enableBrush && (
