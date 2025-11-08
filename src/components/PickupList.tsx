@@ -83,6 +83,7 @@ export interface GachaSimulationMergedResult {
     initialResource: number;
     isTrySim: boolean;
     isSimpleMode: boolean;
+    bannerFailureAction: BannerFailureAction;
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
   };
   perBanner: BannerResult[];
@@ -771,6 +772,7 @@ export default function PickupList() {
           initialResource: results[0].total.initialResource,
           isTrySim: results[0].total.isTrySim,
           isSimpleMode: results[0].total.isSimpleMode,
+          bannerFailureAction: results[0].total.bannerFailureAction,
           statistics: {
             sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
             fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },

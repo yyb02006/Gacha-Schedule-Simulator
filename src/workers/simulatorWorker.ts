@@ -42,6 +42,7 @@ interface SimulationResult {
     initialResource: number;
     isTrySim: boolean;
     isSimpleMode: boolean;
+    bannerFailureAction: BannerFailureAction;
   };
   perBanner: {
     id: string;
@@ -313,6 +314,7 @@ const gachaRateSimulate = ({
       initialResource,
       isTrySim,
       isSimpleMode,
+      bannerFailureAction,
     },
     perBanner: pickupDatas.map(({ id, name }, index) => ({
       id,
@@ -333,9 +335,11 @@ const gachaRateSimulate = ({
       fourth: { totalObtained: 0, pickupObtained: 0, targetObtained: 0 },
     })),
   };
+  // 시뮬레이션 반복
   for (let ti = 0; ti < simulationTry; ti++) {
     let singleSimulationSuccessCount = 0;
     let standardSixthStack = 0;
+    // 1회 시뮬레이션 내의 배너 반복 시작
     for (let di = 0; di < pickupDatas.length; di++) {
       const currentBanner = simulationResult.perBanner[di];
       // 일단 입장 카운트 박고 시작
@@ -451,6 +455,7 @@ const gachaRateSimulate = ({
       const pityRewardOperator = result.operators.sixth[0];
       const successCount: SuccessCount = { sixth: 0, fifth: 0, fourth: 0 };
       const sixStats = result.statistics.sixth;
+      // 주사위 롤링 시작
       for (let i = 0; i < gachaAttemptsLimit; i++) {
         if (!isTrySim) {
           // 재화 다 떨어지면 가챠 중지
@@ -778,7 +783,7 @@ const gachaRateSimulate = ({
             result.statistics[rarityString][obtainedType];
         }
       }
-      // 중단 옵션 활성화 시 이번 시뮬레이션 순회 종료
+      // 중단 옵션 활성화 : 배너 실패시 이번 회차 시뮬레이션 종료
       if (!result.success && bannerFailureAction === 'interruption') {
         break;
       }
