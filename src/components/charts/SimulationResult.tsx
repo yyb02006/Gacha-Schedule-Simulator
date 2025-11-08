@@ -77,16 +77,17 @@ export default function SimulationResult({
       }
     >
       {result ? (
-        <div className="p-4 text-sm">
+        <div className="text-sm">
           <DonutChart
             data={simulationResultData}
             labels={simulationResultLabels}
+            legendPosition="top"
             borderColor={['#fe9a00', '#00a6f4']}
             backgroundColor={['#fe9a00CC', '#00a6f4CC']}
             createLegendHTML={createLegendHTML}
             tooltipCallback={createTooltipLiteral}
           />
-          <div className="font-S-CoreDream-300 space-y-4 text-sm">
+          <div className="font-S-CoreDream-300 space-y-4 px-4 pb-4 text-sm">
             <ul className="space-y-1">
               <li>시뮬레이션 횟수 : {result.total.simulationTry.toLocaleString()} 회</li>
               <li>성공한 시뮬레이션 : {result.total.simulationSuccess.toLocaleString()} 회</li>

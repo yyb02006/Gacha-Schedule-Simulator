@@ -1,7 +1,7 @@
 'use client';
 
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
-import { truncateToDecimals } from '#/libs/utils';
+import { cls, truncateToDecimals } from '#/libs/utils';
 import { doughnutConnectorPlugin } from '#/plugins/chartJsPlugin';
 import { Chart as ChartJS, ArcElement, Tooltip, ChartData, ChartOptions } from 'chart.js';
 import ChartDataLabels, { Context } from 'chartjs-plugin-datalabels';
@@ -148,7 +148,7 @@ export default function DonutChart({
     rotation: 270,
     circumference: 360,
     responsive: true,
-    layout: { padding: 60 },
+    layout: { padding: 76 },
     plugins: {
       tooltip: {
         enabled: false,
@@ -256,8 +256,11 @@ export default function DonutChart({
 
   return (
     <div className="relative flex size-full flex-col">
-      <div ref={legendRef} className={legendPosition === 'bottom' ? 'order-2' : ''} />
-      <div className="-mt-5">
+      <div
+        ref={legendRef}
+        className={cls(legendPosition === 'bottom' ? 'bottom-0' : 'top-0', 'absolute px-4')}
+      />
+      <div>
         <Doughnut
           ref={chartRef}
           data={chartData}

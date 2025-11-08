@@ -122,16 +122,17 @@ export default function TotalGachaResult({
       }
     >
       {result ? (
-        <div className="p-4 text-sm">
+        <div className="text-sm">
           <DonutChart
             data={rarityResultData.data}
             labels={rarityResultData.labels}
+            legendPosition="top"
             backgroundColor={Object.values(rarityColor).map(({ HEX }) => HEX + 'CC')}
             borderColor={Object.values(rarityColor).map(({ HEX }) => HEX)}
             createLegendHTML={createLegendHTML}
             tooltipCallback={createTooltipLiteral}
           />
-          <div className="flex flex-col flex-wrap gap-5">
+          <div className="flex flex-col flex-wrap gap-5 px-4 pb-4">
             <div className="flex flex-1 flex-wrap gap-4">
               <RarityResultDetail rarity="sixth" result={result} />
               <RarityResultDetail rarity="fifth" result={result} />
