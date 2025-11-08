@@ -124,10 +124,14 @@ export default function DonutChart({
       el.addEventListener('click', () => {
         const index = Number(el.getAttribute('data-index'));
         const isCurrentDataVisible = chart.getDataVisibility(index);
+        const hasVisibleData =
+          rawDataRef.current
+            .map((_, index) => chart.getDataVisibility(index))
+            .filter((data) => data === true).length > 1;
         const total = data.reduce((a, b) => a + b, 0);
         const currentData = data[index];
 
-        if (currentData === total && isCurrentDataVisible) return;
+        if ((currentData === total || !hasVisibleData) && isCurrentDataVisible) return;
 
         chart.toggleDataVisibility(index);
 
@@ -258,9 +262,9 @@ export default function DonutChart({
     <div className="relative flex size-full flex-col">
       <div
         ref={legendRef}
-        className={cls(legendPosition === 'bottom' ? 'bottom-0' : 'top-0', 'absolute px-4')}
+        className={cls(legendPosition === 'bottom' ? 'order-2' : '', 'relative px-4')}
       />
-      <div>
+      <div className="order-1">
         <Doughnut
           ref={chartRef}
           data={chartData}
