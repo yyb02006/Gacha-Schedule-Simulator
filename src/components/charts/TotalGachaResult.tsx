@@ -70,7 +70,9 @@ const RarityResultDetail = ({
       <h1 className={cls(rarityColor[rarity].textColor, 'mb-[10px]')}>
         {`${rarities[rarity]}성 결과`} (
         {truncateToDecimals(
-          (result.total.statistics[rarity].totalObtained / result.total.totalGachaRuns) * 100,
+          result.total.totalGachaRuns === 0
+            ? 0
+            : (result.total.statistics[rarity].totalObtained / result.total.totalGachaRuns) * 100,
         )}
         %)
       </h1>
@@ -143,12 +145,14 @@ export default function TotalGachaResult({
                 <h1 className="mb-[10px] text-sky-500">
                   3성 결과 (
                   {truncateToDecimals(
-                    ((result.total.totalGachaRuns -
-                      result.total.statistics.sixth.totalObtained -
-                      result.total.statistics.fifth.totalObtained -
-                      result.total.statistics.fourth.totalObtained) /
-                      result.total.totalGachaRuns) *
-                      100,
+                    result.total.totalGachaRuns === 0
+                      ? 0
+                      : ((result.total.totalGachaRuns -
+                          result.total.statistics.sixth.totalObtained -
+                          result.total.statistics.fifth.totalObtained -
+                          result.total.statistics.fourth.totalObtained) /
+                          result.total.totalGachaRuns) *
+                          100,
                   )}
                   %)
                 </h1>
