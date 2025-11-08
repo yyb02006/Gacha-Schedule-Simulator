@@ -149,7 +149,7 @@ export default function BannerEVShareRate({
       }
     >
       {result ? (
-        <div className="p-4 text-sm">
+        <div className="text-sm">
           <DonutChart
             data={data}
             labels={labels}
