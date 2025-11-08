@@ -99,8 +99,9 @@ interface SuccessCount {
 
 interface SimulationMetrics {
   pityRewardObtainedCount: number;
-  failedSixthAttempts: number;
+  limitedSixthStack: number;
   adjustedSixthRate: number;
+  adjustedFifthRate: number;
 }
 
 interface RollResult {
@@ -334,6 +335,7 @@ const gachaRateSimulate = ({
   };
   for (let ti = 0; ti < simulationTry; ti++) {
     let singleSimulationSuccessCount = 0;
+    let standardSixthStack = 0;
     for (let di = 0; di < pickupDatas.length; di++) {
       const currentBanner = simulationResult.perBanner[di];
       // 일단 입장 카운트 박고 시작
@@ -361,8 +363,9 @@ const gachaRateSimulate = ({
       const pity = pities[gachaType];
       const simulationMetrics: SimulationMetrics = {
         pityRewardObtainedCount: 0,
-        failedSixthAttempts: 0,
-        adjustedSixthRate: 0 + sixthRate,
+        limitedSixthStack: 0,
+        adjustedSixthRate: sixthRate,
+        adjustedFifthRate: fifthRate,
       };
       // 9천만번 기준 reduce = 2500ms~2600ms, for = 2300ms~2400ms
       // makeSimpleTargetOperators 함수도 로우레벨로 교체 50ms 정도 이득
@@ -462,12 +465,22 @@ const gachaRateSimulate = ({
           // 히스토그램의 현재 가챠횟수가 undefined라면 0 삽입
           currentBanner.bannerHistogram[i] = 0;
         }
-        if (simulationMetrics.failedSixthAttempts >= 50) {
-          // 연속 실패횟수 50번 부터 확률 2%씩 증가
-          simulationMetrics.adjustedSixthRate =
-            sixthRate + sixthRate * (simulationMetrics.failedSixthAttempts - 49);
+        // 연속 실패횟수 50번 부터 확률 2%씩 증가
+        if (gachaType === 'limited' || gachaType === 'collab') {
+          // 한정 헤드헌팅 배너일 경우
+          if (simulationMetrics.limitedSixthStack >= 50) {
+            simulationMetrics.adjustedSixthRate =
+              sixthRate + sixthRate * (simulationMetrics.limitedSixthStack - 49);
+          } else {
+            simulationMetrics.adjustedSixthRate = sixthRate;
+          }
         } else {
-          simulationMetrics.adjustedSixthRate = sixthRate;
+          // 표준 헤드헌팅 배너일 경우
+          if (standardSixthStack >= 50) {
+            simulationMetrics.adjustedSixthRate = sixthRate + sixthRate * (standardSixthStack - 49);
+          } else {
+            simulationMetrics.adjustedSixthRate = sixthRate;
+          }
         }
         if (gachaType === 'limited' && i === pity) {
           // 한정 천장 달성 시 가챠와 별개로 확률업 한정 1개 증정
@@ -495,7 +508,12 @@ const gachaRateSimulate = ({
           const stringRarity: OperatorRarityForString = 'sixth';
           const targetOperators = result.operators.sixth;
           sixStats.totalObtained++;
-          simulationMetrics.failedSixthAttempts = 0;
+          // 6성 스택 초기화
+          if (gachaType === 'limited' || gachaType === 'collab') {
+            simulationMetrics.limitedSixthStack = 0;
+          } else {
+            standardSixthStack = 0;
+          }
           if (newTargetOpersCount.sixth > 0) {
             switch (gachaType) {
               case 'collab':
@@ -596,8 +614,16 @@ const gachaRateSimulate = ({
           }
         } else {
           // 6성 미당첨 조건문 중 아래 범위는 이미 선행 if에서 삭제되니 조건으로 추가할 필요 없음
-          simulationMetrics.failedSixthAttempts++;
-          if (roll < simulationMetrics.adjustedSixthRate + fifthRate) {
+          // 6성 스택 증가
+          if (gachaType === 'limited' || gachaType === 'collab') {
+            simulationMetrics.limitedSixthStack++;
+          } else {
+            standardSixthStack++;
+          }
+          // 10회뽑까지 당첨된 5성이상 오퍼레이터가 없으면 강제 최소 5성 당첨 6성은 확률변동 없기 때문에 6성 로직 거쳐서 내려옴
+          const fifthGuaranteed =
+            i === 9 && sixStats.totalObtained === 0 && result.statistics.fifth.totalObtained === 0;
+          if (roll < simulationMetrics.adjustedSixthRate + fifthRate || fifthGuaranteed) {
             // 5성 당첨
             logging && console.log('5성 당첨');
             const stringRarity: OperatorRarityForString = 'fifth';
