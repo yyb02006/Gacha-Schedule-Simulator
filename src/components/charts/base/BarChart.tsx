@@ -190,7 +190,7 @@ export default function BarChart({
         borderRadius: (context) => {
           const chart = context.chart;
           const meta = chart.getDatasetMeta(context.datasetIndex);
-          return meta.vScale ? meta.vScale.width / 6 : 4;
+          return meta.vScale ? meta.vScale.width / 10 : 4;
         },
       },
     ],

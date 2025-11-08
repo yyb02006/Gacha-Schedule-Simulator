@@ -235,7 +235,7 @@ export default function BarLineChart({
         borderRadius: (context) => {
           const chart = context.chart;
           const meta = chart.getDatasetMeta(context.datasetIndex);
-          return meta.vScale ? meta.vScale.width / 12 : 4;
+          return meta.vScale ? meta.vScale.width / 10 : 4;
         },
         animation: { duration: 200 },
       })),
