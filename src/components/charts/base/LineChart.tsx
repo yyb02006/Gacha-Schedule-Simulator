@@ -84,26 +84,34 @@ const externalTooltipHandler =
 
     const sameChart = lastChartId.current === chartId;
     const tooltipWidth = tooltipEl.offsetWidth || 140;
+    const tooltipHeight = tooltipEl.offsetHeight || 60;
     let finalX = baseX + 6;
-    if (caretX + tooltipWidth + 12 > canvasRect.width) finalX = baseX - tooltipWidth - 6;
+    let finalY = baseY + 6;
+
+    if (caretX + tooltipWidth + 12 > canvasRect.width) finalX = canvasRect.width - tooltipWidth - 6;
+
+    if (caretY + tooltipHeight - 80 > canvasRect.height) {
+      finalY = canvasRect.height - tooltipHeight + 80;
+    }
 
     tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
     tooltipEl.style.left = `${finalX}px`;
-    tooltipEl.style.top = `${baseY}px`;
+    tooltipEl.style.top = `${finalY}px`;
     tooltipEl.style.opacity = '1';
     lastChartId.current = chartId;
 
     // 내용 업데이트
     const title = tooltip.title || [];
     const body = tooltip.body;
-    const dataPoint = tooltip.dataPoints?.[0];
-    const textColor =
-      typeof dataPoint.dataset.borderColor === 'string' ? dataPoint.dataset.borderColor : '#ffb900';
+    const dataPoints = tooltip.dataPoints;
+    const textColors = dataPoints.map((dataPoint) =>
+      dataPoint.dataset.borderColor === 'string' ? dataPoint.dataset.borderColor : '#ffb900',
+    );
 
     tooltipEl.innerHTML = tooltipCallback({
       body,
-      data: dataPoint,
-      textColor,
+      datasets: dataPoints,
+      textColors,
       title,
       total,
     });
@@ -191,14 +199,15 @@ export default function LineChart({
     animation: hasRendered ? { duration: 200 } : false,
     animations: {
       x: {
-        duration:
-          (cutoffIndex !== undefined && selectionIndex.end <= cutoffIndex) || data.length > 500
-            ? 300
-            : 1000,
+        duration: (ctx) => {
+          const isOverLength =
+            cutoffIndex && ctx.dataset.data.length >= 500 && ctx.dataset.data.length > cutoffIndex;
+          return isOverLength ? 400 : 200;
+        },
       },
     },
     transitions: {
-      active: { animation: { duration: data.length > 20 ? 0 : 50 } },
+      active: { animation: { duration: data.length > 20 ? 0 : 200 } },
     },
     layout: {
       padding: { top: padding, left: padding, bottom: enableBrush ? 0 : padding, right: padding },
@@ -218,7 +227,7 @@ export default function LineChart({
       x: {
         grid: {
           color: '#3c3c3c',
-          lineWidth: 2,
+          lineWidth: 1,
           tickWidth: 0,
         },
         border: { color: '#3c3c3c' },

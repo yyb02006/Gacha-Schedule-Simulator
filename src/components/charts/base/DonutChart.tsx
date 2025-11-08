@@ -190,20 +190,16 @@ export default function DonutChart({
           const tooltipWidth = tooltipEl.offsetWidth || 140; // 대략 기본 너비
           const tooltipHeight = tooltipEl.offsetHeight || 60;
 
-          const chartWidth = canvasRect.width;
-          const chartHeight = canvasRect.height;
-
           let finalX = baseX + 6; // 기본: 오른쪽
-          let finalY = baseY;
+          let finalY = baseY + 6;
 
           // 오른쪽 공간이 부족하면 왼쪽으로 렌더링
-          if (caretX + tooltipWidth + 12 > chartWidth) {
-            finalX = baseX - tooltipWidth - 6;
-          }
+          if (caretX + tooltipWidth + 12 > canvasRect.width)
+            finalX = canvasRect.width - tooltipWidth - 6;
 
           // 아래쪽 공간이 부족하면 위로 렌더링
-          if (caretY + tooltipHeight + 12 > chartHeight) {
-            finalY = baseY - tooltipHeight - 6;
+          if (caretY + tooltipHeight - 80 > canvasRect.height) {
+            finalY = canvasRect.height - tooltipHeight + 80;
           }
 
           tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
@@ -216,15 +212,17 @@ export default function DonutChart({
           // 내용 업데이트
           const title = tooltip.title || [];
           const body = tooltip.body;
-          const data = tooltip.dataPoints?.[0];
-          const textColor = (data.dataset.borderColor as string[])[data.dataIndex];
-          const total = data.dataset.data.reduce((a, b) => a + b, 0);
+          const dataPoints = tooltip.dataPoints;
+          const textColors = dataPoints.map((dataPoint) =>
+            dataPoint.dataset.borderColor === 'string' ? dataPoint.dataset.borderColor : '#ffb900',
+          );
+          const total = dataPoints[0].dataset.data.reduce((a, b) => a + b, 0);
 
           tooltipEl.innerHTML = tooltipCallback({
             title,
-            textColor,
+            textColors,
             body,
-            data,
+            datasets: dataPoints,
             total: total ?? 1,
           });
         },
