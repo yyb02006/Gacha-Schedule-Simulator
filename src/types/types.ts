@@ -1,6 +1,6 @@
 export type SimulationMode = 'simple' | 'extended';
 
-export type GachaType = 'limited' | 'single' | 'collab' | 'revival' | 'contract' | 'orient';
+export type GachaType = 'limited' | 'single' | 'collab' | 'rotation' | 'contract' | 'orient';
 
 export type GachaTypeButtonLabel = '한정' | '단일 통상' | '일반' | '4중 가챠' | '콜라보' | '지향';
 

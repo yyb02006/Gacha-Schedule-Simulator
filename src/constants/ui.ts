@@ -13,7 +13,7 @@ export const gachaTypeButtons: GachaTypeButton[] = [
   },
   {
     name: '일반',
-    type: 'revival',
+    type: 'rotation',
     hoverBackground: 'linear-gradient(155deg, #7008e7, #a684ff)',
   },
   {
@@ -58,8 +58,8 @@ export const BannerBadgeProps = {
     id: 'collab',
     props: { name: '콜라보 배너', color: 'border-rose-400 text-rose-400' },
   },
-  revival: {
-    id: 'revival',
+  rotation: {
+    id: 'rotation',
     props: { name: '일반 배너', color: 'border-violet-400 text-violet-400' },
   },
   contract: {
