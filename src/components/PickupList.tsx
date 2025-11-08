@@ -82,6 +82,7 @@ export interface GachaSimulationMergedResult {
     pityRewardObtained: number;
     initialResource: number;
     gachaMode: 'currency' | 'try';
+    isSimpleMode: boolean;
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
   };
   perBanner: BannerResult[];
@@ -769,6 +770,7 @@ export default function PickupList() {
           pityRewardObtained: 0,
           initialResource: results[0].total.initialResource,
           gachaMode: results[0].total.gachaMode,
+          isSimpleMode: results[0].total.isSimpleMode,
           statistics: {
             sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
             fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
