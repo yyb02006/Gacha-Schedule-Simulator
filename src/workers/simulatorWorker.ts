@@ -1,4 +1,4 @@
-import { Dummy, WorkerInput } from '#/components/PickupList';
+import { BannerFailureAction, Dummy, WorkerInput } from '#/components/PickupList';
 import { OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
 
 export default {} as typeof Worker & { new (): Worker };
@@ -9,7 +9,7 @@ const pities = {
   collab: 119,
   limited: 299,
   single: 149,
-  revival: [149, 299],
+  rotation: [149, 299],
   contract: null,
   orient: null,
 } as const;
@@ -40,7 +40,7 @@ interface SimulationResult {
     totalGachaRuns: number;
     pityRewardObtained: number;
     initialResource: number;
-    mode: 'currency' | 'try';
+    gachaMode: 'currency' | 'try';
   };
   perBanner: {
     id: string;
@@ -51,6 +51,7 @@ interface SimulationResult {
     bannerHistogram: number[];
     pityRewardObtained: number;
     actualEntryCount: number;
+    interruptionCount: number | null;
     bannerStartingCurrency: number;
     additionalResource: number;
     currencyShortageFailure: number;
@@ -279,6 +280,8 @@ const gachaRateSimulate = ({
   isSimpleMode,
   simulationTry,
   initialResource,
+  probability,
+  bannerFailureAction,
 }: {
   pickupDatas: Dummy[];
   gachaGoal: 'allFirst' | 'allMax' | null;
@@ -286,6 +289,8 @@ const gachaRateSimulate = ({
   isGachaSim: boolean;
   simulationTry: number;
   initialResource: number;
+  probability: { limited: number; normal: number };
+  bannerFailureAction: BannerFailureAction;
 }) => {
   const sixthRate = 2;
   const fifthRate = 8;
@@ -305,7 +310,7 @@ const gachaRateSimulate = ({
       totalGachaRuns: 0,
       pityRewardObtained: 0,
       initialResource,
-      mode: isGachaSim === true ? 'currency' : 'try',
+      gachaMode: isGachaSim === true ? 'currency' : 'try',
     },
     perBanner: pickupDatas.map(({ id, name }, index) => ({
       id,
@@ -316,6 +321,7 @@ const gachaRateSimulate = ({
       bannerHistogram: [],
       pityRewardObtained: 0,
       actualEntryCount: 0,
+      interruptionCount: bannerFailureAction === 'interruption' ? 0 : null,
       bannerStartingCurrency: 0,
       currencyShortageFailure: 0,
       maxAttemptsFailure: 0,
@@ -329,6 +335,7 @@ const gachaRateSimulate = ({
   for (let ti = 0; ti < simulationTry; ti++) {
     let singleSimulationSuccessCount = 0;
     for (let di = 0; di < pickupDatas.length; di++) {
+      const currentBanner = simulationResult.perBanner[di];
       const {
         id,
         additionalResource,
@@ -338,11 +345,17 @@ const gachaRateSimulate = ({
         firstSixthTry,
         name,
         operators,
-        pickupDetails: { pickupChance, pickupOpersCount, simpleMode },
+        pickupDetails: { pickupChance: bannerPickupChance, pickupOpersCount, simpleMode },
       } = pickupDatas[di];
+      const pickupChance =
+        gachaType === 'limited'
+          ? probability.limited
+          : gachaType === 'single' || gachaType === 'rotation'
+            ? probability.normal
+            : bannerPickupChance;
       // 배너 셋팅 시작 시 추가 오리지늄 계산 및 계산된 오리지늄을 배너 시작 재화에 할당
       calculateOrundum(simulationConfig, additionalResource);
-      simulationResult.perBanner[di].bannerStartingCurrency += simulationConfig.orundum;
+      currentBanner.bannerStartingCurrency += simulationConfig.orundum;
       const pity = pities[gachaType];
       const simulationMetrics: SimulationMetrics = {
         pityRewardObtainedCount: 0,
@@ -445,11 +458,11 @@ const gachaRateSimulate = ({
         }
         if (i === 0) {
           // 배너 실제 진입 시 카운트 증가
-          simulationResult.perBanner[di].actualEntryCount++;
+          currentBanner.actualEntryCount++;
         }
-        if (simulationResult.perBanner[di].bannerHistogram[i] === undefined) {
+        if (currentBanner.bannerHistogram[i] === undefined) {
           // 히스토그램의 현재 가챠횟수가 undefined라면 0 삽입
-          simulationResult.perBanner[di].bannerHistogram[i] = 0;
+          currentBanner.bannerHistogram[i] = 0;
         }
         if (simulationMetrics.failedSixthAttempts >= 50) {
           // 연속 실패횟수 50번 부터 확률 2%씩 증가
@@ -541,7 +554,7 @@ const gachaRateSimulate = ({
                   });
                 }
                 break;
-              case 'revival':
+              case 'rotation':
                 {
                   const pityRewardOperators = [targetOperators[0], targetOperators[1]].filter(
                     ({ isFirstObtained }) => !isFirstObtained,
@@ -708,7 +721,7 @@ const gachaRateSimulate = ({
         ) {
           result.bannerGachaRuns = i + 1;
           result.success = true;
-          simulationResult.perBanner[di].bannerHistogram[i]++;
+          currentBanner.bannerHistogram[i]++;
           break;
         } else if (i + 1 === gachaAttemptsLimit) {
           // 조건 완료하지 못한 채 최대값 달성 시 가챠 중지
@@ -720,26 +733,31 @@ const gachaRateSimulate = ({
       // 가챠 배너 완료시 데이터 정리 부분
       logging && console.log('배너 종료');
       if (result.success) {
-        simulationResult.perBanner[di].bannerSuccess++;
-        simulationResult.perBanner[di].bannerWinGachaRuns += result.bannerGachaRuns;
+        currentBanner.bannerSuccess++;
+        currentBanner.bannerWinGachaRuns += result.bannerGachaRuns;
         singleSimulationSuccessCount++;
       } else if (result.failure === 'currency') {
-        simulationResult.perBanner[di].currencyShortageFailure++;
+        currentBanner.currencyShortageFailure++;
       } else if (result.failure === 'limit') {
-        simulationResult.perBanner[di].maxAttemptsFailure++;
+        currentBanner.maxAttemptsFailure++;
       }
       if (result.isPityRewardObtained) {
-        simulationResult.perBanner[di].pityRewardObtained++;
+        currentBanner.pityRewardObtained++;
         simulationResult.total.pityRewardObtained++;
       }
-      simulationResult.perBanner[di].bannerTotalGachaRuns += result.bannerGachaRuns;
+      currentBanner.bannerTotalGachaRuns += result.bannerGachaRuns;
       const rarityStrings = ['sixth', 'fifth', 'fourth'] as const;
       for (const rarityString of rarityStrings) {
         const obtainedTypes = ['totalObtained', 'pickupObtained', 'targetObtained'] as const;
         for (const obtainedType of obtainedTypes) {
-          simulationResult.perBanner[di][rarityString][obtainedType] +=
+          currentBanner[rarityString][obtainedType] +=
             result.statistics[rarityString][obtainedType];
         }
+      }
+      // 중단 옵션 활성화 시 이번 시뮬레이션 순회 종료
+      if (!result.success && currentBanner.interruptionCount !== null) {
+        currentBanner.interruptionCount++;
+        break;
       }
     }
     // 배너 전부 성공시 총 성공카운트 1증가
@@ -1012,7 +1030,7 @@ const singleDummy: Dummy = {
   active: true,
 };
 
-// revival => rotation
+// rotation => rotation
 /**
  * 예상
  *
@@ -1025,7 +1043,7 @@ const rotationDummy: Dummy = {
   id: 'a1b2c3d4-e5f6-4789-b0c1-d2e3zzzzb6c7',
   name: '로테이션-151',
   image: '/images/exusiai.jpg',
-  gachaType: 'revival',
+  gachaType: 'rotation',
   operators: [
     {
       operatorId: 'a1b2c3d4-e5f6-7g8h-9i0j-1k2l3ccc5o6p',
@@ -1072,7 +1090,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
         simulationTry,
         initialResource,
         probability,
-        winCondition,
+        bannerFailureAction,
       },
     },
   } = e.data;
@@ -1095,6 +1113,8 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
     isGachaSim,
     simulationTry,
     initialResource,
+    probability,
+    bannerFailureAction,
   });
   const endTime = performance.now();
   const elapsedTime = endTime - startTime;
