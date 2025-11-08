@@ -1,6 +1,7 @@
 'use client';
 
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import EmptyDonutChart from '#/components/charts/base/EmptyDonut';
 import { cls, truncateToDecimals } from '#/libs/utils';
 import { doughnutConnectorPlugin } from '#/plugins/chartJsPlugin';
 import { Chart as ChartJS, ArcElement, Tooltip, ChartData, ChartOptions } from 'chart.js';
@@ -264,13 +265,15 @@ export default function DonutChart({
         ref={legendRef}
         className={cls(legendPosition === 'bottom' ? 'order-2' : '', 'relative px-4')}
       />
-      <div className="order-1">
+      <div className="relative order-1">
         <Doughnut
           ref={chartRef}
           data={chartData}
           options={options}
           plugins={[doughnutConnectorPlugin()]}
+          className={!data.some((dataEl) => dataEl > 0) ? 'absolute' : ''}
         />
+        {!data.some((dataEl) => dataEl > 0) ? <EmptyDonutChart /> : null}
       </div>
     </div>
   );
