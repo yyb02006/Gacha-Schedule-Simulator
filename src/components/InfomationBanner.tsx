@@ -11,10 +11,10 @@ import { useState } from 'react';
 
 // 배너별 성공 시기 통계
 export default function InfomationBanner({
-  isGachaSim,
+  isTrySim,
   result,
 }: {
-  isGachaSim: boolean;
+  isTrySim: boolean;
   result: GachaSimulationMergedResult | null;
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,9 +35,7 @@ export default function InfomationBanner({
           initial="exit"
           className="text-lg"
         >
-          <span className="text-amber-400">
-            {isGachaSim ? '가챠 확률' : '재화 소모'} 시뮬레이션{' '}
-          </span>
+          <span className="text-amber-400">{isTrySim ? '가챠 확률' : '재화 소모'} 시뮬레이션 </span>
           <span>통계</span>
         </motion.div>
         <TypeSelectionButton

@@ -11,10 +11,10 @@ import { motion, useMotionValue } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 
 export default function SimulatorTypeButton({
-  isGachaSim,
+  isTrySim,
   onTypeClick,
 }: {
-  isGachaSim: boolean;
+  isTrySim: boolean;
   onTypeClick: (isLeft?: boolean) => void;
 }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -24,8 +24,8 @@ export default function SimulatorTypeButton({
     const rect = constraintsRef.current?.getBoundingClientRect();
     if (!rect) return;
     const maxX = rect.width / 2;
-    animate(x, isGachaSim ? 0 : maxX, { type: 'spring', stiffness: 400, damping: 30 });
-  }, [isGachaSim]);
+    animate(x, isTrySim ? 0 : maxX, { type: 'spring', stiffness: 400, damping: 30 });
+  }, [isTrySim, x]);
   return (
     <div className="flex min-w-[100px] flex-col space-y-1">
       <motion.div
@@ -49,8 +49,8 @@ export default function SimulatorTypeButton({
         >
           <motion.div
             variants={fontPop}
-            animate={isGachaSim ? 'inAcitve' : 'active'}
-            initial={isGachaSim ? 'active' : 'inAcitve'}
+            animate={isTrySim ? 'inAcitve' : 'active'}
+            initial={isTrySim ? 'active' : 'inAcitve'}
             exit="exit"
             className="font-S-CoreDream-700"
           >
@@ -66,8 +66,8 @@ export default function SimulatorTypeButton({
         >
           <motion.div
             variants={fontPop}
-            animate={isGachaSim ? 'inAcitve' : 'active'}
-            initial={isGachaSim ? 'active' : 'inAcitve'}
+            animate={isTrySim ? 'inAcitve' : 'active'}
+            initial={isTrySim ? 'active' : 'inAcitve'}
             exit="exit"
             className="font-S-CoreDream-700"
           >
@@ -89,7 +89,7 @@ export default function SimulatorTypeButton({
               if (!rect) return;
               const maxX = rect.width / 2;
               const currentX = x.get();
-              if (isGachaSim) {
+              if (isTrySim) {
                 if (currentX > maxX * (1 / 4)) {
                   onTypeClick(false);
                 } else {
@@ -109,13 +109,13 @@ export default function SimulatorTypeButton({
             <motion.div
               variants={toggleButtonVariants}
               initial="exit"
-              animate={isGachaSim ? 'left' : 'right'}
+              animate={isTrySim ? 'left' : 'right'}
               exit="exit"
               transition={{ duration: 0.3 }}
               className="flex size-full items-center justify-center rounded-lg"
             >
               <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-                {isGachaSim ? '가챠 확률 시뮬레이션' : '재화 소모 시뮬레이션'}
+                {isTrySim ? '가챠 확률 시뮬레이션' : '재화 소모 시뮬레이션'}
               </motion.span>
             </motion.div>
           </motion.div>

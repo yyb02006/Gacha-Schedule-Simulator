@@ -12,13 +12,13 @@ import { InitialInputs, SimulationOptions } from '#/components/PickupList';
 import { clamp, normalizeNumberString, stringToNumber } from '#/libs/utils';
 
 const ControlPanel = ({
-  isGachaSim,
+  isTrySim,
   onTypeClick,
   isSimpleMode,
   onViewModeToggle,
   initialInputs,
 }: {
-  isGachaSim: boolean;
+  isTrySim: boolean;
   onTypeClick: (isLeft?: boolean) => void;
   isSimpleMode: boolean;
   onViewModeToggle: (isLeft?: boolean) => void;
@@ -28,7 +28,7 @@ const ControlPanel = ({
   const [initialResource, setInitialResource] = useState('0');
   return (
     <div className="flex flex-col gap-4">
-      <SimulatorTypeButton isGachaSim={isGachaSim} onTypeClick={onTypeClick} />
+      <SimulatorTypeButton isTrySim={isTrySim} onTypeClick={onTypeClick} />
       <div className="flex flex-wrap justify-between">
         <div className="flex flex-wrap gap-x-6 gap-y-3">
           <div className="flex items-center gap-x-3 text-sm">
@@ -75,7 +75,7 @@ const ControlPanel = ({
             </div>
           </div>
           <AnimatePresence>
-            {isGachaSim || (
+            {isTrySim || (
               <div className="flex items-center gap-x-3 text-sm">
                 <motion.span
                   variants={toOpacityZero}
@@ -138,7 +138,7 @@ const ControlPanel = ({
 };
 
 export default function OptionBar({
-  isGachaSim,
+  isTrySim,
   setIsGachaSim,
   isSimpleMode,
   setIsSimpleMode,
@@ -146,7 +146,7 @@ export default function OptionBar({
   options,
   setOptions,
 }: {
-  isGachaSim: boolean;
+  isTrySim: boolean;
   setIsGachaSim: Dispatch<SetStateAction<boolean>>;
   isSimpleMode: boolean;
   setIsSimpleMode: Dispatch<SetStateAction<boolean>>;
@@ -190,7 +190,7 @@ export default function OptionBar({
         setOptions={setOptions}
       />
       <ControlPanel
-        isGachaSim={isGachaSim}
+        isTrySim={isTrySim}
         onTypeClick={onGachaSimToggle}
         isSimpleMode={isSimpleMode}
         onViewModeToggle={onViewModeToggle}

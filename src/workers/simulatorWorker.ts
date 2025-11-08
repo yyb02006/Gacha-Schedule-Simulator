@@ -40,7 +40,7 @@ interface SimulationResult {
     totalGachaRuns: number;
     pityRewardObtained: number;
     initialResource: number;
-    gachaMode: 'currency' | 'try';
+    isTrySim: boolean;
     isSimpleMode: boolean;
   };
   perBanner: {
@@ -257,15 +257,15 @@ const calculateOrundum = (
   simulationConfig: {
     orundum: number;
     isSimpleMode: boolean;
-    isGachaSim: boolean;
+    isTrySim: boolean;
   },
   additionalResource: {
     simpleMode: number;
     extendedMode: number;
   },
 ) => {
-  const { isGachaSim, isSimpleMode } = simulationConfig;
-  if (!isGachaSim) {
+  const { isTrySim, isSimpleMode } = simulationConfig;
+  if (!isTrySim) {
     const additionalOrundum = isSimpleMode
       ? additionalResource.simpleMode
       : additionalResource.extendedMode;
@@ -276,7 +276,7 @@ const calculateOrundum = (
 const gachaRateSimulate = ({
   pickupDatas,
   gachaGoal,
-  isGachaSim,
+  isTrySim,
   isSimpleMode,
   simulationTry,
   initialResource,
@@ -286,7 +286,7 @@ const gachaRateSimulate = ({
   pickupDatas: Dummy[];
   gachaGoal: 'allFirst' | 'allMax' | null;
   isSimpleMode: boolean;
-  isGachaSim: boolean;
+  isTrySim: boolean;
   simulationTry: number;
   initialResource: number;
   probability: { limited: number; normal: number };
@@ -296,7 +296,7 @@ const gachaRateSimulate = ({
   const fifthRate = 8;
   const fourthRate = 50;
   const globalGachaGoalCount = gachaGoal === 'allMax' ? 6 : gachaGoal === 'allFirst' ? 1 : null;
-  const simulationConfig = { orundum: initialResource, isSimpleMode, isGachaSim };
+  const simulationConfig = { orundum: initialResource, isSimpleMode, isTrySim };
   // gachasim에서만 쓰이는 result 재화소모 시뮬레이션에서는 어디서 실패했는지 같은 정보가 더 필요
   // 최소 경우 최대 경우 식으로 툭 튀는 기록들 보관할지?
   // 천장 보상은 무조건 0번 6성
@@ -310,7 +310,7 @@ const gachaRateSimulate = ({
       totalGachaRuns: 0,
       pityRewardObtained: 0,
       initialResource,
-      gachaMode: isGachaSim ? 'currency' : 'try',
+      isTrySim,
       isSimpleMode,
     },
     perBanner: pickupDatas.map(({ id, name }, index) => ({
@@ -449,7 +449,7 @@ const gachaRateSimulate = ({
       const successCount: SuccessCount = { sixth: 0, fifth: 0, fourth: 0 };
       const sixStats = result.statistics.sixth;
       for (let i = 0; i < gachaAttemptsLimit; i++) {
-        if (!isGachaSim) {
+        if (!isTrySim) {
           // 재화 다 떨어지면 가챠 중지
           if (simulationConfig.orundum < 600) {
             result.failure = 'currency';
@@ -1081,7 +1081,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
     payload: {
       pickupDatas,
       options: {
-        isGachaSim,
+        isTrySim,
         isSimpleMode,
         gachaGoal,
         simulationTry,
@@ -1107,7 +1107,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
     pickupDatas: pickupDatas,
     gachaGoal,
     isSimpleMode,
-    isGachaSim,
+    isTrySim,
     simulationTry,
     initialResource,
     probability,

@@ -393,12 +393,12 @@ const BannerHeader = ({
 };
 
 const SimplePreInfoField = ({
-  isGachaSim,
+  isTrySim,
   pickupData,
   updateSimplePickupCount,
   updateAdditionalResource,
 }: {
-  isGachaSim: boolean;
+  isTrySim: boolean;
   pickupData: Dummy;
   updateSimplePickupCount: UpdateSimplePickupCount;
   updateAdditionalResource: (
@@ -501,9 +501,9 @@ const SimplePreInfoField = ({
           </div>
         </div>
         <div className="mt-2 flex w-full justify-end">
-          {isGachaSim || (
+          {isTrySim || (
             <AdditionalResUntilBannerEnd
-              key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
+              key={`res-${`${id} ${isTrySim}` ? 'hidden' : 'shown'}`}
               additionalResource={additionalResource.simpleMode.toString()}
               onInputBlur={(e) => {
                 updateAdditionalResource('simpleMode', stringToNumber(e.currentTarget.value));
@@ -765,7 +765,7 @@ interface PickupBannerProps {
   pickupData: Dummy;
   dispatch: ActionDispatch<[action: PickupDatasAction]>;
   index: number;
-  isGachaSim: boolean;
+  isTrySim: boolean;
   isSimpleMode: boolean;
   bannersLength: number;
   isImageVisible: boolean;
@@ -775,7 +775,7 @@ export default function PickupBanner({
   pickupData,
   dispatch,
   index,
-  isGachaSim,
+  isTrySim,
   isSimpleMode,
   bannersLength,
   isImageVisible,
@@ -1003,7 +1003,7 @@ export default function PickupBanner({
         isSimpleMode ? (
           <SimplePreInfoField
             // isPresent={isPresent}
-            isGachaSim={isGachaSim}
+            isTrySim={isTrySim}
             pickupData={pickupData}
             updateSimplePickupCount={updateSimplePickupCount}
             updateAdditionalResource={updateAdditionalResource}
@@ -1025,9 +1025,9 @@ export default function PickupBanner({
                 <span className="py-1 whitespace-nowrap">
                   <span className="text-amber-400">목표</span> 픽업 목록
                 </span>
-                {isGachaSim || (
+                {isTrySim || (
                   <AdditionalResUntilBannerEnd
-                    key={`res-${`${id} ${isGachaSim}` ? 'hidden' : 'shown'}`}
+                    key={`res-${`${id} ${isTrySim}` ? 'hidden' : 'shown'}`}
                     additionalResource={pickupData.additionalResource.extendedMode.toString()}
                     onInputBlur={(e) => {
                       updateAdditionalResource(

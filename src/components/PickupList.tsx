@@ -81,7 +81,7 @@ export interface GachaSimulationMergedResult {
     totalGachaRuns: number;
     pityRewardObtained: number;
     initialResource: number;
-    gachaMode: 'currency' | 'try';
+    isTrySim: boolean;
     isSimpleMode: boolean;
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
   };
@@ -598,7 +598,7 @@ export interface WorkerInput {
   type: string;
   payload: {
     pickupDatas: Dummy[];
-    options: { isGachaSim: boolean; isSimpleMode: boolean } & SimulationOptions & InitialInputs;
+    options: { isTrySim: boolean; isSimpleMode: boolean } & SimulationOptions & InitialInputs;
   };
 }
 
@@ -623,7 +623,7 @@ export type SimulationOptions = {
 
 export default function PickupList() {
   const [pickupDatas, dispatch] = useReducer(reducer, prepickupDatas);
-  const [isGachaSim, setIsGachaSim] = useState(true);
+  const [isTrySim, setIsGachaSim] = useState(true);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
   const [options, setOptions] = useState<SimulationOptions>({
     probability: { limited: 70, normal: 50 },
@@ -671,7 +671,7 @@ export default function PickupList() {
         payload: {
           pickupDatas,
           options: {
-            isGachaSim,
+            isTrySim,
             isSimpleMode,
             gachaGoal,
             initialResource,
@@ -769,7 +769,7 @@ export default function PickupList() {
           totalGachaRuns: 0,
           pityRewardObtained: 0,
           initialResource: results[0].total.initialResource,
-          gachaMode: results[0].total.gachaMode,
+          isTrySim: results[0].total.isTrySim,
           isSimpleMode: results[0].total.isSimpleMode,
           statistics: {
             sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
@@ -814,7 +814,7 @@ export default function PickupList() {
           />
         </div>
         <OptionBar
-          isGachaSim={isGachaSim}
+          isTrySim={isTrySim}
           setIsGachaSim={setIsGachaSim}
           isSimpleMode={isSimpleMode}
           setIsSimpleMode={setIsSimpleMode}
@@ -832,7 +832,7 @@ export default function PickupList() {
                 dispatch={dispatch}
                 index={index}
                 isSimpleMode={isSimpleMode}
-                isGachaSim={isGachaSim}
+                isTrySim={isTrySim}
                 bannersLength={pickupDatas.length}
                 isImageVisible={options.showBannerImage}
               />
@@ -847,7 +847,7 @@ export default function PickupList() {
         onSave={addBanner}
         onSavePreset={addBannerUsePreset}
       />
-      <ScheduleOverview result={results} isGachaSim={isGachaSim} />
+      <ScheduleOverview result={results} isTrySim={isTrySim} />
     </div>
   );
 }
