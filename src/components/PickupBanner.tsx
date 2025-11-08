@@ -888,7 +888,7 @@ export default function PickupBanner({
 
   const updateBannerBadge = (newGachaType: GachaType) => {
     const newCount =
-      newGachaType === 'limited' || newGachaType === 'revival'
+      newGachaType === 'limited' || newGachaType === 'rotation'
         ? 2
         : newGachaType === 'collab' || newGachaType === 'single'
           ? 1
