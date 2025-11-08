@@ -1,14 +1,16 @@
-import { useRef } from 'react';
+import { Dispatch, ReactNode, RefObject, SetStateAction, useRef } from 'react';
 import { Chart as ChartJS, Point } from 'chart.js';
 import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
 import BarLineChart, { BarLineChartData } from '#/components/charts/base/BarLineChart';
 import MultiDataBrush from '#/components/charts/base/MultiDataBrush';
+import { LegendData } from '#/components/charts/BannerEntryCurrency';
 
-interface BrushBarLineChartProps {
+interface BrushBarLineChartProps<T extends 'bar' | 'line'> {
   labels: string[];
   primaryData: number[];
   fullDatas: BarLineChartData;
   brushColor: Record<'backgroundColor' | 'borderColor', string | string[]>;
+  dispatchRef?: RefObject<Dispatch<SetStateAction<LegendData<T>>> | null>;
   total: number;
   padding: number;
   enableBrush: boolean;
@@ -17,6 +19,7 @@ interface BrushBarLineChartProps {
   isPercentYAxis?: boolean;
   chartHeight?: string;
   brushHeight?: string;
+  children?: ReactNode;
   tooltipCallback: CreateTooltipLiteral<'bar' | 'line'>;
 }
 
@@ -33,8 +36,10 @@ export default function BrushBarLineChart({
   isPercentYAxis = false,
   chartHeight,
   brushHeight,
+  dispatchRef,
+  children,
   tooltipCallback,
-}: BrushBarLineChartProps) {
+}: BrushBarLineChartProps<'bar' | 'line'>) {
   const mainChartRef = useRef<ChartJS<
     'bar' | 'line',
     (number | [number, number] | null)[] | (number | Point | null)[],
@@ -55,38 +60,42 @@ export default function BrushBarLineChart({
   }).current;
 
   return (
-    <div className="relative space-y-1">
-      <BarLineChart
-        labels={labels}
-        primaryData={primaryData}
-        fullDatas={fullDatas}
-        mainChartRef={mainChartRef}
-        selectionIndex={selectionIndex}
-        total={total}
-        padding={padding}
-        enableBrush={enableBrush}
-        cutoffIndex={cutoffIndex}
-        isPercentYAxis={isPercentYAxis}
-        height={chartHeight}
-        tooltipCallback={tooltipCallback}
-      />
-      {enableBrush && (
-        <MultiDataBrush
+    <>
+      {children}
+      <div className="relative space-y-1">
+        <BarLineChart
           labels={labels}
           primaryData={primaryData}
-          fullDatas={Object.values(fullDatas).flatMap((data) => data.map(({ data }) => data))}
+          fullDatas={fullDatas}
           mainChartRef={mainChartRef}
           selectionIndex={selectionIndex}
-          selection={selection}
-          colors={brushColor}
-          cutoffRatio={cutoffRatio}
-          cutoffPercentage={cutoffPercentage}
-          padding={padding}
-          height={brushHeight}
-          isPercentYAxis={isPercentYAxis}
           total={total}
+          padding={padding}
+          enableBrush={enableBrush}
+          cutoffIndex={cutoffIndex}
+          isPercentYAxis={isPercentYAxis}
+          height={chartHeight}
+          tooltipCallback={tooltipCallback}
         />
-      )}
-    </div>
+        {enableBrush && (
+          <MultiDataBrush
+            labels={labels}
+            primaryData={primaryData}
+            fullDatas={Object.values(fullDatas).flatMap((data) => data.map(({ data }) => data))}
+            mainChartRef={mainChartRef}
+            selectionIndex={selectionIndex}
+            selection={selection}
+            colors={brushColor}
+            cutoffRatio={cutoffRatio}
+            cutoffPercentage={cutoffPercentage}
+            padding={padding}
+            height={brushHeight}
+            dispatchRef={dispatchRef}
+            isPercentYAxis={isPercentYAxis}
+            total={total}
+          />
+        )}
+      </div>
+    </>
   );
 }
