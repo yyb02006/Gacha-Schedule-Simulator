@@ -117,8 +117,8 @@ export default function GachaSurvivalProbability({
         color: {
           backgroundColor: '#fe9a00cc',
           borderColor: '#fe9a00',
-          hoverBackgroundColor: '#e17100cc',
-          hoverBorderColor: '#e17100',
+          hoverBackgroundColor: '#8e51ffcc',
+          hoverBorderColor: '#8e51ff',
         },
       },
     ],
@@ -167,8 +167,8 @@ export default function GachaSurvivalProbability({
                 color: {
                   backgroundColor: '#fe9a00cc',
                   borderColor: '#fe9a00',
-                  hoverBackgroundColor: '#e17100cc',
-                  hoverBorderColor: '#e17100',
+                  hoverBackgroundColor: '#8e51ffcc',
+                  hoverBorderColor: '#8e51ff',
                 },
               },
             ],
