@@ -425,10 +425,11 @@ const gachaRateSimulate = ({
 
         targetOperators = acc;
       }
+      const systemGachaLimit = 9999;
       const gachaAttemptsLimit = isSimpleMode
-        ? 9999
+        ? systemGachaLimit
         : maxGachaAttempts === Infinity
-          ? 9999
+          ? systemGachaLimit
           : maxGachaAttempts;
       const newPickupOpersCount = isSimpleMode ? simpleMode.pickupOpersCount : pickupOpersCount;
       const newTargetOpersCount = isSimpleMode
@@ -455,6 +456,10 @@ const gachaRateSimulate = ({
       const pityRewardOperator = result.operators.sixth[0];
       const successCount: SuccessCount = { sixth: 0, fifth: 0, fourth: 0 };
       const sixStats = result.statistics.sixth;
+
+      // 최대 가챠 시도횟수가 0일 때 예외처리 simpleMode에서는 애초에 maxGachaAttempts를 0으로 조정할 수 없기 때문에 isSimpleMode는 명시할 필요 없음
+      if (maxGachaAttempts === 0 && !isSimpleMode) result.failure = 'limit';
+
       // 주사위 롤링 시작
       for (let i = 0; i < gachaAttemptsLimit; i++) {
         if (!isTrySim) {
@@ -785,6 +790,7 @@ const gachaRateSimulate = ({
       }
       // 중단 옵션 활성화 : 배너 실패시 이번 회차 시뮬레이션 종료
       if (!result.success && bannerFailureAction === 'interruption') {
+        console.log('🔥 break i loop');
         break;
       }
     }

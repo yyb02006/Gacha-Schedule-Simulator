@@ -794,8 +794,14 @@ export default function PickupList() {
           ...bannerResult,
           successIndexUntilCutoff: cutoffIndex,
           cumulativeUntilCutoff: cumulative,
-          minIndex: Math.min(bannerResult.bannerHistogram.findIndex((value) => value > 0)),
-          maxIndex: Math.min(bannerResult.bannerHistogram.findLastIndex((value) => value > 0)),
+          minIndex: Math.max(
+            0,
+            Math.min(bannerResult.bannerHistogram.findIndex((value) => value > 0)),
+          ),
+          maxIndex: Math.max(
+            0,
+            Math.min(bannerResult.bannerHistogram.findLastIndex((value) => value > 0)),
+          ),
         };
       }),
     };
