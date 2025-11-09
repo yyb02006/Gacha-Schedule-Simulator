@@ -629,7 +629,7 @@ export default function PickupList() {
   const [options, setOptions] = useState<SimulationOptions>({
     probability: { limited: 70, normal: 50 },
     simulationTry: 10000,
-    bannerFailureAction: 'continueExecution',
+    bannerFailureAction: 'interruption',
     showBannerImage: true,
   });
   const initialInputs = useRef<InitialInputs>({

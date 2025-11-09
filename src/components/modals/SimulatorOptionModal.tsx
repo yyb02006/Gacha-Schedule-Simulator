@@ -147,7 +147,7 @@ export default function SimulatorOptionModal({
               N회차 시뮬레이션 중 배너 실패 시 동작
             </motion.div>
             <ToggleButton
-              isLeft={localOptions.bannerFailureAction === 'continueExecution'}
+              isLeft={localOptions.bannerFailureAction === 'interruption'}
               onToggle={(isLeft?: boolean) => {
                 setLocalOptions((p) => ({
                   ...p,
@@ -157,8 +157,8 @@ export default function SimulatorOptionModal({
                         ? 'interruption'
                         : 'continueExecution'
                       : isLeft
-                        ? 'continueExecution'
-                        : 'interruption',
+                        ? 'interruption'
+                        : 'continueExecution',
                 }));
               }}
               labels={{ left: '끝까지 진행', right: '해당 회차 중단' }}
