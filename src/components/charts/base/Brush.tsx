@@ -90,7 +90,7 @@ const brushPlugin = (
     ctx.fillRect(currentStartX, top, currentEndX - currentStartX, bottom - top);
     ctx.restore();
 
-    if (cutoffXRatio !== 1) {
+    if (cutoffXRatio !== 1 && cutoffXRatio !== 0) {
       const cutoffX =
         handleMovementArea.left + brushRangeWidth * Math.min(Math.max(cutoffXRatio, 0.01), 0.99);
 
@@ -182,7 +182,7 @@ const brushPlugin = (
         const tickIndex = Math.round(
           safeNumberOrZero(handlePosFromLeft / availableRange) * (totalPoints - 1),
         );
-        const label = chart.data.labels[tickIndex] as string;
+        const label = (chart.data.labels[tickIndex] as string) ?? 0;
 
         ctx.save();
         ctx.font = `${fontSize}px S-CoreDream-400, sans-serif`;
