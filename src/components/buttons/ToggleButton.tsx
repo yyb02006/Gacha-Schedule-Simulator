@@ -18,14 +18,19 @@ export default function ToggleButton({
   className?: string;
 }) {
   const [isDragging, setIsDragging] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const constraintsRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   useEffect(() => {
     const rect = constraintsRef.current?.getBoundingClientRect();
     if (!rect) return;
     const maxX = rect.width / 2;
-    animate(x, isLeft ? 0 : maxX, { type: 'spring', stiffness: 400, damping: 30 });
-  }, [isLeft]);
+    setIsAnimating(true);
+    animate(x, isLeft ? 0 : maxX, { type: 'spring', stiffness: 400, damping: 30 }).finished.then(
+      () => setIsAnimating(false),
+    );
+  }, [isLeft, x]);
+
   return (
     <div className={cls(className, 'flex min-w-[100px] flex-col space-y-1')}>
       <motion.div
@@ -35,7 +40,7 @@ export default function ToggleButton({
         initial="exit"
         exit="exit"
         onClick={() => {
-          if (isDragging) return;
+          if (isDragging || isAnimating) return;
           onToggle();
         }}
         className="font-S-CoreDream-500 relative flex h-full cursor-pointer items-center rounded-xl text-sm"
@@ -63,8 +68,8 @@ export default function ToggleButton({
             drag="x"
             dragConstraints={constraintsRef}
             dragElastic={0.04}
-            dragMomentum={false}
             onDragStart={() => {
+              if (isDragging || isAnimating) return;
               setIsDragging(true);
             }}
             onDragEnd={() => {

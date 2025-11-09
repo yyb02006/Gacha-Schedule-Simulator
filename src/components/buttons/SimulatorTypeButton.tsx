@@ -79,7 +79,6 @@ export default function SimulatorTypeButton({
             drag="x"
             dragConstraints={constraintsRef}
             dragElastic={0.04}
-            dragMomentum={false}
             onDragStart={() => {
               setIsDragging(true);
             }}
