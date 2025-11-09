@@ -38,7 +38,7 @@ const createTooltipLiteral =
         </div>`;
     })
     .join('')}
-</div>`;
+    </div>`;
   };
 
 export default function BannerEVCounts({

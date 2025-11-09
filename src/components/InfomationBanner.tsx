@@ -1,5 +1,5 @@
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
-import BannerAverageCount from '#/components/charts/BannerAverageCounts';
+import BannerEVCounts from '#/components/charts/BannerEVCounts';
 import BannerWinRate from '#/components/charts/BannerWinRate';
 import SimulationResult from '#/components/charts/SimulationResult';
 import TotalGachaResult from '#/components/charts/TotalGachaResult';
@@ -50,7 +50,7 @@ export default function InfomationBanner({
       <SimulationResult result={result} />
       <TotalGachaResult result={result} />
       <BannerWinRate result={result} enableBrush={false} chartHeight="h-[240px]" />
-      <BannerAverageCount result={result} enableBrush={false} chartHeight="h-[240px]" />
+      <BannerEVCounts result={result} enableBrush={false} chartHeight="h-[240px]" />
       <SimulationResultModal
         isOpen={isModalOpen}
         onClose={() => {
