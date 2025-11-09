@@ -217,6 +217,11 @@ const AdditionalResUntilBannerEnd = ({
           <input
             type="text"
             inputMode="numeric"
+            onFocus={(e: FocusEvent<HTMLInputElement>) => {
+              if (e.currentTarget.value === '0') {
+                e.currentTarget.setSelectionRange(0, 1);
+              }
+            }}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const { value } = e.currentTarget;
               const numberString = normalizeNumberString(value);
