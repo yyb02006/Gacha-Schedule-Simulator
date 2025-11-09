@@ -4,7 +4,6 @@ import Modal from '#/components/modals/Modal';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import SimulationResult from '#/components/charts/SimulationResult';
 import BannerWinRate from '#/components/charts/BannerWinRate';
-import BannerAverageCount from '#/components/charts/BannerAverageCounts';
 import TotalGachaResult from '#/components/charts/TotalGachaResult';
 import { toOpacityZero } from '#/constants/variants';
 import { motion } from 'motion/react';
@@ -15,7 +14,8 @@ import BannerEVShareRate from '#/components/charts/BannerEVShareRate';
 import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
 import BannerPreEVSuccess from '#/components/charts/BannerBannerPreEVSuccess';
 import ExpectedCumulativeConsumption from '#/components/charts/ExpectedCumulativeConsumption';
-import GachaSurvivalProbability from '#/components/charts/GachaSurvivalChart';
+import GachaSurvivalProbability from '#/components/charts/GachaSurvivalProbability';
+import BannerEVCounts from '#/components/charts/BannerEVCounts';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -98,10 +98,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <LazyRender>
             <TotalGachaResult result={result} />
           </LazyRender>
-          {!(
-            (result.total.isSimpleMode && result.total.isTrySim) ||
-            result.total.bannerFailureAction === 'continueExecution'
-          ) && (
+          {!(result.total.isSimpleMode && result.total.isTrySim) && (
             <>
               <LazyRender>
                 <GachaSurvivalProbability result={result} chartHeight="h-[400px]" />
@@ -112,15 +109,15 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
             </>
           )}
           <LazyRender>
-            <BannerAverageCount result={result} chartHeight="h-[400px]" />
+            <BannerEVCounts result={result} chartHeight="h-[400px]" />
           </LazyRender>
           {result.total.isTrySim ? (
             <LazyRender>
-              <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
+              <ExpectedCumulativeConsumption result={result} chartHeight="h-[400px]" />
             </LazyRender>
           ) : (
             <LazyRender>
-              <ExpectedCumulativeConsumption result={result} chartHeight="h-[400px]" />
+              <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
             </LazyRender>
           )}
           {/* <LazyRender>
@@ -148,15 +145,22 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <span className="text-amber-500">배너별</span> 성공 기록 통계
         </motion.div>
         <div className="flex flex-col gap-6">
-          {result.perBanner.map((bannerResult) => (
-            <LazyRender key={bannerResult.id}>
-              <BannerSuccessTrialCounts
-                bannerResult={bannerResult}
-                simulationTry={result.total.simulationTry}
-                chartHeight="h-[400px]"
-              />
-            </LazyRender>
-          ))}
+          {result.total.simulationTry > 10 ? (
+            result.perBanner.map((bannerResult) => (
+              <LazyRender key={bannerResult.id}>
+                <BannerSuccessTrialCounts
+                  bannerResult={bannerResult}
+                  simulationTry={result.total.simulationTry}
+                  chartHeight="h-[400px]"
+                />
+              </LazyRender>
+            ))
+          ) : (
+            <span>
+              시뮬레이션 반복 횟수 <span className="text-amber-400">10회 이하</span>에서는 배너별
+              세부기록를 표시하지 않습니다.
+            </span>
+          )}
         </div>
       </section>
     </Modal>
