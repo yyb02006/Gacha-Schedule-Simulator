@@ -299,7 +299,7 @@ const gachaRateSimulate = ({
   const fifthRate = 8;
   const fourthRate = 50;
   const globalGachaGoalCount = gachaGoal === 'allMax' ? 6 : gachaGoal === 'allFirst' ? 1 : null;
-  const simulationConfig = { orundum: initialResource, isSimpleMode, isTrySim };
+  // const simulationConfig = { initialOrundum: initialResource, isSimpleMode, isTrySim };
   // gachasim에서만 쓰이는 result 재화소모 시뮬레이션에서는 어디서 실패했는지 같은 정보가 더 필요
   // 최소 경우 최대 경우 식으로 툭 튀는 기록들 보관할지?
   // 천장 보상은 무조건 0번 6성
@@ -340,6 +340,7 @@ const gachaRateSimulate = ({
   for (let ti = 0; ti < simulationTry; ti++) {
     let singleSimulationSuccessCount = 0;
     let standardSixthStack = 0;
+    let currentOrundum = initialResource;
     // 1회 시뮬레이션 내의 배너 반복 시작
     for (let di = 0; di < pickupDatas.length; di++) {
       const currentBanner = simulationResult.perBanner[di];
@@ -363,8 +364,15 @@ const gachaRateSimulate = ({
             ? probability.normal
             : bannerPickupChance;
       // 배너 셋팅 시작 시 추가 오리지늄 계산 및 계산된 오리지늄을 배너 시작 재화에 할당
-      calculateOrundum(simulationConfig, additionalResource);
-      currentBanner.bannerStartingCurrency += simulationConfig.orundum;
+      // calculateOrundum(simulationConfig, additionalResource);
+      if (!isTrySim) {
+        if (isSimpleMode) {
+          currentOrundum += additionalResource.simpleMode;
+        } else {
+          currentOrundum += additionalResource.simpleMode;
+        }
+        currentBanner.bannerStartingCurrency = currentOrundum;
+      }
       const pity = pities[gachaType];
       const simulationMetrics: SimulationMetrics = {
         pityRewardObtainedCount: 0,
@@ -465,12 +473,12 @@ const gachaRateSimulate = ({
       for (let i = 0; i < gachaAttemptsLimit; i++) {
         if (!isTrySim) {
           // 재화 다 떨어지면 가챠 중지
-          if (simulationConfig.orundum < 600) {
+          if (currentOrundum < 600) {
             result.failure = 'currency';
             break;
           }
           result.bannerGachaRuns = i + 1;
-          simulationConfig.orundum -= 600;
+          currentOrundum -= 600;
         }
         if (currentBanner.bannerHistogram[i] === undefined) {
           // 히스토그램의 현재 가챠횟수가 undefined라면 0 삽입
