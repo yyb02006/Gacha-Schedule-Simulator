@@ -170,6 +170,11 @@ export const InsetNumberInput = ({
           <input
             type="text"
             inputMode="numeric"
+            onFocus={(e: FocusEvent<HTMLInputElement>) => {
+              if (e.currentTarget.value === '0') {
+                e.currentTarget.setSelectionRange(0, 1);
+              }
+            }}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const { value } = e.currentTarget;
               const numberString = normalizeNumberString(value);
@@ -177,6 +182,7 @@ export const InsetNumberInput = ({
               const normalizedString = Math.floor(
                 clamp(parseFloat(numberString), 0, max),
               ).toString();
+              console.log(value);
               setLocalValue(normalizedString);
             }}
             onBlur={(e: FocusEvent<HTMLInputElement>) => {
@@ -719,6 +725,11 @@ const PickupOperatorDetail = ({
               type="text"
               inputMode="numeric"
               max={6}
+              onFocus={(e: FocusEvent<HTMLInputElement>) => {
+                if (e.currentTarget.value === '0') {
+                  e.currentTarget.setSelectionRange(0, 1);
+                }
+              }}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 const numberString = normalizeNumberString(e.currentTarget.value);
                 if (numberString === undefined) return;
