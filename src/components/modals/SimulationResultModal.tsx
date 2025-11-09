@@ -15,6 +15,7 @@ import BannerEVShareRate from '#/components/charts/BannerEVShareRate';
 import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
 import BannerPreEVSuccess from '#/components/charts/BannerBannerPreEVSuccess';
 import ExpectedCumulativeConsumption from '#/components/charts/ExpectedCumulativeConsumption';
+import GachaSurvivalProbability from '#/components/charts/GachaSurvivalChart';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -97,10 +98,23 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <LazyRender>
             <TotalGachaResult result={result} />
           </LazyRender>
+          {!(
+            (result.total.isSimpleMode && result.total.isTrySim) ||
+            result.total.bannerFailureAction === 'continueExecution'
+          ) && (
+            <>
+              <LazyRender>
+                <GachaSurvivalProbability result={result} chartHeight="h-[400px]" />
+              </LazyRender>
+              <LazyRender>
+                <BannerWinRate result={result} chartHeight="h-[400px]" />
+              </LazyRender>
+            </>
+          )}
           <LazyRender>
-            <BannerWinRate result={result} chartHeight="h-[400px]" />
+            <BannerAverageCount result={result} chartHeight="h-[400px]" />
           </LazyRender>
-          {result.total.gachaMode === 'try' ? (
+          {result.total.isTrySim ? (
             <LazyRender>
               <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
             </LazyRender>
@@ -109,12 +123,9 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               <ExpectedCumulativeConsumption result={result} chartHeight="h-[400px]" />
             </LazyRender>
           )}
-          <LazyRender>
-            <BannerAverageCount result={result} chartHeight="h-[400px]" />
-          </LazyRender>
-          <LazyRender>
+          {/* <LazyRender>
             <BannerPreEVSuccess result={result} chartHeight="h-[400px]" />
-          </LazyRender>
+          </LazyRender> */}
           <LazyRender>
             <BannerEVShareRate
               result={{
