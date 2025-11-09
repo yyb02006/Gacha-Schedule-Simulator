@@ -126,7 +126,8 @@ export function clamp(num: number, min = 0, max?: number): number {
  */
 export function truncateToDecimals(num: number, decimals = 2): number {
   const factor = Math.pow(10, decimals);
-  return Math.round(num * factor) / factor;
+  const safeNum = safeNumberOrZero(num);
+  return Math.round(safeNum * factor) / factor;
 }
 
 /**
@@ -153,7 +154,7 @@ export function truncateToDecimals(num: number, decimals = 2): number {
  * const result = getPercentileIndex(histogram, total, 0.1);
  * console.log(result); // { remainingCumulative: 49, cutoffIndex: 3 }
  */
-export const getPercentileIndex = (histogram: number[], total: number, percentile: number) => {
+export function getPercentileIndex(histogram: number[], total: number, percentile: number) {
   if (percentile < 0 || percentile > 1) {
     throw new Error('percentile must be between 0 and 1');
   }
@@ -161,11 +162,33 @@ export const getPercentileIndex = (histogram: number[], total: number, percentil
   let remainingCumulative = 0;
   let cutoffIndex = histogram.length;
   for (let i = histogram.length - 1; i >= 0; i--) {
-    if (remainingCumulative / total >= 1 - percentile) {
+    if (safeNumberOrZero(remainingCumulative / total) >= 1 - percentile) {
       cutoffIndex = i;
       break;
     }
     remainingCumulative += histogram[i];
   }
   return { cumulative: total - remainingCumulative, cutoffIndex };
-};
+}
+
+/**
+ * 주어진 숫자를 안전하게 반환, NaN이면 0으로 처리
+ *
+ * @param {number} num - 검사할 숫자
+ * @returns {number} NaN일 경우 0, 그 외는 원래 숫자
+ *
+ * @example
+ * const safeNumber = safeNumberOrZero(5);
+ * console.log(safeNumber); // 5
+ *
+ * @example
+ * const safeNumber = safeNumberOrZero(NaN);
+ * console.log(safeNumber); // 0
+ *
+ * @example
+ * const safeNumber = safeNumberOrZero(undefined as any);
+ * console.log(safeNumber); // 0
+ */
+export function safeNumberOrZero(num: number): number {
+  return Number.isNaN(num) ? 0 : num;
+}
