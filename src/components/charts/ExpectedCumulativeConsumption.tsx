@@ -3,7 +3,7 @@
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { ChartType } from 'chart.js';
-import { truncateToDecimals } from '#/libs/utils';
+import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import BrushLineChart from '#/components/charts/base/BrushLineChart';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 
@@ -71,7 +71,8 @@ export default function ExpectedCumulativeConsumption({
             result.perBanner.reduce<{ data: number[]; acc: number }>(
               (acc, current) => {
                 const expectedCurrency = truncateToDecimals(
-                  Math.ceil(current.bannerWinGachaRuns / current.bannerSuccess) * 600,
+                  Math.ceil(safeNumberOrZero(current.bannerWinGachaRuns / current.bannerSuccess)) *
+                    600,
                   0,
                 );
                 acc.acc += expectedCurrency;

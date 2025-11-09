@@ -4,7 +4,7 @@ import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { truncateToDecimals } from '#/libs/utils';
+import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 
 const colors = [
   [
@@ -127,7 +127,7 @@ export default function BannerEVShareRate({
     result !== null
       ? result.perBanner
           .map(({ bannerWinGachaRuns, bannerSuccess, name }) => ({
-            data: bannerWinGachaRuns / bannerSuccess,
+            data: safeNumberOrZero(bannerWinGachaRuns / bannerSuccess),
             label: name,
           }))
           .sort((a, b) => b.data - a.data)
@@ -149,7 +149,7 @@ export default function BannerEVShareRate({
       }
     >
       {result ? (
-        <div className="text-sm">
+        <div className="p-4 text-sm">
           <DonutChart
             data={data}
             labels={labels}

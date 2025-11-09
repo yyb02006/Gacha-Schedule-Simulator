@@ -6,7 +6,7 @@ import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { rarityColor } from '#/constants/ui';
 import { obtainedTypes, rarities } from '#/constants/variables';
-import { cls, truncateToDecimals } from '#/libs/utils';
+import { cls, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { OperatorRarityForString } from '#/types/types';
 
 const createTooltipLiteral = ({
@@ -70,9 +70,9 @@ const RarityResultDetail = ({
       <h1 className={cls(rarityColor[rarity].textColor, 'mb-[10px]')}>
         {`${rarities[rarity]}성 결과`} (
         {truncateToDecimals(
-          result.total.totalGachaRuns === 0
-            ? 0
-            : (result.total.statistics[rarity].totalObtained / result.total.totalGachaRuns) * 100,
+          safeNumberOrZero(
+            result.total.statistics[rarity].totalObtained / result.total.totalGachaRuns,
+          ) * 100,
         )}
         %)
       </h1>

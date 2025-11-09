@@ -3,7 +3,7 @@
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { ChartType } from 'chart.js';
-import { truncateToDecimals } from '#/libs/utils';
+import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 
@@ -60,7 +60,7 @@ const DataProcessor = ({
   const correction = 1 - Math.exp(-k * result.total.simulationTry); // 실제 시도횟수 기반으로 사용할 보정계수. 시도횟수가 적을수록 보정도가 낮아져서 총 신뢰도가 작아짐 */
 
   const data = result.perBanner.map(({ bannerWinGachaRuns, bannerSuccess, bannerHistogram }) => {
-    const expectedValueIndex = Math.floor(bannerWinGachaRuns / bannerSuccess);
+    const expectedValueIndex = Math.floor(safeNumberOrZero(bannerWinGachaRuns / bannerSuccess));
 
     const cumulativeToEVIndex = bannerHistogram
       .slice(0, expectedValueIndex + 1)

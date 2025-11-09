@@ -1,3 +1,4 @@
+import { safeNumberOrZero } from '#/libs/utils';
 import { ArcElement, Chart } from 'chart.js';
 
 export const doughnutConnectorPlugin = () => ({
@@ -12,7 +13,7 @@ export const doughnutConnectorPlugin = () => ({
     dataset.data.forEach((value: number, index: number) => {
       const isVisible = chart.getDataVisibility(index);
       if (!isVisible) return; // 숨겨졌다면 connector line도 숨기기
-      const ratio = value / totalizedValue;
+      const ratio = safeNumberOrZero(value / totalizedValue);
       if (ratio < 0.05 && ratio > 0) {
         const meta = chart.getDatasetMeta(0);
         const arc = meta.data[index] as ArcElement;

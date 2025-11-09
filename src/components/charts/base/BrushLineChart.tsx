@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import LineChart from '#/components/charts/base/LineChart';
 import { Chart as ChartJS, Point } from 'chart.js';
 import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
+import { safeNumberOrZero } from '#/libs/utils';
 
 interface BrushLineChartProps {
   labels: string[];
@@ -40,7 +41,8 @@ export default function BrushLineChart({
 }: BrushLineChartProps) {
   const mainChartRef = useRef<ChartJS<'line', (number | Point | null)[], unknown> | null>(null);
 
-  const cutoffRatio = cutoffIndex !== undefined ? (cutoffIndex + 1) / data.length : 1;
+  const cutoffRatio =
+    cutoffIndex !== undefined ? safeNumberOrZero((cutoffIndex + 1) / data.length) : 1;
 
   const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
 

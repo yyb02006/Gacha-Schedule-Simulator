@@ -4,7 +4,7 @@ import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { truncateToDecimals } from '#/libs/utils';
+import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 
 const createTooltipLiteral = ({
   title,
@@ -104,7 +104,7 @@ export default function SimulationResult({
               <li className="font-S-CoreDream-400 text-amber-400">
                 시뮬레이션 당 평균 가챠횟수 :{' '}
                 {Math.floor(
-                  result.total.totalGachaRuns / result.total.simulationTry,
+                  safeNumberOrZero(result.total.totalGachaRuns / result.total.simulationTry),
                 ).toLocaleString()}{' '}
                 회
               </li>

@@ -1,7 +1,7 @@
 'use client';
 
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
-import { truncateToDecimals } from '#/libs/utils';
+import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -179,7 +179,9 @@ const brushPlugin = (
         // x 좌표 -> index 변환
         const availableRange = handleMovementArea.right - handleMovementArea.left;
         const handlePosFromLeft = x - handleMovementArea.left;
-        const tickIndex = Math.round((handlePosFromLeft / availableRange) * (totalPoints - 1));
+        const tickIndex = Math.round(
+          safeNumberOrZero(handlePosFromLeft / availableRange) * (totalPoints - 1),
+        );
         const label = chart.data.labels[tickIndex] as string;
 
         ctx.save();
@@ -410,7 +412,7 @@ export default function Brush<T extends PartialChartType>({
       const rect = canvas.getBoundingClientRect();
       canvas.setPointerCapture(e.pointerId);
       const x = e.clientX - rect.left;
-      const newRatio = (x - left) / (right - left);
+      const newRatio = safeNumberOrZero((x - left) / (right - left));
       const distanceFromStart = Math.abs(newRatio - selection.start);
       const distanceFromEnd = Math.abs(newRatio - selection.end);
       const isCloserToStart = distanceFromStart < distanceFromEnd;
@@ -431,7 +433,7 @@ export default function Brush<T extends PartialChartType>({
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      const newRatio = (x - left) / (right - left);
+      const newRatio = safeNumberOrZero((x - left) / (right - left));
       const isInChartArea = x > left && x < right && y < bottom && y > top;
 
       if (!dragging) {

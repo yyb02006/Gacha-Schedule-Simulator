@@ -6,6 +6,7 @@ import Brush from '#/components/charts/base/Brush';
 import { Dispatch, ReactNode, RefObject, SetStateAction, useRef } from 'react';
 import { Chart as ChartJS } from 'chart.js';
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
+import { safeNumberOrZero } from '#/libs/utils';
 
 interface BrushBarChartProps<T extends 'bar' | 'line'> {
   labels: string[];
@@ -49,7 +50,8 @@ export default function BrushBarChart({
     null,
   );
 
-  const cutoffRatio = cutoffIndex !== undefined ? (cutoffIndex + 1) / data.length : 1;
+  const cutoffRatio =
+    cutoffIndex !== undefined ? safeNumberOrZero((cutoffIndex + 1) / data.length) : 1;
 
   const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
 

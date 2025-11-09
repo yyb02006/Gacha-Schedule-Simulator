@@ -13,7 +13,7 @@ import BannerAddModal from '#/components/modals/BannerAddModal';
 import pickupDatas from '#/data/pickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
 import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
-import { getPercentileIndex } from '#/libs/utils';
+import { getPercentileIndex, safeNumberOrZero } from '#/libs/utils';
 
 export type Operator = {
   operatorId: string;
@@ -662,7 +662,7 @@ export default function PickupList() {
       current: { gachaGoal, initialResource },
     } = initialInputs;
     const expectedTryBySingleCycle = pickupDatas.length * 150;
-    const mobileSimulationTry = Math.floor(10000000 / expectedTryBySingleCycle);
+    const mobileSimulationTry = Math.floor(safeNumberOrZero(10000000 / expectedTryBySingleCycle));
     const getPostMessage = (index: number): WorkerInput => {
       const inputTry = isMobile ? mobileSimulationTry : simulationTry;
       const base = Math.floor(inputTry / workerCount);

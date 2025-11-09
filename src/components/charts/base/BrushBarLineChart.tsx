@@ -4,6 +4,7 @@ import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
 import BarLineChart, { BarLineChartData } from '#/components/charts/base/BarLineChart';
 import MultiDataBrush from '#/components/charts/base/MultiDataBrush';
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
+import { safeNumberOrZero } from '#/libs/utils';
 
 interface BrushBarLineChartProps<T extends 'bar' | 'line'> {
   labels: string[];
@@ -46,7 +47,8 @@ export default function BrushBarLineChart({
     unknown
   > | null>(null);
 
-  const cutoffRatio = cutoffIndex !== undefined ? (cutoffIndex + 1) / primaryData.length : 1;
+  const cutoffRatio =
+    cutoffIndex !== undefined ? safeNumberOrZero((cutoffIndex + 1) / primaryData.length) : 1;
 
   const initialSelectionEnd = primaryData.length > 300 ? cutoffRatio : 1;
 

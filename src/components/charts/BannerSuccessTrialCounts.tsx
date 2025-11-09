@@ -2,7 +2,7 @@
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { BannerResult } from '#/components/PickupList';
-import { truncateToDecimals } from '#/libs/utils';
+import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import Brush from '#/components/charts/base/Brush';
@@ -77,7 +77,10 @@ const Legend = ({
       <div>
         구간 누적 확률 :{' '}
         <span className="font-S-CoreDream-500 text-amber-500">
-          {truncateToDecimals((filteredData.reduce((a, b) => a + b, 0) / bannerSuccess) * 100)}%
+          {truncateToDecimals(
+            safeNumberOrZero(filteredData.reduce((a, b) => a + b, 0) / bannerSuccess) * 100,
+          )}
+          %
         </span>
       </div>
       {/* <div>
@@ -146,7 +149,7 @@ export default function BannerSuccessTrialCounts({
 
   const cutoffRatio =
     successIndexUntilCutoff !== undefined
-      ? successIndexUntilCutoff / (bannerHistogram.length - 1)
+      ? safeNumberOrZero(successIndexUntilCutoff / (bannerHistogram.length - 1))
       : 1;
 
   const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
@@ -217,7 +220,7 @@ export default function BannerSuccessTrialCounts({
             }}
             padding={padding}
             cutoffRatio={cutoffRatio}
-            cutoffPercentage={cumulativeUntilCutoff / bannerSuccess}
+            cutoffPercentage={safeNumberOrZero(cumulativeUntilCutoff / bannerSuccess)}
             height={brushHeight}
             dispatchRef={dispatchRef}
           />

@@ -1,4 +1,5 @@
 import { BannerFailureAction, Dummy, WorkerInput } from '#/components/PickupList';
+import { safeNumberOrZero } from '#/libs/utils';
 import { OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
 
 export default {} as typeof Worker & { new (): Worker };
@@ -186,7 +187,7 @@ const executePickupRoll = ({
     // 이미 획득한 천장보상 제외하고 획득
     rollResult.isPityRewardObtained = true;
     const pityRoll = Math.random() * 100;
-    const PickupChanceByEachReward = 100 / pityRewardOperators.length;
+    const PickupChanceByEachReward = safeNumberOrZero(100 / pityRewardOperators.length);
     for (const [ci, pityRewardOperator] of pityRewardOperators.entries()) {
       if (
         pityRoll < PickupChanceByEachReward * (ci + 1) &&
@@ -514,7 +515,7 @@ const gachaRateSimulate = ({
         ) {
           // 6성 당첨
           logging && console.log('6성 당첨');
-          const pickupChanceByEach = pickupChance / newPickupOpersCount.sixth;
+          const pickupChanceByEach = safeNumberOrZero(pickupChance / newPickupOpersCount.sixth);
           const stringRarity: OperatorRarityForString = 'sixth';
           const targetOperators = result.operators.sixth;
           sixStats.totalObtained++;
@@ -649,7 +650,7 @@ const gachaRateSimulate = ({
                     const rollResult = executePickupRoll({
                       targetOperators,
                       pickupChance: 50,
-                      pickupChanceByEach: 50 / newPickupOpersCount.fifth,
+                      pickupChanceByEach: safeNumberOrZero(50 / newPickupOpersCount.fifth),
                       isPityReached: unObtainedPityRewards.length === 1,
                       pityRewardOperators: unObtainedPityRewards,
                     });
@@ -666,7 +667,7 @@ const gachaRateSimulate = ({
                     const rollResult = executePickupRoll({
                       targetOperators,
                       pickupChance: 100,
-                      pickupChanceByEach: 100 / newPickupOpersCount.fifth,
+                      pickupChanceByEach: safeNumberOrZero(100 / newPickupOpersCount.fifth),
                     });
                     updateResult({
                       rollResult,
@@ -681,7 +682,7 @@ const gachaRateSimulate = ({
                     const rollResult = executePickupRoll({
                       targetOperators,
                       pickupChance: 60,
-                      pickupChanceByEach: 60 / newPickupOpersCount.fifth,
+                      pickupChanceByEach: safeNumberOrZero(60 / newPickupOpersCount.fifth),
                     });
                     updateResult({
                       rollResult,
@@ -696,7 +697,7 @@ const gachaRateSimulate = ({
                     const rollResult = executePickupRoll({
                       targetOperators,
                       pickupChance: 50,
-                      pickupChanceByEach: 50 / newPickupOpersCount.fifth,
+                      pickupChanceByEach: safeNumberOrZero(50 / newPickupOpersCount.fifth),
                     });
                     updateResult({
                       rollResult,
@@ -718,7 +719,7 @@ const gachaRateSimulate = ({
               const rollResult = executePickupRoll({
                 targetOperators,
                 pickupChance: 20,
-                pickupChanceByEach: 20 / newPickupOpersCount.fourth,
+                pickupChanceByEach: safeNumberOrZero(20 / newPickupOpersCount.fourth),
               });
               updateResult({
                 rollResult,
@@ -1156,8 +1157,8 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   console.log(`걸린 시간: ${elapsedTime} 밀리초`);
 
   const { total, perBanner } = result;
-  const expectedValues = perBanner.map(
-    ({ bannerWinGachaRuns, bannerSuccess }) => bannerWinGachaRuns / bannerSuccess,
+  const expectedValues = perBanner.map(({ bannerWinGachaRuns, bannerSuccess }) =>
+    safeNumberOrZero(bannerWinGachaRuns / bannerSuccess),
   );
 
   /* console.log(

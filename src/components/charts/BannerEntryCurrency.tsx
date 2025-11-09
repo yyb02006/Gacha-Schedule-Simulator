@@ -3,7 +3,7 @@
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { BannerResult, GachaSimulationMergedResult } from '#/components/PickupList';
-import { truncateToDecimals } from '#/libs/utils';
+import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import { ChartRef } from '#/components/charts/base/Brush';
@@ -35,7 +35,10 @@ const createTooltipLiteral =
                 truncateToDecimals(
                   bannerResults
                     .slice(0, datasets[0].dataIndex + 1)
-                    .reduce((a, b) => a + b.bannerWinGachaRuns / b.bannerSuccess, 0),
+                    .reduce(
+                      (a, b) => a + safeNumberOrZero(b.bannerWinGachaRuns / b.bannerSuccess),
+                      0,
+                    ),
                   0,
                 ) * 600
               } 합성옥
