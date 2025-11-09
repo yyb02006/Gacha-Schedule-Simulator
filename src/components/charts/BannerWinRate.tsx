@@ -3,7 +3,7 @@
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { ChartType, TooltipItem } from 'chart.js';
-import { truncateToDecimals } from '#/libs/utils';
+import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import BrushBarLineChart from '#/components/charts/base/BrushBarLineChart';
 import { BarLineChartData } from '#/components/charts/base/BarLineChart';
 
@@ -39,11 +39,11 @@ const createTooltipLiteral = ({
           <p>
             ${datasets[i].dataset.label}${datasets[i].dataset.label === '성공' ? '률' : ' 실패율'} :
             <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">
-              ${truncateToDecimals(((datasets[i].parsed.y !== null ? datasets[i].parsed.y : total) / total) * 100)}%
+              ${truncateToDecimals(safeNumberOrZero((datasets[i].parsed.y !== null ? datasets[i].parsed.y : total) / total) * 100)}%
             </span>
           </p>
           <p>
-            실패 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
+            ${datasets[i].dataset.label === '성공' ? '성공' : '실패'} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
           </p>
         </div>`;
     })
@@ -51,21 +51,31 @@ const createTooltipLiteral = ({
 </div>`;
 };
 
-const Legend = () => {
+const Legend = ({
+  isCurrencyBarOff,
+  isLimitBarOff,
+}: {
+  isCurrencyBarOff: boolean;
+  isLimitBarOff: boolean;
+}) => {
   return (
     <div className="font-S-CoreDream-300 flex flex-wrap gap-4 px-4 text-sm">
       <div className="flex items-center gap-x-1 text-sm">
         <div className="size-2 rounded-full bg-[#51a2ff]" />
-        성공률
+        성공
       </div>
-      <div className="flex items-center gap-x-1 text-sm">
-        <div className="size-2 rounded-full bg-[#fe9a00]" />
-        재화부족 실패율
-      </div>
-      <div className="flex items-center gap-x-1 text-sm">
-        <div className="size-2 rounded-full bg-[#ff5e5e]" />
-        횟수부족 실패율
-      </div>
+      {isCurrencyBarOff || (
+        <div className="flex items-center gap-x-1 text-sm">
+          <div className="size-2 rounded-full bg-[#ff5e5e]" />
+          재화부족
+        </div>
+      )}
+      {isLimitBarOff || (
+        <div className="flex items-center gap-x-1 text-sm">
+          <div className="size-2 rounded-full bg-[#fe9a00]" />
+          최대 시도 횟수 도달
+        </div>
+      )}
     </div>
   );
 };
@@ -106,39 +116,81 @@ export default function BannerWinRate({
   const fullDatas: BarLineChartData = {
     bar: [
       {
-        label: '재화부족',
-        data: datas.bar[0],
-        color: {
-          backgroundColor: '#ff5e5ecc',
-          borderColor: '#ff5e5e',
-          hoverBackgroundColor: '#f53939cc',
-          hoverBorderColor: '#f53939',
-        },
-      },
-      {
-        label: '횟수부족',
-        data: datas.bar[1],
-        color: {
-          backgroundColor: '#fe9a00cc',
-          borderColor: '#fe9a00',
-          hoverBackgroundColor: '#d86c00cc',
-          hoverBorderColor: '#d86c00',
-        },
-      },
-    ],
-    line: [
-      {
         label: '성공',
         data: datas.line[0],
         color: {
           backgroundColor: '#51a2ffcc',
           borderColor: '#51a2ff',
-          hoverBackgroundColor: '#024ef3cc',
-          hoverBorderColor: '#024ef3',
+          hoverBackgroundColor: '#2b7fffcc',
+          hoverBorderColor: '#2b7fff',
+        },
+      },
+      ...(!result?.total.isTrySim
+        ? [
+            {
+              label: '재화부족',
+              data: datas.bar[0],
+              color: {
+                backgroundColor: '#ff5e5ecc',
+                borderColor: '#ff5e5e',
+                hoverBackgroundColor: '#ef4444cc',
+                hoverBorderColor: '#ef4444',
+              },
+            },
+          ]
+        : []),
+      ...(!result?.total.isSimpleMode
+        ? [
+            {
+              label: '횟수부족',
+              data: datas.bar[1],
+              color: {
+                backgroundColor: '#fe9a00cc',
+                borderColor: '#fe9a00',
+                hoverBackgroundColor: '#e17100cc',
+                hoverBorderColor: '#e17100',
+              },
+            },
+          ]
+        : []),
+    ],
+    line: [],
+  };
+  /* const dummy = {
+    line: [],
+    bar: [
+      {
+        data: [6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500],
+        label: '성공',
+        color: {
+          backgroundColor: '#51a2ffcc',
+          borderColor: '#51a2ff',
+          hoverBackgroundColor: '#2b7fffcc',
+          hoverBorderColor: '#2b7fff',
+        },
+      },
+      {
+        data: [2000, 600, 300, 5000, 1000, 6000, 5000, 500, 0, 2600, 1000],
+        label: '재화부족',
+        color: {
+          backgroundColor: '#ff5e5ecc',
+          borderColor: '#ff5e5e',
+          hoverBackgroundColor: '#ef4444cc',
+          hoverBorderColor: '#ef4444',
+        },
+      },
+      {
+        data: [1300, 200, 4100, 1900, 300, 2400, 2200, 500, 0, 3000, 500],
+        label: '횟수부족',
+        color: {
+          backgroundColor: '#fe9a00cc',
+          borderColor: '#fe9a00',
+          hoverBackgroundColor: '#e17100cc',
+          hoverBorderColor: '#e17100',
         },
       },
     ],
-  };
+  }; */
   return (
     <ChartWrapper
       title={
@@ -151,41 +203,7 @@ export default function BannerWinRate({
         <BrushBarLineChart
           labels={labels}
           primaryData={[6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500]}
-          fullDatas={{
-            line: [],
-            bar: [
-              {
-                data: [6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500],
-                label: '성공',
-                color: {
-                  backgroundColor: '#51a2ffcc',
-                  borderColor: '#51a2ff',
-                  hoverBackgroundColor: '#2b7fffcc',
-                  hoverBorderColor: '#2b7fff',
-                },
-              },
-              {
-                data: [2000, 600, 300, 5000, 1000, 6000, 5000, 500, 0, 2600, 1000],
-                label: '재화부족',
-                color: {
-                  backgroundColor: '#ff5e5ecc',
-                  borderColor: '#ff5e5e',
-                  hoverBackgroundColor: '#ef4444cc',
-                  hoverBorderColor: '#ef4444',
-                },
-              },
-              {
-                data: [1300, 200, 4100, 1900, 300, 2400, 2200, 500, 0, 3000, 500],
-                label: '횟수부족',
-                color: {
-                  backgroundColor: '#fe9a00cc',
-                  borderColor: '#fe9a00',
-                  hoverBackgroundColor: '#e17100cc',
-                  hoverBorderColor: '#e17100',
-                },
-              },
-            ],
-          }}
+          fullDatas={fullDatas}
           brushColor={{
             backgroundColor: '#8e51ffCC',
             borderColor: '#8e51ff',
@@ -198,7 +216,10 @@ export default function BannerWinRate({
           brushHeight={brushHeight}
           tooltipCallback={createTooltipLiteral}
         >
-          <Legend />
+          <Legend
+            isCurrencyBarOff={result?.total.isTrySim}
+            isLimitBarOff={result?.total.isSimpleMode}
+          />
         </BrushBarLineChart>
       ) : null}
     </ChartWrapper>
