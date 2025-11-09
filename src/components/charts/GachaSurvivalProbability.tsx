@@ -36,16 +36,16 @@ const createTooltipLiteral = ({
   ${body
     .map((b, i) => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
-          <p>
-            ${datasets[i].dataset.label === '중단' ? '여기서 중단될' : datasets[i].dataset.label} 확률 :
-            <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">
-              ${truncateToDecimals(((datasets[i].parsed.y !== null ? datasets[i].parsed.y : total) / total) * 100)}%
-            </span>
-          </p>
-          <p>
-            ${datasets[i].dataset.label === '중단' ? '여기서 중단된' : datasets[i].dataset.label} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
-          </p>
-        </div>`;
+        <p>
+          ${datasets[i].dataset.label === '중단' ? '이 배너에서 중단될' : datasets[i].dataset.label} 확률 :
+          <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">
+            ${truncateToDecimals(((datasets[i].parsed.y !== null ? datasets[i].parsed.y : total) / total) * 100)}%
+          </span>
+        </p>
+        <p>
+          ${datasets[i].dataset.label === '중단' ? '이 배너에서 중단된' : datasets[i].dataset.label} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
+        </p>
+      </div>`;
     })
     .join('')}
 </div>`;
@@ -93,7 +93,13 @@ export default function GachaSurvivalProbability({
             }
           };
           safePush(acc.datas.line, 0, actualEntryCount);
-          safePush(acc.datas.bar, 0, currencyShortageFailure + maxAttemptsFailure);
+          safePush(
+            acc.datas.bar,
+            0,
+            result.total.bannerFailureAction === 'interruption'
+              ? currencyShortageFailure + maxAttemptsFailure
+              : 0,
+          );
           return acc;
         },
         { labels: [], datas: { bar: [], line: [] } },
