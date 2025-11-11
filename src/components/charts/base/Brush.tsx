@@ -304,6 +304,27 @@ export default function Brush<T extends PartialChartType>({
 
       mainChartRef.current.data.datasets[0].data = filteredData;
       mainChartRef.current.data.labels = labels.slice(selectionIndex.start, selectionIndex.end);
+
+      if (mainChartRef.current?.data.datasets[0].type === 'bar' && data.length > 20) {
+        const currentLength = selectionIndex.end - selectionIndex.start;
+        const dataset = (mainChartRef as ChartRef<'bar'>).current?.data.datasets[0];
+        if (dataset) {
+          if (currentLength > 450) {
+            dataset.backgroundColor = '#fe9a00CC';
+            dataset.categoryPercentage = 1;
+            dataset.barPercentage = 1;
+          } else if (currentLength > 300) {
+            dataset.backgroundColor = '#fe9a00E6';
+            dataset.categoryPercentage = 0.95;
+            dataset.barPercentage = 0.9;
+          } else {
+            dataset.backgroundColor = '#fe9a00';
+            dataset.categoryPercentage = 0.9;
+            dataset.barPercentage = 0.8;
+          }
+        }
+      }
+
       mainChartRef.current.update();
 
       if (dispatchRef?.current) {
@@ -321,6 +342,26 @@ export default function Brush<T extends PartialChartType>({
       }
 
       const filteredData = data.slice(selectionIndex.start, selectionIndex.end);
+
+      if (mainChartRef.current?.data.datasets[0].type === 'bar' && data.length > 20) {
+        const currentLength = selectionIndex.end - selectionIndex.start;
+        const dataset = (mainChartRef as ChartRef<'bar'>).current?.data.datasets[0];
+        if (dataset) {
+          if (currentLength > 450) {
+            dataset.backgroundColor = '#fe9a00CC';
+            dataset.categoryPercentage = 1;
+            dataset.barPercentage = 1;
+          } else if (currentLength > 300) {
+            dataset.backgroundColor = '#fe9a00E6';
+            dataset.categoryPercentage = 0.95;
+            dataset.barPercentage = 0.9;
+          } else {
+            dataset.backgroundColor = '#fe9a00';
+            dataset.categoryPercentage = 0.9;
+            dataset.barPercentage = 0.8;
+          }
+        }
+      }
 
       if ((selection.end <= cutoffRatio || data.length < 500) && mainChartRef.current) {
         mainChartRef.current.data.datasets[0].data = filteredData;
