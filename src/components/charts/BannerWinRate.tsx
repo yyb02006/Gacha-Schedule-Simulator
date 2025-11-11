@@ -35,7 +35,7 @@ const createTooltipLiteral = ({
   ${title.map((t) => `<p style="color: #ffb900" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
     .map((b, i) => {
-      return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
+      return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[3px] text-sm whitespace-nowrap">
           <p>
             ${datasets[i].dataset.label}${datasets[i].dataset.label === '성공' ? '률' : ' 실패율'} :
             <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">
@@ -43,7 +43,7 @@ const createTooltipLiteral = ({
             </span>
           </p>
           <p>
-            ${datasets[i].dataset.label === '성공' ? '성공' : '실패'} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
+            ${datasets[i].dataset.label === '성공' ? '성공' : '실패'} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y?.toLocaleString()} 회</span>
           </p>
         </div>`;
     })

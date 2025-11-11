@@ -43,7 +43,7 @@ const createTooltipLiteral = ({
           </span>
         </p>
         <p>
-          ${datasets[i].dataset.label === '중단' ? '이 배너에서 중단된' : datasets[i].dataset.label} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y} 회</span>
+          ${datasets[i].dataset.label === '중단' ? '이 배너에서 중단된' : datasets[i].dataset.label} 횟수 : <span style="color: ${textColors[i]};" class="font-S-CoreDream-500">${datasets[i].parsed.y?.toLocaleString()} 회</span>
         </p>
       </div>`;
     })
