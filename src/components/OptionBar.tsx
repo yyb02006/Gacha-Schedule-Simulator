@@ -10,6 +10,7 @@ import SimulatorTypeButton from '#/components/buttons/SimulatorTypeButton';
 import ToggleButton from '#/components/buttons/ToggleButton';
 import { InitialInputs, SimulationOptions } from '#/components/PickupList';
 import { clamp, normalizeNumberString, stringToNumber } from '#/libs/utils';
+import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 
 const ControlPanel = ({
   isTrySim,
@@ -103,7 +104,7 @@ const ControlPanel = ({
                     <input
                       type="text"
                       inputMode="numeric"
-                      pattern="[0-9]*"
+                      pattern={LOCALE_NUMBER_PATTERN.source}
                       onFocus={(e: FocusEvent<HTMLInputElement>) => {
                         if (e.currentTarget.value === '0') {
                           e.currentTarget.setSelectionRange(0, 1);
@@ -111,7 +112,8 @@ const ControlPanel = ({
                       }}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
                         const { value } = e.currentTarget;
-                        const numberString = normalizeNumberString(value);
+                        const newValue = value.replace(/,/g, '');
+                        const numberString = normalizeNumberString(newValue);
                         if (numberString === undefined) return;
                         const normalizedString = Math.floor(
                           clamp(parseFloat(numberString), 0),
@@ -120,13 +122,20 @@ const ControlPanel = ({
                       }}
                       onBlur={(e: FocusEvent<HTMLInputElement>) => {
                         if (!e.currentTarget.value) return;
-                        initialInputs.initialResource = stringToNumber(e.currentTarget.value);
+                        const newValue = e.currentTarget.value.replace(/,/g, '');
+                        initialInputs.initialResource = stringToNumber(newValue);
                       }}
                       className="relative w-14 min-w-0 text-right"
-                      value={initialResource}
+                      value={stringToNumber(initialResource).toLocaleString()}
                     />
                   </motion.div>
-                  <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+                  <motion.div
+                    variants={toOpacityZero}
+                    initial="exit"
+                    animate="idle"
+                    exit="exit"
+                    className="select-none"
+                  >
                     합성옥
                   </motion.div>
                 </motion.div>

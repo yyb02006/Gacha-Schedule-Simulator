@@ -178,12 +178,12 @@ export const InsetNumberInput = ({
             }}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const { value } = e.currentTarget;
-              const numberString = normalizeNumberString(value);
+              const newValue = value.replace(/,/g, '');
+              const numberString = normalizeNumberString(newValue);
               if (numberString === undefined) return;
               const normalizedString = Math.floor(
                 clamp(parseFloat(numberString), 0, max),
               ).toString();
-              console.log(value);
               setLocalValue(normalizedString);
             }}
             onBlur={(e: FocusEvent<HTMLInputElement>) => {
@@ -193,7 +193,11 @@ export const InsetNumberInput = ({
             className={cls(inputWidth ?? 'w-8', 'relative h-full min-w-0 text-right')}
             max={max}
             maxLength={maxLength}
-            value={showAttemptsSign && (isInfinity || firstSixthTry) ? '' : localValue}
+            value={
+              showAttemptsSign && (isInfinity || firstSixthTry)
+                ? ''
+                : stringToNumber(localValue.replace(/,/g, '')).toLocaleString()
+            }
           />
         </motion.div>
         {children}
@@ -226,17 +230,18 @@ const AdditionalResUntilBannerEnd = ({
             }}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const { value } = e.currentTarget;
-              const numberString = normalizeNumberString(value);
+              const newValue = value.replace(/,/g, '');
+              const numberString = normalizeNumberString(newValue);
               if (numberString === undefined) return;
               const normalizedString = Math.floor(clamp(parseFloat(numberString), 0)).toString();
               setLocalValue(normalizedString);
             }}
             onBlur={onInputBlur}
             className="relative w-14 min-w-0 text-right"
-            value={localValue}
+            value={stringToNumber(localValue).toLocaleString()}
           />
         </div>
-        <div>합성옥</div>
+        <div className="select-none">합성옥</div>
       </div>
     </div>
   );
@@ -272,7 +277,7 @@ const BannerBadges = ({
             'rounded-full border px-3 py-1 text-sm whitespace-nowrap',
           )}
         >
-          <div className="relative top-[1px]">{currentBadgeProp.name}</div>
+          <div className="relative top-[1px] select-none">{currentBadgeProp.name}</div>
         </div>
         <motion.div
           animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
@@ -388,7 +393,9 @@ const BannerHeader = ({
           </svg>
         </SmallButton>
         <div className="font-S-CoreDream-700 flex items-center text-2xl">
-          <span key={`${id} ${index + 1}`}>{index + 1}.</span>
+          <span key={`${id} ${index + 1}`} className="select-none">
+            {index + 1}.
+          </span>
         </div>
         <div className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
           <input
@@ -519,7 +526,8 @@ const SimplePreInfoField = ({
               key={`res-${`${id} ${isTrySim}` ? 'hidden' : 'shown'}`}
               additionalResource={additionalResource.simpleMode.toString()}
               onInputBlur={(e) => {
-                updateAdditionalResource('simpleMode', stringToNumber(e.currentTarget.value));
+                const newValue = e.currentTarget.value.replace(/,/g, '');
+                updateAdditionalResource('simpleMode', stringToNumber(newValue));
               }}
             />
           )}
@@ -554,7 +562,8 @@ const PreInfoField = ({
           <MaxAttempts
             maxGachaAttempts={maxGachaAttempts.toString()}
             onInputBlur={(e) => {
-              updateAttempts(stringToNumber(e.currentTarget.value), 'max');
+              const newValue = e.currentTarget.value.replace(/,/g, '');
+              updateAttempts(stringToNumber(newValue), 'max');
             }}
             onUnlimitedClick={() => {
               updateAttempts(Infinity, 'max');
@@ -564,7 +573,8 @@ const PreInfoField = ({
           <MinAttempts
             minGachaAttempts={minGachaAttempts.toString()}
             onInputBlur={(e) => {
-              updateAttempts(stringToNumber(e.currentTarget.value), 'min');
+              const newValue = e.currentTarget.value.replace(/,/g, '');
+              updateAttempts(stringToNumber(newValue), 'min');
             }}
             onFirstSixth={() => {
               updateFirstSixthTry(true);
@@ -1049,10 +1059,8 @@ export default function PickupBanner({
                     key={`res-${`${id} ${isTrySim}` ? 'hidden' : 'shown'}`}
                     additionalResource={pickupData.additionalResource.extendedMode.toString()}
                     onInputBlur={(e) => {
-                      updateAdditionalResource(
-                        'extendedMode',
-                        stringToNumber(e.currentTarget.value),
-                      );
+                      const newValue = e.currentTarget.value.replace(/,/g, '');
+                      updateAdditionalResource('extendedMode', stringToNumber(newValue));
                     }}
                   />
                 )}
