@@ -69,7 +69,6 @@ const colors = [
 
 const createTooltipLiteral = ({
   title,
-  textColors,
   body,
   datasets,
   total,
@@ -80,7 +79,7 @@ const createTooltipLiteral = ({
 
   return /*html*/ `
     <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 opacity-90 shadow-xl shadow-[#141414]">
-      ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+      ${title.map((t) => `<p style="color: ${borderColor}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
       ${body
         .map((b, i) => {
           return /*html*/ `
@@ -159,7 +158,7 @@ export default function BannerEVShareRate({
             borderColor={colors[Math.ceil(result.perBanner.length / 5) - 1].map((HEX) => HEX)}
             legendPosition="after"
             createLegendHTML={createLegendHTML}
-            tooltipCallback={createTooltipLiteral}
+            createTooltipLiteral={createTooltipLiteral}
             containerClassName="grid grid-cols-[4fr_3fr]"
             legendClassName="flex justify-center items-center"
           />
