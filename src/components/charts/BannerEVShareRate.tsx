@@ -103,7 +103,7 @@ const createTooltipLiteral = ({
 
 const createLegendHTML = (labels: string[], colors: string[], values: number[]) => {
   const total = values.reduce((a, b) => a + b, 0);
-  return `<div class="flex flex-wrap gap-y-[6px] gap-x-6 text-sm">${labels
+  return `<div class="flex flex-wrap h-fit gap-y-3 gap-x-12 text-base">${labels
     .map((label, i) => {
       const color = colors[i];
       const percentage = truncateToDecimals((values[i] / total) * 100);
@@ -157,9 +157,11 @@ export default function BannerEVShareRate({
               (HEX) => HEX + 'CC',
             )}
             borderColor={colors[Math.ceil(result.perBanner.length / 5) - 1].map((HEX) => HEX)}
-            legendPosition="top"
+            legendPosition="after"
             createLegendHTML={createLegendHTML}
             tooltipCallback={createTooltipLiteral}
+            containerClassName="grid grid-cols-[4fr_3fr]"
+            legendClassName="flex justify-center items-center"
           />
         </div>
       ) : null}
