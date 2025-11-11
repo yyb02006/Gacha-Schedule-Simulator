@@ -13,11 +13,13 @@ import { LegendData } from '#/components/charts/BannerEntryCurrency';
 const createTooltipLiteral =
   (originalHistogram: number[]) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
-    const stringifiedValue = datasets[0].formattedValue ?? '';
-    const rawValue = datasets[0].raw as number;
+    const dataset = datasets[0];
+    const stringifiedValue = dataset.formattedValue ?? '';
+    const rawValue = dataset.raw as number;
     const sumUpToCurrent = originalHistogram
-      .slice(0, datasets[0].dataIndex + 1)
+      .slice(0, dataset.dataIndex + 1)
       .reduce((a, b) => a + b, 0);
+    const { dataIndex } = dataset;
 
     return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
@@ -25,19 +27,25 @@ const createTooltipLiteral =
   ${body
     .map((b, i) => {
       return /*html*/ `
-      <div class="font-S-CoreDream-300 space-y-[3px] text-sm whitespace-nowrap">
+      <div class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
         <p>
           현재 차수 성공 횟수 :
           <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
         </p>
-        <p>
-          현재 차수 비중 :
-          <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals((rawValue / total) * 100)}%</span>
-        </p>
-        <p>
-          누적 확률 :
-          <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals((sumUpToCurrent / total) * 100)}%</span>
-        </p>
+        <div class="space-y-[3px]">
+          <p>
+            소모 재화 :
+            <span class="font-S-CoreDream-500 text-rose-400">${((dataIndex + 1) * 600).toLocaleString()} 합성옥</span>
+          </p>
+          <p>
+            현재 차수 비중 :
+            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(rawValue / total) * 100)}%</span>
+          </p>
+          <p>
+            누적 확률 :
+            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(sumUpToCurrent / total) * 100)}%</span>
+          </p>
+        </div>
       </div>
     `;
     })
@@ -47,19 +55,21 @@ const createTooltipLiteral =
 
 const Legend = ({
   data,
-  labels,
+  isTrySim,
   bannerSuccess,
   bannerWinGachaRuns,
   pityRewardObtained,
+  bannerStartingCurrency,
   maxIndex,
   minIndex,
   dispatchRef,
 }: {
   data: number[];
-  labels: string[];
+  isTrySim: boolean;
   bannerSuccess: number;
   bannerWinGachaRuns: number;
   pityRewardObtained: number;
+  bannerStartingCurrency: number;
   maxIndex: number;
   minIndex: number;
   dispatchRef: RefObject<Dispatch<SetStateAction<LegendData<'bar'>>> | null>;
@@ -83,28 +93,34 @@ const Legend = ({
           %
         </span>
       </div>
-      {/* <div>
-    성공 횟수 : <span className="font-S-CoreDream-500 text-amber-500">{bannerSuccess}회</span>
-  </div> */}
       <div>
         성공 기대값 :{' '}
-        <span className="font-S-CoreDream-500 text-amber-500">
-          {truncateToDecimals(bannerWinGachaRuns / bannerSuccess)}회
+        <span className="font-S-CoreDream-500 text-sky-500">
+          {truncateToDecimals(
+            safeNumberOrZero(bannerWinGachaRuns / bannerSuccess),
+          ).toLocaleString()}
+          회
         </span>
       </div>
-      {/* <div>
-    천장 도달 횟수 :{' '}
-    <span className="font-S-CoreDream-500 text-amber-500">{pityRewardObtained}회</span>
-  </div> */}
+      {isTrySim || (
+        <div>
+          배너 시작 시 재화 :{' '}
+          <span className="font-S-CoreDream-500 text-red-400">
+            {truncateToDecimals(safeNumberOrZero(bannerStartingCurrency)).toLocaleString()} 합성옥
+          </span>
+        </div>
+      )}
       <div>
         천장 도달 확률 :{' '}
         <span className="font-S-CoreDream-500 text-amber-500">
-          {truncateToDecimals((pityRewardObtained / bannerSuccess) * 100)}%
+          {truncateToDecimals(safeNumberOrZero((pityRewardObtained / bannerSuccess) * 100))}%
         </span>
       </div>
       <div>
         최장 성공 차수 :{' '}
-        <span className="font-S-CoreDream-500 text-amber-500">{maxIndex + 1}회</span>
+        <span className="font-S-CoreDream-500 text-amber-500">
+          {(maxIndex + 1).toLocaleString()}회
+        </span>
       </div>
       <div>
         최단 성공 차수 :{' '}
@@ -122,16 +138,19 @@ export default function BannerSuccessTrialCounts({
     bannerHistogram,
     cumulativeUntilCutoff,
     successIndexUntilCutoff,
+    bannerStartingCurrency,
     maxIndex,
     minIndex,
     pityRewardObtained,
   },
+  isTrySim,
   simulationTry,
   chartHeight,
   brushHeight,
   enableBrush = true,
 }: {
   bannerResult: BannerResult;
+  isTrySim: boolean;
   simulationTry: number;
   chartHeight?: string;
   brushHeight?: string;
@@ -169,7 +188,7 @@ export default function BannerSuccessTrialCounts({
         <div className="flex items-end gap-3 text-amber-400">
           {name}{' '}
           <div className="font-S-CoreDream-300 text-sm text-[#eaeaea]">
-            ( 성공률 :{' '}
+            ( 배너 성공률 :{' '}
             <span className="font-S-CoreDream-500 text-amber-500">
               {truncateToDecimals((bannerSuccess / simulationTry) * 100)}%
             </span>{' '}
@@ -180,10 +199,11 @@ export default function BannerSuccessTrialCounts({
     >
       <Legend
         data={data}
-        labels={labels}
+        isTrySim={isTrySim}
         bannerWinGachaRuns={bannerWinGachaRuns}
         bannerSuccess={bannerSuccess}
         dispatchRef={dispatchRef}
+        bannerStartingCurrency={bannerStartingCurrency}
         maxIndex={maxIndex}
         minIndex={minIndex}
         pityRewardObtained={pityRewardObtained}
