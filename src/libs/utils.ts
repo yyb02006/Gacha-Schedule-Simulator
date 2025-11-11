@@ -131,7 +131,7 @@ export function truncateToDecimals(num: number, decimals = 2): number {
 }
 
 /**
- * 주어진 히스토그램에서 누적 합 기준으로 주어진 퍼센타일이 되기 직전의 인덱스와 누적 합을 반환
+ * 주어진 히스토그램에서 누적 합 기준으로 주어진 퍼센타일을 넘은 직후의 인덱스와 그 때의 누적 합을 반환
  *
  * @param {number[]} histogram - 각 구간의 값(횟수) 배열
  * @param {number} total - 히스토그램 전체 합
@@ -146,13 +146,13 @@ export function truncateToDecimals(num: number, decimals = 2): number {
  * const histogram = [1, 2, 3, 4];
  * const total = histogram.reduce((a, b) => a + b, 0);
  * const result = getPercentileIndex(histogram, total, 0.25);
- * console.log(result); // { remainingCumulative: 7, cutoffIndex: 1 }
+ * console.log(result); // { cumulative: 3, cutoffIndex: 1 }
  *
  * @example
  * const histogram = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
  * const total = histogram.reduce((a, b) => a + b, 0);
- * const result = getPercentileIndex(histogram, total, 0.1);
- * console.log(result); // { remainingCumulative: 49, cutoffIndex: 3 }
+ * const result = getPercentileIndex(histogram, total, 0.8);
+ * console.log(result); // { cumulative: 45, cutoffIndex: 8 }
  */
 export function getPercentileIndex(histogram: number[], total: number, percentile: number) {
   if (percentile < 0 || percentile > 1) {
@@ -162,16 +162,12 @@ export function getPercentileIndex(histogram: number[], total: number, percentil
   let remainingCumulative = 0;
   let cutoffIndex = histogram.length;
   for (let i = histogram.length - 1; i >= 0; i--) {
+    remainingCumulative += histogram[i];
     if (safeNumberOrZero(remainingCumulative / total) >= 1 - percentile) {
-      if (i < histogram.length - 1) {
-        cutoffIndex = i + 1;
-        remainingCumulative -= histogram[i + 1];
-      } else {
-        cutoffIndex = i;
-      }
+      cutoffIndex = i;
+      remainingCumulative -= histogram[i];
       break;
     }
-    remainingCumulative += histogram[i];
   }
   return { cumulative: total - remainingCumulative, cutoffIndex };
 }
