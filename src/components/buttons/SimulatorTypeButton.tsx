@@ -152,7 +152,13 @@ export default function SimulatorTypeButton({
               transition={{ duration: 0.3 }}
               className="flex size-full items-center justify-center rounded-lg"
             >
-              <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+              <motion.span
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="select-none"
+              >
                 {isTrySim ? '가챠 확률 시뮬레이션' : '재화 소모 시뮬레이션'}
               </motion.span>
             </motion.div>
