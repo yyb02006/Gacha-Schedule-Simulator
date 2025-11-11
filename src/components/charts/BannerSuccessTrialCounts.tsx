@@ -25,7 +25,7 @@ const createTooltipLiteral =
   ${body
     .map((b, i) => {
       return /*html*/ `
-      <div class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
+      <div class="font-S-CoreDream-300 space-y-[3px] text-sm whitespace-nowrap">
         <p>
           현재 차수 성공 횟수 :
           <span style="color: ${textColors[0]};" class="font-S-CoreDream-400">${stringifiedValue} 회</span>

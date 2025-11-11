@@ -20,32 +20,34 @@ const createTooltipLiteral =
   ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
     .map((b, i) => {
-      return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
+      return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
           <p>
-            도달 시 평균 잔여 합성옥 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
+            도달 시 평균 잔여 합성옥 : <span style="color: #ff6467;" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
           </p>
-          <p>
-            필요 합성옥 기대값 :
-            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-              ${(truncateToDecimals(bannerResults[dataIndex].bannerWinGachaRuns / bannerResults[dataIndex].bannerSuccess, 0) * 600).toLocaleString()} 합성옥
-            </span>
-          </p>
-          <p>
-            소모 합성옥 기대값 누적 :
-            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-              ${(
-                truncateToDecimals(
-                  bannerResults
-                    .slice(0, dataIndex + 1)
-                    .reduce(
-                      (a, b) => a + safeNumberOrZero(b.bannerWinGachaRuns / b.bannerSuccess),
-                      0,
-                    ),
-                  0,
-                ) * 600
-              ).toLocaleString()} 합성옥
-            </span>
-          </p>
+          <div class="space-y-[3px]">
+            <p>
+              필요 합성옥 기대값 :
+              <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
+                ${(truncateToDecimals(bannerResults[dataIndex].bannerWinGachaRuns / bannerResults[dataIndex].bannerSuccess, 0) * 600).toLocaleString()} 합성옥
+              </span>
+            </p>
+            <p>
+              소모 합성옥 기대값 누적 :
+              <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
+                ${(
+                  truncateToDecimals(
+                    bannerResults
+                      .slice(0, dataIndex + 1)
+                      .reduce(
+                        (a, b) => a + safeNumberOrZero(b.bannerWinGachaRuns / b.bannerSuccess),
+                        0,
+                      ),
+                    0,
+                  ) * 600
+                ).toLocaleString()} 합성옥
+              </span>
+            </p>
+          </div>
         </div>`;
     })
     .join('')}

@@ -84,7 +84,7 @@ const createTooltipLiteral = ({
       ${body
         .map((b, i) => {
           return /*html*/ `
-          <div class="font-S-CoreDream-300 space-y-[2px] text-sm">
+          <div class="font-S-CoreDream-300 space-y-[3px] text-sm">
             <p>
               성공 시 기대값 :
               <span style="color: ${borderColor};" class="font-S-CoreDream-500">${truncateToDecimals(Number(stringifiedValue))} 회</span>

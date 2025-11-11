@@ -27,7 +27,7 @@ const createTooltipLiteral = ({
       ${body
         .map((b, i) => {
           return /*html*/ `
-          <div class="font-S-CoreDream-300 space-y-[2px] text-sm">
+          <div class="font-S-CoreDream-300 space-y-[3px] text-sm">
             <p>
               ${label} 등장 횟수 :
               <span style="color: ${borderColor};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
