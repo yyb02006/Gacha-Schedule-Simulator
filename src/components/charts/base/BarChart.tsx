@@ -176,6 +176,7 @@ export default function BarChart({
     labels,
     datasets: [
       {
+        type: 'bar',
         label: '배너 데이터',
         data,
         backgroundColor,
@@ -310,14 +311,13 @@ export default function BarChart({
         chart.update();
       } else if (newIndex !== null && hoveredIndexRef.current !== newIndex) {
         // Move
-        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
-        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
         hoveredIndexRef.current = newIndex;
         if (data.length > 20) {
           chartThrottledDraw();
         } else {
           chartThrottledUpdate();
         }
+        hoveredIndexRef.current = newIndex;
       } else if (newIndex === null && hoveredIndexRef.current !== newIndex) {
         // Leave
         chart.data.datasets[0].hoverBackgroundColor = backgroundColor;

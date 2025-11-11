@@ -209,9 +209,8 @@ export default function BarLineChart({
         pointRadius: 3,
         pointHoverRadius: 3,
         pointBackgroundColor: color.backgroundColor,
-        pointBorderColor: color.borderColor,
-        pointHoverBackgroundColor: color.hoverBackgroundColor,
-        pointHoverBorderColor: color.hoverBorderColor,
+        // pointHoverBackgroundColor, pointHoverBorderColor옵션을 명시하지 않으면
+        // hoverBackgroundColor, hoverBorderColor로 대체됨
         pointHoverBorderWidth: 6,
         pointStyle: 'circle',
         fill: true,
@@ -344,24 +343,32 @@ export default function BarLineChart({
     const handleMouseMove = (e: PointerEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
-      const colorsArray = Object.values(fullDatas).flatMap((data) =>
-        data.map(({ color }) => color),
-      );
+      const colorsArray = [
+        ...fullDatas.line.map(({ color }) => color),
+        ...fullDatas.bar.map(({ color }) => color),
+      ];
 
+      // console.log(hoveredIndexRef.current, newIndex);
       if (hoveredIndexRef.current === null && hoveredIndexRef.current !== newIndex) {
         // Enter
         chart.data.datasets.forEach((dataset, index) => {
           dataset.hoverBackgroundColor = colorsArray[index].hoverBackgroundColor;
           dataset.hoverBorderColor = colorsArray[index].hoverBorderColor;
+          if (dataset.type === 'line') {
+            dataset.pointHoverBorderWidth = 6;
+          }
         });
         hoveredIndexRef.current = newIndex;
         chart.update();
       } else if (newIndex !== null && hoveredIndexRef.current !== newIndex) {
-        // Move
-        chart.data.datasets.forEach((dataset, index) => {
+        // move부분은 ref교체 적용 외에 다른 로직은 필요 없는 거 아님?
+        /* chart.data.datasets.forEach((dataset, index) => {
           dataset.hoverBackgroundColor = colorsArray[index].hoverBackgroundColor;
           dataset.hoverBorderColor = colorsArray[index].hoverBorderColor;
-        });
+          if (dataset.type === 'line') {
+            console.log(dataset.pointHoverBorderWidth);
+          }
+        }); */
         hoveredIndexRef.current = newIndex;
         if (primaryData.length > 20) {
           chartThrottledDraw();
@@ -371,8 +378,12 @@ export default function BarLineChart({
       } else if (newIndex === null && hoveredIndexRef.current !== newIndex) {
         // Leave
         chart.data.datasets.forEach((dataset, index) => {
-          dataset.hoverBackgroundColor = colorsArray[index].hoverBackgroundColor;
-          dataset.hoverBorderColor = colorsArray[index].hoverBorderColor;
+          dataset.hoverBackgroundColor = colorsArray[index].backgroundColor;
+          dataset.hoverBorderColor = colorsArray[index].borderColor;
+
+          if (dataset.type === 'line') {
+            dataset.pointHoverBorderWidth = 3;
+          }
         });
         hoveredIndexRef.current = newIndex;
         chart.tooltip?.setActiveElements(elements, {

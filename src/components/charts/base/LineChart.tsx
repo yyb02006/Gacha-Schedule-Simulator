@@ -174,6 +174,7 @@ export default function LineChart({
     labels,
     datasets: [
       {
+        type: 'line',
         label: '배너 데이터',
         data,
         backgroundColor,
@@ -288,30 +289,36 @@ export default function LineChart({
     const canvas = chartRef.current?.canvas;
     const chart = chartRef.current;
     if (!canvas || !chart) return;
+    const dataset = chart.data.datasets[0];
 
     const handleMouseMove = (e: PointerEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current === null && hoveredIndexRef.current !== newIndex) {
         // Enter
-        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
-        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
+        dataset.hoverBackgroundColor = hoverBackgroundColor;
+        dataset.hoverBorderColor = hoverBorderColor;
+        if (dataset.type === 'line') {
+          dataset.pointHoverBorderWidth = 6;
+        }
         hoveredIndexRef.current = newIndex;
         chart.update();
       } else if (newIndex !== null && hoveredIndexRef.current !== newIndex) {
         // Move
-        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
-        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
         hoveredIndexRef.current = newIndex;
         if (data.length > 20) {
           chartThrottledDraw();
         } else {
           chartThrottledUpdate();
         }
+        hoveredIndexRef.current = newIndex;
       } else if (newIndex === null && hoveredIndexRef.current !== newIndex) {
         // Leave
-        chart.data.datasets[0].hoverBackgroundColor = backgroundColor;
-        chart.data.datasets[0].hoverBorderColor = borderColor;
+        dataset.hoverBackgroundColor = backgroundColor;
+        dataset.hoverBorderColor = borderColor;
+        if (dataset.type === 'line') {
+          dataset.pointHoverBorderWidth = 3;
+        }
         hoveredIndexRef.current = newIndex;
         chart.tooltip?.setActiveElements(elements, {
           x: null,

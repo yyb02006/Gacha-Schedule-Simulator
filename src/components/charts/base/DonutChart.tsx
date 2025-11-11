@@ -49,6 +49,7 @@ export default function DonutChart({
     labels,
     datasets: [
       {
+        type: 'doughnut',
         label: '시뮬레이션 통계',
         data,
         backgroundColor: backgroundColor || [
