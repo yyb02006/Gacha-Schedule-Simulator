@@ -223,8 +223,8 @@ export default function DonutChart({
           const title = tooltip.title || [];
           const body = tooltip.body;
           const dataPoints = tooltip.dataPoints;
-          const textColors = dataPoints.map((dataPoint) =>
-            dataPoint.dataset.borderColor === 'string' ? dataPoint.dataset.borderColor : '#ffb900',
+          const textColors = (dataPoints[0].dataset.borderColor as string[]).map((borderColor) =>
+            typeof borderColor === 'string' ? borderColor : '#ffb900',
           );
 
           const total = dataPoints[0].dataset.data.reduce((a, b) => a + b, 0);
