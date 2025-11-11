@@ -170,6 +170,7 @@ export const InsetNumberInput = ({
           <input
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             onFocus={(e: FocusEvent<HTMLInputElement>) => {
               if (e.currentTarget.value === '0') {
                 e.currentTarget.setSelectionRange(0, 1);
@@ -217,6 +218,7 @@ const AdditionalResUntilBannerEnd = ({
           <input
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             onFocus={(e: FocusEvent<HTMLInputElement>) => {
               if (e.currentTarget.value === '0') {
                 e.currentTarget.setSelectionRange(0, 1);
@@ -729,6 +731,7 @@ const PickupOperatorDetail = ({
             <input
               type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
               max={6}
               onFocus={(e: FocusEvent<HTMLInputElement>) => {
                 if (e.currentTarget.value === '0') {

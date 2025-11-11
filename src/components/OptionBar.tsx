@@ -101,7 +101,14 @@ const ControlPanel = ({
                     className="relative flex items-center px-2 py-2"
                   >
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      onFocus={(e: FocusEvent<HTMLInputElement>) => {
+                        if (e.currentTarget.value === '0') {
+                          e.currentTarget.setSelectionRange(0, 1);
+                        }
+                      }}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => {
                         const { value } = e.currentTarget;
                         const numberString = normalizeNumberString(value);
