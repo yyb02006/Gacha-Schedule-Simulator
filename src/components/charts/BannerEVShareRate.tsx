@@ -120,8 +120,10 @@ const createLegendHTML = (labels: string[], colors: string[], values: number[]) 
 
 export default function BannerEVShareRate({
   result,
+  isColspanTwo,
 }: {
   result: GachaSimulationMergedResult | null;
+  isColspanTwo: boolean;
 }) {
   const bannerResults =
     result !== null
@@ -147,6 +149,7 @@ export default function BannerEVShareRate({
           배너별 <span className="text-amber-400">기대값 점유율</span>
         </span>
       }
+      className={isColspanTwo ? 'col-span-2' : ''}
     >
       {result ? (
         <div className="p-4 text-sm">
