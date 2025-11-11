@@ -163,7 +163,12 @@ export function getPercentileIndex(histogram: number[], total: number, percentil
   let cutoffIndex = histogram.length;
   for (let i = histogram.length - 1; i >= 0; i--) {
     if (safeNumberOrZero(remainingCumulative / total) >= 1 - percentile) {
-      cutoffIndex = i;
+      if (i < histogram.length - 1) {
+        cutoffIndex = i + 1;
+        remainingCumulative -= histogram[i + 1];
+      } else {
+        cutoffIndex = i;
+      }
       break;
     }
     remainingCumulative += histogram[i];
