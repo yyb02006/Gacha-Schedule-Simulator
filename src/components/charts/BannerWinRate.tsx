@@ -214,7 +214,7 @@ export default function BannerWinRate({
           isPercentYAxis={true}
           chartHeight={chartHeight}
           brushHeight={brushHeight}
-          tooltipCallback={createTooltipLiteral}
+          createTooltipLiteral={createTooltipLiteral}
         >
           <Legend
             isCurrencyBarOff={result?.total.isTrySim}

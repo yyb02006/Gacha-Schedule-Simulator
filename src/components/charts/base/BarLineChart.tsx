@@ -51,12 +51,12 @@ const externalTooltipHandler =
     lastChartId,
     hoveredIndexRef,
     total,
-    tooltipCallback,
+    createTooltipLiteral,
   }: {
     lastChartId: RefObject<string | null>;
     hoveredIndexRef: RefObject<number | null>;
     total: number;
-    tooltipCallback: TooltipCallback<'bar' | 'line'>;
+    createTooltipLiteral: TooltipCallback<'bar' | 'line'>;
   }) =>
   (context: { chart: ChartJS; tooltip: TooltipModel<'bar' | 'line'> }) => {
     const { chart, tooltip } = context;
@@ -113,7 +113,7 @@ const externalTooltipHandler =
         : '#ffb900';
     });
 
-    tooltipEl.innerHTML = tooltipCallback({
+    tooltipEl.innerHTML = createTooltipLiteral({
       body,
       datasets: dataPoints,
       textColors,
@@ -153,7 +153,7 @@ interface BarLineChartProps {
   isPercentYAxis?: boolean;
   cutoffIndex?: number;
   height?: string;
-  tooltipCallback: CreateTooltipLiteral<'bar' | 'line'>;
+  createTooltipLiteral: CreateTooltipLiteral<'bar' | 'line'>;
 }
 
 export default function BarLineChart({
@@ -168,7 +168,7 @@ export default function BarLineChart({
   isPercentYAxis,
   cutoffIndex,
   height,
-  tooltipCallback,
+  createTooltipLiteral,
 }: BarLineChartProps) {
   const [hasRendered, setHasRendered] = useState(false);
   const categoryPercentage = primaryData.length < 50 ? 0.9 : primaryData.length < 150 ? 0.8 : 0.9;
@@ -269,7 +269,12 @@ export default function BarLineChart({
         enabled: false,
         mode: 'index', // x축 "열(column)" 단위로 hover 인식
         intersect: false, // 바 위가 아니라, 그 열 전체 hover 가능
-        external: externalTooltipHandler({ lastChartId, hoveredIndexRef, total, tooltipCallback }),
+        external: externalTooltipHandler({
+          lastChartId,
+          hoveredIndexRef,
+          total,
+          createTooltipLiteral,
+        }),
       },
       datalabels: { display: false },
     },

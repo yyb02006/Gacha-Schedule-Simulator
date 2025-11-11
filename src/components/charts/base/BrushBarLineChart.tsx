@@ -21,7 +21,7 @@ interface BrushBarLineChartProps<T extends 'bar' | 'line'> {
   chartHeight?: string;
   brushHeight?: string;
   children?: ReactNode;
-  tooltipCallback: CreateTooltipLiteral<'bar' | 'line'>;
+  createTooltipLiteral: CreateTooltipLiteral<'bar' | 'line'>;
 }
 
 export default function BrushBarLineChart({
@@ -39,7 +39,7 @@ export default function BrushBarLineChart({
   brushHeight,
   dispatchRef,
   children,
-  tooltipCallback,
+  createTooltipLiteral,
 }: BrushBarLineChartProps<'bar' | 'line'>) {
   const mainChartRef = useRef<ChartJS<
     'bar' | 'line',
@@ -77,7 +77,7 @@ export default function BrushBarLineChart({
           cutoffIndex={cutoffIndex}
           isPercentYAxis={isPercentYAxis}
           height={chartHeight}
-          tooltipCallback={tooltipCallback}
+          createTooltipLiteral={createTooltipLiteral}
         />
         {enableBrush && (
           <MultiDataBrush

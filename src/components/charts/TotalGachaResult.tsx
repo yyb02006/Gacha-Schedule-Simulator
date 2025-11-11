@@ -132,7 +132,7 @@ export default function TotalGachaResult({
             backgroundColor={Object.values(rarityColor).map(({ HEX }) => HEX + 'CC')}
             borderColor={Object.values(rarityColor).map(({ HEX }) => HEX)}
             createLegendHTML={createLegendHTML}
-            tooltipCallback={createTooltipLiteral}
+            createTooltipLiteral={createTooltipLiteral}
           />
           <div className="flex flex-col flex-wrap gap-5 px-4 pb-4">
             <div className="flex flex-1 flex-wrap gap-4">

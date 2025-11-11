@@ -48,12 +48,12 @@ const externalTooltipHandler =
     lastChartId,
     hoveredIndexRef,
     total,
-    tooltipCallback,
+    createTooltipLiteral,
   }: {
     lastChartId: RefObject<string | null>;
     hoveredIndexRef: RefObject<number | null>;
     total: number;
-    tooltipCallback: TooltipCallback<'line'>;
+    createTooltipLiteral: TooltipCallback<'line'>;
   }) =>
   (context: { chart: ChartJS; tooltip: TooltipModel<'line'> }) => {
     const { chart, tooltip } = context;
@@ -108,7 +108,7 @@ const externalTooltipHandler =
       dataPoint.dataset.borderColor === 'string' ? dataPoint.dataset.borderColor : '#ffb900',
     );
 
-    tooltipEl.innerHTML = tooltipCallback({
+    tooltipEl.innerHTML = createTooltipLiteral({
       body,
       datasets: dataPoints,
       textColors,
@@ -135,7 +135,7 @@ interface LineChartProps {
   isPercentYAxis: boolean;
   cutoffIndex?: number;
   height?: string;
-  tooltipCallback: CreateTooltipLiteral<'line'>;
+  createTooltipLiteral: CreateTooltipLiteral<'line'>;
 }
 
 export default function LineChart({
@@ -150,7 +150,7 @@ export default function LineChart({
   isPercentYAxis,
   cutoffIndex,
   height,
-  tooltipCallback,
+  createTooltipLiteral,
 }: LineChartProps) {
   const [hasRendered, setHasRendered] = useState(false);
   const chartRef = useRef<ChartJS<'line'>>(null);
@@ -219,7 +219,12 @@ export default function LineChart({
         enabled: false,
         mode: 'index', // x축 "열(column)" 단위로 hover 인식
         intersect: false, // 바 위가 아니라, 그 열 전체 hover 가능
-        external: externalTooltipHandler({ hoveredIndexRef, lastChartId, total, tooltipCallback }),
+        external: externalTooltipHandler({
+          hoveredIndexRef,
+          lastChartId,
+          total,
+          createTooltipLiteral,
+        }),
       },
       datalabels: { display: false },
       decimation: { enabled: true, algorithm: 'lttb', samples: 100 },

@@ -84,7 +84,7 @@ export default function BannerEVCounts({
           enableBrush={enableBrush}
           chartHeight={chartHeight}
           brushHeight={brushHeight}
-          tooltipCallback={createTooltipLiteral(result)}
+          createTooltipLiteral={createTooltipLiteral(result)}
         />
       ) : null}
     </ChartWrapper>

@@ -49,12 +49,12 @@ const externalTooltipHandler =
     lastChartId,
     hoveredIndexRef,
     total,
-    tooltipCallback,
+    createTooltipLiteral,
   }: {
     lastChartId: RefObject<string | null>;
     hoveredIndexRef: RefObject<number | null>;
     total: number;
-    tooltipCallback: TooltipCallback<'bar'>;
+    createTooltipLiteral: TooltipCallback<'bar'>;
   }) =>
   (context: { chart: ChartJS; tooltip: TooltipModel<'bar'> }) => {
     const { chart, tooltip } = context;
@@ -109,7 +109,7 @@ const externalTooltipHandler =
       dataPoint.dataset.borderColor === 'string' ? dataPoint.dataset.borderColor : '#ffb900',
     );
 
-    tooltipEl.innerHTML = tooltipCallback({
+    tooltipEl.innerHTML = createTooltipLiteral({
       body,
       datasets: dataPoints,
       textColors,
@@ -136,7 +136,7 @@ interface BarChartProps {
   isPercentYAxis?: boolean;
   cutoffIndex?: number;
   height?: string;
-  tooltipCallback: CreateTooltipLiteral<'bar'>;
+  createTooltipLiteral: CreateTooltipLiteral<'bar'>;
 }
 
 export default function BarChart({
@@ -151,7 +151,7 @@ export default function BarChart({
   isPercentYAxis,
   cutoffIndex,
   height,
-  tooltipCallback,
+  createTooltipLiteral,
 }: BarChartProps) {
   const [hasRendered, setHasRendered] = useState(false);
   const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
@@ -228,7 +228,12 @@ export default function BarChart({
         enabled: false,
         mode: 'index', // x축 "열(column)" 단위로 hover 인식
         intersect: false, // 바 위가 아니라, 그 열 전체 hover 가능
-        external: externalTooltipHandler({ lastChartId, hoveredIndexRef, total, tooltipCallback }),
+        external: externalTooltipHandler({
+          lastChartId,
+          hoveredIndexRef,
+          total,
+          createTooltipLiteral,
+        }),
       },
       datalabels: { display: false },
     },

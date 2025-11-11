@@ -29,7 +29,7 @@ export default function DonutChart({
   containerClassName = '',
   legendClassName = '',
   createLegendHTML,
-  tooltipCallback,
+  createTooltipLiteral,
 }: {
   labels: string[];
   data: number[];
@@ -39,7 +39,7 @@ export default function DonutChart({
   containerClassName?: string;
   legendClassName?: string;
   createLegendHTML: (labels: string[], colors: string[], values: number[]) => string;
-  tooltipCallback: (data: CreateTooltipLiteralProps<'doughnut'>) => string;
+  createTooltipLiteral: (data: CreateTooltipLiteralProps<'doughnut'>) => string;
 }) {
   const chartRef = useRef<ChartJS<'doughnut'>>(null);
   const legendRef = useRef<HTMLDivElement>(null);
@@ -226,9 +226,10 @@ export default function DonutChart({
           const textColors = dataPoints.map((dataPoint) =>
             dataPoint.dataset.borderColor === 'string' ? dataPoint.dataset.borderColor : '#ffb900',
           );
+
           const total = dataPoints[0].dataset.data.reduce((a, b) => a + b, 0);
 
-          tooltipEl.innerHTML = tooltipCallback({
+          tooltipEl.innerHTML = createTooltipLiteral({
             title,
             textColors,
             body,

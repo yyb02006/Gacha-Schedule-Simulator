@@ -21,7 +21,7 @@ interface BrushLineChartProps {
   isPercentYAxis?: boolean;
   chartHeight?: string;
   brushHeight?: string;
-  tooltipCallback: CreateTooltipLiteral<'line'>;
+  createTooltipLiteral: CreateTooltipLiteral<'line'>;
 }
 
 export default function BrushLineChart({
@@ -37,7 +37,7 @@ export default function BrushLineChart({
   isPercentYAxis = false,
   chartHeight,
   brushHeight,
-  tooltipCallback,
+  createTooltipLiteral,
 }: BrushLineChartProps) {
   const mainChartRef = useRef<ChartJS<'line', (number | Point | null)[], unknown> | null>(null);
 
@@ -69,7 +69,7 @@ export default function BrushLineChart({
         cutoffIndex={cutoffIndex}
         isPercentYAxis={isPercentYAxis}
         height={chartHeight}
-        tooltipCallback={tooltipCallback}
+        createTooltipLiteral={createTooltipLiteral}
       />
       {enableBrush && (
         <Brush

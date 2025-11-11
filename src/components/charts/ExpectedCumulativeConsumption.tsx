@@ -97,7 +97,7 @@ export default function ExpectedCumulativeConsumption({
           enableBrush={enableBrush}
           chartHeight={chartHeight}
           brushHeight={brushHeight}
-          tooltipCallback={createTooltipLiteral(result)}
+          createTooltipLiteral={createTooltipLiteral(result)}
         />
       ) : null}
     </ChartWrapper>

@@ -204,7 +204,7 @@ export default function BannerSuccessTrialCounts({
           enableBrush={enableBrush}
           cutoffIndex={successIndexUntilCutoff}
           height={chartHeight}
-          tooltipCallback={createTooltipLiteral(bannerHistogram)}
+          createTooltipLiteral={createTooltipLiteral(bannerHistogram)}
           mainChartRef={mainChartRef}
         />
         {enableBrush && (

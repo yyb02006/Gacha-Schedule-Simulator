@@ -180,7 +180,7 @@ export default function GachaSurvivalProbability({
           isPercentYAxis={true}
           chartHeight={chartHeight}
           brushHeight={brushHeight}
-          tooltipCallback={createTooltipLiteral}
+          createTooltipLiteral={createTooltipLiteral}
         >
           <Legend />
         </BrushBarLineChart>

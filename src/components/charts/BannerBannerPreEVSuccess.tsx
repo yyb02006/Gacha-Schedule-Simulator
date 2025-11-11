@@ -89,7 +89,7 @@ const DataProcessor = ({
       isPercentYAxis={true}
       chartHeight={chartHeight}
       brushHeight={brushHeight}
-      tooltipCallback={createTooltipLiteral(result)}
+      createTooltipLiteral={createTooltipLiteral(result)}
     />
   );
 };

@@ -85,7 +85,7 @@ export default function SimulationResult({
             borderColor={['#fe9a00', '#00a6f4']}
             backgroundColor={['#fe9a00CC', '#00a6f4CC']}
             createLegendHTML={createLegendHTML}
-            tooltipCallback={createTooltipLiteral}
+            createTooltipLiteral={createTooltipLiteral}
           />
           <div className="font-S-CoreDream-300 space-y-4 px-4 pb-4 text-sm">
             <ul className="space-y-1">
