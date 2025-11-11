@@ -59,7 +59,7 @@ const Legend = () => {
         도달
       </div>
       <div className="flex items-center gap-x-1 text-sm">
-        <div className="size-2 rounded-full bg-[#fe9a00]" />
+        <div className="size-2 rounded-full bg-[#ff6467]" />
         중단
       </div>
     </div>
