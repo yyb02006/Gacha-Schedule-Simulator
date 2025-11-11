@@ -22,7 +22,7 @@ const createTooltipLiteral =
     .map((b, i) => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
           <p>
-            도달 시 평균 잔여 합성옥 : <span style="color: #ff6467;" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
+            진입 시 평균 잔여 합성옥 : <span style="color: #ff6467;" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
           </p>
           <div class="space-y-[3px]">
             <p>

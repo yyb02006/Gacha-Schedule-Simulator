@@ -28,15 +28,15 @@ const createTooltipLiteral =
       <div class="font-S-CoreDream-300 space-y-[3px] text-sm whitespace-nowrap">
         <p>
           현재 차수 성공 횟수 :
-          <span style="color: ${textColors[0]};" class="font-S-CoreDream-400">${stringifiedValue} 회</span>
+          <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
         </p>
         <p>
           현재 차수 비중 :
-          <span style="color: ${textColors[0]};" class="font-S-CoreDream-400">${truncateToDecimals((rawValue / total) * 100)}%</span>
+          <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals((rawValue / total) * 100)}%</span>
         </p>
         <p>
           누적 확률 :
-          <span style="color: ${textColors[0]};" class="font-S-CoreDream-400">${truncateToDecimals((sumUpToCurrent / total) * 100)}%</span>
+          <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals((sumUpToCurrent / total) * 100)}%</span>
         </p>
       </div>
     `;
