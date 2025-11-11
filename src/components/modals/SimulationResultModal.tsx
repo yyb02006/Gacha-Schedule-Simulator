@@ -12,10 +12,10 @@ import BannerSuccessTrialCounts from '#/components/charts/BannerSuccessTrialCoun
 import { useEffect, useRef, useState } from 'react';
 import BannerEVShareRate from '#/components/charts/BannerEVShareRate';
 import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
-import BannerPreEVSuccess from '#/components/charts/BannerBannerPreEVSuccess';
 import ExpectedCumulativeConsumption from '#/components/charts/ExpectedCumulativeConsumption';
 import GachaSurvivalProbability from '#/components/charts/GachaSurvivalProbability';
 import BannerEVCounts from '#/components/charts/BannerEVCounts';
+import { cls } from '#/libs/utils';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -26,9 +26,11 @@ interface SettingsModalProps {
 function LazyRender({
   children,
   minHeight = 300,
+  className = '',
 }: {
   children: React.ReactNode;
   minHeight?: number;
+  className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
@@ -55,7 +57,11 @@ function LazyRender({
   }, []);
 
   return (
-    <div ref={ref} className="flex w-full items-center justify-center" style={{ minHeight }}>
+    <div
+      ref={ref}
+      className={cls('flex w-full items-center justify-center', className)}
+      style={{ minHeight }}
+    >
       {inView ? (
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -123,7 +129,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           {/* <LazyRender>
             <BannerPreEVSuccess result={result} chartHeight="h-[400px]" />
           </LazyRender> */}
-          <LazyRender>
+          <LazyRender className="col-span-2">
             <BannerEVShareRate
               result={{
                 ...result,
@@ -150,6 +156,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               <LazyRender key={bannerResult.id}>
                 <BannerSuccessTrialCounts
                   bannerResult={bannerResult}
+                  isTrySim={result.total.isTrySim}
                   simulationTry={result.total.simulationTry}
                   chartHeight="h-[400px]"
                 />
