@@ -128,7 +128,7 @@ export default function TotalGachaResult({
           <DonutChart
             data={rarityResultData.data}
             labels={rarityResultData.labels}
-            legendPosition="top"
+            legendPosition="before"
             backgroundColor={Object.values(rarityColor).map(({ HEX }) => HEX + 'CC')}
             borderColor={Object.values(rarityColor).map(({ HEX }) => HEX)}
             createLegendHTML={createLegendHTML}

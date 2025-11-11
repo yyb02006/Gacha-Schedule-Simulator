@@ -25,7 +25,9 @@ export default function DonutChart({
   data,
   backgroundColor,
   borderColor,
-  legendPosition = 'top',
+  legendPosition = 'after',
+  containerClassName = '',
+  legendClassName = '',
   createLegendHTML,
   tooltipCallback,
 }: {
@@ -33,7 +35,9 @@ export default function DonutChart({
   data: number[];
   backgroundColor: string | string[];
   borderColor: string | string[];
-  legendPosition?: 'top' | 'bottom';
+  legendPosition?: 'after' | 'before';
+  containerClassName?: string;
+  legendClassName?: string;
   createLegendHTML: (labels: string[], colors: string[], values: number[]) => string;
   tooltipCallback: (data: CreateTooltipLiteralProps<'doughnut'>) => string;
 }) {
@@ -260,12 +264,16 @@ export default function DonutChart({
   };
 
   return (
-    <div className="relative flex size-full flex-col">
+    <div className={cls('relative flex size-full flex-col', containerClassName)}>
       <div
         ref={legendRef}
-        className={cls(legendPosition === 'bottom' ? 'order-2' : '', 'relative px-4')}
+        className={cls(
+          legendPosition === 'after' ? 'order-3' : 'order-1',
+          'relative px-4',
+          legendClassName,
+        )}
       />
-      <div className="relative order-1">
+      <div className="relative order-2">
         <Doughnut
           ref={chartRef}
           data={chartData}

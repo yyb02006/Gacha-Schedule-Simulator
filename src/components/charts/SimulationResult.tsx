@@ -81,7 +81,7 @@ export default function SimulationResult({
           <DonutChart
             data={simulationResultData}
             labels={simulationResultLabels}
-            legendPosition="top"
+            legendPosition="before"
             borderColor={['#fe9a00', '#00a6f4']}
             backgroundColor={['#fe9a00CC', '#00a6f4CC']}
             createLegendHTML={createLegendHTML}
