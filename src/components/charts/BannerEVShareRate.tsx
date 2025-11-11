@@ -73,9 +73,10 @@ const createTooltipLiteral = ({
   datasets,
   total,
 }: CreateTooltipLiteralProps<'doughnut'>) => {
+  const dataset = datasets[0];
   const stringifiedValue = datasets[0].formattedValue ?? '';
-  const parsedRawValue = datasets[0].parsed;
-  const borderColor = (datasets[0].dataset.borderColor as string[])[datasets[0].dataIndex];
+  const { parsed, dataIndex } = dataset;
+  const borderColor = (dataset.dataset.borderColor as string[])[dataIndex];
 
   return /*html*/ `
     <div class="space-y-3 rounded-xl bg-[#202020] px-4 py-3 opacity-90 shadow-xl shadow-[#141414]">
@@ -90,7 +91,7 @@ const createTooltipLiteral = ({
             </p>
             <p>
               배너 비중 :
-              <span style="color: ${borderColor};" class="font-S-CoreDream-500">${truncateToDecimals((parsedRawValue / (total ?? 1)) * 100)}%</span>
+              <span style="color: ${borderColor};" class="font-S-CoreDream-500">${truncateToDecimals((parsed / (total ?? 1)) * 100)}%</span>
             </p>
           </div>
         `;

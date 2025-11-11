@@ -14,9 +14,11 @@ export type CreateTooltipLiteral<T extends ChartType> = (
 const createTooltipLiteral =
   (result: GachaSimulationMergedResult) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
-    const parsedRawValue = typeof datasets[0].parsed.y === 'number' ? datasets[0].parsed.y : total;
+    const dataset = datasets[0];
+    const { parsed, dataIndex } = dataset;
+    const parsedRawValue = typeof parsed.y === 'number' ? parsed.y : total;
 
-    const { bannerWinGachaRuns, bannerSuccess } = result.perBanner[datasets[0].dataIndex];
+    const { bannerWinGachaRuns, bannerSuccess } = result.perBanner[dataIndex];
 
     return /*html*/ `
     <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">

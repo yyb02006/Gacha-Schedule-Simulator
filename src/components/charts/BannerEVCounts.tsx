@@ -9,9 +9,10 @@ import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 const createTooltipLiteral =
   (result: GachaSimulationMergedResult) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
-    const stringifiedValue = datasets[0].formattedValue ?? '';
-    const rawValue = datasets[0].raw as number;
-    const { dataIndex } = datasets[0];
+    const dataset = datasets[0];
+    const stringifiedValue = dataset.formattedValue ?? '';
+    const rawValue = dataset.raw as number;
+    const { dataIndex } = dataset;
 
     const { bannerSuccess } = result.perBanner[dataIndex];
 

@@ -14,12 +14,13 @@ export type CreateTooltipLiteral<T extends ChartType> = (
 const createTooltipLiteral =
   (result: GachaSimulationMergedResult) =>
   ({ title, textColors, body, datasets }: CreateTooltipLiteralProps<'line'>) => {
-    const stringifiedValue = datasets[0].formattedValue ?? '';
+    const dataset = datasets[0];
+    const stringifiedValue = dataset.formattedValue ?? '';
+    const { dataIndex } = dataset;
 
     const expectedVaule = truncateToDecimals(
       Math.ceil(
-        result.perBanner[datasets[0].dataIndex].bannerWinGachaRuns /
-          result.perBanner[datasets[0].dataIndex].bannerSuccess,
+        result.perBanner[dataIndex].bannerWinGachaRuns / result.perBanner[dataIndex].bannerSuccess,
       ) * 600,
       0,
     );
