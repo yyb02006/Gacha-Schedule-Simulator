@@ -97,49 +97,32 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           </motion.div>
           <CancelButton handleCancel={onClose} />
         </div>
-        <div className="grid h-fit w-full grid-cols-2 gap-6">
-          <LazyRender>
-            <SimulationResult result={result} />
-          </LazyRender>
-          <LazyRender>
-            <TotalGachaResult result={result} />
-          </LazyRender>
+        <div className="grid h-fit w-full grid-cols-2 items-stretch gap-6">
+          <SimulationResult result={result} />
+          <TotalGachaResult result={result} />
           {!(result.total.isSimpleMode && result.total.isTrySim) && (
             <>
-              <LazyRender>
-                <GachaSurvivalProbability result={result} chartHeight="h-[400px]" />
-              </LazyRender>
-              <LazyRender>
-                <BannerWinRate result={result} chartHeight="h-[400px]" />
-              </LazyRender>
+              <GachaSurvivalProbability result={result} chartHeight="h-[400px]" />
+              <BannerWinRate result={result} chartHeight="h-[400px]" />
             </>
           )}
-          <LazyRender>
-            <BannerEVCounts result={result} chartHeight="h-[400px]" />
-          </LazyRender>
+          <BannerEVCounts result={result} chartHeight="h-[400px]" />
           {result.total.isTrySim ? (
-            <LazyRender>
-              <ExpectedCumulativeConsumption result={result} chartHeight="h-[400px]" />
-            </LazyRender>
+            <ExpectedCumulativeConsumption result={result} chartHeight="h-[400px]" />
           ) : (
-            <LazyRender>
-              <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
-            </LazyRender>
+            <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
           )}
-          {/* <LazyRender>
-            <BannerPreEVSuccess result={result} chartHeight="h-[400px]" />
-          </LazyRender> */}
-          <LazyRender className="col-span-2">
-            <BannerEVShareRate
-              result={{
-                ...result,
-                perBanner: result.perBanner.map((bannerResult, index) => ({
-                  ...bannerResult,
-                  name: `${index + 1}. ${bannerResult.name}`,
-                })),
-              }}
-            />
-          </LazyRender>
+          {/* <BannerPreEVSuccess result={result} chartHeight="h-[400px]" /> */}
+          <BannerEVShareRate
+            result={{
+              ...result,
+              perBanner: result.perBanner.map((bannerResult, index) => ({
+                ...bannerResult,
+                name: `${index + 1}. ${bannerResult.name}`,
+              })),
+            }}
+            isColspanTwo={true}
+          />
         </div>
         <motion.div
           variants={toOpacityZero}
