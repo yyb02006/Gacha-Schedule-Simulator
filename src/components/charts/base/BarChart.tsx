@@ -136,6 +136,7 @@ interface BarChartProps {
   isPercentYAxis?: boolean;
   cutoffIndex?: number;
   height?: string;
+  lazyLoading?: boolean;
   createTooltipLiteral: CreateTooltipLiteral<'bar'>;
 }
 
@@ -151,10 +152,10 @@ export default function BarChart({
   isPercentYAxis,
   cutoffIndex,
   height,
+  lazyLoading = false,
   createTooltipLiteral,
 }: BarChartProps) {
   const [hasRendered, setHasRendered] = useState(false);
-  const categoryPercentage = data.length < 50 ? 0.7 : data.length < 150 ? 0.8 : 0.9;
   const chartRef = useRef<ChartJS<'bar'>>(null);
   const lastChartId = useRef<string | null>(null);
   const hoveredIndexRef = useRef<number | null>(null);
@@ -172,22 +173,33 @@ export default function BarChart({
     }, 200),
   ).current;
 
+  const progressIndexRef = useRef(0);
+  const [loading, setLoading] = useState(lazyLoading);
+
   const chartData: ChartData<'bar'> = {
-    labels,
+    labels: lazyLoading
+      ? loading
+        ? []
+        : labels.slice(selectionIndex.start, selectionIndex.end)
+      : labels,
     datasets: [
       {
         type: 'bar',
         label: '배너 데이터',
-        data,
+        data: lazyLoading
+          ? loading
+            ? []
+            : data.slice(selectionIndex.start, selectionIndex.end)
+          : data,
         backgroundColor,
         borderColor,
         hoverBackgroundColor,
         hoverBorderColor,
         borderWidth: data.length > 20 ? 0 : 2,
         hoverBorderWidth: data.length > 20 ? 0 : 2,
-        categoryPercentage,
+        categoryPercentage: data.length > 20 ? 0.9 : 0.7,
         maxBarThickness: (chartRef.current?.canvas.width ?? 560) / 8,
-        minBarLength: data.length < 50 ? 10 : data.length < 150 ? 5 : 3,
+        minBarLength: data.length < 20 ? 10 : 3,
         borderRadius: (context) => {
           const chart = context.chart;
           const meta = chart.getDatasetMeta(context.datasetIndex);
@@ -228,12 +240,14 @@ export default function BarChart({
         enabled: false,
         mode: 'index', // x축 "열(column)" 단위로 hover 인식
         intersect: false, // 바 위가 아니라, 그 열 전체 hover 가능
-        external: externalTooltipHandler({
-          lastChartId,
-          hoveredIndexRef,
-          total,
-          createTooltipLiteral,
-        }),
+        external: loading
+          ? undefined
+          : externalTooltipHandler({
+              lastChartId,
+              hoveredIndexRef,
+              total,
+              createTooltipLiteral,
+            }),
       },
       datalabels: { display: false },
     },
@@ -366,9 +380,74 @@ export default function BarChart({
     }
   }, [mainChartRef]);
 
+  useEffect(() => {
+    if (!chartRef.current || !hasRendered || !lazyLoading) return;
+
+    const CHUNK_SIZE = 50;
+    const CHUNK_DELAY = 200;
+
+    function drawChunk() {
+      if (!chartRef.current?.ctx) return;
+
+      const chart = chartRef.current;
+      if (progressIndexRef.current >= selectionIndex.end) {
+        setLoading(false);
+        return;
+      }
+
+      const nextIndex = Math.min(progressIndexRef.current + CHUNK_SIZE, data.length);
+
+      const newData = data.slice(progressIndexRef.current, nextIndex);
+      const newLabels = labels.slice(progressIndexRef.current, nextIndex);
+
+      chart.data.datasets[0].data.push(...newData);
+      (chart.data.labels as string[]).push(...newLabels);
+
+      progressIndexRef.current = nextIndex;
+      chart.update('none');
+
+      setTimeout(drawChunk, CHUNK_DELAY);
+    }
+
+    drawChunk();
+  }, [data, labels, hasRendered, selectionIndex, lazyLoading]);
+
+  useEffect(() => {
+    if (mainChartRef.current && data.length > 20 && !loading) {
+      const currentLength = selectionIndex.end - selectionIndex.start;
+      const dataset = mainChartRef.current?.data.datasets[0];
+      if (dataset) {
+        if (currentLength > 450) {
+          dataset.backgroundColor = '#fe9a00CC';
+          dataset.categoryPercentage = 1;
+          dataset.barPercentage = 1;
+        } else if (currentLength > 300) {
+          dataset.backgroundColor = '#fe9a00E6';
+          dataset.categoryPercentage = 0.95;
+          dataset.barPercentage = 0.9;
+        } else {
+          dataset.backgroundColor = '#fe9a00';
+          dataset.categoryPercentage = 0.9;
+          dataset.barPercentage = 0.8;
+        }
+      }
+    }
+  }, [loading, data.length, mainChartRef, selectionIndex]);
+
   return (
     <div className={height}>
-      <Bar ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />
+      {!loading || (
+        <div className="absolute inset-0 flex items-center justify-center rounded-b-lg bg-[#00050] backdrop-blur-sm">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+        </div>
+      )}
+      <Bar
+        ref={chartRef}
+        data={chartData}
+        options={options}
+        plugins={[adaptiveTickSpacing]}
+        className={loading ? 'opacity-0' : ''}
+      />
     </div>
   );
 }

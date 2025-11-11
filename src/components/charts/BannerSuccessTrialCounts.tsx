@@ -213,7 +213,7 @@ export default function BannerSuccessTrialCounts({
           labels={labels}
           data={data}
           colors={{
-            backgroundColor: '#fe9a00CC',
+            backgroundColor: '#fe9a00',
             borderColor: '#fe9a00',
             hoverBackgroundColor: '#8e51ffCC',
             hoverBorderColor: '#8e51ff',
@@ -224,6 +224,7 @@ export default function BannerSuccessTrialCounts({
           enableBrush={enableBrush}
           cutoffIndex={successIndexUntilCutoff}
           height={chartHeight}
+          lazyLoading={true}
           createTooltipLiteral={createTooltipLiteral(bannerHistogram)}
           mainChartRef={mainChartRef}
         />
