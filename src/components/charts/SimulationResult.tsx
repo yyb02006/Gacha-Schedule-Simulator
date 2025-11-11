@@ -26,12 +26,12 @@ const createTooltipLiteral = ({
           return /*html*/ `
           <div class="font-S-CoreDream-300 space-y-[3px] text-sm">
             <p>
-              ${label}한 시뮬레이션 :
-              <span style="color: ${borderColor};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
-            </p>
-            <p>
               ${label} 확률 :
               <span style="color: ${borderColor};" class="font-S-CoreDream-500">${truncateToDecimals((parsed / (total ?? 1)) * 100)}%</span>
+            </p>
+            <p>
+              ${label}한 시뮬레이션 :
+              <span style="color: ${borderColor};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
             </p>
           </div>
         `;
@@ -82,8 +82,8 @@ export default function SimulationResult({
             data={simulationResultData}
             labels={simulationResultLabels}
             legendPosition="before"
-            borderColor={['#fe9a00', '#ff6467CC']}
-            backgroundColor={['#fe9a00CC', '#ff6467']}
+            borderColor={['#fe9a00', '#ff6467']}
+            backgroundColor={['#fe9a00CC', '#ff6467CC']}
             createLegendHTML={createLegendHTML}
             createTooltipLiteral={createTooltipLiteral}
           />
