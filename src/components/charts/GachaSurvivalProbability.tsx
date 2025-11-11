@@ -2,22 +2,11 @@
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
-import { ChartType, TooltipItem } from 'chart.js';
+import { ChartType } from 'chart.js';
 import { truncateToDecimals } from '#/libs/utils';
 import BrushBarLineChart from '#/components/charts/base/BrushBarLineChart';
 import { BarLineChartData } from '#/components/charts/base/BarLineChart';
-
-export interface CreateTooltipLiteralProps<T extends ChartType> {
-  title: string[];
-  textColors: string[];
-  body: {
-    before: string[];
-    lines: string[];
-    after: string[];
-  }[];
-  datasets: TooltipItem<T>[];
-  total: number;
-}
+import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 
 export type CreateTooltipLiteral<T extends ChartType> = (
   props: CreateTooltipLiteralProps<T>,
