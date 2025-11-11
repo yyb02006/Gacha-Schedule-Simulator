@@ -30,11 +30,11 @@ const createTooltipLiteral = ({
           <div class="font-S-CoreDream-300 space-y-[2px] text-sm">
             <p>
               ${label} 등장 횟수 :
-              <span style="color: ${borderColor};">${stringifiedValue} 회</span>
+              <span style="color: ${borderColor};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
             </p>
             <p>
               ${label} 등장 확률 :
-              <span style="color: ${borderColor};">${truncateToDecimals((parsedRawValue / (total ?? 1)) * 100)}%</span>
+              <span style="color: ${borderColor};" class="font-S-CoreDream-500">${truncateToDecimals((parsedRawValue / (total ?? 1)) * 100)}%</span>
             </p>
           </div>
         `;
