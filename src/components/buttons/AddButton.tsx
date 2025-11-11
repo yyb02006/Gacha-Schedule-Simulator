@@ -74,7 +74,7 @@ export default function AddButton({
         <div
           className={cls(
             mergedCustom?.size === 'default' ? 'size-12' : 'size-8',
-            'absolute flex items-center justify-center',
+            'absolute flex items-center justify-center select-none',
           )}
         >
           <div className="absolute flex size-full items-center justify-center overflow-hidden">

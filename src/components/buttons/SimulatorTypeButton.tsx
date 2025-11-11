@@ -74,7 +74,7 @@ export default function SimulatorTypeButton({
             animate={isTrySim ? 'inAcitve' : 'active'}
             initial={isTrySim ? 'active' : 'inAcitve'}
             exit="exit"
-            className="font-S-CoreDream-700"
+            className="font-S-CoreDream-700 select-none"
           >
             가챠 확률 시뮬레이션
           </motion.div>

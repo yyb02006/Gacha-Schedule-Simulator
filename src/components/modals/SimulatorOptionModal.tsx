@@ -75,7 +75,7 @@ export default function SimulatorOptionModal({
                   initial="exit"
                   animate="idle"
                   exit="exit"
-                  className="relative top-[2px] mr-3 -ml-2 text-sm"
+                  className="relative top-[2px] mr-3 -ml-2 text-sm select-none"
                 >
                   %
                 </motion.div>
@@ -104,7 +104,7 @@ export default function SimulatorOptionModal({
                   initial="exit"
                   animate="idle"
                   exit="exit"
-                  className="relative top-[2px] mr-3 -ml-2 text-sm"
+                  className="relative top-[2px] mr-3 -ml-2 text-sm select-none"
                 >
                   %
                 </motion.div>
@@ -121,12 +121,13 @@ export default function SimulatorOptionModal({
               onInputBlur={(e) => {
                 const { value } = e.currentTarget;
                 if (!value) return;
+                const newValue = value.replace(/,/g, '');
                 setLocalOptions((p) => ({
                   ...p,
-                  simulationTry: stringToNumber(value),
+                  simulationTry: stringToNumber(newValue),
                 }));
               }}
-              currentValue={localOptions.simulationTry.toString()}
+              currentValue={localOptions.simulationTry.toLocaleString()}
               inputWidth="w-20"
               max={100000}
               animate
@@ -136,7 +137,7 @@ export default function SimulatorOptionModal({
                 initial="exit"
                 animate="idle"
                 exit="exit"
-                className="relative top-[2px] mr-3 -ml-2 text-sm"
+                className="relative top-[2px] mr-3 -ml-2 text-sm select-none"
               >
                 회
               </motion.div>

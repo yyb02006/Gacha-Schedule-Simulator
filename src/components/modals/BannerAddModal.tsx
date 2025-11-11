@@ -246,7 +246,7 @@ const BannerAddTypeToggle = ({
             animate={isCustomMode ? 'inAcitve' : 'active'}
             initial={isCustomMode ? 'active' : 'inAcitve'}
             exit="exit"
-            className="font-S-CoreDream-700"
+            className="font-S-CoreDream-700 select-none"
           >
             커스텀
           </motion.div>
@@ -263,7 +263,7 @@ const BannerAddTypeToggle = ({
             animate={isCustomMode ? 'inAcitve' : 'active'}
             initial={isCustomMode ? 'active' : 'inAcitve'}
             exit="exit"
-            className="font-S-CoreDream-700"
+            className="font-S-CoreDream-700 select-none"
           >
             프리셋
           </motion.div>
@@ -284,7 +284,13 @@ const BannerAddTypeToggle = ({
               transition={{ duration: 0.3 }}
               className="flex size-full items-center justify-center rounded-lg"
             >
-              <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+              <motion.span
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="select-none"
+              >
                 {isCustomMode ? '커스텀' : '프리셋'}
               </motion.span>
             </motion.div>

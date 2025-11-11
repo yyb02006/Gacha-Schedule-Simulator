@@ -44,7 +44,7 @@ export default function Badge({
         className={cls(
           color,
           animation ? 'cursor-pointer' : 'cursor-default',
-          'inline-block w-fit rounded-full border px-3 py-1 text-sm whitespace-nowrap',
+          'inline-block w-fit rounded-full border px-3 py-1 text-sm whitespace-nowrap select-none',
         )}
       >
         {name}

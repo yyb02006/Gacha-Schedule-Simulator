@@ -53,7 +53,7 @@ export default function ResetButton({
                 opacity: 0,
               }}
               custom={{ isMount }}
-              className="absolute"
+              className="absolute select-none"
             >
               <Image alt="test" src={'/reset.svg'} width={32} height={32} />
             </motion.div>

@@ -44,7 +44,7 @@ export default function PlayButton({
           animate={isHover ? { rotateZ: 30 } : undefined}
           className="absolute flex size-12 items-center justify-center"
         >
-          <div className="absolute flex size-12 items-center justify-center overflow-hidden">
+          <div className="absolute flex size-12 items-center justify-center overflow-hidden select-none">
             <motion.div
               variants={playShadowVariants}
               animate={isHover ? 'hover' : 'idle'}

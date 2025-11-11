@@ -56,7 +56,7 @@ export default function TypeSelectionButton({
         variants={toOpacityZero}
         initial="exit"
         animate="idle"
-        className="relative top-[1px]"
+        className="relative top-[1px] select-none"
       >
         {name}
       </motion.div>

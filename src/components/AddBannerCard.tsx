@@ -25,7 +25,7 @@ export default function AddBannerCard({ openModal }: { openModal: () => void }) 
         initial="exit"
         animate="idle"
         exit="exit"
-        className="font-S-CoreDream-700 text-2xl"
+        className="font-S-CoreDream-700 text-2xl select-none"
       >
         픽업 배너 추가
       </motion.div>

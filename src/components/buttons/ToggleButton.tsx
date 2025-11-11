@@ -50,7 +50,7 @@ export default function ToggleButton({
           animate="idle"
           initial="exit"
           exit="exit"
-          className="relative top-[2px] left-[2px] flex h-full w-1/2 items-center justify-center px-3 text-center whitespace-nowrap text-[#a4a4a4]"
+          className="relative top-[2px] left-[2px] flex h-full w-1/2 items-center justify-center px-3 text-center whitespace-nowrap text-[#a4a4a4] select-none"
         >
           {labels.left}
         </motion.div>
@@ -59,7 +59,7 @@ export default function ToggleButton({
           animate="idle"
           initial="exit"
           exit="exit"
-          className="relative top-[2px] right-[2px] flex h-full w-1/2 items-center justify-center px-3 text-center whitespace-nowrap text-[#a4a4a4]"
+          className="relative top-[2px] right-[2px] flex h-full w-1/2 items-center justify-center px-3 text-center whitespace-nowrap text-[#a4a4a4] select-none"
         >
           {labels.right}
         </motion.div>
@@ -103,7 +103,13 @@ export default function ToggleButton({
               transition={{ duration: 0.3 }}
               className="flex size-full items-center justify-center rounded-lg"
             >
-              <motion.span variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+              <motion.span
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="select-none"
+              >
                 {isLeft ? labels.left : labels.right}
               </motion.span>
             </motion.div>
