@@ -11,7 +11,9 @@ import { ChartRef } from '#/components/charts/base/Brush';
 const createTooltipLiteral =
   (bannerResults: BannerResult[]) =>
   ({ title, textColors, body, datasets }: CreateTooltipLiteralProps<'bar'>) => {
-    const stringifiedValue = datasets[0].formattedValue ?? '';
+    const dataset = datasets[0];
+    const stringifiedValue = dataset.formattedValue ?? '';
+    const { dataIndex } = dataset;
 
     return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
@@ -20,28 +22,28 @@ const createTooltipLiteral =
     .map((b, i) => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[2px] text-sm whitespace-nowrap">
           <p>
-            진입 시 합성옥 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
+            도달 시 평균 잔여 합성옥 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
           </p>
           <p>
-            평균 소모 합성옥 :
+            필요 합성옥 기대값 :
             <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-              ${truncateToDecimals(bannerResults[datasets[0].dataIndex].bannerWinGachaRuns / bannerResults[datasets[0].dataIndex].bannerSuccess, 0) * 600} 합성옥
+              ${(truncateToDecimals(bannerResults[dataIndex].bannerWinGachaRuns / bannerResults[dataIndex].bannerSuccess, 0) * 600).toLocaleString()} 합성옥
             </span>
           </p>
           <p>
-            누적 평균 소모 합성옥 :
+            소모 합성옥 기대값 누적 :
             <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-              ${
+              ${(
                 truncateToDecimals(
                   bannerResults
-                    .slice(0, datasets[0].dataIndex + 1)
+                    .slice(0, dataIndex + 1)
                     .reduce(
                       (a, b) => a + safeNumberOrZero(b.bannerWinGachaRuns / b.bannerSuccess),
                       0,
                     ),
                   0,
                 ) * 600
-              } 합성옥
+              ).toLocaleString()} 합성옥
             </span>
           </p>
         </div>`;
@@ -139,7 +141,7 @@ export default function BannerEntryCurrency({
           enableBrush={enableBrush}
           chartHeight={chartHeight}
           brushHeight={brushHeight}
-          tooltipCallback={createTooltipLiteral(result.perBanner)}
+          createTooltipLiteral={createTooltipLiteral(result.perBanner)}
         >
           <Legend result={result} dispatchRef={dispatchRef} />
         </BrushBarChart>
