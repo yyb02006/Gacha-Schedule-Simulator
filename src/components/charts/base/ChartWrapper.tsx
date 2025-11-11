@@ -1,15 +1,18 @@
 'use client';
 
 import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
+import { cls } from '#/libs/utils';
 import { motion } from 'motion/react';
 import { ReactNode } from 'react';
 
 export default function ChartWrapper({
   children,
   title,
+  className = '',
 }: {
   children: ReactNode;
   title: ReactNode;
+  className?: string;
 }) {
   return (
     <motion.div
@@ -18,7 +21,7 @@ export default function ChartWrapper({
       initial="exit"
       animate="idle"
       exit="exit"
-      className="w-full rounded-xl"
+      className={cls('w-full rounded-xl', className)}
     >
       <motion.div
         variants={toOpacityZero}
