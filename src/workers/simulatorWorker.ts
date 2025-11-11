@@ -364,6 +364,7 @@ const gachaRateSimulate = ({
             ? probability.normal
             : bannerPickupChance;
       // 배너 셋팅 시작 시 추가 오리지늄 계산 및 계산된 오리지늄을 배너 시작 재화에 할당
+      // 이후 배너 진입 횟수만큼 나눠야 함
       // calculateOrundum(simulationConfig, additionalResource);
       if (!isTrySim) {
         if (isSimpleMode) {
@@ -371,7 +372,7 @@ const gachaRateSimulate = ({
         } else {
           currentOrundum += additionalResource.simpleMode;
         }
-        currentBanner.bannerStartingCurrency = currentOrundum;
+        currentBanner.bannerStartingCurrency += currentOrundum;
       }
       const pity = pities[gachaType];
       const simulationMetrics: SimulationMetrics = {
@@ -799,7 +800,6 @@ const gachaRateSimulate = ({
       }
       // 중단 옵션 활성화 : 배너 실패시 이번 회차 시뮬레이션 종료
       if (!result.success && bannerFailureAction === 'interruption') {
-        console.log('🔥 break i loop');
         break;
       }
     }

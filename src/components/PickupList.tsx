@@ -13,7 +13,7 @@ import BannerAddModal from '#/components/modals/BannerAddModal';
 import pickupDatas from '#/data/pickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
 import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
-import { getPercentileIndex, safeNumberOrZero } from '#/libs/utils';
+import { getPercentileIndex, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 
 export type Operator = {
   operatorId: string;
@@ -801,6 +801,12 @@ export default function PickupList() {
           maxIndex: Math.max(
             0,
             Math.min(bannerResult.bannerHistogram.findLastIndex((value) => value > 0)),
+          ),
+          bannerStartingCurrency: truncateToDecimals(
+            safeNumberOrZero(
+              Math.floor(bannerResult.bannerStartingCurrency / bannerResult.actualEntryCount),
+            ),
+            0,
           ),
         };
       }),
