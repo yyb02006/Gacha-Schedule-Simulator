@@ -128,9 +128,9 @@ export default function BannerEntryCurrency({
           labels={result.perBanner.map(({ name }) => name)}
           data={data}
           barChartColors={{
-            backgroundColor: '#fe9a00CC',
-            borderColor: '#fe9a00',
-            hoverBackgroundColor: '#8e51ffCC',
+            backgroundColor: '#ff6467CC',
+            borderColor: '#ff6467',
+            hoverBackgroundColor: '#8e51ffcc',
             hoverBorderColor: '#8e51ff',
           }}
           brushColor={{

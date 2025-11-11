@@ -111,8 +111,8 @@ export default function GachaSurvivalProbability({
         label: '중단',
         data: datas.bar[0],
         color: {
-          backgroundColor: '#fe9a00cc',
-          borderColor: '#fe9a00',
+          backgroundColor: '#ff6467CC',
+          borderColor: '#ff6467',
           hoverBackgroundColor: '#8e51ffcc',
           hoverBorderColor: '#8e51ff',
         },

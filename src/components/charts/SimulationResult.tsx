@@ -82,8 +82,8 @@ export default function SimulationResult({
             data={simulationResultData}
             labels={simulationResultLabels}
             legendPosition="before"
-            borderColor={['#fe9a00', '#00a6f4']}
-            backgroundColor={['#fe9a00CC', '#00a6f4CC']}
+            borderColor={['#fe9a00', '#ff6467CC']}
+            backgroundColor={['#fe9a00CC', '#ff6467']}
             createLegendHTML={createLegendHTML}
             createTooltipLiteral={createTooltipLiteral}
           />

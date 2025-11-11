@@ -23,19 +23,21 @@ const createTooltipLiteral =
   ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
     .map((b, i) => {
-      return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[3px] text-sm whitespace-nowrap">
+      return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
           <p>
-            성공 시 기대값 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
+            성공 시 기대값 : <span style="color: #51a2ff;" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
           </p>
-          <p>
-            배너 기대값 비중 :
-            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-              ${truncateToDecimals((rawValue / total) * 100)}%
-            </span>
-          </p>
-          <p>
-          전체 시뮬레이션 대비 성공률 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(cumulativeToEVIndex * 100, 2)}%</span>
-        </p>
+          <div class="space-y-[3px]">
+            <p>
+              배너 기대값 비중 :
+              <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
+                ${truncateToDecimals((rawValue / total) * 100)}%
+              </span>
+            </p>
+            <p>
+            전체 시뮬레이션 대비 성공률 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(cumulativeToEVIndex * 100, 2)}%</span>
+            </p>
+          </div>
         </div>`;
     })
     .join('')}
