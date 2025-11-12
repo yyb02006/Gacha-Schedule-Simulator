@@ -193,3 +193,40 @@ export function getPercentileIndex(histogram: number[], total: number, percentil
 export function safeNumberOrZero(num: number): number {
   return Number.isNaN(num) ? 0 : num;
 }
+
+/**
+ * 배열에서 조건을 만족하는 요소를 제한 개수만큼 추출하여 새로운 배열로 반환
+ *
+ * @template T
+ * @param {T[]} arr - 순회할 배열
+ * @param {(x: T) => boolean} predicate - 요소가 조건을 만족하는지 판단하는 함수
+ * @param {number} [limit=2] - 반환할 최대 요소 개수
+ * @returns {T[]} 조건을 만족하는 요소로 이루어진 배열
+ *
+ * @example
+ * const arr = [1, 2, 3, 4, 5];
+ * const evens = filterLimitArray(arr, x => x % 2 === 0, 2);
+ * console.log(evens); // [2, 4]
+ *
+ * @example
+ * const arr = [1, 3, 5];
+ * const evens = filterLimitArray(arr, x => x % 2 === 0, 2);
+ * console.log(evens); // []
+ *
+ * @example
+ * // limit보다 조건 만족 요소가 적으면 존재하는 것만 반환
+ * const arr = [2];
+ * const evens = filterLimitArray(arr, x => x % 2 === 0, 2);
+ * console.log(evens); // [2]
+ */
+export function filterLimitArray<T>(arr: T[], predicate: (x: T) => boolean, limit = 2): T[] {
+  const result: T[] = [];
+  let count = 0;
+  for (const item of arr) {
+    if (predicate(item)) {
+      result.push(item);
+      if (++count >= limit) break;
+    }
+  }
+  return result;
+}
