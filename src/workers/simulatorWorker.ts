@@ -256,26 +256,6 @@ const updateResult = ({
   if (rollResult.isTargetObtained) currentStatistics.targetObtained++;
 };
 
-const calculateOrundum = (
-  simulationConfig: {
-    orundum: number;
-    isSimpleMode: boolean;
-    isTrySim: boolean;
-  },
-  additionalResource: {
-    simpleMode: number;
-    extendedMode: number;
-  },
-) => {
-  const { isTrySim, isSimpleMode } = simulationConfig;
-  if (!isTrySim) {
-    const additionalOrundum = isSimpleMode
-      ? additionalResource.simpleMode
-      : additionalResource.extendedMode;
-    simulationConfig.orundum += additionalOrundum;
-  }
-};
-
 const gachaRateSimulate = ({
   pickupDatas,
   gachaGoal,
