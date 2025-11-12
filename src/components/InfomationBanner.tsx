@@ -6,6 +6,7 @@ import TotalGachaResult from '#/components/charts/TotalGachaResult';
 import SimulationResultModal from '#/components/modals/SimulationResultModal';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
+import { cls } from '#/libs/utils';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 
@@ -25,31 +26,35 @@ export default function InfomationBanner({
         viewport={{ once: true, amount: 0.5 }}
         transition={{ ...cardTransition, ease: 'easeIn' }}
         initial="exit"
-        className="font-S-CoreDream-500 flex w-[480px] items-center justify-between rounded-xl p-4"
+        className="font-S-CoreDream-500 w-[480px] rounded-xl p-4"
       >
         <motion.div
           variants={toOpacityZero}
           whileInView="idle"
           viewport={{ once: true, amount: 0.5 }}
           initial="exit"
-          className="text-lg"
+          className="flex items-center justify-between text-lg"
         >
-          <span className="text-amber-400">{isTrySim ? '가챠 확률' : '재화 소모'} 시뮬레이션 </span>
-          <span>통계</span>
+          <div>
+            <span className={cls(result?.total.isTrySim ? 'text-amber-400' : 'text-red-400')}>
+              {result?.total.isTrySim ? '가챠 확률' : '재화 소모'} 시뮬레이션{' '}
+            </span>
+            <span>통계</span>
+          </div>
+          <div className="relative">
+            <TypeSelectionButton
+              name="자세히보기"
+              hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+              onTypeClick={() => {
+                setIsModalOpen(true);
+              }}
+              className="px-4"
+            />
+            {result === null && (
+              <div className="absolute top-0 left-0 size-full rounded-xl bg-[#505050aa]" />
+            )}
+          </div>
         </motion.div>
-        <div className="relative">
-          <TypeSelectionButton
-            name="자세히보기"
-            hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-            onTypeClick={() => {
-              setIsModalOpen(true);
-            }}
-            className="px-4"
-          />
-          {result === null && (
-            <div className="absolute top-0 left-0 size-full rounded-xl bg-[#505050aa]" />
-          )}
-        </div>
       </motion.div>
       <SimulationResult result={result} />
       <TotalGachaResult result={result} />
