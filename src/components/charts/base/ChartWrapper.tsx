@@ -83,7 +83,7 @@ export default function ChartWrapper({
       >
         {title}
       </motion.div>
-      <LazyRender>{children}</LazyRender>
+      <div>{children}</div>
     </motion.div>
   );
 }
