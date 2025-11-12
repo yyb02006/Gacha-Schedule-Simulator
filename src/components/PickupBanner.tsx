@@ -11,7 +11,7 @@ import {
 import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
-import { clamp, cls, normalizeNumberString, stringToNumber } from '#/libs/utils';
+import { clamp, cls, filterLimitArray, normalizeNumberString, stringToNumber } from '#/libs/utils';
 import React, {
   ActionDispatch,
   ChangeEvent,
@@ -618,9 +618,11 @@ const PreInfoField = ({
 // 콜라보의 경우 5성도 한정 가능해야함
 const OperatorBadges = ({
   operator,
+  isPityReward,
   onChangeOperatorDetails,
 }: {
   operator: Operator;
+  isPityReward: boolean;
   onChangeOperatorDetails: (payload: UpdateOperatorDetails) => void;
 }) => {
   const { operatorId, operatorType, rarity } = operator;
@@ -643,6 +645,7 @@ const OperatorBadges = ({
         }}
         className="flex h-full cursor-pointer gap-x-1 *:pointer-events-none"
       >
+        {isPityReward && <Badge name="천장" color="border-teal-400 text-teal-400" />}
         {operatorType === 'limited' ? (
           <Badge {...operatorBadgeProps.operatorType.limited.props} />
         ) : (
@@ -683,10 +686,12 @@ const OperatorBadges = ({
 
 const PickupOperatorDetail = ({
   operator,
+  isPityReward,
   onOperatorDelete,
   onChangeOperatorDetails,
 }: {
   operator: Operator;
+  isPityReward: boolean;
   onOperatorDelete: () => void;
   onChangeOperatorDetails: (payload: UpdateOperatorDetails) => void;
 }) => {
@@ -709,7 +714,11 @@ const PickupOperatorDetail = ({
             value={localName}
             className="w-full text-[15px]"
           />
-          <OperatorBadges onChangeOperatorDetails={onChangeOperatorDetails} operator={operator} />
+          <OperatorBadges
+            isPityReward={isPityReward}
+            onChangeOperatorDetails={onChangeOperatorDetails}
+            operator={operator}
+          />
         </div>
       </div>
       <div className="flex gap-x-6 gap-y-3">
@@ -1068,6 +1077,18 @@ export default function PickupBanner({
                 {operators.map((operator) => (
                   <PickupOperatorDetail
                     key={operator.operatorId}
+                    isPityReward={
+                      gachaType === 'rotation'
+                        ? filterLimitArray(operators, ({ rarity }) => rarity === 6, 2).some(
+                            ({ operatorId }) => operatorId === operator.operatorId,
+                          )
+                        : gachaType === 'collab' ||
+                            gachaType === 'limited' ||
+                            gachaType === 'single'
+                          ? operators.find(({ rarity }) => rarity === 6)?.operatorId ===
+                            operator.operatorId
+                          : false
+                    }
                     operator={operator}
                     onChangeOperatorDetails={updateOperatorDetails}
                     onOperatorDelete={() => {
