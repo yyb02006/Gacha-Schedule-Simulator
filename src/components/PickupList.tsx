@@ -1,6 +1,6 @@
 'use client';
 
-import ScheduleOverview from '#/components/InfomationBanner';
+import SummaryBanner from '#/components/SummaryBanner';
 import { AnimatePresence } from 'motion/react';
 import { useReducer, useRef, useState } from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
@@ -863,7 +863,7 @@ export default function PickupList() {
         onSave={addBanner}
         onSavePreset={addBannerUsePreset}
       />
-      <ScheduleOverview result={results} isTrySim={isTrySim} />
+      <SummaryBanner result={results} />
     </div>
   );
 }

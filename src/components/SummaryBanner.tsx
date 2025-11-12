@@ -7,16 +7,10 @@ import SimulationResultModal from '#/components/modals/SimulationResultModal';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
 import { cls } from '#/libs/utils';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 
-export default function InfomationBanner({
-  isTrySim,
-  result,
-}: {
-  isTrySim: boolean;
-  result: GachaSimulationMergedResult | null;
-}) {
+export default function SummaryBanner({ result }: { result: GachaSimulationMergedResult | null }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <div className="w-[480px] space-y-6">
@@ -45,16 +39,22 @@ export default function InfomationBanner({
           </div>
           <div className="relative">
             <TypeSelectionButton
-              name="자세히보기"
+              name="자세히"
               hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
               onTypeClick={() => {
                 setIsModalOpen(true);
               }}
-              className="px-4"
+              className="px-4 text-base"
             />
-            {result === null && (
-              <div className="absolute top-0 left-0 size-full rounded-xl bg-[#505050aa]" />
-            )}
+            <AnimatePresence>
+              {result === null && (
+                <motion.div
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute top-0 left-0 size-full rounded-xl bg-[#505050aa]"
+                />
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       </motion.div>
