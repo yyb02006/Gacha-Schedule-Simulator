@@ -11,7 +11,7 @@ import {
   toggleButtonVariants,
   toOpacityZero,
 } from '#/constants/variants';
-import { clamp, normalizeNumberString } from '#/libs/utils';
+import { clamp, cls, normalizeNumberString } from '#/libs/utils';
 import { GachaType } from '#/types/types';
 import { motion } from 'motion/react';
 import { ChangeEvent, useReducer, useState } from 'react';
@@ -166,7 +166,7 @@ const prePickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
 
 const PresetModalContents = ({ onPresetClick }: { onPresetClick: (payload: Dummy) => void }) => {
   return (
-    <SimpleBar autoHide={false} className="-mx-4 h-full space-y-6 p-4" style={{ minHeight: 0 }}>
+    <SimpleBar autoHide={false} className="-mx-4 h-full p-4" style={{ minHeight: 0 }}>
       <div className="space-y-6">
         {prePickupDatas.map((pickupData) => {
           const { id, image, name, gachaType } = pickupData;
@@ -351,7 +351,9 @@ export default function BannerAddModal({
         onClose();
       }}
     >
-      <div className="h-[calc(100vh-96px)] rounded-xl bg-[#202020] p-6">
+      <div
+        className={cls(isCustomMode ? '' : 'h-[calc(100vh-96px)]', 'rounded-xl bg-[#202020] p-6')}
+      >
         <div className="flex h-full w-[360px] flex-1 flex-col gap-y-8 lg:w-[480px]">
           <div className="flex items-center justify-between gap-x-6">
             <motion.h1
