@@ -36,8 +36,10 @@ export default function InfomationBanner({
           className="flex items-center justify-between text-lg"
         >
           <div>
-            <span className={cls(result?.total.isTrySim ? 'text-amber-400' : 'text-red-400')}>
-              {result?.total.isTrySim ? '가챠 확률' : '재화 소모'} 시뮬레이션{' '}
+            <span
+              className={cls(result?.total.isTrySim === false ? 'text-red-400' : 'text-amber-400')}
+            >
+              {result?.total.isTrySim === false ? '재화 소모' : '가챠 확률'} 시뮬레이션{' '}
             </span>
             <span>통계</span>
           </div>
