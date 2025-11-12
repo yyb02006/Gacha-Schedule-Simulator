@@ -125,7 +125,7 @@ const ControlPanel = ({
                         const newValue = e.currentTarget.value.replace(/,/g, '');
                         initialInputs.initialResource = stringToNumber(newValue);
                       }}
-                      className="relative w-14 min-w-0 text-right"
+                      className="relative w-18 min-w-0 text-right"
                       value={stringToNumber(initialResource).toLocaleString()}
                     />
                   </motion.div>
