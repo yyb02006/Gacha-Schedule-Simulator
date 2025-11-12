@@ -104,7 +104,7 @@ const Legend = ({
       </div>
       {isTrySim || (
         <div>
-          배너 시작 시 재화 :{' '}
+          진입 시 평균 재화 :{' '}
           <span className="font-S-CoreDream-500 text-red-400">
             {truncateToDecimals(safeNumberOrZero(bannerStartingCurrency)).toLocaleString()} 합성옥
           </span>
