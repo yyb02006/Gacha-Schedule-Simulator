@@ -9,7 +9,6 @@ import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variant
 import { motion } from 'motion/react';
 import { useState } from 'react';
 
-// 배너별 성공 시기 통계
 export default function InfomationBanner({
   isTrySim,
   result,
@@ -38,14 +37,19 @@ export default function InfomationBanner({
           <span className="text-amber-400">{isTrySim ? '가챠 확률' : '재화 소모'} 시뮬레이션 </span>
           <span>통계</span>
         </motion.div>
-        <TypeSelectionButton
-          name="자세히보기"
-          hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-          onTypeClick={() => {
-            setIsModalOpen(true);
-          }}
-          className="px-4"
-        />
+        <div className="relative">
+          <TypeSelectionButton
+            name="자세히보기"
+            hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+            onTypeClick={() => {
+              setIsModalOpen(true);
+            }}
+            className="px-4"
+          />
+          {result === null && (
+            <div className="absolute top-0 left-0 size-full rounded-xl bg-[#505050aa]" />
+          )}
+        </div>
       </motion.div>
       <SimulationResult result={result} />
       <TotalGachaResult result={result} />

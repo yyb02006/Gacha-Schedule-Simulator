@@ -31,6 +31,9 @@ import Image from 'next/image';
 import ToggleButton from '#/components/buttons/ToggleButton';
 import SmallButton from '#/components/buttons/SmallButton';
 import FoldButton from '#/components/buttons/MaximizeButton';
+import ChevronDown from '#/icons/ChevronDown.svg';
+import ChevronUp from '#/icons/ChevronUp.svg';
+import Tag from '#/icons/Tag.svg';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -284,13 +287,13 @@ const BannerBadges = ({
           transition={{ duration: 0.2 }}
           className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
         >
-          <motion.svg
+          {/* <motion.div
             animate={isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }}
             transition={{ duration: 0.2 }}
             className="size-[22px] text-amber-400"
           >
-            <use href="/icons/icons.svg#tag" />
-          </motion.svg>
+            <Tag />
+          </motion.div> */}
         </motion.div>
       </motion.button>
       <BannerBadgeEditModal
@@ -375,9 +378,7 @@ const BannerHeader = ({
           isAnimateLocked={isAnimateLocked}
           className="text-amber-400"
         >
-          <svg className="relative size-full">
-            <use href="/icons/icons.svg#chevron-up" />
-          </svg>
+          <ChevronUp className="size-full" />
         </SmallButton>
         <SmallButton
           background="linear-gradient(135deg, #bb4d00, #ffb900)"
@@ -388,9 +389,7 @@ const BannerHeader = ({
           isAnimateLocked={isAnimateLocked}
           className="text-amber-400"
         >
-          <svg className="relative size-full">
-            <use href="/icons/icons.svg#chevron-down" />
-          </svg>
+          <ChevronDown className="size-full" />
         </SmallButton>
         <div className="font-S-CoreDream-700 flex items-center text-2xl">
           <span key={`${id} ${index + 1}`} className="select-none">
@@ -660,13 +659,13 @@ const OperatorBadges = ({
           animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
           className="border-rose relative flex aspect-square h-full items-center justify-center rounded-full border"
         >
-          <motion.svg
+          <motion.div
             animate={isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }}
             transition={{ duration: 0.2 }}
-            className="size-[18px] text-amber-400"
+            className="size-full p-1 text-amber-400"
           >
-            <use href="/icons/icons.svg#tag" />
-          </motion.svg>
+            <Tag className="size-full" />
+          </motion.div>
         </motion.div>
       </motion.button>
       <OperatorBadgeEditModal

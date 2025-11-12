@@ -6,6 +6,8 @@ import { motion } from 'motion/react';
 import { smallButtonVariants } from '#/constants/variants';
 import { cls } from '#/libs/utils';
 import { useIsMount } from '#/hooks/useIsMount';
+import Delete from '#/icons/Delete.svg';
+import DeleteCap from '#/icons/DeleteCap.svg';
 
 export default function DeleteButton({
   onDelete,
@@ -41,17 +43,19 @@ export default function DeleteButton({
       aria-pressed={isClicked}
       className={cls(size, className, 'cursor-pointer rounded-xl p-1 text-[#ff637e]')}
     >
-      <svg className="size-full">
-        <motion.use
+      <div className="relative size-full">
+        <motion.div
           animate={
             isHover
-              ? { rotateZ: -45, transformOrigin: 'bottom left' }
-              : { rotateZ: 0, transformOrigin: 'bottom left' }
+              ? { rotateZ: -45, transformOrigin: '18% 40%' }
+              : { rotateZ: 0, transformOrigin: '18% 40%' }
           }
-          href="/icons/icons.svg#delete-cap"
-        />
-        <use href="/icons/icons.svg#delete" />
-      </svg>
+          className="absolute size-full"
+        >
+          <DeleteCap className="size-full" />
+        </motion.div>
+        <Delete className="absolute size-full" />
+      </div>
     </motion.button>
   );
 }

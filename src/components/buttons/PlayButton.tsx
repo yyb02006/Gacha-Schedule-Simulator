@@ -3,8 +3,8 @@
 import DiamondButton from '#/components/buttons/DiamondButton';
 import { useIsMount } from '#/hooks/useIsMount';
 import { motion, Variants } from 'motion/react';
-import Image from 'next/image';
 import { MouseEventHandler, useState } from 'react';
+import Play from '#/icons/Play.svg';
 
 const playShadowVariants: Variants = {
   idle: (custom: { isMount: boolean }) => ({
@@ -20,8 +20,8 @@ const playShadowVariants: Variants = {
 };
 
 const playVariants: Variants = {
-  idle: { background: 'linear-gradient(135deg, #dba100, #ffd84d)' },
-  hover: { background: 'linear-gradient(-45deg, #dba100, #ffd84d)' },
+  idle: { background: 'linear-gradient(125deg, #f59e0b, #fde047)' },
+  hover: { background: 'linear-gradient(15deg, #f59e0b, #fde047)' },
 };
 
 export default function PlayButton({
@@ -55,19 +55,19 @@ export default function PlayButton({
               custom={{ isMount }}
               className="absolute -rotate-z-45"
             >
-              <Image alt="test" src={'/play.svg'} width={32} height={32} />
+              <Play className="size-8 text-[#202020]" />
             </motion.div>
           </div>
           <motion.div
             variants={playVariants}
-            animate={isHover ? 'hover' : 'idle'}
             transition={{ duration: 0.3, delay: isMount ? 0 : 0.6 }}
             initial={{
               background: 'linear-gradient(145deg, #202020, #202020)',
             }}
+            animate={isHover ? 'hover' : 'idle'}
             className="absolute size-8 -rotate-z-45"
             style={{
-              maskImage: 'url(play.svg)',
+              maskImage: 'url(icons/play.svg)',
               maskSize: 'contain',
               maskRepeat: 'no-repeat',
             }}

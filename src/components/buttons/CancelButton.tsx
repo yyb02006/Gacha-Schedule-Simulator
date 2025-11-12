@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { cancelButtonVariants, toOpacityZero } from '#/constants/variants';
+import Cancel from '#/icons/Cancel.svg';
 
 export default function CancelButton({
   handleCancel,
@@ -38,7 +39,7 @@ export default function CancelButton({
       exit="exit"
       className="size-[44px] cursor-pointer rounded-xl p-2 text-[#ff637e]"
     >
-      <motion.svg
+      <motion.div
         variants={toOpacityZero}
         whileInView="idle"
         viewport={{ once: true, amount: 0.5 }}
@@ -46,8 +47,8 @@ export default function CancelButton({
         exit="exit"
         className="size-full"
       >
-        <use href="/icons/icons.svg#cancel" />
-      </motion.svg>
+        <Cancel className="size-full" />
+      </motion.div>
     </motion.button>
   );
 }

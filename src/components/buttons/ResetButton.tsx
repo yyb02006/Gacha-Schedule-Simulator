@@ -3,8 +3,8 @@
 import DiamondButton from '#/components/buttons/DiamondButton';
 import { useIsMount } from '#/hooks/useIsMount';
 import { motion, Variants } from 'motion/react';
-import Image from 'next/image';
 import { MouseEventHandler, useState } from 'react';
+import Reset from '#/icons/Reset.svg';
 
 const resetShadowVariants: Variants = {
   idle: (custom: { isMount: boolean }) => ({
@@ -20,8 +20,8 @@ const resetShadowVariants: Variants = {
 };
 
 const resetVariants: Variants = {
-  idle: { background: 'linear-gradient(135deg, #dba100, #ffd84d)' },
-  hover: { background: 'linear-gradient(-45deg, #dba100, #ffd84d)' },
+  idle: { background: 'linear-gradient(90deg, #f59e0b, #fde047)' },
+  hover: { background: 'linear-gradient(-90deg, #f59e0b, #fde047)' },
 };
 
 export default function ResetButton({
@@ -55,7 +55,7 @@ export default function ResetButton({
               custom={{ isMount }}
               className="absolute select-none"
             >
-              <Image alt="test" src={'/reset.svg'} width={32} height={32} />
+              <Reset className="size-8 text-[#202020]" />
             </motion.div>
           </div>
           <motion.div
@@ -67,7 +67,7 @@ export default function ResetButton({
             }}
             className="absolute size-8"
             style={{
-              maskImage: 'url(reset.svg)',
+              maskImage: 'url(icons/reset.svg)',
               maskSize: 'contain',
               maskRepeat: 'no-repeat',
             }}

@@ -4,8 +4,8 @@ import DiamondButton from '#/components/buttons/DiamondButton';
 import { useIsMount } from '#/hooks/useIsMount';
 import { cls } from '#/libs/utils';
 import { motion, Variants } from 'motion/react';
-import Image from 'next/image';
 import { MouseEventHandler, useState } from 'react';
+import Add from '#/icons/Add.svg';
 
 const addShadowVariants: Variants = {
   idle: (custom: { isMount: boolean }) => ({
@@ -25,11 +25,11 @@ const addShadowVariants: Variants = {
 };
 
 const addVariants: Variants = {
-  idle: { background: 'linear-gradient(145deg, #dba100, #ffd84d)' },
+  idle: { background: 'linear-gradient(135deg, #d97706, #fde047)' },
   exit: {
-    background: 'linear-gradient(145deg, #202020, #202020)',
+    background: 'linear-gradient(135deg, #202020, #202020)',
   },
-  hover: { background: 'linear-gradient(-35deg, #dba100, #ffd84d)' },
+  hover: { background: 'linear-gradient(45deg, #d97706, #fde047)' },
 };
 
 interface AddButtonProps {
@@ -86,12 +86,11 @@ export default function AddButton({
               custom={{ isMount }}
               className="absolute -rotate-z-45"
             >
-              <Image
-                alt="test"
-                src={'/add.svg'}
-                width={32}
-                height={32}
-                className={mergedCustom?.size === 'small' ? 'size-5' : ''}
+              <Add
+                className={cls(
+                  mergedCustom?.size === 'small' ? 'size-5' : 'size-8',
+                  'text-[#202020]',
+                )}
               />
             </motion.div>
           </div>
@@ -106,7 +105,7 @@ export default function AddButton({
               'absolute -rotate-z-45',
             )}
             style={{
-              maskImage: 'url(add.svg)',
+              maskImage: 'url(icons/add.svg)',
               maskSize: 'contain',
               maskRepeat: 'no-repeat',
             }}

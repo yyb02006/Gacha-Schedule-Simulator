@@ -6,6 +6,8 @@ import { motion } from 'motion/react';
 import { smallButtonVariants } from '#/constants/variants';
 import { cls } from '#/libs/utils';
 import { useIsMount } from '#/hooks/useIsMount';
+import Maximize from '#/icons/Maximize.svg';
+import Minimize from '#/icons/Minimize.svg';
 
 export default function FoldButton({
   onFold,
@@ -47,15 +49,7 @@ export default function FoldButton({
         'relative shrink-0 cursor-pointer rounded-xl p-1 text-[#51a2ff]',
       )}
     >
-      {isFolded ? (
-        <svg className="size-full">
-          <use href="/icons/icons.svg#maximize" />
-        </svg>
-      ) : (
-        <svg className="relative top-2 size-full">
-          <use href="/icons/icons.svg#minimize" />
-        </svg>
-      )}
+      {isFolded ? <Maximize className="size-full" /> : <Minimize className="mt-2 size-full" />}
     </motion.button>
   );
 }

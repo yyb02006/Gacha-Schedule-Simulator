@@ -16,8 +16,8 @@ const pauseShadowVariants: Variants = {
 };
 
 const pauseVariants: Variants = {
-  idle: { background: 'linear-gradient(135deg, #dba100, #ffd84d)' },
-  hover: { background: 'linear-gradient(-45deg, #dba100, #ffd84d)' },
+  idle: { background: 'linear-gradient(125deg, #f59e0b, #fde047)' },
+  hover: { background: 'linear-gradient(15deg, #f59e0b, #fde047)' },
 };
 
 export default function PauseButton({
@@ -56,11 +56,11 @@ export default function PauseButton({
           </div>
           <motion.div
             variants={pauseVariants}
-            animate={isHover ? 'hover' : 'idle'}
             transition={{ duration: 0.3 }}
             initial={{
-              background: 'linear-gradient(145deg, #dba100, #ffd84d)',
+              background: 'linear-gradient(145deg, #202020, #202020)',
             }}
+            animate={isHover ? 'hover' : 'idle'}
             className="absolute size-8 -rotate-z-45"
             style={{
               maskImage: 'url(pause.svg)',
