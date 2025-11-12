@@ -655,13 +655,15 @@ export default function PickupList() {
     const { isMobile, workerCount } = getOptimalWorkerCount();
     if (workerCount <= 0) return;
     setIsRunning(true);
+    const activePickupDatas = pickupDatas.filter(({ active }) => active);
+
     const workers: Worker[] = [];
     const promises: Promise<GachaSimulationMergedResult>[] = [];
     const { simulationTry, probability, showBannerImage, bannerFailureAction } = options;
     const {
       current: { gachaGoal, initialResource },
     } = initialInputs;
-    const expectedTryBySingleCycle = pickupDatas.length * 150;
+    const expectedTryBySingleCycle = activePickupDatas.length * 150;
     const mobileSimulationTry = Math.floor(safeNumberOrZero(10000000 / expectedTryBySingleCycle));
     const getPostMessage = (index: number): WorkerInput => {
       const inputTry = isMobile ? mobileSimulationTry : simulationTry;
@@ -670,7 +672,7 @@ export default function PickupList() {
       return {
         type: 'start',
         payload: {
-          pickupDatas,
+          pickupDatas: activePickupDatas,
           options: {
             isTrySim,
             isSimpleMode,
