@@ -287,13 +287,13 @@ const BannerBadges = ({
           transition={{ duration: 0.2 }}
           className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
         >
-          {/* <motion.div
+          <motion.div
             animate={isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }}
             transition={{ duration: 0.2 }}
-            className="size-[22px] text-amber-400"
+            className="text-amber-400"
           >
-            <Tag />
-          </motion.div> */}
+            <Tag className="size-full" />
+          </motion.div>
         </motion.div>
       </motion.button>
       <BannerBadgeEditModal
