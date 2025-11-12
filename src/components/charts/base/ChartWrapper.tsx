@@ -58,11 +58,11 @@ const LazyRender = ({
 
 export default function ChartWrapper({
   children,
-  title,
+  header,
   className = '',
 }: {
   children: ReactNode;
-  title: ReactNode;
+  header: ReactNode;
   className?: string;
 }) {
   return (
@@ -81,7 +81,7 @@ export default function ChartWrapper({
         initial="exit"
         className="font-S-CoreDream-500 p-4 text-lg"
       >
-        {title}
+        {header}
       </motion.div>
       <div>{children}</div>
     </motion.div>

@@ -62,7 +62,7 @@ export default function BannerEVCounts({
     : [];
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           배너별 <span className="text-amber-400">성공 시 기대값</span>
         </span>

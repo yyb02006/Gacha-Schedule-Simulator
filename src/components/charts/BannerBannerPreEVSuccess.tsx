@@ -109,7 +109,7 @@ export default function BannerPreEVSuccess({
 }) {
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           배너별 <span className="text-amber-400">기대값 도달 전 성공 확률</span>
         </span>

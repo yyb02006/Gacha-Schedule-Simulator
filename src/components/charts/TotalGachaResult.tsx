@@ -117,7 +117,7 @@ export default function TotalGachaResult({
   };
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           <span className="text-amber-400">전체 가챠 </span>통계
         </span>

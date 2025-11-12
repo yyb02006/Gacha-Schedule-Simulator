@@ -59,7 +59,7 @@ export default function ExpectedCumulativeConsumption({
 }) {
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           평균 <span className="text-red-400">누적 소모 합성옥</span>
         </span>

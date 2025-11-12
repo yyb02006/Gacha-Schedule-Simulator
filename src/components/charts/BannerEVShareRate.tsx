@@ -144,7 +144,7 @@ export default function BannerEVShareRate({
   );
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           배너별 <span className="text-amber-400">기대값 점유율</span>
         </span>

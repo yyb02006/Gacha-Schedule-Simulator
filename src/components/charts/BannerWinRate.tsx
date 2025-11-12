@@ -156,44 +156,9 @@ export default function BannerWinRate({
     ],
     line: [],
   };
-  /* const dummy = {
-    line: [],
-    bar: [
-      {
-        data: [6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500],
-        label: '성공',
-        color: {
-          backgroundColor: '#51a2ffcc',
-          borderColor: '#51a2ff',
-          hoverBackgroundColor: '#2b7fffcc',
-          hoverBorderColor: '#2b7fff',
-        },
-      },
-      {
-        data: [2000, 600, 300, 5000, 1000, 6000, 5000, 500, 0, 2600, 1000],
-        label: '재화부족',
-        color: {
-          backgroundColor: '#ff5e5ecc',
-          borderColor: '#ff5e5e',
-          hoverBackgroundColor: '#ef4444cc',
-          hoverBorderColor: '#ef4444',
-        },
-      },
-      {
-        data: [1300, 200, 4100, 1900, 300, 2400, 2200, 500, 0, 3000, 500],
-        label: '횟수부족',
-        color: {
-          backgroundColor: '#fe9a00cc',
-          borderColor: '#fe9a00',
-          hoverBackgroundColor: '#e17100cc',
-          hoverBorderColor: '#e17100',
-        },
-      },
-    ],
-  }; */
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           배너별 <span className="text-amber-400">성공 / 실패 비율</span>
         </span>

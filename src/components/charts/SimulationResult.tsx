@@ -70,7 +70,7 @@ export default function SimulationResult({
   const simulationResultLabels = ['성공', '실패'];
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           <span className="text-amber-400">시뮬레이션 </span>통계
         </span>

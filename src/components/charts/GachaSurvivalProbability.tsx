@@ -120,35 +120,9 @@ export default function GachaSurvivalProbability({
       },
     ],
   };
-  /* const dummy = {
-    line: [
-      {
-        data: [10000, 9220, 8600, 8500, 7700, 6200, 4300, 3600, 2700, 2000, 1300],
-        label: '도달 성공',
-        color: {
-          backgroundColor: '#51a2ffcc',
-          borderColor: '#51a2ff',
-          hoverBackgroundColor: '#fe9a00ccc',
-          hoverBorderColor: '#fe9a00',
-        },
-      },
-    ],
-    bar: [
-      {
-        data: [780, 620, 100, 800, 1500, 1900, 700, 900, 700, 700, 0],
-        label: '일정 중단',
-        color: {
-          backgroundColor: '#fe9a00cc',
-          borderColor: '#fe9a00',
-          hoverBackgroundColor: '#8e51ffcc',
-          hoverBorderColor: '#8e51ff',
-        },
-      },
-    ],
-  }; */
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           가챠배너 <span className="text-amber-400">도달 / 중단 확률</span>
         </span>

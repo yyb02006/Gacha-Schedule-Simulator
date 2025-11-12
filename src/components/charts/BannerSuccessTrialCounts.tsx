@@ -184,7 +184,7 @@ export default function BannerSuccessTrialCounts({
 
   return (
     <ChartWrapper
-      title={
+      header={
         <div className="flex items-end gap-3 text-amber-400">
           {name}{' '}
           <div className="font-S-CoreDream-300 text-sm text-[#eaeaea]">

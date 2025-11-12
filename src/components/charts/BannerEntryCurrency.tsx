@@ -117,7 +117,7 @@ export default function BannerEntryCurrency({
   const dispatchRef = useRef<Dispatch<SetStateAction<LegendData<'bar'>>>>(null);
   return (
     <ChartWrapper
-      title={
+      header={
         <span>
           배너별 <span className="text-amber-400">진입 시 평균 재화</span>
         </span>
