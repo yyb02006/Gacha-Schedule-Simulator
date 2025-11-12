@@ -13,13 +13,15 @@ import {
 } from '#/constants/variants';
 import { clamp, cls, normalizeNumberString } from '#/libs/utils';
 import { GachaType } from '#/types/types';
-import { motion } from 'motion/react';
-import { ChangeEvent, useReducer, useState } from 'react';
+import { motion, useMotionValue } from 'motion/react';
+import { ChangeEvent, useEffect, useReducer, useRef, useState } from 'react';
 import SimpleBar from 'simplebar-react';
 import pickupDatas from '#/data/pickupDatas.json';
 import 'simplebar-react/dist/simplebar.min.css';
 import Image from 'next/image';
 import Badge from '#/components/Badge';
+import { useResizeDragToggle } from '#/hooks/useResizeDragToggle';
+import { animate } from 'motion';
 
 const CustomModalContents = ({
   modalState,
@@ -221,8 +223,19 @@ const BannerAddTypeToggle = ({
   onTypeClick,
 }: {
   isCustomMode: boolean;
-  onTypeClick: () => void;
+  onTypeClick: (isLeft?: boolean) => void;
 }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragEnabled] = useResizeDragToggle(100);
+
+  const constraintsRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  useEffect(() => {
+    const rect = constraintsRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const maxX = rect.width / 2;
+    animate(x, isCustomMode ? 0 : maxX, { type: 'spring', stiffness: 400, damping: 30 });
+  }, [isCustomMode, x]);
   return (
     <div className="flex min-w-[100px] flex-col space-y-1">
       <motion.div
@@ -231,7 +244,10 @@ const BannerAddTypeToggle = ({
         viewport={{ once: true, amount: 0.5 }}
         initial="exit"
         exit="exit"
-        onClick={onTypeClick}
+        onClick={() => {
+          if (isDragging) return;
+          onTypeClick();
+        }}
         className="relative flex h-[48px] cursor-pointer items-center justify-center rounded-xl px-4 pt-3 pb-2 font-bold"
       >
         <motion.div
@@ -268,12 +284,55 @@ const BannerAddTypeToggle = ({
             프리셋
           </motion.div>
         </motion.div>
-        <div className="absolute top-0 flex size-full">
+        <div ref={constraintsRef} className="absolute top-0 flex size-full">
           <motion.div
-            transition={{
+            drag={dragEnabled ? 'x' : false}
+            dragConstraints={constraintsRef}
+            dragElastic={0}
+            // timeConstant = 관성 적용 시간 이며, 관성 적용 시간이 길어진다는 것은 느려지는 것이므로 관성이 약하게 나타나게 된다.
+            dragTransition={{
+              power: 0.2,
+              timeConstant: 750,
+              modifyTarget: (target) => {
+                // 관성 한계값 제한
+                const rect = constraintsRef.current?.getBoundingClientRect();
+                if (!rect) return target;
+                const padding = 160; // 160이 괜찮긴 한데 정확히 어느 수치가 좋은지는 보면서 찾아야함
+                const maxX = rect.width / 2 + padding;
+                const minX = 0 - padding;
+
+                return Math.min(Math.max(target, minX), maxX);
+              },
+            }}
+            onDragStart={() => {
+              setIsDragging(true);
+            }}
+            onDragEnd={() => {
+              setIsDragging(false);
+              const rect = constraintsRef.current?.getBoundingClientRect();
+              if (!rect) return;
+              const maxX = rect.width / 2;
+              const currentX = x.get();
+
+              if (isCustomMode) {
+                if (currentX > maxX * (1 / 4)) {
+                  onTypeClick(false);
+                } else {
+                  animate(x, 0, { type: 'spring', stiffness: 400, damping: 30 });
+                }
+              } else {
+                if (currentX < maxX * (3 / 4)) {
+                  onTypeClick(true);
+                } else {
+                  animate(x, maxX, { type: 'spring', stiffness: 400, damping: 30 });
+                }
+              }
+            }}
+            style={{ x }}
+            /* transition={{
               left: { type: 'spring', visualDuration: 0.3, bounce: 0.2 },
             }}
-            animate={isCustomMode ? { left: 0 } : { left: '50%' }}
+            animate={isCustomMode ? { left: 0 } : { left: '50%' }} */
             className="relative h-full w-1/2 p-[2px]"
           >
             <motion.div
@@ -369,8 +428,12 @@ export default function BannerAddModal({
           </div>
           <BannerAddTypeToggle
             isCustomMode={isCustomMode}
-            onTypeClick={() => {
-              setIsCustomMode((p) => !p);
+            onTypeClick={(isLeft?: boolean) => {
+              if (isLeft === undefined) {
+                setIsCustomMode((p) => !p);
+              } else {
+                setIsCustomMode(isLeft);
+              }
             }}
           />
           {isCustomMode ? (
