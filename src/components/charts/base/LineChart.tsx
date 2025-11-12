@@ -2,6 +2,7 @@
 
 import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
 import { TooltipCallback } from '#/components/charts/base/BarChart';
+import { useIsMount } from '#/hooks/useIsMount';
 import { truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
@@ -152,7 +153,7 @@ export default function LineChart({
   height,
   createTooltipLiteral,
 }: LineChartProps) {
-  const [hasRendered, setHasRendered] = useState(false);
+  const isMount = useIsMount();
   const chartRef = useRef<ChartJS<'line'>>(null);
   const lastChartId = useRef<string | null>(null);
   const hoveredIndexRef = useRef<number | null>(null);
@@ -197,7 +198,7 @@ export default function LineChart({
   const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: !height,
-    animation: hasRendered ? { duration: 200 } : false,
+    animation: isMount ? { duration: 200 } : false,
     animations: {
       x: {
         duration: (ctx) => {
@@ -358,9 +359,6 @@ export default function LineChart({
 
   useEffect(() => {
     mainChartRef.current = chartRef.current;
-    if (chartRef.current) {
-      setHasRendered(true);
-    }
   }, [mainChartRef]);
 
   return (

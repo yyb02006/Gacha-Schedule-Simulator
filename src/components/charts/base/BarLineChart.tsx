@@ -1,6 +1,7 @@
 'use client';
 
 import { CreateTooltipLiteral, CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import { useIsMount } from '#/hooks/useIsMount';
 import { truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
@@ -170,7 +171,7 @@ export default function BarLineChart({
   height,
   createTooltipLiteral,
 }: BarLineChartProps) {
-  const [hasRendered, setHasRendered] = useState(false);
+  const isMount = useIsMount();
   const categoryPercentage = primaryData.length < 50 ? 0.9 : primaryData.length < 150 ? 0.8 : 0.9;
   const chartRef = useRef<ChartJS<
     'bar' | 'line',
@@ -247,7 +248,7 @@ export default function BarLineChart({
   const options: ChartOptions<'bar' | 'line'> = {
     responsive: true,
     maintainAspectRatio: !height,
-    animation: hasRendered ? { duration: 200 } : false,
+    animation: isMount ? { duration: 200 } : false,
     animations: {
       x: {
         duration: (ctx) => {
@@ -416,9 +417,6 @@ export default function BarLineChart({
 
   useEffect(() => {
     mainChartRef.current = chartRef.current;
-    if (chartRef.current) {
-      setHasRendered(true);
-    }
   }, [mainChartRef]);
 
   return (

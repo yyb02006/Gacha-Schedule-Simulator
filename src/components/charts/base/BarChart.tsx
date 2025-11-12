@@ -1,6 +1,7 @@
 'use client';
 
 import { CreateTooltipLiteral, CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import { useIsMount } from '#/hooks/useIsMount';
 import { truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
@@ -155,7 +156,7 @@ export default function BarChart({
   lazyLoading = false,
   createTooltipLiteral,
 }: BarChartProps) {
-  const [hasRendered, setHasRendered] = useState(false);
+  const isMount = useIsMount();
   const chartRef = useRef<ChartJS<'bar'>>(null);
   const lastChartId = useRef<string | null>(null);
   const hoveredIndexRef = useRef<number | null>(null);
@@ -212,7 +213,7 @@ export default function BarChart({
   const options: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: !height,
-    animation: hasRendered ? { duration: 200 } : false,
+    animation: isMount ? { duration: 200 } : false,
     animations: {
       x: {
         duration: (ctx) => {
@@ -375,13 +376,10 @@ export default function BarChart({
 
   useEffect(() => {
     mainChartRef.current = chartRef.current;
-    if (chartRef.current) {
-      setHasRendered(true);
-    }
   }, [mainChartRef]);
 
   useEffect(() => {
-    if (!chartRef.current || !hasRendered || !lazyLoading) return;
+    if (!chartRef.current || !isMount || !lazyLoading) return;
 
     const CHUNK_SIZE = 50;
     const CHUNK_DELAY = 200;
@@ -410,7 +408,7 @@ export default function BarChart({
     }
 
     drawChunk();
-  }, [data, labels, hasRendered, selectionIndex, lazyLoading]);
+  }, [data, labels, isMount, selectionIndex, lazyLoading]);
 
   useEffect(() => {
     if (mainChartRef.current && data.length > 20 && !loading) {
