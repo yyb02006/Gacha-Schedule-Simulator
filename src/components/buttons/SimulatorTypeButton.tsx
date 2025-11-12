@@ -6,6 +6,7 @@ import {
   toggleButtonVariants,
   toOpacityZero,
 } from '#/constants/variants';
+import { useResizeDragToggle } from '#/hooks/useResizeDragToggle';
 import { animate } from 'motion';
 import { motion, useMotionValue } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
@@ -18,7 +19,7 @@ export default function SimulatorTypeButton({
   onTypeClick: (isLeft?: boolean) => void;
 }) {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragEnabled, setDragEnabled] = useState(true);
+  const [dragEnabled] = useResizeDragToggle(100);
 
   const constraintsRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -28,26 +29,6 @@ export default function SimulatorTypeButton({
     const maxX = rect.width / 2;
     animate(x, isTrySim ? 0 : maxX, { type: 'spring', stiffness: 400, damping: 30 });
   }, [isTrySim, x]);
-
-  // resize 이벤트 작동 시 드래그 요소가 초기 위치로 리셋되는 현상 방지
-  useEffect(() => {
-    let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
-
-    const handleResize = () => {
-      // drag 비활성화 → layout 안정 후 다시 활성화
-      setDragEnabled(false);
-      if (resizeTimeout) clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        setDragEnabled(true);
-      }, 100);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (resizeTimeout) clearTimeout(resizeTimeout);
-    };
-  }, []);
   return (
     <div className="flex min-w-[100px] flex-col space-y-1">
       <motion.div
@@ -101,7 +82,6 @@ export default function SimulatorTypeButton({
             drag={dragEnabled ? 'x' : false}
             dragConstraints={constraintsRef}
             dragElastic={0}
-            dragMomentum={true}
             // timeConstant = 관성 적용 시간 이며, 관성 적용 시간이 길어진다는 것은 느려지는 것이므로 관성이 약하게 나타나게 된다.
             dragTransition={{
               power: 0.2,

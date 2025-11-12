@@ -1,6 +1,7 @@
 'use client';
 
 import { insetInputVariants, toggleButtonVariants, toOpacityZero } from '#/constants/variants';
+import { useResizeDragToggle } from '#/hooks/useResizeDragToggle';
 import { cls } from '#/libs/utils';
 import { animate } from 'motion';
 import { motion, useMotionValue } from 'motion/react';
@@ -19,6 +20,8 @@ export default function ToggleButton({
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [dragEnabled] = useResizeDragToggle(100);
+
   const constraintsRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   useEffect(() => {
@@ -65,9 +68,23 @@ export default function ToggleButton({
         </motion.div>
         <div ref={constraintsRef} className="absolute top-0 flex size-full">
           <motion.div
-            drag="x"
+            drag={dragEnabled ? 'x' : false}
             dragConstraints={constraintsRef}
-            dragElastic={0.04}
+            dragElastic={0}
+            dragTransition={{
+              power: 0.2,
+              timeConstant: 750,
+              modifyTarget: (target) => {
+                // 관성 한계값 제한
+                const rect = constraintsRef.current?.getBoundingClientRect();
+                if (!rect) return target;
+                const padding = 160; // 160이 괜찮긴 한데 정확히 어느 수치가 좋은지는 보면서 찾아야함
+                const maxX = rect.width / 2 + padding;
+                const minX = 0 - padding;
+
+                return Math.min(Math.max(target, minX), maxX);
+              },
+            }}
             onDragStart={() => {
               if (isDragging || isAnimating) return;
               setIsDragging(true);
