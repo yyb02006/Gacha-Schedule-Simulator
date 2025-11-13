@@ -1075,13 +1075,13 @@ export default function PickupBanner({
               </div>
               <div className="space-y-6 lg:space-y-4">
                 {operators.map((operator) => {
-                  const hasLimitedInSixths = operators.some(
+                  const limitedInSixths = operators.find(
                     ({ rarity, operatorType }) => rarity === 6 && operatorType === 'limited',
                   );
-                  const limitedSixth = operators.find(
+                  const limitedSixthId = operators.find(
                     ({ rarity, operatorType }) => rarity === 6 && operatorType === 'limited',
                   )?.operatorId;
-                  const normalSixth = operators.find(({ rarity }) => rarity === 6)?.operatorId;
+                  const normalSixthId = operators.find(({ rarity }) => rarity === 6)?.operatorId;
                   const twoSixthsWithRotation = filterLimitArray(
                     operators,
                     ({ rarity }) => rarity === 6,
@@ -1091,11 +1091,11 @@ export default function PickupBanner({
                   const isPityReward =
                     gachaType === 'rotation'
                       ? twoSixthsWithRotation
-                      : gachaType === 'collab' || gachaType === 'limited' || gachaType === 'single'
-                        ? hasLimitedInSixths
-                          ? limitedSixth === operator.operatorId
-                          : normalSixth === operator.operatorId
-                        : false;
+                      : gachaType === 'single'
+                        ? normalSixthId === operator.operatorId
+                        : gachaType === 'collab' || gachaType === 'limited'
+                          ? limitedSixthId === operator.operatorId
+                          : false;
                   return (
                     <PickupOperatorDetail
                       key={operator.operatorId}
