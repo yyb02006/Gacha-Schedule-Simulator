@@ -346,9 +346,10 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
         gachaType,
       } = currentBanner;
       const { sixth, fifth, fourth } = pickupOpersCount;
-      const isFirstOperatorInLimitedBanner =
-        (currentBanner.gachaType === 'limited' || currentBanner.gachaType === 'collab') &&
-        operatorCount === 0;
+      const canHaveLimitedOperator =
+        currentBanner.gachaType === 'collab' ||
+        (currentBanner.gachaType === 'limited' &&
+          !currentBanner.operators.some(({ operatorType }) => operatorType === 'limited'));
       const currentOperatorsCount = getCurrentOperatorsCount(currentBanner.operators);
       const newRarity =
         currentOperatorsCount.sixth < sixth || sixth < operatorLimitByBannerType[gachaType]['sixth']
@@ -365,7 +366,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
         name: `오퍼레이터 ${operatorCount + 1}`,
         operatorId: crypto.randomUUID(),
         currentQty: 0,
-        operatorType: isFirstOperatorInLimitedBanner ? 'limited' : 'normal',
+        operatorType: canHaveLimitedOperator ? 'limited' : 'normal',
         rarity: newRarity,
         targetCount: 1,
       };
