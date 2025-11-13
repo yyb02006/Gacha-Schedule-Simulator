@@ -14,7 +14,7 @@ export default function ToTopButton({
   const [isClicked, setIsClicked] = useState(false);
   return (
     <motion.button
-      key="cancel"
+      key="toTop"
       onClick={handleToTop}
       onHoverStart={() => {
         setIsHover(true);
