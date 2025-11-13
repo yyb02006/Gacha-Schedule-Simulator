@@ -620,14 +620,17 @@ const PreInfoField = ({
   );
 };
 
-// 콜라보의 경우 5성도 한정 가능해야함
 const OperatorBadges = ({
   operator,
   isPityReward,
+  gachaType,
+  operators,
   onChangeOperatorDetails,
 }: {
   operator: Operator;
   isPityReward: boolean;
+  gachaType: GachaType;
+  operators: Operator[];
   onChangeOperatorDetails: (payload: UpdateOperatorDetails) => void;
 }) => {
   const { operatorId, operatorType, rarity } = operator;
@@ -683,6 +686,8 @@ const OperatorBadges = ({
         }}
         operatorType={operatorType}
         rarity={rarity}
+        operators={operators}
+        gachaType={gachaType}
         onBadgeEdit={editBadge}
       />
     </>
@@ -692,11 +697,15 @@ const OperatorBadges = ({
 const PickupOperatorDetail = ({
   operator,
   isPityReward,
+  gachaType,
+  operators,
   onOperatorDelete,
   onChangeOperatorDetails,
 }: {
   operator: Operator;
   isPityReward: boolean;
+  gachaType: GachaType;
+  operators: Operator[];
   onOperatorDelete: () => void;
   onChangeOperatorDetails: (payload: UpdateOperatorDetails) => void;
 }) => {
@@ -723,6 +732,8 @@ const PickupOperatorDetail = ({
             isPityReward={isPityReward}
             onChangeOperatorDetails={onChangeOperatorDetails}
             operator={operator}
+            gachaType={gachaType}
+            operators={operators}
           />
         </div>
       </div>
@@ -1086,32 +1097,46 @@ export default function PickupBanner({
                 )}
               </div>
               <div className="space-y-6 lg:space-y-4">
-                {operators.map((operator) => (
-                  <PickupOperatorDetail
-                    key={operator.operatorId}
-                    isPityReward={
-                      gachaType === 'rotation'
-                        ? filterLimitArray(operators, ({ rarity }) => rarity === 6, 2).some(
-                            ({ operatorId }) => operatorId === operator.operatorId,
-                          )
-                        : gachaType === 'collab' ||
-                            gachaType === 'limited' ||
-                            gachaType === 'single'
-                          ? operators.find(({ rarity }) => rarity === 6)?.operatorId ===
-                            operator.operatorId
-                          : false
-                    }
-                    operator={operator}
-                    onChangeOperatorDetails={updateOperatorDetails}
-                    onOperatorDelete={() => {
-                      deleteData({
-                        target: 'operator',
-                        operatorId: operator.operatorId,
-                        rarity: operator.rarity,
-                      });
-                    }}
-                  />
-                ))}
+                {operators.map((operator) => {
+                  const hasLimitedInSixths = operators.some(
+                    ({ rarity, operatorType }) => rarity === 6 && operatorType === 'limited',
+                  );
+                  const limitedSixth = operators.find(
+                    ({ rarity, operatorType }) => rarity === 6 && operatorType === 'limited',
+                  )?.operatorId;
+                  const normalSixth = operators.find(({ rarity }) => rarity === 6)?.operatorId;
+                  const twoSixthsWithRotation = filterLimitArray(
+                    operators,
+                    ({ rarity }) => rarity === 6,
+                    2,
+                  ).some(({ operatorId }) => operatorId === operator.operatorId);
+
+                  const isPityReward =
+                    gachaType === 'rotation'
+                      ? twoSixthsWithRotation
+                      : gachaType === 'collab' || gachaType === 'limited' || gachaType === 'single'
+                        ? hasLimitedInSixths
+                          ? limitedSixth === operator.operatorId
+                          : normalSixth === operator.operatorId
+                        : false;
+                  return (
+                    <PickupOperatorDetail
+                      key={operator.operatorId}
+                      isPityReward={isPityReward}
+                      operator={operator}
+                      operators={operators}
+                      gachaType={gachaType}
+                      onChangeOperatorDetails={updateOperatorDetails}
+                      onOperatorDelete={() => {
+                        deleteData({
+                          target: 'operator',
+                          operatorId: operator.operatorId,
+                          rarity: operator.rarity,
+                        });
+                      }}
+                    />
+                  );
+                })}
               </div>
               <motion.div
                 layout="position"
