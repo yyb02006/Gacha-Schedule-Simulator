@@ -668,7 +668,7 @@ const OperatorBadges = ({
         )}
         <motion.div
           animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
-          className="border-rose relative flex aspect-square h-full items-center justify-center rounded-full border"
+          className="border-rose relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
         >
           <motion.div
             animate={isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }}
