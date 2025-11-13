@@ -396,8 +396,11 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
     case 'delete': {
       const { id: bannerId, target, operatorId: payloadOperatorId, rarity } = action.payload;
       if (target === 'banner') {
+        if (pickupDatas.length === 1) return pickupDatas;
         return pickupDatas.filter(({ id }) => id !== action.payload.id);
       } else if (target === 'operator') {
+        const currentBanner = pickupDatas.find((pickupData) => pickupData.id === bannerId);
+        if (currentBanner?.operators.length === 1) return pickupDatas;
         return pickupDatas.map((pickupData) => {
           if (rarity === undefined) return pickupData;
           const rarityString = rarities[rarity];
