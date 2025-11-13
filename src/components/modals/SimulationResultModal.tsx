@@ -15,7 +15,6 @@ import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
 import ExpectedCumulativeConsumption from '#/components/charts/ExpectedCumulativeConsumption';
 import GachaSurvivalProbability from '#/components/charts/GachaSurvivalProbability';
 import BannerEVCounts from '#/components/charts/BannerEVCounts';
-import { cls } from '#/libs/utils';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -23,68 +22,46 @@ interface SettingsModalProps {
   result: GachaSimulationMergedResult | null;
 }
 
-function LazyRender({
-  children,
-  minHeight = 300,
-  className = '',
-}: {
-  children: React.ReactNode;
-  minHeight?: number;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.unobserve(entry.target); // 한 번만 트리거
-        }
-      },
-      {
-        threshold: 0.1,
-      },
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
+const FloatingActionBar = ({ currentBanner }: { currentBanner: HTMLDivElement | undefined }) => {
   return (
-    <div
-      ref={ref}
-      className={cls('flex w-full items-center justify-center', className)}
-      // style={{ minHeight }}
-    >
-      {inView ? (
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: 'easeOut' }}
-          className="h-full w-full"
-        >
-          {children}
-        </motion.div>
-      ) : (
-        <div
-          className="w-full animate-pulse rounded-lg bg-neutral-800/50"
-          style={{ height: minHeight }}
-        />
-      )}
+    <div className="fixed bottom-6 left-1/2 flex h-[40px] w-[400px] -translate-x-1/2 items-center justify-between rounded-lg bg-[#404040] px-2 text-stone-50">
+      <div>{currentBanner ? currentBanner.dataset.name : '11111'}</div>
+      <div className=""></div>
     </div>
   );
-}
+};
 
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
+  const chartRefs = useRef<HTMLDivElement[]>([]);
+  const [currentChartIndex, setCurrentChartIndex] = useState<HTMLDivElement | undefined>(undefined);
+
+  // 이 코드 파고들기
+  useEffect(() => {
+    if (!result || !isOpen) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleCharts = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visibleCharts.length > 0) {
+          const el = chartRefs.current.find((el) => el === visibleCharts[0].target);
+          setCurrentChartIndex(el);
+        }
+      },
+      { threshold: 0.5 }, // 화면에 50% 이상 보여야 진입으로 간주
+    );
+
+    chartRefs.current.forEach((el) => el && observer.observe(el));
+
+    return () => {
+      chartRefs.current.forEach((el) => el && observer.unobserve(el));
+    };
+  }, [isOpen, result]);
+
   return result ? (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <section className="w-[1280px] space-y-6 rounded-xl bg-[#202020] p-6">
+      <section className="mb-[200px] w-[1280px] space-y-6 rounded-xl bg-[#202020] p-6">
         <div className="flex items-center justify-between">
           <motion.div
             variants={toOpacityZero}
@@ -98,22 +75,81 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           <CancelButton handleCancel={onClose} />
         </div>
         <div className="grid h-fit w-full grid-cols-2 items-stretch gap-6">
-          <SimulationResult result={result} />
-          <TotalGachaResult result={result} />
+          <SimulationResult
+            ref={(el) => {
+              if (!el) return;
+              chartRefs.current[0] = el;
+            }}
+            name="시뮬레이션 통계"
+            result={result}
+          />
+          <TotalGachaResult
+            ref={(el) => {
+              if (!el) return;
+              chartRefs.current[1] = el;
+            }}
+            name="전체 단일가챠 통계"
+            result={result}
+          />
           {!(result.total.isSimpleMode && result.total.isTrySim) && (
             <>
-              <GachaSurvivalProbability result={result} chartHeight="h-[400px]" />
-              <BannerWinRate result={result} chartHeight="h-[400px]" />
+              <GachaSurvivalProbability
+                ref={(el) => {
+                  if (!el) return;
+                  chartRefs.current[2] = el;
+                }}
+                name="가챠배너 도달 / 중단 확률"
+                result={result}
+                chartHeight="h-[400px]"
+              />
+              <BannerWinRate
+                ref={(el) => {
+                  if (!el) return;
+                  chartRefs.current[3] = el;
+                }}
+                name="배너별 성공 / 실패 비율"
+                result={result}
+                chartHeight="h-[400px]"
+              />
             </>
           )}
-          <BannerEVCounts result={result} chartHeight="h-[400px]" />
+          <BannerEVCounts
+            ref={(el) => {
+              if (!el) return;
+              chartRefs.current[4] = el;
+            }}
+            name="배너별 성공 시 기대값"
+            result={result}
+            chartHeight="h-[400px]"
+          />
           {result.total.isTrySim ? (
-            <ExpectedCumulativeConsumption result={result} chartHeight="h-[400px]" />
+            <ExpectedCumulativeConsumption
+              ref={(el) => {
+                if (!el) return;
+                chartRefs.current[5] = el;
+              }}
+              name="평균 누적 소모 합성옥"
+              result={result}
+              chartHeight="h-[400px]"
+            />
           ) : (
-            <BannerEntryCurrency result={result} chartHeight="h-[400px]" />
+            <BannerEntryCurrency
+              ref={(el) => {
+                if (!el) return;
+                chartRefs.current[6] = el;
+              }}
+              name="배너별 진입 시 평균 재화"
+              result={result}
+              chartHeight="h-[400px]"
+            />
           )}
           {/* <BannerPreEVSuccess result={result} chartHeight="h-[400px]" /> */}
           <BannerEVShareRate
+            ref={(el) => {
+              if (!el) return;
+              chartRefs.current[7] = el;
+            }}
+            name="배너별 기대값 점유율"
             result={{
               ...result,
               perBanner: result.perBanner.map((bannerResult, index) => ({
@@ -135,15 +171,19 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
         </motion.div>
         <div className="flex flex-col gap-6">
           {result.total.simulationTry > 10 ? (
-            result.perBanner.map((bannerResult) => (
-              <LazyRender key={bannerResult.id}>
-                <BannerSuccessTrialCounts
-                  bannerResult={bannerResult}
-                  isTrySim={result.total.isTrySim}
-                  simulationTry={result.total.simulationTry}
-                  chartHeight="h-[400px]"
-                />
-              </LazyRender>
+            result.perBanner.map((bannerResult, index) => (
+              <BannerSuccessTrialCounts
+                key={bannerResult.id}
+                ref={(el) => {
+                  if (!el) return;
+                  chartRefs.current[8 + index] = el;
+                }}
+                name={bannerResult.name}
+                bannerResult={bannerResult}
+                isTrySim={result.total.isTrySim}
+                simulationTry={result.total.simulationTry}
+                chartHeight="h-[400px]"
+              />
             ))
           ) : (
             <span>
@@ -153,6 +193,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           )}
         </div>
       </section>
+      <FloatingActionBar currentBanner={currentChartIndex} />
     </Modal>
   ) : null;
 }
