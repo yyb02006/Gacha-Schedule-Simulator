@@ -15,6 +15,7 @@ import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
 import ExpectedCumulativeConsumption from '#/components/charts/ExpectedCumulativeConsumption';
 import GachaSurvivalProbability from '#/components/charts/GachaSurvivalProbability';
 import BannerEVCounts from '#/components/charts/BannerEVCounts';
+import ToTopButton from '#/components/buttons/ToTopButton';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -22,16 +23,25 @@ interface SettingsModalProps {
   result: GachaSimulationMergedResult | null;
 }
 
-const FloatingActionBar = ({ currentBanner }: { currentBanner: HTMLDivElement | undefined }) => {
+const FloatingActionBar = ({
+  currentBanner,
+  handleToTop,
+}: {
+  currentBanner: HTMLDivElement | undefined;
+  handleToTop: () => void;
+}) => {
   return (
-    <div className="fixed bottom-6 left-1/2 flex h-[40px] w-[400px] -translate-x-1/2 items-center justify-between rounded-lg bg-[#404040] px-2 text-stone-50">
-      <div>{currentBanner ? currentBanner.dataset.name : '11111'}</div>
-      <div className=""></div>
+    <div className="fixed bottom-6 left-1/2 flex h-[60px] w-[400px] -translate-x-1/2 items-center justify-between rounded-xl bg-[#202020] px-2 text-stone-50 shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]">
+      <ToTopButton handleToTop={handleToTop} />
+      <div className="mr-3 text-lg">
+        {currentBanner ? currentBanner.dataset.name : '시뮬레이션 결과'}
+      </div>
     </div>
   );
 };
 
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<HTMLDivElement[]>([]);
   const [currentChartIndex, setCurrentChartIndex] = useState<HTMLDivElement | undefined>(undefined);
 
@@ -60,7 +70,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
   }, [isOpen, result]);
 
   return result ? (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ref={modalRef}>
       <section className="mb-[200px] w-[1280px] space-y-6 rounded-xl bg-[#202020] p-6">
         <div className="flex items-center justify-between">
           <motion.div
@@ -193,7 +203,13 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           )}
         </div>
       </section>
-      <FloatingActionBar currentBanner={currentChartIndex} />
+      <FloatingActionBar
+        handleToTop={() => {
+          console.log(modalRef);
+          modalRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+        }}
+        currentBanner={currentChartIndex}
+      />
     </Modal>
   ) : null;
 }

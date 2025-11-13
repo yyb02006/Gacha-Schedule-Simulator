@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, RefObject, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 
@@ -8,9 +8,10 @@ interface ModalProps {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
+  ref?: RefObject<HTMLDivElement | null>;
 }
 
-export default function Modal({ children, isOpen, onClose }: ModalProps) {
+export default function Modal({ children, isOpen, onClose, ref }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const isMouseDownOnTarget = useRef<boolean>(false);
@@ -30,6 +31,11 @@ export default function Modal({ children, isOpen, onClose }: ModalProps) {
       document.documentElement.style.overflow = '';
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!ref) return;
+    ref.current = modalRef.current;
+  }, [ref, isOpen]);
 
   return (
     mounted &&
