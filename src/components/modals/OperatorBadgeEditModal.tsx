@@ -4,24 +4,29 @@ import Badge from '#/components/Badge';
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/modals/Modal';
+import { Operator } from '#/components/PickupList';
 import { operatorBadgeProps } from '#/constants/ui';
 import { rarities } from '#/constants/variables';
 import { toOpacityZero } from '#/constants/variants';
-import { OperatorRarity, OperatorType } from '#/types/types';
+import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 
 export default function OperatorBadgeEditModal({
   isOpen,
-  onClose,
   operatorType,
   rarity,
+  gachaType,
+  operators,
+  onClose,
   onBadgeEdit,
 }: {
   isOpen: boolean;
-  onClose: () => void;
   operatorType: OperatorType;
   rarity: OperatorRarity;
+  gachaType: GachaType;
+  operators: Operator[];
+  onClose: () => void;
   onBadgeEdit: (operatorType: OperatorType, rarity: OperatorRarity) => void;
 }) {
   const {
@@ -39,6 +44,16 @@ export default function OperatorBadgeEditModal({
     (badgeProp) => badgeProp.id !== currentState.rarity,
   );
   const isLimited = currentState.operatorType === 'limited';
+  // 6성일 때는 가챠 타입이 한정, 콜라보가 아니거나 이미 6성에 한정오퍼가 있을 때 막고
+  // 5성일 때는 가챠 타입이 콜라보가 아니면 막고
+  // 4성은 한정이 존재하지 않음
+  const preventSelectLimited =
+    currentState.rarity === 6
+      ? !(gachaType === 'limited' || gachaType === 'collab') ||
+        operators.some(({ operatorType, rarity }) => rarity === 6 && operatorType === 'limited')
+      : currentState.rarity === 5
+        ? gachaType !== 'collab'
+        : true;
   const onEditConfirmClick = () => {
     onClose();
     onBadgeEdit(currentState.operatorType, currentState.rarity);
@@ -69,7 +84,7 @@ export default function OperatorBadgeEditModal({
             <span className="text-sky-500">미선택</span> 뱃지
           </motion.div>
           <div className="flex flex-wrap gap-x-2 gap-y-3">
-            {currentState.operatorType === 'limited' ? (
+            {isLimited ? (
               <Badge
                 key={'normal'}
                 {...normal.props}
@@ -83,14 +98,12 @@ export default function OperatorBadgeEditModal({
               <Badge
                 key={'limited'}
                 color={
-                  currentState.rarity !== 6
-                    ? 'border-[#606060] text-[#606060]'
-                    : limited.props.color
+                  preventSelectLimited ? 'border-[#606060] text-[#606060]' : limited.props.color
                 }
                 name={limited.props.name}
-                animation={currentState.rarity === 6 ? true : false}
+                animation={preventSelectLimited ? false : true}
                 onBadgeClick={() => {
-                  if (currentState.rarity !== 6) return;
+                  if (preventSelectLimited) return;
                   setCurrentState((p) => ({ ...p, operatorType: 'limited' }));
                 }}
                 isLayout
