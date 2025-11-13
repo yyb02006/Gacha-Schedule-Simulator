@@ -16,6 +16,9 @@ import ExpectedCumulativeConsumption from '#/components/charts/ExpectedCumulativ
 import GachaSurvivalProbability from '#/components/charts/GachaSurvivalProbability';
 import BannerEVCounts from '#/components/charts/BannerEVCounts';
 import ToTopButton from '#/components/buttons/ToTopButton';
+import ChevronDown from '#/icons/ChevronDown.svg';
+import ChevronUp from '#/icons/ChevronUp.svg';
+import { cls } from '#/libs/utils';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -27,14 +30,20 @@ const FloatingActionBar = ({
   result,
   isOpen,
   chartRefs,
+  modalRef,
   handleToTop,
 }: {
   result: GachaSimulationMergedResult | null;
   isOpen: boolean;
   chartRefs: RefObject<HTMLDivElement[]>;
+  modalRef: RefObject<HTMLDivElement | null>;
   handleToTop: () => void;
 }) => {
   const [currentBanner, setCurrentBanner] = useState<HTMLDivElement | undefined>(undefined);
+  const [isListOpen, setIsListOpen] = useState(false);
+  const listItemRefs = useRef<HTMLButtonElement[]>([]);
+  const listRef = useRef<HTMLDivElement>(null);
+  const prevIsListOpen = useRef(false);
 
   useEffect(() => {
     if (!result || !isOpen) return;
@@ -59,11 +68,65 @@ const FloatingActionBar = ({
     };
   }, [isOpen, result, chartRefs]);
 
+  useEffect(() => {
+    if (!isListOpen || listItemRefs.current.length === 0) {
+      prevIsListOpen.current = isListOpen;
+      return;
+    }
+
+    if (!prevIsListOpen.current && isListOpen) {
+      // 빠진 index가 있어서 undefined 빼줘야함 안그러면 undefined 요소에서 dataset을 찾다가 에러남
+      const currentItem = listItemRefs.current
+        .filter(Boolean)
+        .find((banner) => banner.dataset.id === currentBanner?.dataset.id);
+
+      if (currentItem && listRef.current) {
+        listRef.current.scrollTo({ top: currentItem.offsetTop });
+      }
+    }
+
+    prevIsListOpen.current = isListOpen;
+  }, [isListOpen, currentBanner?.dataset.id]);
+
   return (
-    <div className="fixed bottom-6 left-1/2 flex h-[60px] w-[400px] -translate-x-1/2 items-center justify-between rounded-xl bg-[#202020] px-2 text-stone-50 shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]">
+    <div className="fixed bottom-6 left-1/2 flex w-[400px] -translate-x-1/2 gap-2 text-stone-50">
       <ToTopButton handleToTop={handleToTop} />
-      <div className="mr-3 text-lg">
+      <div className="relative flex flex-1 items-center justify-between self-stretch rounded-xl bg-[#202020] pl-4 text-lg shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]">
         {currentBanner ? currentBanner.dataset.name : '시뮬레이션 결과'}
+        <button
+          onClick={() => {
+            setIsListOpen((p) => !p);
+          }}
+          className="aspect-square h-full cursor-pointer p-[6px] hover:text-amber-500"
+        >
+          {isListOpen ? <ChevronDown className="size-full" /> : <ChevronUp className="size-full" />}
+        </button>
+        {isListOpen && (
+          <div
+            ref={listRef}
+            className="font-S-CoreDream-300 absolute -top-[216px] right-0 size-full h-[200px] overflow-y-auto rounded-xl bg-[#202020] p-3 text-sm shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]"
+          >
+            {chartRefs.current.map((banner, index) => (
+              <button
+                onClick={() => {
+                  modalRef.current?.scrollTo({ top: Math.max(banner.offsetTop - 32, 0) });
+                }}
+                key={index}
+                data-id={banner.dataset.id}
+                ref={(el) => {
+                  if (!el) return;
+                  listItemRefs.current[index] = el;
+                }}
+                className={cls(
+                  currentBanner?.offsetTop === banner.offsetTop ? 'text-sky-500' : '',
+                  'block w-full cursor-pointer py-[3px] text-left hover:bg-[#303030] hover:text-amber-500',
+                )}
+              >
+                {banner.dataset.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -72,30 +135,6 @@ const FloatingActionBar = ({
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<HTMLDivElement[]>([]);
-  /*   const [currentChartIndex, setCurrentChartIndex] = useState<HTMLDivElement | undefined>(undefined);
-
-  useEffect(() => {
-    if (!result || !isOpen) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleCharts = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-
-        if (visibleCharts.length > 0) {
-          const el = chartRefs.current.find((el) => el === visibleCharts[0].target);
-          setCurrentChartIndex(el);
-        }
-      },
-      { threshold: 0.5 }, // 화면에 50% 이상 보여야 진입으로 간주
-    );
-
-    chartRefs.current.forEach((el) => el && observer.observe(el));
-
-    return () => {
-      chartRefs.current.forEach((el) => el && observer.unobserve(el));
-    };
-  }, [isOpen, result]); */
 
   return result ? (
     <Modal isOpen={isOpen} onClose={onClose} ref={modalRef}>
@@ -118,6 +157,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               if (!el) return;
               chartRefs.current[0] = el;
             }}
+            id="1"
             name="시뮬레이션 통계"
             result={result}
           />
@@ -126,6 +166,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               if (!el) return;
               chartRefs.current[1] = el;
             }}
+            id="2"
             name="전체 단일가챠 통계"
             result={result}
           />
@@ -136,6 +177,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                   if (!el) return;
                   chartRefs.current[2] = el;
                 }}
+                id="3"
                 name="가챠배너 도달 / 중단 확률"
                 result={result}
                 chartHeight="h-[400px]"
@@ -145,6 +187,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                   if (!el) return;
                   chartRefs.current[3] = el;
                 }}
+                id="4"
                 name="배너별 성공 / 실패 비율"
                 result={result}
                 chartHeight="h-[400px]"
@@ -156,6 +199,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               if (!el) return;
               chartRefs.current[4] = el;
             }}
+            id="5"
             name="배너별 성공 시 기대값"
             result={result}
             chartHeight="h-[400px]"
@@ -166,6 +210,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                 if (!el) return;
                 chartRefs.current[5] = el;
               }}
+              id="6"
               name="평균 누적 소모 합성옥"
               result={result}
               chartHeight="h-[400px]"
@@ -176,6 +221,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                 if (!el) return;
                 chartRefs.current[6] = el;
               }}
+              id="7"
               name="배너별 진입 시 평균 재화"
               result={result}
               chartHeight="h-[400px]"
@@ -187,6 +233,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               if (!el) return;
               chartRefs.current[7] = el;
             }}
+            id="8"
             name="배너별 기대값 점유율"
             result={{
               ...result,
@@ -216,6 +263,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                   if (!el) return;
                   chartRefs.current[8 + index] = el;
                 }}
+                id={`${8 + index}`}
                 name={bannerResult.name}
                 bannerResult={bannerResult}
                 isTrySim={result.total.isTrySim}
@@ -233,10 +281,10 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
       </section>
       <FloatingActionBar
         handleToTop={() => {
-          console.log(modalRef);
           modalRef.current?.scrollTo({ top: 0, behavior: 'auto' });
         }}
         chartRefs={chartRefs}
+        modalRef={modalRef}
         isOpen={isOpen}
         result={result}
       />
