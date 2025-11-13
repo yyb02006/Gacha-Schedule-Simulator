@@ -34,6 +34,7 @@ import FoldButton from '#/components/buttons/MaximizeButton';
 import ChevronDown from '#/icons/ChevronDown.svg';
 import ChevronUp from '#/icons/ChevronUp.svg';
 import Tag from '#/icons/Tag.svg';
+import { operatorLimitByBannerType } from '#/constants/variables';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -414,11 +415,13 @@ const BannerHeader = ({
 const SimplePreInfoField = ({
   isTrySim,
   pickupData,
+  targetLimit,
   updateSimplePickupCount,
   updateAdditionalResource,
 }: {
   isTrySim: boolean;
   pickupData: Dummy;
+  targetLimit: Record<OperatorRarityForString, number>;
   updateSimplePickupCount: UpdateSimplePickupCount;
   updateAdditionalResource: (
     mode: 'simpleMode' | 'extendedMode',
@@ -446,7 +449,7 @@ const SimplePreInfoField = ({
                 });
               }}
               currentValue={simpleMode.pickupOpersCount.sixth.toString()}
-              max={10}
+              max={targetLimit['sixth']}
             />
             <InsetNumberInput
               name="목표 6성"
@@ -459,7 +462,7 @@ const SimplePreInfoField = ({
                 });
               }}
               currentValue={simpleMode.targetOpersCount.sixth.toString()}
-              max={10}
+              max={targetLimit['sixth']}
             />
           </div>
           <div className="flex gap-x-3">
@@ -474,7 +477,7 @@ const SimplePreInfoField = ({
                 });
               }}
               currentValue={simpleMode.pickupOpersCount.fifth.toString()}
-              max={10}
+              max={targetLimit['fifth']}
             />
             <InsetNumberInput
               name="목표 5성"
@@ -487,7 +490,7 @@ const SimplePreInfoField = ({
                 });
               }}
               currentValue={simpleMode.targetOpersCount.fifth.toString()}
-              max={10}
+              max={targetLimit['fifth']}
             />
           </div>
           <div className="flex gap-x-3">
@@ -502,7 +505,7 @@ const SimplePreInfoField = ({
                 });
               }}
               currentValue={simpleMode.pickupOpersCount.fourth.toString()}
-              max={10}
+              max={targetLimit['fourth']}
             />
             <InsetNumberInput
               name="목표 4성"
@@ -515,7 +518,7 @@ const SimplePreInfoField = ({
                 });
               }}
               currentValue={simpleMode.targetOpersCount.fourth.toString()}
-              max={10}
+              max={targetLimit['fourth']}
             />
           </div>
         </div>
@@ -538,11 +541,13 @@ const SimplePreInfoField = ({
 
 const PreInfoField = ({
   pickupData,
+  targetLimit,
   updatePickupCount,
   updateAttempts,
   updateFirstSixthTry,
 }: {
   pickupData: Dummy;
+  targetLimit: Record<OperatorRarityForString, number>;
   updatePickupCount: (count: number, rarityType: OperatorRarityForString) => void;
   updateAttempts: (attempts: number, target: 'max' | 'min' | 'both') => void;
   updateFirstSixthTry: (isTry: boolean) => void;
@@ -589,7 +594,7 @@ const PreInfoField = ({
               updatePickupCount(stringToNumber(e.currentTarget.value), 'sixth');
             }}
             currentValue={pickupOpersCount.sixth.toString()}
-            max={10}
+            max={targetLimit.sixth}
           />
           <InsetNumberInput
             name="픽업 5성"
@@ -598,7 +603,7 @@ const PreInfoField = ({
               updatePickupCount(stringToNumber(e.currentTarget.value), 'fifth');
             }}
             currentValue={pickupOpersCount.fifth.toString()}
-            max={10}
+            max={targetLimit.fifth}
           />
           <InsetNumberInput
             name="픽업 4성"
@@ -607,7 +612,7 @@ const PreInfoField = ({
               updatePickupCount(stringToNumber(e.currentTarget.value), 'fourth');
             }}
             currentValue={pickupOpersCount.fourth.toString()}
-            max={10}
+            max={targetLimit.fourth}
           />
         </div>
       </div>
@@ -824,6 +829,11 @@ export default function PickupBanner({
   const [isHover, setIsHover] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isAnimateLocked, setIsAnimateLocked] = useState(false);
+  const targetLimit = {
+    sixth: operatorLimitByBannerType[gachaType]['sixth'],
+    fifth: operatorLimitByBannerType[gachaType]['fifth'],
+    fourth: operatorLimitByBannerType[gachaType]['fourth'],
+  };
 
   const isViewRef = useRef(false);
 
@@ -1042,6 +1052,7 @@ export default function PickupBanner({
             // isPresent={isPresent}
             isTrySim={isTrySim}
             pickupData={pickupData}
+            targetLimit={targetLimit}
             updateSimplePickupCount={updateSimplePickupCount}
             updateAdditionalResource={updateAdditionalResource}
           />
@@ -1053,6 +1064,7 @@ export default function PickupBanner({
             <PreInfoField
               // isPresent={isPresent}
               pickupData={pickupData}
+              targetLimit={targetLimit}
               updatePickupCount={updatePickupCount}
               updateAttempts={updateAttempts}
               updateFirstSixthTry={updateFirstSixthTry}
