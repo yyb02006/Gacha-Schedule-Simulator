@@ -105,8 +105,9 @@ const TotalGachaResult = forwardRef<
   {
     result: GachaSimulationMergedResult | null;
     name: string;
+    id?: string;
   }
->(({ result, name }, ref) => {
+>(({ result, name, id }, ref) => {
   const rarityResultData = {
     data:
       result === null
@@ -129,6 +130,7 @@ const TotalGachaResult = forwardRef<
           <span className="text-amber-400">전체 단일가챠 </span>통계
         </span>
       }
+      id={id}
       name={name}
       chartRef={ref}
     >

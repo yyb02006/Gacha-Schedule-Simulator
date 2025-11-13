@@ -50,11 +50,12 @@ const BannerEVCounts = forwardRef<
   {
     result: GachaSimulationMergedResult | null;
     name: string;
+    id: string;
     chartHeight?: string;
     brushHeight?: string;
     enableBrush?: boolean;
   }
->(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
+>(({ result, name, id, chartHeight, brushHeight, enableBrush = true }, ref) => {
   const data = result
     ? result.perBanner.map(({ bannerWinGachaRuns, bannerSuccess }) =>
         truncateToDecimals(bannerWinGachaRuns / bannerSuccess),
@@ -67,6 +68,7 @@ const BannerEVCounts = forwardRef<
           배너별 <span className="text-amber-400">성공 시 기대값</span>
         </span>
       }
+      id={id}
       name={name}
       chartRef={ref}
     >

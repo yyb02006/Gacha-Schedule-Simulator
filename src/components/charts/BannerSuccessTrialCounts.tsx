@@ -205,6 +205,7 @@ const BannerSuccessTrialCounts = forwardRef<
     isTrySim: boolean;
     simulationTry: number;
     name: string;
+    id: string;
     chartHeight?: string;
     brushHeight?: string;
     enableBrush?: boolean;
@@ -227,6 +228,7 @@ const BannerSuccessTrialCounts = forwardRef<
       isTrySim,
       simulationTry,
       name: dataName,
+      id,
       chartHeight,
       brushHeight,
       enableBrush = true,
@@ -284,6 +286,7 @@ const BannerSuccessTrialCounts = forwardRef<
             />
           </div>
         }
+        id={id}
         name={dataName}
         chartRef={ref}
       >

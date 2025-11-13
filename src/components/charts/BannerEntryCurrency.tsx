@@ -112,11 +112,12 @@ const BannerEntryCurrency = forwardRef<
   {
     result: GachaSimulationMergedResult | null;
     name: string;
+    id: string;
     chartHeight?: string;
     brushHeight?: string;
     enableBrush?: boolean;
   }
->(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
+>(({ result, name, id, chartHeight, brushHeight, enableBrush = true }, ref) => {
   // 헤더 : 누적 소모 합성옥, 남은 합성옥, 툴팁: 진입시 합성옥, 소모 합성옥, 누적 소모 합성옥,
   const data = result
     ? result.perBanner.map(({ bannerStartingCurrency }) => bannerStartingCurrency)
@@ -129,6 +130,7 @@ const BannerEntryCurrency = forwardRef<
           배너별 <span className="text-amber-400">진입 시 평균 재화</span>
         </span>
       }
+      id={id}
       name={name}
       chartRef={ref}
     >

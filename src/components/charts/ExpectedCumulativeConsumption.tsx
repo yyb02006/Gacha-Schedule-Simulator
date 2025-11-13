@@ -52,11 +52,12 @@ const ExpectedCumulativeConsumption = forwardRef<
   {
     result: GachaSimulationMergedResult | null;
     name: string;
+    id: string;
     chartHeight?: string;
     brushHeight?: string;
     enableBrush?: boolean;
   }
->(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
+>(({ result, name, id, chartHeight, brushHeight, enableBrush = true }, ref) => {
   return (
     <ChartWrapper
       header={
@@ -64,6 +65,7 @@ const ExpectedCumulativeConsumption = forwardRef<
           평균 <span className="text-red-400">누적 소모 합성옥</span>
         </span>
       }
+      id={id}
       name={name}
       chartRef={ref}
     >

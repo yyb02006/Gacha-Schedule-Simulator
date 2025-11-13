@@ -124,9 +124,10 @@ const BannerEVShareRate = forwardRef<
   {
     result: GachaSimulationMergedResult | null;
     name: string;
+    id: string;
     isColspanTwo: boolean;
   }
->(({ result, name, isColspanTwo }, ref) => {
+>(({ result, name, id, isColspanTwo }, ref) => {
   const bannerResults =
     result !== null
       ? result.perBanner
@@ -151,6 +152,7 @@ const BannerEVShareRate = forwardRef<
           배너별 <span className="text-amber-400">기대값 점유율</span>
         </span>
       }
+      id={id}
       name={name}
       chartRef={ref}
       className={isColspanTwo ? 'col-span-2' : ''}

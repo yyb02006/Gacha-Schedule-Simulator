@@ -61,11 +61,12 @@ const GachaSurvivalProbability = forwardRef<
   {
     result: GachaSimulationMergedResult | null;
     name: string;
+    id: string;
     chartHeight?: string;
     brushHeight?: string;
     enableBrush?: boolean;
   }
->(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
+>(({ result, name, id, chartHeight, brushHeight, enableBrush = true }, ref) => {
   const { labels, datas } = result
     ? result.perBanner.reduce<{
         labels: string[];
@@ -127,6 +128,7 @@ const GachaSurvivalProbability = forwardRef<
           가챠배너 <span className="text-amber-400">도달 / 중단 확률</span>
         </span>
       }
+      id={id}
       name={name}
       chartRef={ref}
     >

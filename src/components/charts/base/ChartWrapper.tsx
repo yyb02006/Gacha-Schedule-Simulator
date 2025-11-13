@@ -11,10 +11,12 @@ export default function ChartWrapper({
   className = '',
   chartRef,
   name,
+  id,
 }: {
   children: ReactNode;
   header: ReactNode;
   name: string;
+  id?: string;
   className?: string;
   chartRef?: Ref<HTMLDivElement>;
 }) {
@@ -22,6 +24,7 @@ export default function ChartWrapper({
     <motion.div
       ref={chartRef}
       data-name={name}
+      data-id={id}
       variants={cardVariants}
       transition={{ ...cardTransition, ease: 'easeIn' }}
       initial="exit"

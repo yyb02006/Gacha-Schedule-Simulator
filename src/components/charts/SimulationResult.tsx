@@ -61,8 +61,9 @@ const SimulationResult = forwardRef<
   {
     result: GachaSimulationMergedResult | null;
     name: string;
+    id?: string;
   }
->(({ result, name }, ref) => {
+>(({ result, name, id }, ref) => {
   const simulationResultData =
     result === null
       ? []
@@ -80,6 +81,7 @@ const SimulationResult = forwardRef<
           <span className="text-amber-400">시뮬레이션 </span>통계
         </span>
       }
+      id={id}
       name={name}
       chartRef={ref}
       className="justify-start"
