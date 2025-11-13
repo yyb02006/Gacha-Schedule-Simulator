@@ -196,6 +196,7 @@ export type PickupDatasAction =
       payload: {
         id: string;
         gachaType: GachaType;
+        isSimpleMode: boolean;
       };
     }
   | {
@@ -581,10 +582,98 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       });
     }
     case 'updateGachaType': {
-      const { id, gachaType } = action.payload;
-      return modifyBannerDetails(id, () => {
-        return { gachaType };
-      });
+      const { id, gachaType, isSimpleMode } = action.payload;
+      const prevBanner = pickupDatas.find((pickupData) => pickupData.id === id);
+      if (!prevBanner) return pickupDatas;
+      if (isSimpleMode) {
+        const { targetOpersCount: prevTargetOpersCount } = prevBanner.pickupDetails.simpleMode;
+        const newPickupOpersCount = {
+          sixth: Math.min(
+            operatorLimitByBannerType[gachaType]['sixth'],
+            prevTargetOpersCount.sixth,
+          ),
+          fifth: Math.min(
+            operatorLimitByBannerType[gachaType]['fifth'],
+            prevTargetOpersCount.fifth,
+          ),
+          fourth: Math.min(
+            operatorLimitByBannerType[gachaType]['fourth'],
+            prevTargetOpersCount.fourth,
+          ),
+        };
+        const newTargetOpersCount = {
+          sixth: Math.min(newPickupOpersCount['sixth'], prevTargetOpersCount.sixth),
+          fifth: Math.min(newPickupOpersCount['fifth'], prevTargetOpersCount.fifth),
+          fourth: Math.min(newPickupOpersCount['fourth'], prevTargetOpersCount.fourth),
+        };
+        return modifyBannerDetails(id, (pickupData) => {
+          const operators = [
+            ...pickupData.operators
+              .filter(({ rarity }) => rarity === 6)
+              .slice(0, newTargetOpersCount.sixth),
+            ...pickupData.operators
+              .filter(({ rarity }) => rarity === 5)
+              .slice(0, newTargetOpersCount.fifth),
+            ...pickupData.operators
+              .filter(({ rarity }) => rarity === 4)
+              .slice(0, newTargetOpersCount.fourth),
+          ];
+          return {
+            gachaType,
+            pickupDetails: {
+              ...pickupData.pickupDetails,
+              simpleMode: {
+                pickupOpersCount: newPickupOpersCount,
+                targetOpersCount: newTargetOpersCount,
+              },
+            },
+            operators,
+          };
+        });
+      } else {
+        const { targetOpersCount: prevTargetOpersCount } = prevBanner.pickupDetails;
+        const newPickupOpersCount = {
+          sixth: Math.min(
+            operatorLimitByBannerType[gachaType]['sixth'],
+            prevTargetOpersCount.sixth,
+          ),
+          fifth: Math.min(
+            operatorLimitByBannerType[gachaType]['fifth'],
+            prevTargetOpersCount.fifth,
+          ),
+          fourth: Math.min(
+            operatorLimitByBannerType[gachaType]['fourth'],
+            prevTargetOpersCount.fourth,
+          ),
+        };
+        const newTargetOpersCount = {
+          sixth: Math.min(newPickupOpersCount['sixth'], prevTargetOpersCount.sixth),
+          fifth: Math.min(newPickupOpersCount['fifth'], prevTargetOpersCount.fifth),
+          fourth: Math.min(newPickupOpersCount['fourth'], prevTargetOpersCount.fourth),
+        };
+        return modifyBannerDetails(id, (pickupData) => {
+          const operators = [
+            ...pickupData.operators
+              .filter(({ rarity }) => rarity === 6)
+              .slice(0, newTargetOpersCount.sixth),
+            ...pickupData.operators
+              .filter(({ rarity }) => rarity === 5)
+              .slice(0, newTargetOpersCount.fifth),
+            ...pickupData.operators
+              .filter(({ rarity }) => rarity === 4)
+              .slice(0, newTargetOpersCount.fourth),
+          ];
+          return {
+            gachaType,
+            pickupDetails: {
+              ...pickupData.pickupDetails,
+              pickupOpersCount: newPickupOpersCount,
+              targetOpersCount: newTargetOpersCount,
+            },
+            operators,
+          };
+        });
+      }
     }
     case 'toggleActive': {
       const { id, isLeft } = action.payload;

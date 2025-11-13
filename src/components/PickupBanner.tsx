@@ -941,30 +941,7 @@ export default function PickupBanner({
   };
 
   const updateGachaType = (gachaType: GachaType) => {
-    dispatch({ type: 'updateGachaType', payload: { id, gachaType } });
-  };
-
-  const updateBannerBadge = (newGachaType: GachaType) => {
-    const newCount =
-      newGachaType === 'limited' || newGachaType === 'rotation'
-        ? 2
-        : newGachaType === 'collab' || newGachaType === 'single'
-          ? 1
-          : newGachaType === 'orient'
-            ? 3
-            : 4;
-    updateGachaType(newGachaType);
-    if (isSimpleMode) {
-      dispatch({
-        type: 'updateSimplePickupCount',
-        payload: { id, count: newCount, countType: 'pickupOpersCount', rarityType: 'sixth' },
-      });
-    } else {
-      dispatch({
-        type: 'updatePickupCount',
-        payload: { id, count: newCount, rarityType: 'sixth' },
-      });
-    }
+    dispatch({ type: 'updateGachaType', payload: { id, gachaType, isSimpleMode } });
   };
 
   const updateIndex = (direction: 'increase' | 'decrease') => {
@@ -1045,7 +1022,7 @@ export default function PickupBanner({
         onNameBlur={(e) => {
           updateBannerName({ name: e.currentTarget.value });
         }}
-        onBannerBadgeChange={updateBannerBadge}
+        onBannerBadgeChange={updateGachaType}
         onUpdateIndex={updateIndex}
         onMinimized={() => {
           setIsMinimized((p) => !p);
