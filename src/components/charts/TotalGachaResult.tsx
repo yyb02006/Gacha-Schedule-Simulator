@@ -67,7 +67,7 @@ const RarityResultDetail = ({
   rarity: OperatorRarityForString;
 }) => {
   return (
-    <ul className="font-S-CoreDream-500 flex-1 space-y-1 text-[15px] whitespace-nowrap">
+    <ul className="font-S-CoreDream-500 flex-1 space-y-[6px] text-[15px] whitespace-nowrap">
       <h1 className={cls(rarityColor[rarity].textColor, 'mb-[10px]')}>
         {`${rarities[rarity]}성 결과`} (
         {truncateToDecimals(
@@ -82,12 +82,16 @@ const RarityResultDetail = ({
           {obtainedType === 'totalObtained' ? (
             <div>
               {'총 등장 : '}
-              {result.total.statistics[rarity][obtainedType].toLocaleString()} 회{' '}
+              <span className={cls('font-S-CoreDream-400', rarityColor[rarity].textColor)}>
+                {result.total.statistics[rarity][obtainedType].toLocaleString()} 회
+              </span>
             </div>
           ) : (
             <div>
               {obtainedType === 'pickupObtained' ? '픽업오퍼 등장' : '목표오퍼 등장'} :{' '}
-              {result.total.statistics[rarity][obtainedType].toLocaleString()} 회
+              <span className={cls('font-S-CoreDream-400', rarityColor[rarity].textColor)}>
+                {result.total.statistics[rarity][obtainedType].toLocaleString()} 회
+              </span>
             </div>
           )}
         </li>
@@ -122,7 +126,7 @@ const TotalGachaResult = forwardRef<
     <ChartWrapper
       header={
         <span>
-          <span className="text-amber-400">전체 가챠 </span>통계
+          <span className="text-amber-400">전체 단일가챠 </span>통계
         </span>
       }
       name={name}
@@ -163,13 +167,16 @@ const TotalGachaResult = forwardRef<
                 </h1>
                 <div className="font-S-CoreDream-300 text-[13px]">
                   총 등장 :{' '}
-                  {(
-                    result.total.totalGachaRuns -
-                    result.total.statistics.sixth.totalObtained -
-                    result.total.statistics.fifth.totalObtained -
-                    result.total.statistics.fourth.totalObtained
-                  ).toLocaleString()}{' '}
-                  회{' '}
+                  <span className="text-sky-500">
+                    {' '}
+                    {(
+                      result.total.totalGachaRuns -
+                      result.total.statistics.sixth.totalObtained -
+                      result.total.statistics.fifth.totalObtained -
+                      result.total.statistics.fourth.totalObtained
+                    ).toLocaleString()}{' '}
+                    회
+                  </span>
                 </div>
               </div>
             </div>
