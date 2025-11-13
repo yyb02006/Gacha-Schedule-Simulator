@@ -12,7 +12,12 @@ import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from
 import BannerAddModal from '#/components/modals/BannerAddModal';
 import pickupDatas from '#/data/pickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
-import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
+import {
+  obtainedTypes,
+  operatorLimitByBannerType,
+  rarities,
+  rarityStrings,
+} from '#/constants/variables';
 import { getPercentileIndex, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 
 export type Operator = {
@@ -338,14 +343,24 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       const operatorCount = currentBanner.operators.length;
       const {
         pickupDetails: { pickupOpersCount, targetOpersCount },
+        gachaType,
       } = currentBanner;
-      const { sixth, fifth } = pickupOpersCount;
+      const { sixth, fifth, fourth } = pickupOpersCount;
       const isFirstOperatorInLimitedBanner =
         (currentBanner.gachaType === 'limited' || currentBanner.gachaType === 'collab') &&
         operatorCount === 0;
       const currentOperatorsCount = getCurrentOperatorsCount(currentBanner.operators);
       const newRarity =
-        currentOperatorsCount.sixth >= sixth ? (currentOperatorsCount.fifth >= fifth ? 4 : 5) : 6;
+        currentOperatorsCount.sixth < sixth || sixth < operatorLimitByBannerType[gachaType]['sixth']
+          ? 6
+          : currentOperatorsCount.fifth < fifth ||
+              fifth < operatorLimitByBannerType[gachaType]['fifth']
+            ? 5
+            : currentOperatorsCount.fourth < fourth ||
+                fourth < operatorLimitByBannerType[gachaType]['fourth']
+              ? 4
+              : null;
+      if (newRarity === null) return pickupDatas;
       const newOperator: Operator = {
         name: `오퍼레이터 ${operatorCount + 1}`,
         operatorId: crypto.randomUUID(),
