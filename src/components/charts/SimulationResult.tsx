@@ -82,6 +82,7 @@ const SimulationResult = forwardRef<
       }
       name={name}
       chartRef={ref}
+      className="justify-start"
     >
       {result && (
         <div className="text-sm">
