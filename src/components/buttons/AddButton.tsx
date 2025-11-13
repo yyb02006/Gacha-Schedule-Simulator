@@ -25,41 +25,66 @@ const addShadowVariants: Variants = {
 };
 
 const addVariants: Variants = {
-  idle: { background: 'linear-gradient(135deg, #d97706, #fde047)' },
+  idle: (custom: { from: string; to: string }) => ({
+    background: `linear-gradient(135deg, ${custom?.from || '#d97706'} , ${custom?.from || '#fde047'})`,
+  }),
   exit: {
     background: 'linear-gradient(135deg, #202020, #202020)',
   },
-  hover: { background: 'linear-gradient(45deg, #d97706, #fde047)' },
+  hover: (custom: { from: string; to: string }) => ({
+    background: `linear-gradient(45deg, ${custom?.from || '#d97706'} , ${custom?.from || '#fde047'})`,
+  }),
+};
+
+const shaking45Variants: Variants = {
+  idle: { x: 0, y: 0 },
+  shake: {
+    x: [0, -5.7, 5.7, -4.2, 4.2, -2.1, 2.1, 0],
+    y: [0, 5.7, -5.7, 4.2, -4.2, 2.1, -2.1, 0],
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
 };
 
 interface AddButtonProps {
   onAddClick: MouseEventHandler<HTMLDivElement>;
-  custom?: { size?: 'small' | 'default'; boxShadow?: string };
+  diamondCustom?: { size?: 'small' | 'default'; boxShadow?: string; from?: string; to?: string };
+  addCustom?: { from: string; to: string };
   isOtherElHover?: boolean;
+  isAddPrevent?: boolean;
 }
 
 export default function AddButton({
   onAddClick,
-  custom,
+  diamondCustom,
+  addCustom,
   isOtherElHover,
-}: {
-  onAddClick: MouseEventHandler<HTMLDivElement>;
-  custom?: { size?: 'small' | 'default'; boxShadow?: string };
-  isOtherElHover?: boolean;
-}) {
+  isAddPrevent,
+}: AddButtonProps) {
   const [isHover, setIsHover] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
   const isMount = useIsMount();
   const initialDelay = 0.2;
   const currentHover = isOtherElHover !== undefined ? isOtherElHover : isHover;
-  const mergedCustom: AddButtonProps['custom'] = custom && {
-    size: custom.size || 'default',
-    boxShadow: custom.boxShadow,
+  const mergedCustom: AddButtonProps['diamondCustom'] = {
+    size: diamondCustom?.size || 'default',
+    ...diamondCustom,
   };
   return (
     <motion.div
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      onClick={onAddClick}
+      onClick={(e) => {
+        if (isAddPrevent) setIsShaking(true);
+        if (isShaking || isAddPrevent) return;
+        onAddClick(e);
+      }}
+      variants={shaking45Variants}
+      animate={isShaking ? 'shake' : 'idle'}
+      onAnimationComplete={() => {
+        if (isShaking) {
+          setIsShaking(false);
+        }
+      }}
       className={cls(
         mergedCustom?.size === 'default' ? 'size-18' : 'size-11',
         'relative flex rotate-45 items-center justify-center',
@@ -109,6 +134,7 @@ export default function AddButton({
               maskSize: 'contain',
               maskRepeat: 'no-repeat',
             }}
+            custom={addCustom}
           />
         </div>
       </DiamondButton>

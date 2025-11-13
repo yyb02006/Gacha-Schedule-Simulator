@@ -984,7 +984,7 @@ export default function PickupList() {
           setOptions={setOptions}
         />
         <div className="flex w-full flex-col gap-y-6">
-          <AddBannerCard openModal={openModal} />
+          <AddBannerCard isAddPrevent={pickupDatas.length >= 20} openModal={openModal} />
           <AnimatePresence>
             {pickupDatas.map((pickupData, index) => (
               <PickupBanner

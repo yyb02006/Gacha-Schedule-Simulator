@@ -11,16 +11,21 @@ const buttonVariants: Variants = {
   exit: {
     rotateZ: 0,
     boxShadow: '0px 0px 0px 0px #2020200, 0px 0px 0px 0px #2020200',
-    background: 'linear-gradient(90deg, #2020200,#20202000)',
+    background: 'linear-gradient(90deg, #20202000, #20202000)',
   },
-  hover: (custom?: { size?: 'default' | 'small'; boxShadow?: string }) => ({
+  hover: (custom?: {
+    size?: 'default' | 'small';
+    boxShadow?: string;
+    from?: string;
+    to?: string;
+  }) => ({
     rotateZ: 90,
     boxShadow:
       custom?.boxShadow ||
       (custom?.size === 'default'
         ? '0px -10px 20px 0px #000000, 0px 7px 22px 3px #505050'
         : '0px -6px 14px 0px #000000, 0px 4px 15px 2px #505050'),
-    background: 'linear-gradient(0deg, #dba100, #ffd84d)',
+    background: `linear-gradient(0deg, ${custom?.from || '#dba100'}, ${custom?.to || '#ffd84d'})`,
   }),
 };
 
@@ -71,7 +76,7 @@ export default function DiamondButton({
   isHover: boolean;
   initialDelay?: number;
   isMount?: boolean;
-  custom?: { size?: 'small' | 'default'; boxShadow?: string };
+  custom?: { size?: 'small' | 'default'; boxShadow?: string; from?: string; to?: string };
 }) {
   return (
     <motion.button

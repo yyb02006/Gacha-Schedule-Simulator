@@ -846,6 +846,10 @@ export default function PickupBanner({
     fourth: operatorLimitByBannerType[gachaType]['fourth'],
   };
 
+  const isOperatorsFull =
+    operators.length >=
+    Object.values(operatorLimitByBannerType[gachaType]).reduce((a, b) => a + b, 0);
+
   const isViewRef = useRef(false);
 
   useEffect(() => {
@@ -1126,7 +1130,16 @@ export default function PickupBanner({
                 }}
                 className="flex w-full justify-center py-2"
               >
-                <AddButton onAddClick={addOperator} custom={{ size: 'small' }} />
+                <AddButton
+                  onAddClick={addOperator}
+                  diamondCustom={
+                    isOperatorsFull
+                      ? { size: 'small', from: '#bd1b36', to: '#ff637e' }
+                      : { size: 'small' }
+                  }
+                  addCustom={isOperatorsFull ? { from: '#bd1b36', to: '#ff637e' } : undefined}
+                  isAddPrevent={isOperatorsFull}
+                />
               </motion.div>
             </div>
           </div>
