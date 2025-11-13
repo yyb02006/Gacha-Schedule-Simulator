@@ -4,12 +4,79 @@ import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { BannerResult } from '#/components/PickupList';
 import { cls, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
-import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  forwardRef,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import Brush from '#/components/charts/base/Brush';
 import BarChart from '#/components/charts/base/BarChart';
 import { Chart as ChartJS } from 'chart.js';
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
 import FoldButton from '#/components/buttons/MaximizeButton';
+import { motion } from 'motion/react';
+
+function LazyRender({
+  children,
+  minHeight = 300,
+  className = '',
+}: {
+  children: React.ReactNode;
+  minHeight?: number;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(entry.target); // 한 번만 트리거
+        }
+      },
+      {
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={cls('flex w-full items-center justify-center', className)}
+      // style={{ minHeight }}
+    >
+      {inView ? (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+          className="h-full w-full"
+        >
+          {children}
+        </motion.div>
+      ) : (
+        <div
+          className="w-full animate-pulse rounded-lg bg-neutral-800/50"
+          style={{ height: minHeight }}
+        />
+      )}
+    </div>
+  );
+}
 
 const createTooltipLiteral =
   (originalHistogram: number[]) =>
@@ -131,136 +198,154 @@ const Legend = ({
   );
 };
 
-export default function BannerSuccessTrialCounts({
-  bannerResult: {
-    name,
-    bannerWinGachaRuns,
-    bannerSuccess,
-    bannerHistogram,
-    cumulativeUntilCutoff,
-    successIndexUntilCutoff,
-    bannerStartingCurrency,
-    maxIndex,
-    minIndex,
-    pityRewardObtained,
-  },
-  isTrySim,
-  simulationTry,
-  chartHeight,
-  brushHeight,
-  enableBrush = true,
-}: {
-  bannerResult: BannerResult;
-  isTrySim: boolean;
-  simulationTry: number;
-  chartHeight?: string;
-  brushHeight?: string;
-  enableBrush?: boolean;
-}) {
-  const [isFolded, setFolded] = useState(false);
-  const padding = 16;
-  const { data, labels } = useRef({
-    data: bannerHistogram,
-    labels: Array.from({ length: bannerHistogram.length }, (_, index) => `${index + 1}`),
-  }).current;
-  const mainChartRef = useRef<ChartJS<'bar', (number | [number, number] | null)[], unknown> | null>(
-    null,
-  );
-  const dispatchRef = useRef<Dispatch<SetStateAction<LegendData<'bar'>>>>(null);
+const BannerSuccessTrialCounts = forwardRef<
+  HTMLDivElement,
+  {
+    bannerResult: BannerResult;
+    isTrySim: boolean;
+    simulationTry: number;
+    name: string;
+    chartHeight?: string;
+    brushHeight?: string;
+    enableBrush?: boolean;
+  }
+>(
+  (
+    {
+      bannerResult: {
+        name,
+        bannerWinGachaRuns,
+        bannerSuccess,
+        bannerHistogram,
+        cumulativeUntilCutoff,
+        successIndexUntilCutoff,
+        bannerStartingCurrency,
+        maxIndex,
+        minIndex,
+        pityRewardObtained,
+      },
+      isTrySim,
+      simulationTry,
+      name: dataName,
+      chartHeight,
+      brushHeight,
+      enableBrush = true,
+    },
+    ref,
+  ) => {
+    const [isFolded, setFolded] = useState(false);
+    const padding = 16;
+    const { data, labels } = useRef({
+      data: bannerHistogram,
+      labels: Array.from({ length: bannerHistogram.length }, (_, index) => `${index + 1}`),
+    }).current;
+    const mainChartRef = useRef<ChartJS<
+      'bar',
+      (number | [number, number] | null)[],
+      unknown
+    > | null>(null);
+    const dispatchRef = useRef<Dispatch<SetStateAction<LegendData<'bar'>>>>(null);
 
-  const cutoffRatio =
-    successIndexUntilCutoff !== undefined
-      ? safeNumberOrZero(successIndexUntilCutoff / (bannerHistogram.length - 1))
-      : 1;
+    const cutoffRatio =
+      successIndexUntilCutoff !== undefined
+        ? safeNumberOrZero(successIndexUntilCutoff / (bannerHistogram.length - 1))
+        : 1;
 
-  const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
+    const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
 
-  const selection = useRef({
-    start: 0,
-    end: initialSelectionEnd,
-  }).current;
-  const selectionIndex = useRef({
-    start: 0,
-    end: Math.round((data.length - 1) * initialSelectionEnd) + 1,
-  }).current;
+    const selection = useRef({
+      start: 0,
+      end: initialSelectionEnd,
+    }).current;
+    const selectionIndex = useRef({
+      start: 0,
+      end: Math.round((data.length - 1) * initialSelectionEnd) + 1,
+    }).current;
 
-  return (
-    <ChartWrapper
-      header={
-        <div className="flex items-center justify-between">
-          <div className="flex items-end gap-3 text-amber-400">
-            <span className="text-xl">{name}</span>{' '}
-            <div className="font-S-CoreDream-300 text-sm text-[#eaeaea]">
-              ( 배너 성공률 :{' '}
-              <span className="font-S-CoreDream-500 text-amber-500">
-                {truncateToDecimals((bannerSuccess / simulationTry) * 100)}%
-              </span>{' '}
-              )
+    return (
+      <ChartWrapper
+        header={
+          <div className="flex items-center justify-between">
+            <div className="flex items-end gap-3 text-amber-400">
+              <span className="text-xl">{name}</span>{' '}
+              <div className="font-S-CoreDream-300 text-sm text-[#eaeaea]">
+                ( 배너 성공률 :{' '}
+                <span className="font-S-CoreDream-500 text-amber-500">
+                  {truncateToDecimals((bannerSuccess / simulationTry) * 100)}%
+                </span>{' '}
+                )
+              </div>
             </div>
+            <FoldButton
+              onFold={() => {
+                setFolded((p) => !p);
+              }}
+              isFolded={isFolded}
+            />
           </div>
-          <FoldButton
-            onFold={() => {
-              setFolded((p) => !p);
-            }}
-            isFolded={isFolded}
+        }
+        name={dataName}
+        chartRef={ref}
+      >
+        <div className={isFolded ? 'pb-4' : ''}>
+          <Legend
+            data={data}
+            isTrySim={isTrySim}
+            bannerWinGachaRuns={bannerWinGachaRuns}
+            bannerSuccess={bannerSuccess}
+            dispatchRef={dispatchRef}
+            bannerStartingCurrency={bannerStartingCurrency}
+            maxIndex={maxIndex}
+            minIndex={minIndex}
+            pityRewardObtained={pityRewardObtained}
           />
         </div>
-      }
-    >
-      <div className={isFolded ? 'pb-4' : ''}>
-        <Legend
-          data={data}
-          isTrySim={isTrySim}
-          bannerWinGachaRuns={bannerWinGachaRuns}
-          bannerSuccess={bannerSuccess}
-          dispatchRef={dispatchRef}
-          bannerStartingCurrency={bannerStartingCurrency}
-          maxIndex={maxIndex}
-          minIndex={minIndex}
-          pityRewardObtained={pityRewardObtained}
-        />
-      </div>
-      {
-        <div className={cls('relative space-y-1', isFolded ? 'hidden' : '')}>
-          <BarChart
-            labels={labels}
-            data={data}
-            colors={{
-              backgroundColor: '#fe9a00',
-              borderColor: '#fe9a00',
-              hoverBackgroundColor: '#8e51ffCC',
-              hoverBorderColor: '#8e51ff',
-            }}
-            selectionIndex={selectionIndex}
-            total={bannerSuccess}
-            padding={padding}
-            enableBrush={enableBrush}
-            cutoffIndex={successIndexUntilCutoff}
-            height={chartHeight}
-            lazyLoading={true}
-            createTooltipLiteral={createTooltipLiteral(bannerHistogram)}
-            mainChartRef={mainChartRef}
-          />
-          {enableBrush && (
-            <Brush
+        <LazyRender>
+          <div className={cls('relative space-y-1', isFolded ? 'hidden' : '')}>
+            <BarChart
               labels={labels}
               data={data}
-              mainChartRef={mainChartRef}
-              selection={selection}
-              selectionIndex={selectionIndex}
               colors={{
-                backgroundColor: '#8e51ffCC',
-                borderColor: '#8e51ff',
+                backgroundColor: '#fe9a00',
+                borderColor: '#fe9a00',
+                hoverBackgroundColor: '#8e51ffCC',
+                hoverBorderColor: '#8e51ff',
               }}
+              selectionIndex={selectionIndex}
+              total={bannerSuccess}
               padding={padding}
-              cutoffRatio={cutoffRatio}
-              cutoffPercentage={safeNumberOrZero(cumulativeUntilCutoff / bannerSuccess)}
-              height={brushHeight}
-              dispatchRef={dispatchRef}
+              enableBrush={enableBrush}
+              cutoffIndex={successIndexUntilCutoff}
+              height={chartHeight}
+              lazyLoading={true}
+              createTooltipLiteral={createTooltipLiteral(bannerHistogram)}
+              mainChartRef={mainChartRef}
             />
-          )}
-        </div>
-      }
-    </ChartWrapper>
-  );
-}
+            {enableBrush && (
+              <Brush
+                labels={labels}
+                data={data}
+                mainChartRef={mainChartRef}
+                selection={selection}
+                selectionIndex={selectionIndex}
+                colors={{
+                  backgroundColor: '#8e51ffCC',
+                  borderColor: '#8e51ff',
+                }}
+                padding={padding}
+                cutoffRatio={cutoffRatio}
+                cutoffPercentage={safeNumberOrZero(cumulativeUntilCutoff / bannerSuccess)}
+                height={brushHeight}
+                dispatchRef={dispatchRef}
+              />
+            )}
+          </div>
+        </LazyRender>
+      </ChartWrapper>
+    );
+  },
+);
+
+BannerSuccessTrialCounts.displayName = 'BannerSuccessTrialCounts';
+
+export default BannerSuccessTrialCounts;
