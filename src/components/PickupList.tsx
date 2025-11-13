@@ -18,7 +18,12 @@ import {
   rarities,
   rarityStrings,
 } from '#/constants/variables';
-import { getPercentileIndex, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
+import {
+  canHaveLimited,
+  getPercentileIndex,
+  safeNumberOrZero,
+  truncateToDecimals,
+} from '#/libs/utils';
 
 export type Operator = {
   operatorId: string;
@@ -610,10 +615,26 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           const operators = [
             ...pickupData.operators
               .filter(({ rarity }) => rarity === 6)
-              .slice(0, newTargetOpersCount.sixth),
+              .slice(0, newTargetOpersCount.sixth)
+              .map((operator) =>
+                !canHaveLimited(gachaType, 6)
+                  ? ({ ...operator, operatorType: 'normal' } satisfies Operator)
+                  : {
+                      ...operator,
+                      operatorType: gachaType === 'collab' ? 'limited' : operator.operatorType,
+                    },
+              ),
             ...pickupData.operators
               .filter(({ rarity }) => rarity === 5)
-              .slice(0, newTargetOpersCount.fifth),
+              .slice(0, newTargetOpersCount.fifth)
+              .map((operator) =>
+                !canHaveLimited(gachaType, 5)
+                  ? ({ ...operator, operatorType: 'normal' } satisfies Operator)
+                  : {
+                      ...operator,
+                      operatorType: gachaType === 'collab' ? 'limited' : operator.operatorType,
+                    },
+              ),
             ...pickupData.operators
               .filter(({ rarity }) => rarity === 4)
               .slice(0, newTargetOpersCount.fourth),
@@ -655,10 +676,26 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           const operators = [
             ...pickupData.operators
               .filter(({ rarity }) => rarity === 6)
-              .slice(0, newTargetOpersCount.sixth),
+              .slice(0, newTargetOpersCount.sixth)
+              .map((operator) =>
+                !canHaveLimited(gachaType, 6)
+                  ? ({ ...operator, operatorType: 'normal' } satisfies Operator)
+                  : {
+                      ...operator,
+                      operatorType: gachaType === 'collab' ? 'limited' : operator.operatorType,
+                    },
+              ),
             ...pickupData.operators
               .filter(({ rarity }) => rarity === 5)
-              .slice(0, newTargetOpersCount.fifth),
+              .slice(0, newTargetOpersCount.fifth)
+              .map((operator) =>
+                !canHaveLimited(gachaType, 5)
+                  ? ({ ...operator, operatorType: 'normal' } satisfies Operator)
+                  : {
+                      ...operator,
+                      operatorType: gachaType === 'collab' ? 'limited' : operator.operatorType,
+                    },
+              ),
             ...pickupData.operators
               .filter(({ rarity }) => rarity === 4)
               .slice(0, newTargetOpersCount.fourth),
