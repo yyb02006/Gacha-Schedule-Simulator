@@ -6,7 +6,7 @@ import SimulationResult from '#/components/charts/SimulationResult';
 import BannerWinRate from '#/components/charts/BannerWinRate';
 import TotalGachaResult from '#/components/charts/TotalGachaResult';
 import { toOpacityZero } from '#/constants/variants';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import CancelButton from '#/components/buttons/CancelButton';
 import BannerSuccessTrialCounts from '#/components/charts/BannerSuccessTrialCounts';
 import { RefObject, useEffect, useRef, useState } from 'react';
@@ -91,7 +91,7 @@ const FloatingActionBar = ({
   return (
     <div className="fixed bottom-6 left-1/2 flex w-[400px] -translate-x-1/2 gap-2 text-stone-50">
       <ToTopButton handleToTop={handleToTop} />
-      <div className="relative flex flex-1 items-center justify-between self-stretch rounded-xl bg-[#202020] pl-4 text-lg shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]">
+      <div className="relative flex flex-1 items-center justify-between self-stretch rounded-xl bg-[#202020] pl-4 text-base shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]">
         {currentBanner ? currentBanner.dataset.name : '시뮬레이션 결과'}
         <button
           onClick={() => {
@@ -101,32 +101,39 @@ const FloatingActionBar = ({
         >
           {isListOpen ? <ChevronDown className="size-full" /> : <ChevronUp className="size-full" />}
         </button>
-        {isListOpen && (
-          <div
-            ref={listRef}
-            className="font-S-CoreDream-300 absolute -top-[216px] right-0 size-full h-[200px] overflow-y-auto rounded-xl bg-[#202020] p-3 text-sm shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]"
-          >
-            {chartRefs.current.map((banner, index) => (
-              <button
-                onClick={() => {
-                  modalRef.current?.scrollTo({ top: Math.max(banner.offsetTop - 32, 0) });
-                }}
-                key={index}
-                data-id={banner.dataset.id}
-                ref={(el) => {
-                  if (!el) return;
-                  listItemRefs.current[index] = el;
-                }}
-                className={cls(
-                  currentBanner?.offsetTop === banner.offsetTop ? 'text-sky-500' : '',
-                  'block w-full cursor-pointer py-[3px] text-left hover:bg-[#303030] hover:text-amber-500',
-                )}
-              >
-                {banner.dataset.name}
-              </button>
-            ))}
-          </div>
-        )}
+        <AnimatePresence>
+          {isListOpen && (
+            <motion.div
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              ref={listRef}
+              className="font-S-CoreDream-300 absolute -top-[216px] right-0 size-full h-[200px] overflow-y-auto rounded-xl bg-[#202020] px-4 py-3 text-sm shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]"
+            >
+              {chartRefs.current.map((banner, index) => (
+                <button
+                  onClick={() => {
+                    modalRef.current?.scrollTo({ top: Math.max(banner.offsetTop - 32, 0) });
+                  }}
+                  key={index}
+                  data-id={banner.dataset.id}
+                  ref={(el) => {
+                    if (!el) return;
+                    listItemRefs.current[index] = el;
+                  }}
+                  className={cls(
+                    currentBanner?.offsetTop === banner.offsetTop
+                      ? 'bg-[#292929] text-sky-500'
+                      : '',
+                    'block w-full cursor-pointer py-[4px] text-left hover:bg-[#303030] hover:text-amber-500',
+                  )}
+                >
+                  {banner.dataset.name}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
