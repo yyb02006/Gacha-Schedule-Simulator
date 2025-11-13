@@ -8,6 +8,7 @@ import { rarityColor } from '#/constants/ui';
 import { obtainedTypes, rarities } from '#/constants/variables';
 import { cls, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { OperatorRarityForString } from '#/types/types';
+import { forwardRef } from 'react';
 
 const createTooltipLiteral = ({
   title,
@@ -95,11 +96,13 @@ const RarityResultDetail = ({
   );
 };
 
-export default function TotalGachaResult({
-  result,
-}: {
-  result: GachaSimulationMergedResult | null;
-}) {
+const TotalGachaResult = forwardRef<
+  HTMLDivElement,
+  {
+    result: GachaSimulationMergedResult | null;
+    name: string;
+  }
+>(({ result, name }, ref) => {
   const rarityResultData = {
     data:
       result === null
@@ -122,6 +125,8 @@ export default function TotalGachaResult({
           <span className="text-amber-400">전체 가챠 </span>통계
         </span>
       }
+      name={name}
+      chartRef={ref}
     >
       {result ? (
         <div className="text-sm">
@@ -173,4 +178,8 @@ export default function TotalGachaResult({
       ) : null}
     </ChartWrapper>
   );
-}
+});
+
+TotalGachaResult.displayName = 'TotalGachaResult';
+
+export default TotalGachaResult;

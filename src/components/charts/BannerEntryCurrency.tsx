@@ -5,7 +5,15 @@ import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { BannerResult, GachaSimulationMergedResult } from '#/components/PickupList';
 import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
-import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  forwardRef,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { ChartRef } from '#/components/charts/base/Brush';
 
 const createTooltipLiteral =
@@ -99,17 +107,16 @@ const Legend = ({
   );
 };
 
-export default function BannerEntryCurrency({
-  result,
-  chartHeight,
-  brushHeight,
-  enableBrush = true,
-}: {
-  result: GachaSimulationMergedResult | null;
-  chartHeight?: string;
-  brushHeight?: string;
-  enableBrush?: boolean;
-}) {
+const BannerEntryCurrency = forwardRef<
+  HTMLDivElement,
+  {
+    result: GachaSimulationMergedResult | null;
+    name: string;
+    chartHeight?: string;
+    brushHeight?: string;
+    enableBrush?: boolean;
+  }
+>(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
   // 헤더 : 누적 소모 합성옥, 남은 합성옥, 툴팁: 진입시 합성옥, 소모 합성옥, 누적 소모 합성옥,
   const data = result
     ? result.perBanner.map(({ bannerStartingCurrency }) => bannerStartingCurrency)
@@ -122,6 +129,8 @@ export default function BannerEntryCurrency({
           배너별 <span className="text-amber-400">진입 시 평균 재화</span>
         </span>
       }
+      name={name}
+      chartRef={ref}
     >
       {result ? (
         <BrushBarChart
@@ -150,4 +159,8 @@ export default function BannerEntryCurrency({
       ) : null}
     </ChartWrapper>
   );
-}
+});
+
+BannerEntryCurrency.displayName = 'BannerEntryCurrency';
+
+export default BannerEntryCurrency;

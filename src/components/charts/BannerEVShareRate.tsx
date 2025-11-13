@@ -5,6 +5,7 @@ import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
+import { forwardRef } from 'react';
 
 const colors = [
   [
@@ -118,13 +119,14 @@ const createLegendHTML = (labels: string[], colors: string[], values: number[]) 
     .join('')}</div>`;
 };
 
-export default function BannerEVShareRate({
-  result,
-  isColspanTwo,
-}: {
-  result: GachaSimulationMergedResult | null;
-  isColspanTwo: boolean;
-}) {
+const BannerEVShareRate = forwardRef<
+  HTMLDivElement,
+  {
+    result: GachaSimulationMergedResult | null;
+    name: string;
+    isColspanTwo: boolean;
+  }
+>(({ result, name, isColspanTwo }, ref) => {
   const bannerResults =
     result !== null
       ? result.perBanner
@@ -149,6 +151,8 @@ export default function BannerEVShareRate({
           배너별 <span className="text-amber-400">기대값 점유율</span>
         </span>
       }
+      name={name}
+      chartRef={ref}
       className={isColspanTwo ? 'col-span-2' : ''}
     >
       {result ? (
@@ -170,4 +174,8 @@ export default function BannerEVShareRate({
       ) : null}
     </ChartWrapper>
   );
-}
+});
+
+BannerEVShareRate.displayName = 'BannerEVShareRate';
+
+export default BannerEVShareRate;

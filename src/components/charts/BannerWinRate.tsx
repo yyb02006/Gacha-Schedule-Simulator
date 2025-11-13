@@ -6,6 +6,7 @@ import { ChartType, TooltipItem } from 'chart.js';
 import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import BrushBarLineChart from '#/components/charts/base/BrushBarLineChart';
 import { BarLineChartData } from '#/components/charts/base/BarLineChart';
+import { forwardRef } from 'react';
 
 export interface CreateTooltipLiteralProps<T extends ChartType> {
   title: string[];
@@ -80,17 +81,16 @@ const Legend = ({
   );
 };
 
-export default function BannerWinRate({
-  result,
-  chartHeight,
-  brushHeight,
-  enableBrush = true,
-}: {
-  result: GachaSimulationMergedResult | null;
-  chartHeight?: string;
-  brushHeight?: string;
-  enableBrush?: boolean;
-}) {
+const BannerWinRate = forwardRef<
+  HTMLDivElement,
+  {
+    result: GachaSimulationMergedResult | null;
+    name: string;
+    chartHeight?: string;
+    brushHeight?: string;
+    enableBrush?: boolean;
+  }
+>(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
   const { labels, datas } = result
     ? result.perBanner.reduce<{
         labels: string[];
@@ -163,6 +163,8 @@ export default function BannerWinRate({
           배너별 <span className="text-amber-400">성공 / 실패 비율</span>
         </span>
       }
+      name={name}
+      chartRef={ref}
     >
       {result ? (
         <BrushBarLineChart
@@ -189,4 +191,8 @@ export default function BannerWinRate({
       ) : null}
     </ChartWrapper>
   );
-}
+});
+
+BannerWinRate.displayName = 'BannerWinRate';
+
+export default BannerWinRate;

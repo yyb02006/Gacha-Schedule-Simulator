@@ -5,6 +5,7 @@ import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import { forwardRef } from 'react';
 
 const createTooltipLiteral =
   (result: GachaSimulationMergedResult) =>
@@ -44,17 +45,16 @@ const createTooltipLiteral =
     </div>`;
   };
 
-export default function BannerEVCounts({
-  result,
-  chartHeight,
-  brushHeight,
-  enableBrush = true,
-}: {
-  result: GachaSimulationMergedResult | null;
-  chartHeight?: string;
-  brushHeight?: string;
-  enableBrush?: boolean;
-}) {
+const BannerEVCounts = forwardRef<
+  HTMLDivElement,
+  {
+    result: GachaSimulationMergedResult | null;
+    name: string;
+    chartHeight?: string;
+    brushHeight?: string;
+    enableBrush?: boolean;
+  }
+>(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
   const data = result
     ? result.perBanner.map(({ bannerWinGachaRuns, bannerSuccess }) =>
         truncateToDecimals(bannerWinGachaRuns / bannerSuccess),
@@ -67,6 +67,8 @@ export default function BannerEVCounts({
           배너별 <span className="text-amber-400">성공 시 기대값</span>
         </span>
       }
+      name={name}
+      chartRef={ref}
     >
       {result ? (
         <BrushBarChart
@@ -92,4 +94,8 @@ export default function BannerEVCounts({
       ) : null}
     </ChartWrapper>
   );
-}
+});
+
+BannerEVCounts.displayName = 'BannerEVCounts';
+
+export default BannerEVCounts;

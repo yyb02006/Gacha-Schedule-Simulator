@@ -7,6 +7,7 @@ import { truncateToDecimals } from '#/libs/utils';
 import BrushBarLineChart from '#/components/charts/base/BrushBarLineChart';
 import { BarLineChartData } from '#/components/charts/base/BarLineChart';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import { forwardRef } from 'react';
 
 export type CreateTooltipLiteral<T extends ChartType> = (
   props: CreateTooltipLiteralProps<T>,
@@ -55,17 +56,16 @@ const Legend = () => {
   );
 };
 
-export default function GachaSurvivalProbability({
-  result,
-  chartHeight,
-  brushHeight,
-  enableBrush = true,
-}: {
-  result: GachaSimulationMergedResult | null;
-  chartHeight?: string;
-  brushHeight?: string;
-  enableBrush?: boolean;
-}) {
+const GachaSurvivalProbability = forwardRef<
+  HTMLDivElement,
+  {
+    result: GachaSimulationMergedResult | null;
+    name: string;
+    chartHeight?: string;
+    brushHeight?: string;
+    enableBrush?: boolean;
+  }
+>(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
   const { labels, datas } = result
     ? result.perBanner.reduce<{
         labels: string[];
@@ -127,6 +127,8 @@ export default function GachaSurvivalProbability({
           가챠배너 <span className="text-amber-400">도달 / 중단 확률</span>
         </span>
       }
+      name={name}
+      chartRef={ref}
     >
       {result ? (
         <BrushBarLineChart
@@ -150,4 +152,8 @@ export default function GachaSurvivalProbability({
       ) : null}
     </ChartWrapper>
   );
-}
+});
+
+GachaSurvivalProbability.displayName = 'GachaSurvivalProbability';
+
+export default GachaSurvivalProbability;

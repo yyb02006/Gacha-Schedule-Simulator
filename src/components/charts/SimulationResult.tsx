@@ -5,6 +5,7 @@ import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import DonutChart from '#/components/charts/base/DonutChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
+import { forwardRef } from 'react';
 
 const createTooltipLiteral = ({
   title,
@@ -55,11 +56,13 @@ const createLegendHTML = (labels: string[], colors: string[]) =>
     })
     .join('')}</div>`;
 
-export default function SimulationResult({
-  result,
-}: {
-  result: GachaSimulationMergedResult | null;
-}) {
+const SimulationResult = forwardRef<
+  HTMLDivElement,
+  {
+    result: GachaSimulationMergedResult | null;
+    name: string;
+  }
+>(({ result, name }, ref) => {
   const simulationResultData =
     result === null
       ? []
@@ -67,7 +70,9 @@ export default function SimulationResult({
           result.total.simulationSuccess,
           result.total.simulationTry - result.total.simulationSuccess,
         ];
+
   const simulationResultLabels = ['성공', '실패'];
+
   return (
     <ChartWrapper
       header={
@@ -75,8 +80,10 @@ export default function SimulationResult({
           <span className="text-amber-400">시뮬레이션 </span>통계
         </span>
       }
+      name={name}
+      chartRef={ref}
     >
-      {result ? (
+      {result && (
         <div className="text-sm">
           <DonutChart
             data={simulationResultData}
@@ -121,7 +128,11 @@ export default function SimulationResult({
             </ul>
           </div>
         </div>
-      ) : null}
+      )}
     </ChartWrapper>
   );
-}
+});
+
+SimulationResult.displayName = 'SimulationResult';
+
+export default SimulationResult;

@@ -6,6 +6,7 @@ import { ChartType } from 'chart.js';
 import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import BrushLineChart from '#/components/charts/base/BrushLineChart';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import { forwardRef } from 'react';
 
 export type CreateTooltipLiteral<T extends ChartType> = (
   props: CreateTooltipLiteralProps<T>,
@@ -46,17 +47,16 @@ const createTooltipLiteral =
 </div>`;
   };
 
-export default function ExpectedCumulativeConsumption({
-  result,
-  chartHeight,
-  brushHeight,
-  enableBrush = true,
-}: {
-  result: GachaSimulationMergedResult | null;
-  chartHeight?: string;
-  brushHeight?: string;
-  enableBrush?: boolean;
-}) {
+const ExpectedCumulativeConsumption = forwardRef<
+  HTMLDivElement,
+  {
+    result: GachaSimulationMergedResult | null;
+    name: string;
+    chartHeight?: string;
+    brushHeight?: string;
+    enableBrush?: boolean;
+  }
+>(({ result, name, chartHeight, brushHeight, enableBrush = true }, ref) => {
   return (
     <ChartWrapper
       header={
@@ -64,6 +64,8 @@ export default function ExpectedCumulativeConsumption({
           평균 <span className="text-red-400">누적 소모 합성옥</span>
         </span>
       }
+      name={name}
+      chartRef={ref}
     >
       {result ? (
         <BrushLineChart
@@ -103,4 +105,8 @@ export default function ExpectedCumulativeConsumption({
       ) : null}
     </ChartWrapper>
   );
-}
+});
+
+ExpectedCumulativeConsumption.displayName = 'ExpectedCumulativeConsumption';
+
+export default ExpectedCumulativeConsumption;
