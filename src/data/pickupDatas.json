@@ -314,7 +314,7 @@
           "operatorId": "c1d2e3f4-xxxx-7i8j-9k0l-1m2n3oxx5q6r",
           "name": "미스미 우이카",
           "currentQty": 0,
-          "operatorType": "normal",
+          "operatorType": "limited",
           "targetCount": 1,
           "rarity": 5
         },
@@ -322,7 +322,7 @@
           "operatorId": "c1dxxxf4-g5h6-7i8j-9k0l-1m2n3oxx5q6r",
           "name": "와카바 무츠미",
           "currentQty": 0,
-          "operatorType": "normal",
+          "operatorType": "limited",
           "targetCount": 1,
           "rarity": 5
         }
