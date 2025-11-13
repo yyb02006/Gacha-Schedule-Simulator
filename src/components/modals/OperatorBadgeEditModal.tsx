@@ -6,7 +6,7 @@ import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/modals/Modal';
 import { Operator } from '#/components/PickupList';
 import { operatorBadgeProps } from '#/constants/ui';
-import { rarities } from '#/constants/variables';
+import { operatorLimitByBannerType, rarities } from '#/constants/variables';
 import { toOpacityZero } from '#/constants/variants';
 import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 import { motion } from 'motion/react';
@@ -43,7 +43,7 @@ export default function OperatorBadgeEditModal({
   const unSelectedRarityBadges = Object.values(operatorBadgeProps.rarity).filter(
     (badgeProp) => badgeProp.id !== currentState.rarity,
   );
-  const isLimited = currentState.operatorType === 'limited';
+  const isOperatorLimited = currentState.operatorType === 'limited';
   // 6성일 때는 가챠 타입이 한정, 콜라보가 아니거나 이미 6성에 한정오퍼가 있을 때 막고
   // 5성일 때는 가챠 타입이 콜라보가 아니면 막고
   // 4성은 한정이 존재하지 않음
@@ -84,12 +84,16 @@ export default function OperatorBadgeEditModal({
             <span className="text-sky-500">미선택</span> 뱃지
           </motion.div>
           <div className="flex flex-wrap gap-x-2 gap-y-3">
-            {isLimited ? (
+            {isOperatorLimited ? (
               <Badge
                 key={'normal'}
-                {...normal.props}
-                animation={true}
+                color={
+                  gachaType === 'collab' ? 'border-[#606060] text-[#606060]' : normal.props.color
+                }
+                name={normal.props.name}
+                animation={gachaType === 'collab' ? false : true}
                 onBadgeClick={() => {
+                  if (gachaType === 'collab') return;
                   setCurrentState((p) => ({ ...p, operatorType: 'normal' }));
                 }}
                 isLayout
@@ -109,21 +113,28 @@ export default function OperatorBadgeEditModal({
                 isLayout
               />
             )}
-            {unSelectedRarityBadges.map((filteredBadgeProp) => {
-              const isSixth = filteredBadgeProp.id === 6;
+            {unSelectedRarityBadges.map((rarityBadge) => {
+              const isBadgeSixth = rarityBadge.id === 6;
+              const currentOperators = {
+                sixth: operators.filter(({ rarity }) => rarity === 6),
+                fifth: operators.filter(({ rarity }) => rarity === 5),
+                fourth: operators.filter(({ rarity }) => rarity === 4),
+              };
+              const active =
+                currentOperators[rarities[rarityBadge.id]].length <
+                  operatorLimitByBannerType[gachaType][rarities[rarityBadge.id]] &&
+                !(isOperatorLimited && rarityBadge.id === 4) &&
+                !(isOperatorLimited && rarityBadge.id === 5 && gachaType !== 'collab');
+
               return (
                 <Badge
-                  key={rarities[filteredBadgeProp.id]}
-                  color={
-                    isLimited && !isSixth
-                      ? 'border-[#606060] text-[#606060]'
-                      : filteredBadgeProp.props.color
-                  }
-                  name={filteredBadgeProp.props.name}
-                  animation={isLimited && !isSixth ? false : true}
+                  key={rarities[rarityBadge.id]}
+                  color={active ? rarityBadge.props.color : 'border-[#606060] text-[#606060]'}
+                  name={rarityBadge.props.name}
+                  animation={active ? true : false}
                   onBadgeClick={() => {
-                    if (isLimited && !isSixth) return;
-                    setCurrentState((p) => ({ ...p, rarity: filteredBadgeProp.id }));
+                    if (isOperatorLimited && !isBadgeSixth) return;
+                    setCurrentState((p) => ({ ...p, rarity: rarityBadge.id }));
                   }}
                   isLayout
                 />
