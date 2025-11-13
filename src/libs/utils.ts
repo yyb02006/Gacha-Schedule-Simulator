@@ -1,3 +1,5 @@
+import { GachaType, OperatorRarity } from '#/types/types';
+
 /**
  *
  * 주어진 클래스 이름들을 공백으로 연결하여 하나의 문자열로 반환
@@ -229,4 +231,30 @@ export function filterLimitArray<T>(arr: T[], predicate: (x: T) => boolean, limi
     }
   }
   return result;
+}
+
+/**
+ * 주어진 가챠 타입과 희귀도에 따라 한정(Limited) 오퍼레이터를 포함할 수 있는지를 판별
+ *
+ * @param {GachaType} gachaType - 가챠의 종류 (normal, limited, collab)
+ * @param {OperatorRarity} rarity - 오퍼레이터 희귀도 (4, 5, 6)
+ * @returns {boolean} 해당 조합이 한정 오퍼레이터를 가질 수 있다면 true, 아니면 false
+ *
+ * @example
+ * canHaveLimited('limited', 6); // true (리미티드 6성 가능)
+ *
+ * @example
+ * canHaveLimited('collab', 5); // true (콜라보 5성 가능)
+ *
+ * @example
+ * canHaveLimited('normal', 5); // false (일반 가챠에는 한정 없음)
+ */
+export function canHaveLimited(gachaType: GachaType, rarity: OperatorRarity) {
+  if (rarity === 6) {
+    return gachaType === 'collab' || gachaType === 'limited';
+  } else if (rarity === 5) {
+    return gachaType === 'collab';
+  } else {
+    return false;
+  }
 }
