@@ -2,13 +2,14 @@
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { BannerResult } from '#/components/PickupList';
-import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
+import { cls, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import Brush from '#/components/charts/base/Brush';
 import BarChart from '#/components/charts/base/BarChart';
 import { Chart as ChartJS } from 'chart.js';
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
+import FoldButton from '#/components/buttons/MaximizeButton';
 
 const createTooltipLiteral =
   (originalHistogram: number[]) =>
@@ -156,6 +157,7 @@ export default function BannerSuccessTrialCounts({
   brushHeight?: string;
   enableBrush?: boolean;
 }) {
+  const [isFolded, setFolded] = useState(false);
   const padding = 16;
   const { data, labels } = useRef({
     data: bannerHistogram,
@@ -185,68 +187,80 @@ export default function BannerSuccessTrialCounts({
   return (
     <ChartWrapper
       header={
-        <div className="flex items-end gap-3 text-amber-400">
-          {name}{' '}
-          <div className="font-S-CoreDream-300 text-sm text-[#eaeaea]">
-            ( 배너 성공률 :{' '}
-            <span className="font-S-CoreDream-500 text-amber-500">
-              {truncateToDecimals((bannerSuccess / simulationTry) * 100)}%
-            </span>{' '}
-            )
+        <div className="flex items-center justify-between">
+          <div className="flex items-end gap-3 text-amber-400">
+            <span className="text-xl">{name}</span>{' '}
+            <div className="font-S-CoreDream-300 text-sm text-[#eaeaea]">
+              ( 배너 성공률 :{' '}
+              <span className="font-S-CoreDream-500 text-amber-500">
+                {truncateToDecimals((bannerSuccess / simulationTry) * 100)}%
+              </span>{' '}
+              )
+            </div>
           </div>
+          <FoldButton
+            onFold={() => {
+              setFolded((p) => !p);
+            }}
+            isFolded={isFolded}
+          />
         </div>
       }
     >
-      <Legend
-        data={data}
-        isTrySim={isTrySim}
-        bannerWinGachaRuns={bannerWinGachaRuns}
-        bannerSuccess={bannerSuccess}
-        dispatchRef={dispatchRef}
-        bannerStartingCurrency={bannerStartingCurrency}
-        maxIndex={maxIndex}
-        minIndex={minIndex}
-        pityRewardObtained={pityRewardObtained}
-      />
-      <div className="relative space-y-1">
-        <BarChart
-          labels={labels}
+      <div className={isFolded ? 'pb-4' : ''}>
+        <Legend
           data={data}
-          colors={{
-            backgroundColor: '#fe9a00',
-            borderColor: '#fe9a00',
-            hoverBackgroundColor: '#8e51ffCC',
-            hoverBorderColor: '#8e51ff',
-          }}
-          selectionIndex={selectionIndex}
-          total={bannerSuccess}
-          padding={padding}
-          enableBrush={enableBrush}
-          cutoffIndex={successIndexUntilCutoff}
-          height={chartHeight}
-          lazyLoading={true}
-          createTooltipLiteral={createTooltipLiteral(bannerHistogram)}
-          mainChartRef={mainChartRef}
+          isTrySim={isTrySim}
+          bannerWinGachaRuns={bannerWinGachaRuns}
+          bannerSuccess={bannerSuccess}
+          dispatchRef={dispatchRef}
+          bannerStartingCurrency={bannerStartingCurrency}
+          maxIndex={maxIndex}
+          minIndex={minIndex}
+          pityRewardObtained={pityRewardObtained}
         />
-        {enableBrush && (
-          <Brush
+      </div>
+      {
+        <div className={cls('relative space-y-1', isFolded ? 'hidden' : '')}>
+          <BarChart
             labels={labels}
             data={data}
-            mainChartRef={mainChartRef}
-            selection={selection}
-            selectionIndex={selectionIndex}
             colors={{
-              backgroundColor: '#8e51ffCC',
-              borderColor: '#8e51ff',
+              backgroundColor: '#fe9a00',
+              borderColor: '#fe9a00',
+              hoverBackgroundColor: '#8e51ffCC',
+              hoverBorderColor: '#8e51ff',
             }}
+            selectionIndex={selectionIndex}
+            total={bannerSuccess}
             padding={padding}
-            cutoffRatio={cutoffRatio}
-            cutoffPercentage={safeNumberOrZero(cumulativeUntilCutoff / bannerSuccess)}
-            height={brushHeight}
-            dispatchRef={dispatchRef}
+            enableBrush={enableBrush}
+            cutoffIndex={successIndexUntilCutoff}
+            height={chartHeight}
+            lazyLoading={true}
+            createTooltipLiteral={createTooltipLiteral(bannerHistogram)}
+            mainChartRef={mainChartRef}
           />
-        )}
-      </div>
+          {enableBrush && (
+            <Brush
+              labels={labels}
+              data={data}
+              mainChartRef={mainChartRef}
+              selection={selection}
+              selectionIndex={selectionIndex}
+              colors={{
+                backgroundColor: '#8e51ffCC',
+                borderColor: '#8e51ff',
+              }}
+              padding={padding}
+              cutoffRatio={cutoffRatio}
+              cutoffPercentage={safeNumberOrZero(cumulativeUntilCutoff / bannerSuccess)}
+              height={brushHeight}
+              dispatchRef={dispatchRef}
+            />
+          )}
+        </div>
+      }
     </ChartWrapper>
   );
 }
