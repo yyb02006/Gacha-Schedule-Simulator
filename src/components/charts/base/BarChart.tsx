@@ -388,8 +388,11 @@ export default function BarChart({
       if (!chartRef.current?.ctx) return;
 
       const chart = chartRef.current;
+      chart.data.datasets[0].animation = false;
+
       if (progressIndexRef.current >= selectionIndex.end) {
         setLoading(false);
+        chart.data.datasets[0].animation = { duration: 200 };
         return;
       }
 
