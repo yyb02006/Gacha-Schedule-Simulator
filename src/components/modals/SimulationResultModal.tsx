@@ -60,7 +60,7 @@ function LazyRender({
     <div
       ref={ref}
       className={cls('flex w-full items-center justify-center', className)}
-      style={{ minHeight }}
+      // style={{ minHeight }}
     >
       {inView ? (
         <motion.div
