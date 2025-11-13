@@ -9,7 +9,7 @@ import { toOpacityZero } from '#/constants/variants';
 import { motion } from 'motion/react';
 import CancelButton from '#/components/buttons/CancelButton';
 import BannerSuccessTrialCounts from '#/components/charts/BannerSuccessTrialCounts';
-import { useEffect, useRef, useState } from 'react';
+import { RefObject, useEffect, useRef, useState } from 'react';
 import BannerEVShareRate from '#/components/charts/BannerEVShareRate';
 import BannerEntryCurrency from '#/components/charts/BannerEntryCurrency';
 import ExpectedCumulativeConsumption from '#/components/charts/ExpectedCumulativeConsumption';
@@ -24,12 +24,41 @@ interface SettingsModalProps {
 }
 
 const FloatingActionBar = ({
-  currentBanner,
+  result,
+  isOpen,
+  chartRefs,
   handleToTop,
 }: {
-  currentBanner: HTMLDivElement | undefined;
+  result: GachaSimulationMergedResult | null;
+  isOpen: boolean;
+  chartRefs: RefObject<HTMLDivElement[]>;
   handleToTop: () => void;
 }) => {
+  const [currentBanner, setCurrentBanner] = useState<HTMLDivElement | undefined>(undefined);
+
+  useEffect(() => {
+    if (!result || !isOpen) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleCharts = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visibleCharts.length > 0) {
+          const el = chartRefs.current.find((el) => el === visibleCharts[0].target);
+          setCurrentBanner(el);
+        }
+      },
+      { threshold: 0.5 }, // 화면에 50% 이상 보여야 진입으로 간주
+    );
+
+    chartRefs.current.forEach((el) => el && observer.observe(el));
+
+    return () => {
+      chartRefs.current.forEach((el) => el && observer.unobserve(el));
+    };
+  }, [isOpen, result, chartRefs]);
+
   return (
     <div className="fixed bottom-6 left-1/2 flex h-[60px] w-[400px] -translate-x-1/2 items-center justify-between rounded-xl bg-[#202020] px-2 text-stone-50 shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]">
       <ToTopButton handleToTop={handleToTop} />
@@ -43,9 +72,8 @@ const FloatingActionBar = ({
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<HTMLDivElement[]>([]);
-  const [currentChartIndex, setCurrentChartIndex] = useState<HTMLDivElement | undefined>(undefined);
+  /*   const [currentChartIndex, setCurrentChartIndex] = useState<HTMLDivElement | undefined>(undefined);
 
-  // 이 코드 파고들기
   useEffect(() => {
     if (!result || !isOpen) return;
     const observer = new IntersectionObserver(
@@ -67,7 +95,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
     return () => {
       chartRefs.current.forEach((el) => el && observer.unobserve(el));
     };
-  }, [isOpen, result]);
+  }, [isOpen, result]); */
 
   return result ? (
     <Modal isOpen={isOpen} onClose={onClose} ref={modalRef}>
@@ -208,7 +236,9 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           console.log(modalRef);
           modalRef.current?.scrollTo({ top: 0, behavior: 'auto' });
         }}
-        currentBanner={currentChartIndex}
+        chartRefs={chartRefs}
+        isOpen={isOpen}
+        result={result}
       />
     </Modal>
   ) : null;
