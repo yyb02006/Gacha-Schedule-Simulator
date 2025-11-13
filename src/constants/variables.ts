@@ -22,7 +22,7 @@ export const operatorLimitByBannerType: Record<
   rotation: { sixth: 2, fifth: 3, fourth: 0 },
   single: { sixth: 1, fifth: 2, fourth: 1 },
   limited: { sixth: 2, fifth: 1, fourth: 0 },
-  collab: { sixth: 2, fifth: 2, fourth: 0 },
+  collab: { sixth: 1, fifth: 2, fourth: 0 },
   orient: { sixth: 3, fifth: 3, fourth: 0 },
   contract: { sixth: 4, fifth: 6, fourth: 0 },
 };
