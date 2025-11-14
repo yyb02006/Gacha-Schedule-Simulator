@@ -1,4 +1,6 @@
-import { GachaType, OperatorRarity } from '#/types/types';
+import { Operator } from '#/components/PickupList';
+import { rarities } from '#/constants/variables';
+import { GachaType, OperatorRarity, OperatorRarityForString } from '#/types/types';
 
 /**
  *
@@ -257,4 +259,44 @@ export function canHaveLimited(gachaType: GachaType, rarity: OperatorRarity) {
   } else {
     return false;
   }
+}
+
+/**
+ * 주어진 operator 배열을 rarity 기준으로 그룹화하여 객체 형태로 반환
+ *
+ * @param {Operator[]} operators - 분류할 operator 배열
+ * @returns {Record<OperatorRarityForString, Operator[]>}
+ * rarity(sixth, fifth, fourth)별로 operator를 배열로 모은 객체
+ *
+ * @example
+ * const operators = [
+ *   { name: 'A', rarity: 6 },
+ *   { name: 'B', rarity: 5 },
+ *   { name: 'C', rarity: 6 },
+ * ];
+ *
+ * const result = getOperatorsByRarity(operators);
+ *
+ * console.log(result.sixth); // [{ name: 'A', rarity: 6 }, { name: 'C', rarity: 6 }]
+ * console.log(result.fifth); // [{ name: 'B', rarity: 5 }]
+ * console.log(result.fourth); // []
+ *
+ * @example
+ * // 빈 배열을 입력하면 모든 rarity 배열이 빈 배열로 반환
+ * const result = getOperatorsByRarity([]);
+ * console.log(result);
+ * // { sixth: [], fifth: [], fourth: [] }
+ */
+export function getOperatorsByRarity(operators: Operator[]) {
+  return operators.reduce<Record<OperatorRarityForString, Operator[]>>(
+    (acc, current) => {
+      acc[rarities[current.rarity]].push(current);
+      return acc;
+    },
+    {
+      sixth: [],
+      fifth: [],
+      fourth: [],
+    },
+  );
 }
