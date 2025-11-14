@@ -398,10 +398,11 @@ const BannerHeader = ({
           background="linear-gradient(135deg, #bb4d00, #ffb900)"
           color="#eaeaea"
           onButtonClick={() => {
-            onUpdateIndex('decrease');
+            onUpdateIndex('increase');
           }}
           isAnimateLocked={isAnimateLocked}
           className="text-amber-400"
+          isClickPrevent={index < 1}
         >
           <ChevronUp className="size-full" />
         </SmallButton>
@@ -409,10 +410,11 @@ const BannerHeader = ({
           background="linear-gradient(135deg, #bb4d00, #ffb900)"
           color="#eaeaea"
           onButtonClick={() => {
-            onUpdateIndex('increase');
+            onUpdateIndex('decrease');
           }}
           isAnimateLocked={isAnimateLocked}
           className="text-amber-400"
+          isClickPrevent={index >= dataLength - 1}
         >
           <ChevronDown className="size-full" />
         </SmallButton>
@@ -1021,9 +1023,9 @@ export default function PickupBanner({
   };
 
   const updateIndex = (direction: 'increase' | 'decrease') => {
-    if (direction === 'increase' && index < bannerCount - 1) {
+    if (direction === 'decrease' && index < bannerCount - 1) {
       dispatch({ type: 'swapIndex', payload: { fromIndex: index, toIndex: index + 1 } });
-    } else if (direction === 'decrease' && index > 0) {
+    } else if (direction === 'increase' && index > 0) {
       dispatch({ type: 'swapIndex', payload: { fromIndex: index, toIndex: index - 1 } });
     }
   };
