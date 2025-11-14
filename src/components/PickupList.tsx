@@ -568,13 +568,12 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
     case 'updateOperatorDetails': {
       const { id, operatorId, rarity, operatorType } = action.payload;
       return modifyBannerDetails(id, (pickupData) => {
-        const { operators, gachaType, pickupDetails } = pickupData;
+        const { gachaType, pickupDetails } = pickupData;
         const prevOperator = pickupData.operators.find(
           (operator) => operator.operatorId === operatorId,
         );
         if (!prevOperator) return pickupData;
         const prevStringRarity = rarities[prevOperator.rarity];
-        const meetsLimitPityBanner = gachaType === 'collab' || gachaType === 'limited';
         const currentOperatorType = operatorType || prevOperator.operatorType;
         const currentOperatorRarity = rarity || prevOperator.rarity;
 
