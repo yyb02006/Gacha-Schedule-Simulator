@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { insetInputVariants, toOpacityZero } from '#/constants/variants';
 import {
   Dummy,
@@ -933,7 +933,6 @@ export default function PickupBanner({
     isViewRef.current = false;
 
     const rect = el.getBoundingClientRect();
-    // console.log(rect.top, window.scrollY + window.innerHeight);
     if (rect.top < window.scrollY + window.innerHeight && rect.top > 0) {
       setIsView(true);
       isViewRef.current = true;
@@ -1066,7 +1065,7 @@ export default function PickupBanner({
               background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
             }
       }
-      exit={{ opacity: 0, transition: { duration: 0.1 } }}
+      exit={{ opacity: 0, transition: { duration: 0.15 } }}
       transition={{
         layout: {
           duration: 0.3,
@@ -1085,120 +1084,124 @@ export default function PickupBanner({
         'relative flex flex-col space-y-6 rounded-xl p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]',
       )}
     >
-      <BannerHeader
-        id={id}
-        currentName={name}
-        gachaType={gachaType}
-        isAnimateLocked={isAnimateLocked}
-        isMinimized={isMinimized}
-        index={index}
-        isActive={active}
-        isSimpleMode={isSimpleMode}
-        pickupData={pickupData}
-        dataLength={bannerCount}
-        onBannerDelete={() => {
-          deleteData({ target: 'banner' });
-        }}
-        onNameBlur={(e) => {
-          updateBannerName({ name: e.currentTarget.value });
-        }}
-        onBannerBadgeChange={updateGachaType}
-        onUpdateIndex={updateIndex}
-        onMinimized={() => {
-          setIsMinimized((p) => !p);
-        }}
-        onToggle={toggleActive}
-      />
-      {!isMinimized && image && active && isImageVisible ? (
-        <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-          <Image src={image} width={1560} height={500} alt="babel" />
-        </motion.div>
-      ) : null}
-      {!isMinimized && isView && active ? (
-        isSimpleMode ? (
-          <SimplePreInfoField
-            // isPresent={isPresent}
-            isTrySim={isTrySim}
+      <AnimatePresence>
+        <div key={id}>
+          <BannerHeader
+            id={id}
+            currentName={name}
+            gachaType={gachaType}
+            isAnimateLocked={isAnimateLocked}
+            isMinimized={isMinimized}
+            index={index}
+            isActive={active}
+            isSimpleMode={isSimpleMode}
             pickupData={pickupData}
-            targetLimit={targetLimit}
-            updateSimplePickupCount={updateSimplePickupCount}
-            updateAdditionalResource={updateAdditionalResource}
+            dataLength={bannerCount}
+            onBannerDelete={() => {
+              deleteData({ target: 'banner' });
+            }}
+            onNameBlur={(e) => {
+              updateBannerName({ name: e.currentTarget.value });
+            }}
+            onBannerBadgeChange={updateGachaType}
+            onUpdateIndex={updateIndex}
+            onMinimized={() => {
+              setIsMinimized((p) => !p);
+            }}
+            onToggle={toggleActive}
           />
-        ) : (
-          <div
-            key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
-            className="space-y-6 text-sm lg:space-y-7"
-          >
-            <PreInfoField
-              // isPresent={isPresent}
-              pickupData={pickupData}
-              targetLimit={targetLimit}
-              updatePickupCount={updatePickupCount}
-              updateAttempts={updateAttempts}
-              updateFirstSixthTry={updateFirstSixthTry}
-            />
-            <div className="space-y-3">
-              <div className="font-S-CoreDream-500 flex flex-wrap justify-between gap-x-6 gap-y-4 text-xl">
-                <span className="py-1 whitespace-nowrap">
-                  <span className="text-amber-400">목표</span> 픽업 목록
-                </span>
-                {isTrySim || (
-                  <AdditionalResUntilBannerEnd
-                    key={`res-${`${id} ${isTrySim}` ? 'hidden' : 'shown'}`}
-                    additionalResource={pickupData.additionalResource.extendedMode.toString()}
-                    onInputBlur={(e) => {
-                      const newValue = e.currentTarget.value.replace(/,/g, '');
-                      updateAdditionalResource('extendedMode', stringToNumber(newValue));
-                    }}
-                  />
-                )}
-              </div>
-              <div className="space-y-6 lg:space-y-4">
-                {operators.map((operator) => {
-                  return (
-                    <PickupOperatorDetail
-                      key={operator.operatorId}
-                      operator={operator}
-                      operators={operators}
-                      gachaType={gachaType}
-                      onChangeOperatorDetails={updateOperatorDetails}
-                      onOperatorDelete={() => {
-                        deleteData({
-                          target: 'operator',
-                          operatorId: operator.operatorId,
-                          rarity: operator.rarity,
-                        });
-                      }}
-                    />
-                  );
-                })}
-              </div>
-              <motion.div
-                layout="position"
-                transition={{
-                  layout: {
-                    duration: 0.05,
-                    type: 'spring',
-                    mass: 0.3,
-                  },
-                }}
-                className="flex w-full justify-center py-2"
+          {!isMinimized && image && active && isImageVisible ? (
+            <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+              <Image src={image} width={1560} height={500} alt="babel" />
+            </motion.div>
+          ) : null}
+          {!isMinimized && isView && active ? (
+            isSimpleMode ? (
+              <SimplePreInfoField
+                // isPresent={isPresent}
+                isTrySim={isTrySim}
+                pickupData={pickupData}
+                targetLimit={targetLimit}
+                updateSimplePickupCount={updateSimplePickupCount}
+                updateAdditionalResource={updateAdditionalResource}
+              />
+            ) : (
+              <div
+                key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
+                className="space-y-6 text-sm lg:space-y-7"
               >
-                <AddButton
-                  onAddClick={addOperator}
-                  diamondCustom={
-                    isOperatorsFull
-                      ? { size: 'small', from: '#bd1b36', to: '#ff637e' }
-                      : { size: 'small' }
-                  }
-                  addCustom={isOperatorsFull ? { from: '#bd1b36', to: '#ff637e' } : undefined}
-                  isAddPrevent={isOperatorsFull}
+                <PreInfoField
+                  // isPresent={isPresent}
+                  pickupData={pickupData}
+                  targetLimit={targetLimit}
+                  updatePickupCount={updatePickupCount}
+                  updateAttempts={updateAttempts}
+                  updateFirstSixthTry={updateFirstSixthTry}
                 />
-              </motion.div>
-            </div>
-          </div>
-        )
-      ) : null}
+                <div className="space-y-3">
+                  <div className="font-S-CoreDream-500 flex flex-wrap justify-between gap-x-6 gap-y-4 text-xl">
+                    <span className="py-1 whitespace-nowrap">
+                      <span className="text-amber-400">목표</span> 픽업 목록
+                    </span>
+                    {isTrySim || (
+                      <AdditionalResUntilBannerEnd
+                        key={`res-${`${id} ${isTrySim}` ? 'hidden' : 'shown'}`}
+                        additionalResource={pickupData.additionalResource.extendedMode.toString()}
+                        onInputBlur={(e) => {
+                          const newValue = e.currentTarget.value.replace(/,/g, '');
+                          updateAdditionalResource('extendedMode', stringToNumber(newValue));
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div className="space-y-6 lg:space-y-4">
+                    {operators.map((operator) => {
+                      return (
+                        <PickupOperatorDetail
+                          key={operator.operatorId}
+                          operator={operator}
+                          operators={operators}
+                          gachaType={gachaType}
+                          onChangeOperatorDetails={updateOperatorDetails}
+                          onOperatorDelete={() => {
+                            deleteData({
+                              target: 'operator',
+                              operatorId: operator.operatorId,
+                              rarity: operator.rarity,
+                            });
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <motion.div
+                    layout="position"
+                    transition={{
+                      layout: {
+                        duration: 0.05,
+                        type: 'spring',
+                        mass: 0.3,
+                      },
+                    }}
+                    className="flex w-full justify-center py-2"
+                  >
+                    <AddButton
+                      onAddClick={addOperator}
+                      diamondCustom={
+                        isOperatorsFull
+                          ? { size: 'small', from: '#bd1b36', to: '#ff637e' }
+                          : { size: 'small' }
+                      }
+                      addCustom={isOperatorsFull ? { from: '#bd1b36', to: '#ff637e' } : undefined}
+                      isAddPrevent={isOperatorsFull}
+                    />
+                  </motion.div>
+                </div>
+              </div>
+            )
+          ) : null}
+        </div>
+      </AnimatePresence>
     </motion.div>
   );
 }
