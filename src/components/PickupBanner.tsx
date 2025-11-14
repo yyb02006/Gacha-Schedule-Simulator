@@ -34,7 +34,7 @@ import FoldButton from '#/components/buttons/MaximizeButton';
 import ChevronDown from '#/icons/ChevronDown.svg';
 import ChevronUp from '#/icons/ChevronUp.svg';
 import Tag from '#/icons/Tag.svg';
-import { operatorLimitByBannerType } from '#/constants/variables';
+import { operatorLimitByBannerType, rarities, rarityStrings } from '#/constants/variables';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -586,8 +586,21 @@ const PreInfoField = ({
     pickupDetails: { pickupOpersCount },
     maxGachaAttempts,
     minGachaAttempts,
+    operators,
     firstSixthTry,
   } = pickupData;
+
+  const operatorsByRarity = operators.reduce<Record<OperatorRarityForString, Operator[]>>(
+    (acc, current) => {
+      acc[rarities[current.rarity]].push(current);
+      return acc;
+    },
+    {
+      sixth: [],
+      fifth: [],
+      fourth: [],
+    },
+  );
 
   return (
     <div className="font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
@@ -620,8 +633,14 @@ const PreInfoField = ({
           <InsetNumberInput
             name="픽업 6성"
             className="text-orange-400"
-            onInputBlur={(e) => {
-              updatePickupCount(stringToNumber(e.currentTarget.value), 'sixth');
+            onInputBlur={(e, syncLocalValue) => {
+              const count = stringToNumber(e.currentTarget.value);
+              const hasNoTargetOperators =
+                count === 0 &&
+                operatorsByRarity.fifth.length === 0 &&
+                operatorsByRarity.fourth.length === 0;
+              updatePickupCount(hasNoTargetOperators ? 1 : count, 'sixth');
+              syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
             }}
             currentValue={pickupOpersCount.sixth.toString()}
             max={targetLimit.sixth}
@@ -629,8 +648,14 @@ const PreInfoField = ({
           <InsetNumberInput
             name="픽업 5성"
             className="text-amber-400"
-            onInputBlur={(e) => {
-              updatePickupCount(stringToNumber(e.currentTarget.value), 'fifth');
+            onInputBlur={(e, syncLocalValue) => {
+              const count = stringToNumber(e.currentTarget.value);
+              const hasNoTargetOperators =
+                count === 0 &&
+                operatorsByRarity.sixth.length === 0 &&
+                operatorsByRarity.fourth.length === 0;
+              updatePickupCount(hasNoTargetOperators ? 1 : count, 'fifth');
+              syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
             }}
             currentValue={pickupOpersCount.fifth.toString()}
             max={targetLimit.fifth}
@@ -638,8 +663,14 @@ const PreInfoField = ({
           <InsetNumberInput
             name="픽업 4성"
             className="text-purple-400"
-            onInputBlur={(e) => {
-              updatePickupCount(stringToNumber(e.currentTarget.value), 'fourth');
+            onInputBlur={(e, syncLocalValue) => {
+              const count = stringToNumber(e.currentTarget.value);
+              const hasNoTargetOperators =
+                count === 0 &&
+                operatorsByRarity.fifth.length === 0 &&
+                operatorsByRarity.sixth.length === 0;
+              updatePickupCount(hasNoTargetOperators ? 1 : count, 'fourth');
+              syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
             }}
             currentValue={pickupOpersCount.fourth.toString()}
             max={targetLimit.fourth}
