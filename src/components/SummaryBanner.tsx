@@ -58,20 +58,10 @@ export default function SummaryBanner({ result }: { result: GachaSimulationMerge
           </div>
         </motion.div>
       </motion.div>
-      <SimulationResult result={result} name="시뮬레이션 통계" />
-      <TotalGachaResult result={result} name="전체 단일가챠 통계" />
-      <BannerWinRate
-        result={result}
-        enableBrush={false}
-        chartHeight="h-[240px]"
-        name="배너별 성공 / 실패 비율"
-      />
-      <BannerEVCounts
-        result={result}
-        enableBrush={false}
-        chartHeight="h-[240px]"
-        name="배너별 성공 시 기대값"
-      />
+      <SimulationResult result={result} />
+      <TotalGachaResult result={result} />
+      <BannerWinRate result={result} enableBrush={false} chartHeight="h-[240px]" />
+      <BannerEVCounts result={result} enableBrush={false} chartHeight="h-[240px]" />
       <SimulationResultModal
         isOpen={isModalOpen}
         onClose={() => {
