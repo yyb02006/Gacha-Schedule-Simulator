@@ -119,7 +119,7 @@ export const InsetNumberInput = ({
   children?: ReactNode;
   onInputBlur: (
     e: FocusEvent<HTMLInputElement>,
-    forceUpdate: React.Dispatch<React.SetStateAction<string>>,
+    synceLocalValue: React.Dispatch<React.SetStateAction<string>>,
   ) => void;
   currentValue: string;
   name: ReactNode;
@@ -453,7 +453,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 6성"
               className="text-orange-400"
-              onInputBlur={(e, forceUpdate) => {
+              onInputBlur={(e, synceLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.fifth === 0 && targetOpersCount.fourth === 0;
@@ -462,7 +462,7 @@ const SimplePreInfoField = ({
                   countType: 'pickupOpersCount',
                   rarityType: 'sixth',
                 });
-                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
+                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={pickupOpersCount.sixth.toString()}
               max={targetLimit['sixth']}
@@ -470,7 +470,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 6성"
               className="text-orange-400"
-              onInputBlur={(e, forceUpdate) => {
+              onInputBlur={(e, synceLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.fifth === 0 && targetOpersCount.fourth === 0;
@@ -479,7 +479,7 @@ const SimplePreInfoField = ({
                   countType: 'targetOpersCount',
                   rarityType: 'sixth',
                 });
-                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
+                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={targetOpersCount.sixth.toString()}
               max={targetLimit['sixth']}
@@ -489,7 +489,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 5성"
               className="text-amber-400"
-              onInputBlur={(e, forceUpdate) => {
+              onInputBlur={(e, synceLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fourth === 0;
@@ -498,7 +498,7 @@ const SimplePreInfoField = ({
                   countType: 'pickupOpersCount',
                   rarityType: 'fifth',
                 });
-                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
+                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={pickupOpersCount.fifth.toString()}
               max={targetLimit['fifth']}
@@ -506,7 +506,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 5성"
               className="text-amber-400"
-              onInputBlur={(e, forceUpdate) => {
+              onInputBlur={(e, synceLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fourth === 0;
@@ -515,7 +515,7 @@ const SimplePreInfoField = ({
                   countType: 'targetOpersCount',
                   rarityType: 'fifth',
                 });
-                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
+                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={targetOpersCount.fifth.toString()}
               max={targetLimit['fifth']}
@@ -525,7 +525,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 4성"
               className="text-sky-500"
-              onInputBlur={(e, forceUpdate) => {
+              onInputBlur={(e, synceLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fifth === 0;
@@ -534,7 +534,7 @@ const SimplePreInfoField = ({
                   countType: 'pickupOpersCount',
                   rarityType: 'fourth',
                 });
-                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
+                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={pickupOpersCount.fourth.toString()}
               max={targetLimit['fourth']}
@@ -542,7 +542,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 4성"
               className="text-sky-500"
-              onInputBlur={(e, forceUpdate) => {
+              onInputBlur={(e, synceLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fifth === 0;
@@ -551,7 +551,7 @@ const SimplePreInfoField = ({
                   countType: 'targetOpersCount',
                   rarityType: 'fourth',
                 });
-                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
+                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={targetOpersCount.fourth.toString()}
               max={targetLimit['fourth']}
