@@ -12,7 +12,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": true
         }
       ],
       "pickupDetails": {
@@ -42,7 +43,8 @@
           "currentQty": 0,
           "operatorType": "limited",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": true
         },
         {
           "operatorId": "b1c2d3e4-f5g6-7h8i-9j0k-1l2m3n4o5p6q",
@@ -50,7 +52,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         }
       ],
       "pickupDetails": {
@@ -80,7 +83,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": true
         }
       ],
       "pickupDetails": {
@@ -110,7 +114,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         },
         {
           "operatorId": "c1d2e3f4-g5h6-7i8j-9k0l-1m2zzzzz5q6r",
@@ -118,7 +123,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         },
         {
           "operatorId": "c1d2e3f4-g5h6-7i8j-9k0l-1m2sdfsddq6r",
@@ -126,7 +132,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         }
       ],
       "pickupDetails": {
@@ -156,7 +163,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": true
         }
       ],
       "pickupDetails": {
@@ -186,7 +194,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": true
         }
       ],
       "pickupDetails": {
@@ -216,7 +225,8 @@
           "currentQty": 0,
           "operatorType": "limited",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": true
         },
         {
           "operatorId": "czf2e3f4-g556-7i8j-9k0l-1m2n3o4p5q6r",
@@ -224,7 +234,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         }
       ],
       "pickupDetails": {
@@ -254,7 +265,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         },
         {
           "operatorId": "c1ggebf4-g5h6-7i8j-9k0l-1m2n3o4p5q6r",
@@ -262,7 +274,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         },
         {
           "operatorId": "c1xge3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r",
@@ -270,7 +283,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         },
         {
           "operatorId": "c1cce3f4-g5h6-7i8j-9k0l-1m2n3o4p5q6r",
@@ -278,7 +292,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         }
       ],
       "pickupDetails": {
@@ -308,7 +323,8 @@
           "currentQty": 0,
           "operatorType": "limited",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": true
         },
         {
           "operatorId": "c1d2e3f4-xxxx-7i8j-9k0l-1m2n3oxx5q6r",
@@ -316,7 +332,8 @@
           "currentQty": 0,
           "operatorType": "limited",
           "targetCount": 1,
-          "rarity": 5
+          "rarity": 5,
+          "isPityReward": false
         },
         {
           "operatorId": "c1dxxxf4-g5h6-7i8j-9k0l-1m2n3oxx5q6r",
@@ -324,7 +341,8 @@
           "currentQty": 0,
           "operatorType": "limited",
           "targetCount": 1,
-          "rarity": 5
+          "rarity": 5,
+          "isPityReward": false
         }
       ],
       "pickupDetails": {
@@ -354,7 +372,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": true
         }
       ],
       "pickupDetails": {
@@ -384,7 +403,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         },
         {
           "operatorId": "c1d2e3f4-vvvx-vv8j-9k0l-1m2n3oxx5q6r",
@@ -392,7 +412,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         },
         {
           "operatorId": "c1dxxxf4-g5h6-7dej-vvvl-1m2n3oxx5q6r",
@@ -400,7 +421,8 @@
           "currentQty": 0,
           "operatorType": "normal",
           "targetCount": 1,
-          "rarity": 6
+          "rarity": 6,
+          "isPityReward": false
         }
       ],
       "pickupDetails": {
