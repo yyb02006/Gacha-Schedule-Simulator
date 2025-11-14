@@ -4,18 +4,18 @@ import { optionButtonVariants, toOpacityZero } from '#/constants/variants';
 
 export default function AdjustmentButton({ onClick }: { onClick: () => void }) {
   const [isHover, setIsHover] = useState(false);
-  const [isClicked, setIsClicked] = useState(false);
+  const [isMouseDown, setIsMouseDown] = useState(false);
   const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
   return (
     <motion.button
-      onClick={onClick}
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      onMouseDown={() => setIsClicked(true)}
-      onMouseUp={() => setIsClicked(false)}
-      onMouseLeave={() => setIsClicked(false)}
-      onTapStart={() => setIsClicked(true)}
-      onTapCancel={() => setIsClicked(false)}
+      onMouseDown={() => setIsMouseDown(true)}
+      onMouseUp={() => setIsMouseDown(false)}
+      onMouseLeave={() => setIsMouseDown(false)}
+      onTapStart={() => setIsMouseDown(true)}
+      onTapCancel={() => setIsMouseDown(false)}
+      onClick={onClick}
       className="rounded-xl"
     >
       <motion.div
@@ -23,11 +23,11 @@ export default function AdjustmentButton({ onClick }: { onClick: () => void }) {
         variants={optionButtonVariants}
         viewport={{ once: true, amount: 0.5 }}
         custom={{
-          state: isFirstRenderOver ? 'normal' : 'initial',
           background: 'linear-gradient(135deg, #bb4d00, #ffb900)',
+          state: isFirstRenderOver ? 'normal' : 'initial',
           color: '#eaeaea',
         }}
-        animate={isClicked ? 'active' : isHover ? 'hover' : 'idle'}
+        animate={isMouseDown ? 'active' : isHover ? 'hover' : 'idle'}
         initial="exit"
         exit="exit"
         className="relative flex size-[44px] cursor-pointer items-center justify-between self-end rounded-xl p-2"
