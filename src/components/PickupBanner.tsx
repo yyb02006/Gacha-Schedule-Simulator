@@ -117,7 +117,10 @@ export const InsetNumberInput = ({
   animate = false,
 }: {
   children?: ReactNode;
-  onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
+  onInputBlur: (
+    e: FocusEvent<HTMLInputElement>,
+    forceUpdate: React.Dispatch<React.SetStateAction<string>>,
+  ) => void;
   currentValue: string;
   name: ReactNode;
   inputWidth?: string;
@@ -192,7 +195,7 @@ export const InsetNumberInput = ({
             }}
             onBlur={(e: FocusEvent<HTMLInputElement>) => {
               if (!e.currentTarget.value) return;
-              onInputBlur(e);
+              onInputBlur(e, setLocalValue);
             }}
             className={cls(inputWidth ?? 'w-8', 'relative h-full min-w-0 text-right')}
             max={max}
@@ -429,10 +432,13 @@ const SimplePreInfoField = ({
   ) => void;
 }) => {
   const {
-    pickupDetails: { simpleMode },
+    pickupDetails: {
+      simpleMode: { pickupOpersCount, targetOpersCount },
+    },
     id,
     additionalResource,
   } = pickupData;
+
   return (
     <div className="font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex flex-wrap justify-between gap-x-6 gap-y-3">
@@ -441,27 +447,35 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 6성"
               className="text-orange-400"
-              onInputBlur={(e) => {
+              onInputBlur={(e, forceUpdate) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.fifth === 0 && targetOpersCount.fourth === 0;
                 updateSimplePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
+                  count: hasNoTargetOperators ? 1 : count,
                   countType: 'pickupOpersCount',
                   rarityType: 'sixth',
                 });
+                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
               }}
-              currentValue={simpleMode.pickupOpersCount.sixth.toString()}
+              currentValue={pickupOpersCount.sixth.toString()}
               max={targetLimit['sixth']}
             />
             <InsetNumberInput
               name="목표 6성"
               className="text-orange-400"
-              onInputBlur={(e) => {
+              onInputBlur={(e, forceUpdate) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.fifth === 0 && targetOpersCount.fourth === 0;
                 updateSimplePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
+                  count: hasNoTargetOperators ? 1 : count,
                   countType: 'targetOpersCount',
                   rarityType: 'sixth',
                 });
+                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
               }}
-              currentValue={simpleMode.targetOpersCount.sixth.toString()}
+              currentValue={targetOpersCount.sixth.toString()}
               max={targetLimit['sixth']}
             />
           </div>
@@ -469,27 +483,35 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 5성"
               className="text-amber-400"
-              onInputBlur={(e) => {
+              onInputBlur={(e, forceUpdate) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fourth === 0;
                 updateSimplePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
+                  count: hasNoTargetOperators ? 1 : count,
                   countType: 'pickupOpersCount',
                   rarityType: 'fifth',
                 });
+                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
               }}
-              currentValue={simpleMode.pickupOpersCount.fifth.toString()}
+              currentValue={pickupOpersCount.fifth.toString()}
               max={targetLimit['fifth']}
             />
             <InsetNumberInput
               name="목표 5성"
               className="text-amber-400"
-              onInputBlur={(e) => {
+              onInputBlur={(e, forceUpdate) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fourth === 0;
                 updateSimplePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
+                  count: hasNoTargetOperators ? 1 : count,
                   countType: 'targetOpersCount',
                   rarityType: 'fifth',
                 });
+                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
               }}
-              currentValue={simpleMode.targetOpersCount.fifth.toString()}
+              currentValue={targetOpersCount.fifth.toString()}
               max={targetLimit['fifth']}
             />
           </div>
@@ -497,27 +519,35 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 4성"
               className="text-sky-500"
-              onInputBlur={(e) => {
+              onInputBlur={(e, forceUpdate) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fifth === 0;
                 updateSimplePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
+                  count: hasNoTargetOperators ? 1 : count,
                   countType: 'pickupOpersCount',
                   rarityType: 'fourth',
                 });
+                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
               }}
-              currentValue={simpleMode.pickupOpersCount.fourth.toString()}
+              currentValue={pickupOpersCount.fourth.toString()}
               max={targetLimit['fourth']}
             />
             <InsetNumberInput
               name="목표 4성"
               className="text-sky-500"
-              onInputBlur={(e) => {
+              onInputBlur={(e, forceUpdate) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fifth === 0;
                 updateSimplePickupCount({
-                  count: stringToNumber(e.currentTarget.value),
+                  count: hasNoTargetOperators ? 1 : count,
                   countType: 'targetOpersCount',
                   rarityType: 'fourth',
                 });
+                forceUpdate(hasNoTargetOperators ? '1' : count.toString());
               }}
-              currentValue={simpleMode.targetOpersCount.fourth.toString()}
+              currentValue={targetOpersCount.fourth.toString()}
               max={targetLimit['fourth']}
             />
           </div>
@@ -849,6 +879,8 @@ export default function PickupBanner({
     Object.values(operatorLimitByBannerType[gachaType]).reduce((a, b) => a + b, 0);
 
   const isViewRef = useRef(false);
+
+  // console.log(pickupData);
 
   useEffect(() => {
     if (!ref.current) return;
