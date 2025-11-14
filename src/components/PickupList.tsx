@@ -643,21 +643,9 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       const prevBanner = pickupDatas.find((pickupData) => pickupData.id === id);
       if (!prevBanner) return pickupDatas;
       if (isSimpleMode) {
-        const { targetOpersCount: prevTargetOpersCount } = prevBanner.pickupDetails.simpleMode;
-        const newPickupOpersCount = {
-          sixth: Math.min(
-            operatorLimitByBannerType[gachaType]['sixth'],
-            prevTargetOpersCount.sixth,
-          ),
-          fifth: Math.min(
-            operatorLimitByBannerType[gachaType]['fifth'],
-            prevTargetOpersCount.fifth,
-          ),
-          fourth: Math.min(
-            operatorLimitByBannerType[gachaType]['fourth'],
-            prevTargetOpersCount.fourth,
-          ),
-        };
+        const { targetOpersCount: prevTargetOpersCount, pickupOpersCount: prevPickupOpersCount } =
+          prevBanner.pickupDetails.simpleMode;
+        const newPickupOpersCount = operatorLimitByBannerType[gachaType];
         const newTargetOpersCount = {
           sixth: Math.min(newPickupOpersCount['sixth'], prevTargetOpersCount.sixth),
           fifth: Math.min(newPickupOpersCount['fifth'], prevTargetOpersCount.fifth),
