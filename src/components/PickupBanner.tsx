@@ -1081,11 +1081,11 @@ export default function PickupBanner({
         setIsAnimateLocked(false);
       }}
       className={cls(
-        'relative flex flex-col space-y-6 rounded-xl p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]',
+        'relative rounded-xl p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]',
       )}
     >
       <AnimatePresence>
-        <div key={id}>
+        <div key={id} className="relative flex flex-col space-y-6">
           <BannerHeader
             id={id}
             currentName={name}
