@@ -11,7 +11,13 @@ import {
 import DeleteButton from '#/components/buttons/DeleteButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import AddButton from '#/components/buttons/AddButton';
-import { clamp, cls, filterLimitArray, normalizeNumberString, stringToNumber } from '#/libs/utils';
+import {
+  clamp,
+  cls,
+  getOperatorsByRarity,
+  normalizeNumberString,
+  stringToNumber,
+} from '#/libs/utils';
 import React, {
   ActionDispatch,
   ChangeEvent,
@@ -34,7 +40,7 @@ import FoldButton from '#/components/buttons/MaximizeButton';
 import ChevronDown from '#/icons/ChevronDown.svg';
 import ChevronUp from '#/icons/ChevronUp.svg';
 import Tag from '#/icons/Tag.svg';
-import { operatorLimitByBannerType, rarities, rarityStrings } from '#/constants/variables';
+import { operatorLimitByBannerType, rarities } from '#/constants/variables';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -119,7 +125,7 @@ export const InsetNumberInput = ({
   children?: ReactNode;
   onInputBlur: (
     e: FocusEvent<HTMLInputElement>,
-    synceLocalValue: React.Dispatch<React.SetStateAction<string>>,
+    syncLocalValue: React.Dispatch<React.SetStateAction<string>>,
   ) => void;
   currentValue: string;
   name: ReactNode;
@@ -197,7 +203,7 @@ export const InsetNumberInput = ({
               if (!e.currentTarget.value) return;
               onInputBlur(e, setLocalValue);
             }}
-            className={cls(inputWidth ?? 'w-8', 'relative h-full min-w-0 text-right')}
+            className={cls('relative h-full min-w-0 text-right', inputWidth ?? 'w-8')}
             max={max}
             maxLength={maxLength}
             value={
@@ -256,9 +262,13 @@ const AdditionalResUntilBannerEnd = ({
 
 const BannerBadges = ({
   gachaType,
+  isSimpleMode,
+  pickupData,
   onBannerBadgeChange,
 }: {
   gachaType: GachaType;
+  isSimpleMode: boolean;
+  pickupData: Dummy;
   onBannerBadgeChange: (gachaType: GachaType) => void;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -305,7 +315,8 @@ const BannerBadges = ({
         onClose={() => {
           setIsModalOpen(false);
         }}
-        gachaType={gachaType}
+        isSimpleMode={isSimpleMode}
+        pickupData={pickupData}
         onEditConfirmClick={onBannerBadgeChange}
       />
     </>
@@ -320,6 +331,8 @@ const BannerHeader = ({
   gachaType,
   isMinimized,
   isActive,
+  isSimpleMode,
+  pickupData,
   dataLength,
   onNameBlur,
   onBannerDelete,
@@ -335,6 +348,8 @@ const BannerHeader = ({
   gachaType: GachaType;
   isMinimized: boolean;
   isActive: boolean;
+  isSimpleMode: boolean;
+  pickupData: Dummy;
   dataLength: number;
   onNameBlur: (e: FocusEvent<HTMLInputElement>) => void;
   onBannerDelete: () => void;
@@ -414,7 +429,12 @@ const BannerHeader = ({
             value={localValue}
             className="w-full"
           />
-          <BannerBadges gachaType={gachaType} onBannerBadgeChange={onBannerBadgeChange} />
+          <BannerBadges
+            gachaType={gachaType}
+            isSimpleMode={isSimpleMode}
+            pickupData={pickupData}
+            onBannerBadgeChange={onBannerBadgeChange}
+          />
         </div>
       </div>
     </div>
@@ -453,7 +473,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 6성"
               className="text-orange-400"
-              onInputBlur={(e, synceLocalValue) => {
+              onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.fifth === 0 && targetOpersCount.fourth === 0;
@@ -462,7 +482,7 @@ const SimplePreInfoField = ({
                   countType: 'pickupOpersCount',
                   rarityType: 'sixth',
                 });
-                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={pickupOpersCount.sixth.toString()}
               max={targetLimit['sixth']}
@@ -470,7 +490,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 6성"
               className="text-orange-400"
-              onInputBlur={(e, synceLocalValue) => {
+              onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.fifth === 0 && targetOpersCount.fourth === 0;
@@ -479,7 +499,7 @@ const SimplePreInfoField = ({
                   countType: 'targetOpersCount',
                   rarityType: 'sixth',
                 });
-                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={targetOpersCount.sixth.toString()}
               max={targetLimit['sixth']}
@@ -489,7 +509,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 5성"
               className="text-amber-400"
-              onInputBlur={(e, synceLocalValue) => {
+              onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fourth === 0;
@@ -498,7 +518,7 @@ const SimplePreInfoField = ({
                   countType: 'pickupOpersCount',
                   rarityType: 'fifth',
                 });
-                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={pickupOpersCount.fifth.toString()}
               max={targetLimit['fifth']}
@@ -506,7 +526,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 5성"
               className="text-amber-400"
-              onInputBlur={(e, synceLocalValue) => {
+              onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fourth === 0;
@@ -515,7 +535,7 @@ const SimplePreInfoField = ({
                   countType: 'targetOpersCount',
                   rarityType: 'fifth',
                 });
-                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={targetOpersCount.fifth.toString()}
               max={targetLimit['fifth']}
@@ -525,7 +545,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 4성"
               className="text-sky-500"
-              onInputBlur={(e, synceLocalValue) => {
+              onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fifth === 0;
@@ -534,7 +554,7 @@ const SimplePreInfoField = ({
                   countType: 'pickupOpersCount',
                   rarityType: 'fourth',
                 });
-                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={pickupOpersCount.fourth.toString()}
               max={targetLimit['fourth']}
@@ -542,7 +562,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 4성"
               className="text-sky-500"
-              onInputBlur={(e, synceLocalValue) => {
+              onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
                   count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fifth === 0;
@@ -551,7 +571,7 @@ const SimplePreInfoField = ({
                   countType: 'targetOpersCount',
                   rarityType: 'fourth',
                 });
-                synceLocalValue(hasNoTargetOperators ? '1' : count.toString());
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
               }}
               currentValue={targetOpersCount.fourth.toString()}
               max={targetLimit['fourth']}
@@ -596,18 +616,7 @@ const PreInfoField = ({
     firstSixthTry,
   } = pickupData;
 
-  const operatorsByRarity = operators.reduce<Record<OperatorRarityForString, Operator[]>>(
-    (acc, current) => {
-      acc[rarities[current.rarity]].push(current);
-      return acc;
-    },
-    {
-      sixth: [],
-      fifth: [],
-      fourth: [],
-    },
-  );
-
+  const operatorsByRarity = getOperatorsByRarity(operators);
   return (
     <div className="font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex w-full flex-wrap justify-between gap-x-6 gap-y-3">
@@ -902,26 +911,19 @@ export default function PickupBanner({
   bannerCount,
   isImageVisible,
 }: PickupBannerProps) {
-  // const isPresent = useIsPresent();
   const { gachaType, name, operators, id, image, active } = pickupData;
   const ref = useRef<HTMLDivElement>(null);
   const [isView, setIsView] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isAnimateLocked, setIsAnimateLocked] = useState(false);
-  const targetLimit = {
-    sixth: operatorLimitByBannerType[gachaType]['sixth'],
-    fifth: operatorLimitByBannerType[gachaType]['fifth'],
-    fourth: operatorLimitByBannerType[gachaType]['fourth'],
-  };
+  const targetLimit = operatorLimitByBannerType[gachaType];
 
   const isOperatorsFull =
     operators.length >=
     Object.values(operatorLimitByBannerType[gachaType]).reduce((a, b) => a + b, 0);
 
   const isViewRef = useRef(false);
-
-  // console.log(pickupData);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -1091,6 +1093,8 @@ export default function PickupBanner({
         isMinimized={isMinimized}
         index={index}
         isActive={active}
+        isSimpleMode={isSimpleMode}
+        pickupData={pickupData}
         dataLength={bannerCount}
         onBannerDelete={() => {
           deleteData({ target: 'banner' });
