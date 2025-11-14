@@ -20,6 +20,7 @@ import {
 } from '#/constants/variables';
 import {
   canHaveLimited,
+  filterLimitArray,
   getPercentileIndex,
   safeNumberOrZero,
   truncateToDecimals,
@@ -32,6 +33,7 @@ export type Operator = {
   operatorType: OperatorType;
   targetCount: number;
   rarity: OperatorRarity;
+  isPityReward: boolean;
 };
 
 export interface Dummy {
@@ -270,6 +272,9 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       }
       const { gachaType, pickupOpersCount, targetOpersCount } = action.payload;
       const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
+      const isSinglePityBanner =
+        gachaType === 'collab' || gachaType === 'limited' || gachaType === 'single';
+      const isDoublePityBanner = gachaType === 'rotation';
       const operators: Dummy['operators'] = [
         ...Array.from(
           { length: targetOpersCount.sixth },
@@ -284,6 +289,10 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
                   : 'normal',
               targetCount: 1,
               rarity: 6,
+              isPityReward:
+                (isSinglePityBanner && index < 1) || (isDoublePityBanner && index < 2)
+                  ? true
+                  : false,
             }) satisfies Operator,
         ),
         ...Array.from(
@@ -296,6 +305,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
               operatorType: 'normal',
               targetCount: 1,
               rarity: 5,
+              isPityReward: false,
             }) satisfies Operator,
         ),
         ...Array.from(
@@ -308,6 +318,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
               operatorType: 'normal',
               targetCount: 1,
               rarity: 4,
+              isPityReward: false,
             }) satisfies Operator,
         ),
       ];
@@ -368,6 +379,17 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
               ? 4
               : null;
       if (newRarity === null) return pickupDatas;
+      const currentPityRewardOpersLength = filterLimitArray(
+        currentBanner.operators,
+        ({ isPityReward }) => isPityReward,
+        2,
+      ).length;
+      const isSingleLimitPityEligible =
+        (gachaType === 'collab' || gachaType === 'limited') &&
+        currentPityRewardOpersLength < 1 &&
+        canHaveLimitedOperator;
+      const isSingleGachaEligible = gachaType === 'single' && currentPityRewardOpersLength < 1;
+      const isRotationGachaEligible = gachaType === 'rotation' && currentPityRewardOpersLength < 2;
       const newOperator: Operator = {
         name: `오퍼레이터 ${operatorCount + 1}`,
         operatorId: crypto.randomUUID(),
@@ -375,6 +397,11 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
         operatorType: canHaveLimitedOperator ? 'limited' : 'normal',
         rarity: newRarity,
         targetCount: 1,
+        isPityReward:
+          newRarity === 6 &&
+          (isSingleLimitPityEligible || isSingleGachaEligible || isRotationGachaEligible)
+            ? true
+            : false,
       };
       return modifyBannerDetails(id, (originalPickupData) => ({
         pickupDetails: {
@@ -539,42 +566,68 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       });
     }
     case 'updateOperatorDetails': {
-      const { id, operatorId, rarity } = action.payload;
+      const { id, operatorId, rarity, operatorType } = action.payload;
       return modifyBannerDetails(id, (pickupData) => {
+        const { operators, gachaType, pickupDetails } = pickupData;
         const prevOperator = pickupData.operators.find(
           (operator) => operator.operatorId === operatorId,
         );
         if (!prevOperator) return pickupData;
         const prevStringRarity = rarities[prevOperator.rarity];
+        const meetsLimitPityBanner = gachaType === 'collab' || gachaType === 'limited';
+        const currentOperatorType = operatorType || prevOperator.operatorType;
+        const currentOperatorRarity = rarity || prevOperator.rarity;
+
+        const newOperators = modifyOperatorDetails({
+          operatorId,
+          operators: pickupData.operators,
+          transform: () => ({
+            // 값이 undefined인 프로퍼티를 제외하고 새로운 객체 반환
+            ...Object.fromEntries(
+              Object.entries(action.payload).filter(([, value]) => value !== undefined),
+            ),
+          }),
+        });
+        const currentPityRewardOpersLength = filterLimitArray(
+          newOperators,
+          ({ isPityReward }) => isPityReward,
+          2,
+        ).length;
+        const currentIndex = newOperators.findIndex(
+          ({ operatorId: newOperatorId }) => newOperatorId === operatorId,
+        );
+
+        const isSingleLimitPityEligible =
+          (gachaType === 'collab' || gachaType === 'limited') &&
+          currentPityRewardOpersLength < 1 &&
+          currentOperatorType === 'limited';
+        const isSingleGachaEligible = gachaType === 'single' && currentPityRewardOpersLength < 1;
+        const isRotationGachaEligible =
+          gachaType === 'rotation' && currentPityRewardOpersLength < 2;
+        const isPityReward =
+          currentOperatorRarity === 6 &&
+          (isSingleLimitPityEligible || isSingleGachaEligible || isRotationGachaEligible);
+
+        newOperators[currentIndex].isPityReward = isPityReward;
+
         return {
           pickupDetails:
             rarity === undefined
-              ? pickupData.pickupDetails
+              ? pickupDetails
               : {
-                  ...pickupData.pickupDetails,
+                  ...pickupDetails,
                   targetOpersCount: {
-                    ...pickupData.pickupDetails.targetOpersCount,
-                    [prevStringRarity]:
-                      pickupData.pickupDetails.targetOpersCount[prevStringRarity] - 1,
-                    [rarities[rarity]]:
-                      pickupData.pickupDetails.targetOpersCount[rarities[rarity]] + 1,
+                    ...pickupDetails.targetOpersCount,
+                    [prevStringRarity]: pickupDetails.targetOpersCount[prevStringRarity] - 1,
+                    [rarities[rarity]]: pickupDetails.targetOpersCount[rarities[rarity]] + 1,
                   },
                   pickupOpersCount: {
-                    ...pickupData.pickupDetails.pickupOpersCount,
-                    [prevStringRarity]:
-                      pickupData.pickupDetails.pickupOpersCount[prevStringRarity] - 1,
-                    [rarities[rarity]]:
-                      pickupData.pickupDetails.pickupOpersCount[rarities[rarity]] + 1,
+                    ...pickupDetails.pickupOpersCount,
+                    [prevStringRarity]: pickupDetails.pickupOpersCount[prevStringRarity] - 1,
+                    [rarities[rarity]]: pickupDetails.pickupOpersCount[rarities[rarity]] + 1,
                   },
                 },
-          operators: modifyOperatorDetails({
-            operatorId,
-            operators: pickupData.operators,
-            transform: () =>
-              Object.fromEntries(
-                Object.entries(action.payload).filter(([, value]) => value !== undefined),
-              ),
-          }),
+          operators: newOperators,
         };
       });
     }
@@ -616,12 +669,26 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
             ...pickupData.operators
               .filter(({ rarity }) => rarity === 6)
               .slice(0, newTargetOpersCount.sixth)
-              .map((operator) =>
+              .map((operator, index) =>
                 !canHaveLimited(gachaType, 6)
-                  ? ({ ...operator, operatorType: 'normal' } satisfies Operator)
+                  ? ({
+                      ...operator,
+                      operatorType: 'normal',
+                      isPityReward:
+                        (gachaType === 'single' && index < 1) ||
+                        (gachaType === 'rotation' && index < 2)
+                          ? true
+                          : false,
+                    } satisfies Operator)
                   : {
                       ...operator,
                       operatorType: gachaType === 'collab' ? 'limited' : operator.operatorType,
+                      isPityReward:
+                        gachaType === 'collab'
+                          ? true
+                          : operator.operatorType === 'limited'
+                            ? true
+                            : false,
                     },
               ),
             ...pickupData.operators
@@ -677,12 +744,26 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
             ...pickupData.operators
               .filter(({ rarity }) => rarity === 6)
               .slice(0, newTargetOpersCount.sixth)
-              .map((operator) =>
+              .map((operator, index) =>
                 !canHaveLimited(gachaType, 6)
-                  ? ({ ...operator, operatorType: 'normal' } satisfies Operator)
+                  ? ({
+                      ...operator,
+                      operatorType: 'normal',
+                      isPityReward:
+                        (gachaType === 'single' && index < 1) ||
+                        (gachaType === 'rotation' && index < 2)
+                          ? true
+                          : false,
+                    } satisfies Operator)
                   : {
                       ...operator,
                       operatorType: gachaType === 'collab' ? 'limited' : operator.operatorType,
+                      isPityReward:
+                        gachaType === 'collab'
+                          ? true
+                          : operator.operatorType === 'limited'
+                            ? true
+                            : false,
                     },
               ),
             ...pickupData.operators

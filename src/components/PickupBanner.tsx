@@ -696,20 +696,18 @@ const OperatorBadges = ({
 
 const PickupOperatorDetail = ({
   operator,
-  isPityReward,
   gachaType,
   operators,
   onOperatorDelete,
   onChangeOperatorDetails,
 }: {
   operator: Operator;
-  isPityReward: boolean;
   gachaType: GachaType;
   operators: Operator[];
   onOperatorDelete: () => void;
   onChangeOperatorDetails: (payload: UpdateOperatorDetails) => void;
 }) => {
-  const { name, operatorId, currentQty, targetCount } = operator;
+  const { name, operatorId, currentQty, targetCount, isPityReward } = operator;
   const [localName, setLocalName] = useState(name);
   const [localQty, setLocalQty] = useState(currentQty.toString());
   return (
@@ -1079,31 +1077,9 @@ export default function PickupBanner({
               </div>
               <div className="space-y-6 lg:space-y-4">
                 {operators.map((operator) => {
-                  const limitedInSixths = operators.find(
-                    ({ rarity, operatorType }) => rarity === 6 && operatorType === 'limited',
-                  );
-                  const limitedSixthId = operators.find(
-                    ({ rarity, operatorType }) => rarity === 6 && operatorType === 'limited',
-                  )?.operatorId;
-                  const normalSixthId = operators.find(({ rarity }) => rarity === 6)?.operatorId;
-                  const twoSixthsWithRotation = filterLimitArray(
-                    operators,
-                    ({ rarity }) => rarity === 6,
-                    2,
-                  ).some(({ operatorId }) => operatorId === operator.operatorId);
-
-                  const isPityReward =
-                    gachaType === 'rotation'
-                      ? twoSixthsWithRotation
-                      : gachaType === 'single'
-                        ? normalSixthId === operator.operatorId
-                        : gachaType === 'collab' || gachaType === 'limited'
-                          ? limitedSixthId === operator.operatorId
-                          : false;
                   return (
                     <PickupOperatorDetail
                       key={operator.operatorId}
-                      isPityReward={isPityReward}
                       operator={operator}
                       operators={operators}
                       gachaType={gachaType}
