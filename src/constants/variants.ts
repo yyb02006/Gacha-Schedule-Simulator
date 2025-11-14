@@ -216,8 +216,15 @@ export const gachaBannerOptionCardVariants: Variants = {
 };
 
 export const shakingVariants: Variants = {
-  shake: {
+  shake: (custom: { shakingBackground: string }) => ({
     x: [0, -5.7, 5.7, -4.2, 4.2, -2.1, 2.1, 0],
-    transition: { duration: 0.5, ease: 'easeOut' },
-  },
+    background: custom.shakingBackground,
+    color: '#eaeaea',
+    transition: {
+      duration: 0.5,
+      ease: 'easeOut',
+      background: { duration: 0 },
+      color: { duration: 0 },
+    },
+  }),
 };
