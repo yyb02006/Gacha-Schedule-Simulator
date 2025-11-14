@@ -9,7 +9,7 @@ import { useIsMount } from '#/hooks/useIsMount';
 import Delete from '#/icons/Delete.svg';
 import DeleteCap from '#/icons/DeleteCap.svg';
 
-const shaking45Variants: Variants = {
+const shakingVariants: Variants = {
   shake: {
     x: [0, -5.7, 5.7, -4.2, 4.2, -2.1, 2.1, 0],
     transition: { duration: 0.5, ease: 'easeOut' },
@@ -45,7 +45,7 @@ export default function DeleteButton({
       onMouseLeave={() => setIsClicked(false)}
       onTapStart={() => setIsClicked(true)}
       onTapCancel={() => setIsClicked(false)}
-      variants={{ ...smallButtonVariants, ...shaking45Variants }}
+      variants={{ ...smallButtonVariants, ...shakingVariants }}
       viewport={{ once: true, amount: 0.5 }}
       initial="idle"
       animate={isClicked ? 'active' : isShaking ? 'shake' : isHover ? 'hover' : 'idle'}
