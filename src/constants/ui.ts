@@ -12,7 +12,7 @@ export const gachaTypeButtons: GachaTypeButton[] = [
     hoverBackground: 'linear-gradient(155deg, #1447e6, #51a2ff)',
   },
   {
-    name: '일반',
+    name: '로테이션',
     type: 'rotation',
     hoverBackground: 'linear-gradient(155deg, #7008e7, #a684ff)',
   },
