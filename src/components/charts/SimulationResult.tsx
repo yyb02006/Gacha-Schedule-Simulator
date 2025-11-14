@@ -60,7 +60,7 @@ const SimulationResult = forwardRef<
   HTMLDivElement,
   {
     result: GachaSimulationMergedResult | null;
-    name: string;
+    name?: string;
     id?: string;
   }
 >(({ result, name, id }, ref) => {

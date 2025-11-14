@@ -204,8 +204,8 @@ const BannerSuccessTrialCounts = forwardRef<
     bannerResult: BannerResult;
     isTrySim: boolean;
     simulationTry: number;
-    name: string;
-    id: string;
+    name?: string;
+    id?: string;
     chartHeight?: string;
     brushHeight?: string;
     enableBrush?: boolean;

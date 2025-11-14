@@ -15,7 +15,7 @@ export default function ChartWrapper({
 }: {
   children: ReactNode;
   header: ReactNode;
-  name: string;
+  name?: string;
   id?: string;
   className?: string;
   chartRef?: Ref<HTMLDivElement>;

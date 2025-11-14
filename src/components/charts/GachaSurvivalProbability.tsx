@@ -60,8 +60,8 @@ const GachaSurvivalProbability = forwardRef<
   HTMLDivElement,
   {
     result: GachaSimulationMergedResult | null;
-    name: string;
-    id: string;
+    name?: string;
+    id?: string;
     chartHeight?: string;
     brushHeight?: string;
     enableBrush?: boolean;

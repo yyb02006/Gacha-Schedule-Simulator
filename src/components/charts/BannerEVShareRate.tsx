@@ -123,8 +123,8 @@ const BannerEVShareRate = forwardRef<
   HTMLDivElement,
   {
     result: GachaSimulationMergedResult | null;
-    name: string;
-    id: string;
+    name?: string;
+    id?: string;
     isColspanTwo: boolean;
   }
 >(({ result, name, id, isColspanTwo }, ref) => {
