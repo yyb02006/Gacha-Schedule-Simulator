@@ -815,6 +815,7 @@ const contractDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: false,
     },
     {
       operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1msszzzz5q6r',
@@ -823,6 +824,7 @@ const contractDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: false,
     },
     {
       operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2sgdfddq6r',
@@ -831,6 +833,7 @@ const contractDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: false,
     },
     {
       operatorId: 'c1dxxxf4-gdd6-7i8j-9k0l-1m2sdfsddq6r',
@@ -839,6 +842,7 @@ const contractDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: false,
     },
   ],
   pickupDetails: {
@@ -878,6 +882,7 @@ const orientDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: false,
     },
     {
       operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2zzzzz5q6r',
@@ -886,6 +891,7 @@ const orientDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: false,
     },
     {
       operatorId: 'c1d2e3f4-g5h6-7i8j-9k0l-1m2sdfsddq6r',
@@ -894,6 +900,7 @@ const orientDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: false,
     },
   ],
   pickupDetails: {
@@ -933,6 +940,7 @@ const collabDummy: Dummy = {
       operatorType: 'limited',
       targetCount: 1,
       rarity: 6,
+      isPityReward: true,
     },
     {
       operatorId: 'c1d2e3f4-xxxx-7i8j-9k0l-1m2n3oxx5q6r',
@@ -941,6 +949,7 @@ const collabDummy: Dummy = {
       operatorType: 'limited',
       targetCount: 1,
       rarity: 5,
+      isPityReward: false,
     },
     {
       operatorId: 'c1dxxxf4-g5h6-7i8j-9k0l-1m2n3oxx5q6r',
@@ -949,6 +958,7 @@ const collabDummy: Dummy = {
       operatorType: 'limited',
       targetCount: 1,
       rarity: 5,
+      isPityReward: false,
     },
   ],
   pickupDetails: {
@@ -988,6 +998,7 @@ const limitedDummy: Dummy = {
       operatorType: 'limited',
       targetCount: 1,
       rarity: 6,
+      isPityReward: true,
     },
     {
       operatorId: 'czf2e3f4-g556-7i8j-9k0l-1m2n3o4ddd6r',
@@ -996,6 +1007,7 @@ const limitedDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: false,
     },
   ],
   pickupDetails: {
@@ -1035,6 +1047,7 @@ const singleDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: true,
     },
   ],
   pickupDetails: {
@@ -1075,6 +1088,7 @@ const rotationDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 6,
       rarity: 6,
+      isPityReward: true,
     },
     {
       operatorId: 'b1c2d3e4-f5g6-7h8i-9j0k-1ddm3n4o5p6q',
@@ -1083,6 +1097,7 @@ const rotationDummy: Dummy = {
       operatorType: 'normal',
       targetCount: 1,
       rarity: 6,
+      isPityReward: true,
     },
   ],
   pickupDetails: {
