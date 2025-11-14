@@ -3,7 +3,7 @@ import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/modals/Modal';
 import { InsetNumberInput } from '#/components/PickupBanner';
 import { Dummy, ExtractPayloadFromAction, Operator } from '#/components/PickupList';
-import { BannerBadgeProps, gachaTypeButtons } from '#/constants/ui';
+import { BannerBadgeProps, gachaTypeButtons, rarityColor } from '#/constants/ui';
 import {
   cardVariants,
   fontPop,
@@ -11,8 +11,8 @@ import {
   toggleButtonVariants,
   toOpacityZero,
 } from '#/constants/variants';
-import { clamp, cls, normalizeNumberString } from '#/libs/utils';
-import { GachaType } from '#/types/types';
+import { cls, stringToNumber } from '#/libs/utils';
+import { GachaType, OperatorRarity } from '#/types/types';
 import { motion, useMotionValue } from 'motion/react';
 import { ChangeEvent, useEffect, useReducer, useRef, useState } from 'react';
 import SimpleBar from 'simplebar-react';
@@ -22,6 +22,7 @@ import Image from 'next/image';
 import Badge from '#/components/Badge';
 import { useResizeDragToggle } from '#/hooks/useResizeDragToggle';
 import { animate } from 'motion';
+import { operatorLimitByBannerType, rarities } from '#/constants/variables';
 
 const CustomModalContents = ({
   modalState,
@@ -29,12 +30,14 @@ const CustomModalContents = ({
   onTypeClick,
 }: {
   modalState: ModalState;
-  onPickupCountChange: (
-    e: ChangeEvent<HTMLInputElement>,
-    countType: 'pickupOpersCount' | 'targetOpersCount',
-  ) => void;
+  onPickupCountChange: (payload: {
+    count: number;
+    countType: 'pickupOpersCount' | 'targetOpersCount';
+    rarity: OperatorRarity;
+  }) => void;
   onTypeClick: (type: GachaType) => void;
 }) => {
+  const targetLimit = operatorLimitByBannerType[modalState.gachaType];
   return (
     <>
       <div className="flex flex-wrap gap-4">
@@ -51,23 +54,35 @@ const CustomModalContents = ({
           />
         ))}
       </div>
-      <div className="flex gap-x-6">
-        <InsetNumberInput
-          name="픽업 6성"
-          className="text-sm text-sky-500"
-          onInputBlur={(e: ChangeEvent<HTMLInputElement>) => {
-            onPickupCountChange(e, 'pickupOpersCount');
-          }}
-          currentValue={modalState.pickupOpersCount.sixth.toString()}
-        />
-        <InsetNumberInput
-          name="목표 6성"
-          className="text-sm text-amber-400"
-          onInputBlur={(e: ChangeEvent<HTMLInputElement>) => {
-            onPickupCountChange(e, 'targetOpersCount');
-          }}
-          currentValue={modalState.targetOpersCount.sixth.toString()}
-        />
+      <div className="flex flex-col gap-y-8">
+        {([6, 5, 4] as const).map((rarity, index) => (
+          <div key={`${rarity}${index}`} className="flex gap-6">
+            {(['pickupOpersCount', 'targetOpersCount'] as const).map((countType) => (
+              <InsetNumberInput
+                key={`${rarity}${countType}`}
+                name={`${countType === 'pickupOpersCount' ? '픽업' : '목표'} ${rarity}성`}
+                className={cls(rarityColor[rarities[rarity]].textColor, 'text-sm')}
+                onInputBlur={(e: ChangeEvent<HTMLInputElement>, syncLocalValue) => {
+                  const value = stringToNumber(e.currentTarget.value);
+                  const { targetOpersCount } = modalState;
+                  const otherRarities = Object.entries(targetOpersCount)
+                    .filter(([key]) => key !== rarities[rarity])
+                    .map(([_, value]) => value) as OperatorRarity[];
+                  const hasNoTargetOperators =
+                    value === 0 &&
+                    targetOpersCount[rarities[otherRarities[0]]] === 0 &&
+                    targetOpersCount[rarities[otherRarities[1]]] === 0;
+                  const count = hasNoTargetOperators ? 1 : value;
+                  onPickupCountChange({ count, countType, rarity });
+                  syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+                }}
+                max={targetLimit[rarities[rarity]]}
+                currentValue={modalState[countType][rarities[rarity]].toString()}
+                inputWidth="w-full min-w-8"
+              />
+            ))}
+          </div>
+        ))}
       </div>
     </>
   );
@@ -83,13 +98,20 @@ type ModalAction =
       payload: {
         count: number;
         countType: 'pickupOpersCount' | 'targetOpersCount';
+        rarity: OperatorRarity;
       };
     };
 
+const initialGachaType: GachaType = 'limited';
+
 const initialState: ModalState = {
-  gachaType: 'limited',
-  pickupOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
-  targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
+  gachaType: initialGachaType,
+  pickupOpersCount: operatorLimitByBannerType[initialGachaType],
+  targetOpersCount: {
+    sixth: operatorLimitByBannerType[initialGachaType].sixth,
+    fourth: 0,
+    fifth: 0,
+  },
 };
 
 const reducer = (
@@ -106,50 +128,38 @@ const reducer = (
     }
     case 'updateType': {
       const { gachaType } = action.payload;
-      const commonOpersCount =
-        gachaType === 'limited' || gachaType === 'single'
-          ? {
-              pickupOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
-              targetOpersCount: { sixth: 2, fourth: 0, fifth: 0 },
-            }
-          : gachaType === 'rotation' || gachaType === 'collab'
-            ? {
-                pickupOpersCount: { sixth: 1, fourth: 0, fifth: 0 },
-                targetOpersCount: { sixth: 1, fourth: 0, fifth: 0 },
-              }
-            : gachaType === 'orient'
-              ? {
-                  pickupOpersCount: { sixth: 3, fourth: 0, fifth: 0 },
-                  targetOpersCount: { sixth: 3, fourth: 0, fifth: 0 },
-                }
-              : {
-                  pickupOpersCount: { sixth: 4, fourth: 0, fifth: 0 },
-                  targetOpersCount: { sixth: 4, fourth: 0, fifth: 0 },
-                };
+      const baseOperCount = {
+        pickupOpersCount: operatorLimitByBannerType[gachaType],
+        targetOpersCount: {
+          sixth: operatorLimitByBannerType[gachaType].sixth,
+          fourth: 0,
+          fifth: 0,
+        },
+      };
       return {
         gachaType,
-        ...commonOpersCount,
+        ...baseOperCount,
       };
     }
     case 'updatePickupCount': {
-      const { count, countType } = action.payload;
-      const isTargetOpersCountExceeded = count > state[countType]['sixth'];
-      const isPickupOpersCountDeficit = count < state[countType]['sixth'];
+      const { count, countType, rarity } = action.payload;
+      const isTargetOpersCountExceeded = count > state.pickupOpersCount[rarities[rarity]];
+      const isPickupOpersCountDeficit = count < state.targetOpersCount[rarities[rarity]];
       const oppositeCountType: typeof countType =
         countType === 'pickupOpersCount' ? 'targetOpersCount' : 'pickupOpersCount';
       const newOppositeCount = {
-        sixth:
+        [rarities[rarity]]:
           countType === 'pickupOpersCount'
             ? isPickupOpersCountDeficit
               ? count
-              : state.targetOpersCount.sixth
+              : state.targetOpersCount[rarities[rarity]]
             : isTargetOpersCountExceeded
               ? count
-              : state.pickupOpersCount.sixth,
+              : state.pickupOpersCount[rarities[rarity]],
       };
       return {
         ...state,
-        [countType]: { ...state[countType], sixth: count },
+        [countType]: { ...state[countType], [rarities[rarity]]: count },
         [oppositeCountType]: { ...state[oppositeCountType], ...newOppositeCount },
       };
     }
@@ -375,17 +385,14 @@ export default function BannerAddModal({
 }) {
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [modalState, dispatch] = useReducer(reducer, initialState);
-  const updatePickupCount = (
-    e: ChangeEvent<HTMLInputElement>,
-    countType: 'pickupOpersCount' | 'targetOpersCount',
-  ) => {
-    const { value } = e.currentTarget;
-    const numberString = normalizeNumberString(value);
-    if (numberString === undefined) return;
-    const normalizedNumber = Math.floor(clamp(parseFloat(numberString), 0));
+  const updatePickupCount = (payload: {
+    count: number;
+    countType: 'pickupOpersCount' | 'targetOpersCount';
+    rarity: OperatorRarity;
+  }) => {
     dispatch({
       type: 'updatePickupCount',
-      payload: { count: normalizedNumber, countType },
+      payload,
     });
   };
   const updateType = (gachaType: GachaType) => {
