@@ -60,7 +60,7 @@ export const BannerBadgeProps = {
   },
   rotation: {
     id: 'rotation',
-    props: { name: '일반 배너', color: 'border-violet-400 text-violet-400' },
+    props: { name: '로테이션 배너', color: 'border-violet-400 text-violet-400' },
   },
   contract: {
     id: 'contract',
