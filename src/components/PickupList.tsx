@@ -1074,7 +1074,7 @@ export default function PickupList() {
                 index={index}
                 isSimpleMode={isSimpleMode}
                 isTrySim={isTrySim}
-                bannersLength={pickupDatas.length}
+                bannerCount={pickupDatas.length}
                 isImageVisible={options.showBannerImage}
               />
             ))}

@@ -320,6 +320,7 @@ const BannerHeader = ({
   gachaType,
   isMinimized,
   isActive,
+  dataLength,
   onNameBlur,
   onBannerDelete,
   onBannerBadgeChange,
@@ -334,6 +335,7 @@ const BannerHeader = ({
   gachaType: GachaType;
   isMinimized: boolean;
   isActive: boolean;
+  dataLength: number;
   onNameBlur: (e: FocusEvent<HTMLInputElement>) => void;
   onBannerDelete: () => void;
   onBannerBadgeChange: (gachaType: GachaType) => void;
@@ -370,7 +372,11 @@ const BannerHeader = ({
             }}
           />
         </div>
-        <DeleteButton onDelete={onBannerDelete} className="shrink-0" />
+        <DeleteButton
+          onDelete={onBannerDelete}
+          isDeletePrevent={dataLength === 1}
+          className="shrink-0"
+        />
       </div>
       <div className="flex grow gap-4">
         <SmallButton
@@ -774,7 +780,11 @@ const PickupOperatorDetail = ({
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
       <div className="flex grow gap-6">
-        <DeleteButton onDelete={onOperatorDelete} className="-mr-2" />
+        <DeleteButton
+          onDelete={onOperatorDelete}
+          isDeletePrevent={operators.length === 1}
+          className="-mr-2"
+        />
         <div className="flex grow items-center rounded-lg py-2 pr-2 pl-4 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
           <input
             type="text"
@@ -879,7 +889,7 @@ interface PickupBannerProps {
   index: number;
   isTrySim: boolean;
   isSimpleMode: boolean;
-  bannersLength: number;
+  bannerCount: number;
   isImageVisible: boolean;
 }
 
@@ -889,7 +899,7 @@ export default function PickupBanner({
   index,
   isTrySim,
   isSimpleMode,
-  bannersLength,
+  bannerCount,
   isImageVisible,
 }: PickupBannerProps) {
   // const isPresent = useIsPresent();
@@ -1010,7 +1020,7 @@ export default function PickupBanner({
   };
 
   const updateIndex = (direction: 'increase' | 'decrease') => {
-    if (direction === 'increase' && index < bannersLength - 1) {
+    if (direction === 'increase' && index < bannerCount - 1) {
       dispatch({ type: 'swapIndex', payload: { fromIndex: index, toIndex: index + 1 } });
     } else if (direction === 'decrease' && index > 0) {
       dispatch({ type: 'swapIndex', payload: { fromIndex: index, toIndex: index - 1 } });
@@ -1081,6 +1091,7 @@ export default function PickupBanner({
         isMinimized={isMinimized}
         index={index}
         isActive={active}
+        dataLength={bannerCount}
         onBannerDelete={() => {
           deleteData({ target: 'banner' });
         }}

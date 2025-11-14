@@ -2,28 +2,42 @@
 
 import { SizeClass } from '#/types/types';
 import { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, Variants } from 'motion/react';
 import { smallButtonVariants } from '#/constants/variants';
 import { cls } from '#/libs/utils';
 import { useIsMount } from '#/hooks/useIsMount';
 import Delete from '#/icons/Delete.svg';
 import DeleteCap from '#/icons/DeleteCap.svg';
 
+const shaking45Variants: Variants = {
+  shake: {
+    x: [0, -5.7, 5.7, -4.2, 4.2, -2.1, 2.1, 0],
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
+};
+
 export default function DeleteButton({
   onDelete,
+  isDeletePrevent,
   size = 'size-[44px]',
   className = '',
 }: {
   onDelete: () => void;
+  isDeletePrevent?: boolean;
   size?: SizeClass;
   className?: string;
 }) {
   const [isHover, setIsHover] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const isMount = useIsMount();
   return (
     <motion.button
-      onClick={onDelete}
+      onClick={() => {
+        if (isDeletePrevent) setIsShaking(true);
+        if (isShaking || isDeletePrevent) return;
+        onDelete();
+      }}
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
       onMouseDown={() => setIsClicked(true)}
@@ -31,14 +45,19 @@ export default function DeleteButton({
       onMouseLeave={() => setIsClicked(false)}
       onTapStart={() => setIsClicked(true)}
       onTapCancel={() => setIsClicked(false)}
-      variants={smallButtonVariants}
+      variants={{ ...smallButtonVariants, ...shaking45Variants }}
       viewport={{ once: true, amount: 0.5 }}
       initial="idle"
-      animate={isClicked ? 'active' : isHover ? 'hover' : 'idle'}
+      animate={isClicked ? 'active' : isShaking ? 'shake' : isHover ? 'hover' : 'idle'}
       custom={{
         state: isMount ? 'normal' : 'initial',
         background: 'linear-gradient(135deg, #bd1b36, #ff637e)',
         color: '#eaeaea',
+      }}
+      onAnimationComplete={() => {
+        if (isShaking) {
+          setIsShaking(false);
+        }
       }}
       aria-pressed={isClicked}
       className={cls(size, className, 'cursor-pointer rounded-xl p-1 text-[#ff637e]')}
