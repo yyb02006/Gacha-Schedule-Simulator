@@ -17,11 +17,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
         "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
         "pickupChance": 50,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
           "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 }
         }
       },
@@ -57,11 +57,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 2, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 2, "fifth": 1, "fourth": 0 },
         "targetOpersCount": { "sixth": 2, "fifth": 0, "fourth": 0 },
         "pickupChance": 70,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 2, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 2, "fifth": 1, "fourth": 0 },
           "targetOpersCount": { "sixth": 2, "fifth": 0, "fourth": 0 }
         }
       },
@@ -88,11 +88,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
         "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
         "pickupChance": 50,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
           "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 }
         }
       },
@@ -137,11 +137,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 3, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 3, "fifth": 3, "fourth": 0 },
         "targetOpersCount": { "sixth": 3, "fifth": 0, "fourth": 0 },
         "pickupChance": 100,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 3, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 3, "fifth": 3, "fourth": 0 },
           "targetOpersCount": { "sixth": 3, "fifth": 0, "fourth": 0 }
         }
       },
@@ -168,11 +168,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
         "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
         "pickupChance": 50,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
           "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 }
         }
       },
@@ -199,11 +199,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
         "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
         "pickupChance": 50,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
           "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 }
         }
       },
@@ -239,11 +239,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 2, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 2, "fifth": 1, "fourth": 0 },
         "targetOpersCount": { "sixth": 2, "fifth": 0, "fourth": 0 },
         "pickupChance": 70,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 2, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 2, "fifth": 1, "fourth": 0 },
           "targetOpersCount": { "sixth": 2, "fifth": 0, "fourth": 0 }
         }
       },
@@ -297,11 +297,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 4, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 4, "fifth": 6, "fourth": 0 },
         "targetOpersCount": { "sixth": 4, "fifth": 0, "fourth": 0 },
         "pickupChance": 100,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 4, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 4, "fifth": 6, "fourth": 0 },
           "targetOpersCount": { "sixth": 4, "fifth": 0, "fourth": 0 }
         }
       },
@@ -377,11 +377,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
         "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
         "pickupChance": 50,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 1, "fifth": 2, "fourth": 1 },
           "targetOpersCount": { "sixth": 1, "fifth": 0, "fourth": 0 }
         }
       },
@@ -426,11 +426,11 @@
         }
       ],
       "pickupDetails": {
-        "pickupOpersCount": { "sixth": 3, "fifth": 0, "fourth": 0 },
+        "pickupOpersCount": { "sixth": 3, "fifth": 3, "fourth": 0 },
         "targetOpersCount": { "sixth": 3, "fifth": 0, "fourth": 0 },
         "pickupChance": 100,
         "simpleMode": {
-          "pickupOpersCount": { "sixth": 3, "fifth": 0, "fourth": 0 },
+          "pickupOpersCount": { "sixth": 3, "fifth": 3, "fourth": 0 },
           "targetOpersCount": { "sixth": 3, "fifth": 0, "fourth": 0 }
         }
       },
