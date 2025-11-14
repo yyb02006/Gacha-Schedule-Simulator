@@ -2,19 +2,12 @@
 
 import { SizeClass } from '#/types/types';
 import { useState } from 'react';
-import { motion, Variants } from 'motion/react';
-import { smallButtonVariants } from '#/constants/variants';
+import { motion } from 'motion/react';
+import { shakingVariants, smallButtonVariants } from '#/constants/variants';
 import { cls } from '#/libs/utils';
 import { useIsMount } from '#/hooks/useIsMount';
 import Delete from '#/icons/Delete.svg';
 import DeleteCap from '#/icons/DeleteCap.svg';
-
-const shakingVariants: Variants = {
-  shake: {
-    x: [0, -5.7, 5.7, -4.2, 4.2, -2.1, 2.1, 0],
-    transition: { duration: 0.5, ease: 'easeOut' },
-  },
-};
 
 export default function DeleteButton({
   onDelete,
