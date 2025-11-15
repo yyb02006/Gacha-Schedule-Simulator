@@ -39,7 +39,7 @@ interface SimulationResult {
     simulationTry: number;
     simulationSuccess: number;
     totalGachaRuns: number;
-    pityRewardObtained: number;
+    anyPityRewardObtained: number;
     initialResource: number;
     isTrySim: boolean;
     isSimpleMode: boolean;
@@ -53,7 +53,7 @@ interface SimulationResult {
     bannerTotalGachaRuns: number;
     bannerWinGachaRuns: number;
     bannerHistogram: number[];
-    pityRewardObtained: number;
+    anyPityRewardObtained: number;
     actualEntryCount: number;
     bannerStartingCurrency: number;
     additionalResource: number;
@@ -91,7 +91,7 @@ interface BannerResult {
   operators: Record<OperatorRarityForString, OperatorResult[]>;
   statistics: Record<OperatorRarityForString, Statistics>;
   bannerGachaRuns: number;
-  isPityRewardObtained: boolean;
+  isAnyPityRewardObtained: boolean;
   failure: 'currency' | 'limit' | null;
 }
 
@@ -113,7 +113,7 @@ interface RollResult {
   isSuccessOnThisTry: boolean;
   isPickupObtained: boolean;
   isTargetObtained: boolean;
-  isPityRewardObtained: boolean;
+  isAnyPityRewardObtained: boolean;
 }
 
 const makeStatistics = (): Statistics => ({
@@ -187,13 +187,14 @@ const executePickupRoll = ({
     isSuccessOnThisTry: false,
     isPickupObtained: false,
     isTargetObtained: false,
-    isPityRewardObtained: false,
+    isAnyPityRewardObtained: false,
   };
   if (isPityReached && pityRewardOperators) {
     // 천장일 시
     logging && console.log('천장');
     // 이미 획득한 천장보상 제외하고 획득
-    rollResult.isPityRewardObtained = true;
+    rollResult.isAnyPityRewardObtained = true;
+    rollResult.isPickupObtained = true;
     if (pityRewardOperators.length > 0) {
       const pityRoll = Math.random() * 100;
       const PickupChanceByEachReward = safeNumberOrZero(100 / pityRewardOperators.length);
@@ -254,7 +255,7 @@ const updateResult = ({
 }) => {
   const currentOperators = result.operators[stringRarity];
   const currentStatistics = result.statistics[stringRarity];
-  if (rollResult.isPityRewardObtained) result.isPityRewardObtained = true;
+  if (rollResult.isAnyPityRewardObtained) result.isAnyPityRewardObtained = true;
   if (rollResult.obtainedOperator) {
     const { index } = rollResult.obtainedOperator;
     currentOperators[index] = rollResult.obtainedOperator;
@@ -301,7 +302,7 @@ const gachaRateSimulate = ({
       simulationTry,
       simulationSuccess: 0,
       totalGachaRuns: 0,
-      pityRewardObtained: 0,
+      anyPityRewardObtained: 0,
       initialResource,
       isTrySim,
       isSimpleMode,
@@ -315,7 +316,7 @@ const gachaRateSimulate = ({
       bannerTotalGachaRuns: 0,
       bannerWinGachaRuns: 0,
       bannerHistogram: [],
-      pityRewardObtained: 0,
+      anyPityRewardObtained: 0,
       actualEntryCount: 0,
       bannerStartingCurrency: 0,
       currencyShortageFailure: 0,
@@ -452,7 +453,7 @@ const gachaRateSimulate = ({
         operators: targetOperators,
         statistics: { sixth: makeStatistics(), fifth: makeStatistics(), fourth: makeStatistics() },
         bannerGachaRuns: 0,
-        isPityRewardObtained: false,
+        isAnyPityRewardObtained: false,
         failure: null,
       };
       const pityRewardOperator = result.operators.sixth.find(({ isPityReward }) => isPityReward);
@@ -509,7 +510,7 @@ const gachaRateSimulate = ({
           sixStats.pickupObtained++;
           sixStats.targetObtained++;
           sixStats.totalObtained++;
-          result.isPityRewardObtained = true;
+          result.isAnyPityRewardObtained = true;
           if (pityRewardOperator) {
             pityRewardOperator.isFirstObtained = true;
             pityRewardOperator.currentCount++;
@@ -569,13 +570,12 @@ const gachaRateSimulate = ({
                 break;
               case 'rotation':
                 {
-                  const pityRewardOperators = targetOperators.filter(
-                    ({ isFirstObtained, isPityReward }) => !isFirstObtained && isPityReward,
-                  );
                   const pityObtainedCount = simulationMetrics.pityRewardObtainedCount;
+                  const pityRewardOperators = targetOperators.filter(
+                    ({ isPityReward }) => isPityReward,
+                  );
                   const isRotationPityReached =
-                    pityRewardOperators.length > 0 &&
-                    ((i > 149 && pityObtainedCount < 1) || (i > 299 && pityObtainedCount < 2));
+                    (i > 149 && pityObtainedCount < 1) || (i > 299 && pityObtainedCount < 2);
                   const rollResult = executePickupRoll({
                     targetOperators,
                     isPityReached: isRotationPityReached,
@@ -763,9 +763,9 @@ const gachaRateSimulate = ({
       } else if (result.failure === 'limit') {
         currentBanner.maxAttemptsFailure++;
       }
-      if (result.isPityRewardObtained) {
-        currentBanner.pityRewardObtained++;
-        simulationResult.total.pityRewardObtained++;
+      if (result.isAnyPityRewardObtained) {
+        currentBanner.anyPityRewardObtained++;
+        simulationResult.total.anyPityRewardObtained++;
       }
       currentBanner.bannerTotalGachaRuns += result.bannerGachaRuns;
       const rarityStrings = ['sixth', 'fifth', 'fourth'] as const;
@@ -787,7 +787,7 @@ const gachaRateSimulate = ({
   }
   /* for (let bi = 0; bi < simulationResult.perBanner.length; bi++) {
     simulationResult.total.totalGachaRuns += simulationResult.perBanner[bi].bannerGachaRuns;
-    simulationResult.total.pityRewardObtained += simulationResult.perBanner[bi].pityRewardObtained;
+    simulationResult.total.anyPityRewardObtained += simulationResult.perBanner[bi].anyPityRewardObtained;
   } */
   return simulationResult;
 };

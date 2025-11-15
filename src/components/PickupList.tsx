@@ -72,7 +72,7 @@ export interface BannerResult {
   bannerTotalGachaRuns: number;
   bannerWinGachaRuns: number;
   bannerHistogram: number[];
-  pityRewardObtained: number;
+  anyPityRewardObtained: number;
   actualEntryCount: number;
   bannerStartingCurrency: number;
   additionalResource: number;
@@ -92,7 +92,7 @@ export interface GachaSimulationMergedResult {
     simulationTry: number;
     simulationSuccess: number;
     totalGachaRuns: number;
-    pityRewardObtained: number;
+    anyPityRewardObtained: number;
     initialResource: number;
     isTrySim: boolean;
     isSimpleMode: boolean;
@@ -931,7 +931,7 @@ export default function PickupList() {
             bannerSuccess,
             bannerTotalGachaRuns,
             bannerWinGachaRuns,
-            pityRewardObtained,
+            anyPityRewardObtained,
             actualEntryCount,
             bannerStartingCurrency,
             additionalResource,
@@ -944,7 +944,7 @@ export default function PickupList() {
             acc.perBanner[index].bannerSuccess += bannerSuccess;
             acc.perBanner[index].bannerTotalGachaRuns += bannerTotalGachaRuns;
             acc.perBanner[index].bannerWinGachaRuns += bannerWinGachaRuns;
-            acc.perBanner[index].pityRewardObtained += pityRewardObtained;
+            acc.perBanner[index].anyPityRewardObtained += anyPityRewardObtained;
             acc.perBanner[index].actualEntryCount += actualEntryCount;
             acc.perBanner[index].bannerStartingCurrency += bannerStartingCurrency;
             acc.perBanner[index].currencyShortageFailure += currencyShortageFailure;
@@ -979,7 +979,7 @@ export default function PickupList() {
         acc.total.simulationTry += current.total.simulationTry;
         acc.total.simulationSuccess += current.total.simulationSuccess;
         acc.total.totalGachaRuns += current.total.totalGachaRuns;
-        acc.total.pityRewardObtained += current.total.pityRewardObtained;
+        acc.total.anyPityRewardObtained += current.total.anyPityRewardObtained;
 
         return acc;
       },
@@ -988,7 +988,7 @@ export default function PickupList() {
           simulationTry: 0,
           simulationSuccess: 0,
           totalGachaRuns: 0,
-          pityRewardObtained: 0,
+          anyPityRewardObtained: 0,
           initialResource: results[0].total.initialResource,
           isTrySim: results[0].total.isTrySim,
           isSimpleMode: results[0].total.isSimpleMode,
