@@ -102,7 +102,7 @@ interface SuccessCount {
 }
 
 interface SimulationMetrics {
-  pityRewardObtainedCount: number;
+  rotationPityRewardObtainedCount: number;
   limitedSixthStack: number;
   adjustedSixthRate: number;
   adjustedFifthRate: number;
@@ -262,7 +262,7 @@ const updateResult = ({
     if (rollResult.isSuccessOnThisTry) successCount[stringRarity]++;
   }
   if (pityContext && pityContext.isPityReached)
-    pityContext.simulationMetrics.pityRewardObtainedCount++;
+    pityContext.simulationMetrics.rotationPityRewardObtainedCount++;
   if (rollResult.isPickupObtained) currentStatistics.pickupObtained++;
   if (rollResult.isTargetObtained) currentStatistics.targetObtained++;
 };
@@ -368,7 +368,7 @@ const gachaRateSimulate = ({
       }
       const pity = pities[gachaType];
       const simulationMetrics: SimulationMetrics = {
-        pityRewardObtainedCount: 0,
+        rotationPityRewardObtainedCount: 0,
         limitedSixthStack: 0,
         adjustedSixthRate: sixthRate,
         adjustedFifthRate: fifthRate,
@@ -570,7 +570,7 @@ const gachaRateSimulate = ({
                 break;
               case 'rotation':
                 {
-                  const pityObtainedCount = simulationMetrics.pityRewardObtainedCount;
+                  const pityObtainedCount = simulationMetrics.rotationPityRewardObtainedCount;
                   const pityRewardOperators = targetOperators.filter(
                     ({ isPityReward }) => isPityReward,
                   );
