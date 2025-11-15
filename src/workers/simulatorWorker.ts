@@ -504,12 +504,14 @@ const gachaRateSimulate = ({
         /////////Uncaught TypeError: Cannot read properties of undefined (reading 'isFirstObtained') : 519줄
         if (gachaType === 'limited' && i === pity) {
           // 한정 천장 달성 시 가챠와 별개로 확률업 한정 1개 증정
+          // 이미 얻었는지 여부는 따지지 않음
           logging && console.log('한정 300천장');
           sixStats.pickupObtained++;
           sixStats.targetObtained++;
           sixStats.totalObtained++;
           result.isPityRewardObtained = true;
           if (pityRewardOperator) {
+            pityRewardOperator.isFirstObtained = true;
             pityRewardOperator.currentCount++;
             if (pityRewardOperator.currentCount >= pityRewardOperator.gachaGoalCount)
               pityRewardOperator.success = true;
@@ -517,12 +519,14 @@ const gachaRateSimulate = ({
               successCount.sixth++;
           }
         }
-        //
+
+        // 콜라보 천장은 이미 얻었을 시 사라짐
         const isCollabPityReached =
           gachaType === 'collab' && !pityRewardOperator?.isFirstObtained && i === pity;
 
         const roll = Math.random() * 100;
 
+        // 콜라보 천장이 true일 시 무조건 6성 당첨 + 6성 픽업 당첨
         if (roll < simulationMetrics.adjustedSixthRate || isCollabPityReached) {
           // 6성 당첨
           logging && console.log('6성 당첨');
@@ -545,26 +549,12 @@ const gachaRateSimulate = ({
                   );
                   const rollResult = executePickupRoll({
                     targetOperators,
-                    isPityReached: !pityRewardOperator?.isFirstObtained && i === pity,
-                    pickupChance,
-                    pickupChanceByEach,
-                    pityRewardOperators: pityRewardOperator ? [pityRewardOperator] : [],
-                  });
-                  updateResult({
-                    rollResult,
-                    result,
-                    successCount,
-                    stringRarity,
-                  });
-                }
-                break;
-              case 'limited':
-                {
-                  const pityRewardOperator = targetOperators.find(
-                    ({ isPityReward }) => isPityReward,
-                  );
-                  const rollResult = executePickupRoll({
-                    targetOperators,
+                    // 내가 얻고자 입력한 pityRewardOperator가 없어도 시스템에는 여전히 천장이 돌아가기 때문에
+                    // 정해놓은 천장 보상(pityRewardOperator)이 있으면서 그 오퍼를 획득한 적 있는 게 아니라면 천장 작동
+                    isPityReached:
+                      !pityRewardOperator?.isFirstObtained &&
+                      typeof pity === 'number' &&
+                      i === pity,
                     pickupChance,
                     pickupChanceByEach,
                     pityRewardOperators: pityRewardOperator ? [pityRewardOperator] : [],
@@ -579,15 +569,13 @@ const gachaRateSimulate = ({
                 break;
               case 'single':
                 {
-                  const singlePity = pities[gachaType];
                   const pityRewardOperator = targetOperators.find(
                     ({ isPityReward }) => isPityReward,
                   );
                   const rollResult = executePickupRoll({
                     targetOperators,
-                    isPityReached: pityRewardOperator
-                      ? !pityRewardOperator.isFirstObtained && i > singlePity
-                      : false,
+                    isPityReached:
+                      !pityRewardOperator?.isFirstObtained && typeof pity === 'number' && i > pity,
                     pickupChance,
                     pickupChanceByEach,
                     pityRewardOperators: pityRewardOperator ? [pityRewardOperator] : [],
