@@ -19,6 +19,7 @@ import { Chart as ChartJS } from 'chart.js';
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
 import FoldButton from '#/components/buttons/MaximizeButton';
 import { motion } from 'motion/react';
+import { GachaType } from '#/types/types';
 
 function LazyRender({
   children,
@@ -124,6 +125,7 @@ const createTooltipLiteral =
 const Legend = ({
   data,
   isTrySim,
+  bannerType,
   bannerSuccess,
   bannerWinGachaRuns,
   pityRewardObtained,
@@ -134,6 +136,7 @@ const Legend = ({
 }: {
   data: number[];
   isTrySim: boolean;
+  bannerType: GachaType;
   bannerSuccess: number;
   bannerWinGachaRuns: number;
   pityRewardObtained: number;
@@ -180,9 +183,13 @@ const Legend = ({
       )}
       <div>
         천장 도달 확률 :{' '}
-        <span className="font-S-CoreDream-500 text-amber-500">
-          {truncateToDecimals(safeNumberOrZero((pityRewardObtained / bannerSuccess) * 100))}%
-        </span>
+        {bannerType === 'orient' || bannerType === 'contract' ? (
+          <span className="font-S-CoreDream-500 text-amber-500">천장 없음</span>
+        ) : (
+          <span className="font-S-CoreDream-500 text-amber-500">
+            {truncateToDecimals(safeNumberOrZero((pityRewardObtained / bannerSuccess) * 100))}%
+          </span>
+        )}
       </div>
       <div>
         최장 성공 차수 :{' '}
@@ -215,6 +222,7 @@ const BannerSuccessTrialCounts = forwardRef<
     {
       bannerResult: {
         name,
+        bannerType,
         bannerWinGachaRuns,
         bannerSuccess,
         bannerHistogram,
@@ -294,6 +302,7 @@ const BannerSuccessTrialCounts = forwardRef<
           <Legend
             data={data}
             isTrySim={isTrySim}
+            bannerType={bannerType}
             bannerWinGachaRuns={bannerWinGachaRuns}
             bannerSuccess={bannerSuccess}
             dispatchRef={dispatchRef}
