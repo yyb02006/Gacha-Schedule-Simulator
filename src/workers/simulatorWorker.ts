@@ -543,39 +543,18 @@ const gachaRateSimulate = ({
           if (newPickupOpersCount.sixth > 0) {
             switch (gachaType) {
               case 'collab':
-                {
-                  const pityRewardOperator = targetOperators.find(
-                    ({ isPityReward }) => isPityReward,
-                  );
-                  const rollResult = executePickupRoll({
-                    targetOperators,
-                    // 내가 얻고자 입력한 pityRewardOperator가 없어도 시스템에는 여전히 천장이 돌아가기 때문에
-                    // 정해놓은 천장 보상(pityRewardOperator)이 있으면서 그 오퍼를 획득한 적 있는 게 아니라면 천장 작동
-                    isPityReached:
-                      !pityRewardOperator?.isFirstObtained &&
-                      typeof pity === 'number' &&
-                      i === pity,
-                    pickupChance,
-                    pickupChanceByEach,
-                    pityRewardOperators: pityRewardOperator ? [pityRewardOperator] : [],
-                  });
-                  updateResult({
-                    rollResult,
-                    result,
-                    successCount,
-                    stringRarity,
-                  });
-                }
-                break;
               case 'single':
                 {
                   const pityRewardOperator = targetOperators.find(
                     ({ isPityReward }) => isPityReward,
                   );
+                  const isPityCountReached =
+                    typeof pity === 'number' && (gachaType === 'collab' ? i === pity : i > pity);
                   const rollResult = executePickupRoll({
                     targetOperators,
-                    isPityReached:
-                      !pityRewardOperator?.isFirstObtained && typeof pity === 'number' && i > pity,
+                    // 내가 얻고자 입력한 pityRewardOperator가 없어도 시스템에는 여전히 천장이 돌아가기 때문에
+                    // 정해놓은 천장 보상(pityRewardOperator)이 있으면서 그 오퍼를 획득한 적 있는 게 아니라면 천장 작동
+                    isPityReached: !pityRewardOperator?.isFirstObtained && isPityCountReached,
                     pickupChance,
                     pickupChanceByEach,
                     pityRewardOperators: pityRewardOperator ? [pityRewardOperator] : [],
