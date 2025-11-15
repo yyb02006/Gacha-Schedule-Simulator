@@ -67,20 +67,21 @@ interface ObtainedStatistics {
 export interface BannerResult {
   id: string;
   name: string;
+  bannerType: GachaType;
   bannerSuccess: number;
   bannerTotalGachaRuns: number;
   bannerWinGachaRuns: number;
-  successIndexUntilCutoff: number;
-  cumulativeUntilCutoff: number;
-  minIndex: number;
-  maxIndex: number;
-  pityRewardObtained: number;
   bannerHistogram: number[];
+  pityRewardObtained: number;
   actualEntryCount: number;
   bannerStartingCurrency: number;
   additionalResource: number;
   currencyShortageFailure: number;
   maxAttemptsFailure: number;
+  successIndexUntilCutoff: number;
+  cumulativeUntilCutoff: number;
+  minIndex: number;
+  maxIndex: number;
   sixth: ObtainedStatistics;
   fifth: ObtainedStatistics;
   fourth: ObtainedStatistics;
@@ -865,7 +866,9 @@ export default function PickupList() {
 
   const runSimulation = async () => {
     if (isRunning) return;
-    const { isMobile, workerCount } = getOptimalWorkerCount();
+    // const { isMobile, workerCount } = getOptimalWorkerCount();
+    const { isMobile } = getOptimalWorkerCount();
+    const workerCount = 1;
     if (workerCount <= 0) return;
     setIsRunning(true);
     const activePickupDatas = pickupDatas.filter(({ active }) => active);
@@ -934,6 +937,7 @@ export default function PickupList() {
             additionalResource,
             currencyShortageFailure,
             maxAttemptsFailure,
+            bannerType,
           } = currentBanner;
           current.total.totalGachaRuns += bannerTotalGachaRuns;
           if (acc.perBanner[index]) {
@@ -946,6 +950,7 @@ export default function PickupList() {
             acc.perBanner[index].currencyShortageFailure += currencyShortageFailure;
             acc.perBanner[index].maxAttemptsFailure += maxAttemptsFailure;
             acc.perBanner[index].additionalResource = additionalResource;
+            acc.perBanner[index].bannerType = bannerType;
             for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
               const a = acc.perBanner[index].bannerHistogram[i] ?? 0;
               const b = currentBanner.bannerHistogram[i] ?? 0;
