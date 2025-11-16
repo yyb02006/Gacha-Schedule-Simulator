@@ -20,6 +20,7 @@ import {
 } from '#/constants/variables';
 import {
   canHaveLimited,
+  deriveWorkerSeeds,
   filterLimitArray,
   getPercentileIndex,
   safeNumberOrZero,
@@ -89,6 +90,22 @@ export interface BannerResult {
   fourth: ObtainedStatistics;
 }
 
+interface GachaSimulationResult {
+  total: {
+    simulationTry: number;
+    simulationSuccess: number;
+    totalGachaRuns: number;
+    anyPityRewardObtained: number;
+    initialResource: number;
+    isTrySim: boolean;
+    isSimpleMode: boolean;
+    bannerFailureAction: BannerFailureAction;
+    statistics: Record<OperatorRarityForString, ObtainedStatistics>;
+    seed: number;
+  };
+  perBanner: BannerResult[];
+}
+
 export interface GachaSimulationMergedResult {
   total: {
     simulationTry: number;
@@ -100,6 +117,7 @@ export interface GachaSimulationMergedResult {
     isSimpleMode: boolean;
     bannerFailureAction: BannerFailureAction;
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
+    seeds: number[];
   };
   perBanner: BannerResult[];
 }
@@ -822,6 +840,7 @@ const prepickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
 export interface WorkerInput {
   type: string;
   payload: {
+    seed: number;
     pickupDatas: Dummy[];
     options: { isTrySim: boolean; isSimpleMode: boolean } & SimulationOptions & InitialInputs;
   };
@@ -876,15 +895,17 @@ export default function PickupList() {
 
   const runSimulation = async () => {
     if (isRunning) return;
-    // const { isMobile, workerCount } = getOptimalWorkerCount();
-    const { isMobile } = getOptimalWorkerCount();
-    const workerCount = 1;
+    const { isMobile, workerCount } = getOptimalWorkerCount();
     if (workerCount <= 0) return;
+    const uintArray = new Uint32Array(1);
+    crypto.getRandomValues(uintArray);
+    const baseSeed = uintArray[0];
+    const seeds = deriveWorkerSeeds(4001629188, workerCount);
     setIsRunning(true);
     const activePickupDatas = pickupDatas.filter(({ active }) => active);
 
     const workers: Worker[] = [];
-    const promises: Promise<GachaSimulationMergedResult>[] = [];
+    const promises: Promise<GachaSimulationResult>[] = [];
     const { simulationTry, probability, showBannerImage, bannerFailureAction } = options;
     const {
       current: { gachaGoal, initialResource },
@@ -898,6 +919,7 @@ export default function PickupList() {
       return {
         type: 'start',
         payload: {
+          seed: seeds[index],
           pickupDatas: activePickupDatas,
           options: {
             isTrySim,
@@ -919,10 +941,8 @@ export default function PickupList() {
       });
       workers.push(worker);
 
-      const promise = new Promise<GachaSimulationMergedResult>((resolve) => {
-        worker.onmessage = (
-          e: MessageEvent<{ type: string; result: GachaSimulationMergedResult }>,
-        ) => {
+      const promise = new Promise<GachaSimulationResult>((resolve) => {
+        worker.onmessage = (e: MessageEvent<{ type: string; result: GachaSimulationResult }>) => {
           resolve(e.data.result);
           worker.terminate(); // 작업 끝나면 종료
         };
@@ -997,11 +1017,13 @@ export default function PickupList() {
         acc.total.simulationSuccess += current.total.simulationSuccess;
         acc.total.totalGachaRuns += current.total.totalGachaRuns;
         acc.total.anyPityRewardObtained += current.total.anyPityRewardObtained;
+        acc.total.seeds.push(current.total.seed);
 
         return acc;
       },
       {
         total: {
+          seeds: [],
           simulationTry: 0,
           simulationSuccess: 0,
           totalGachaRuns: 0,
@@ -1049,6 +1071,8 @@ export default function PickupList() {
       }),
     };
     console.log(mergedResult);
+    console.log(seeds);
+    console.log(baseSeed);
     setResults(mergedResult);
     setIsRunning(false);
   };

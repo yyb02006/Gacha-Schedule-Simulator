@@ -1,5 +1,5 @@
 import { BannerFailureAction, Dummy, WorkerInput } from '#/components/PickupList';
-import { safeNumberOrZero } from '#/libs/utils';
+import { createRNG, safeNumberOrZero } from '#/libs/utils';
 import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
 
 export default {} as typeof Worker & { new (): Worker };
@@ -24,16 +24,6 @@ const rarities = {
   fourth: 4,
 } as const;
 
-function createRNG(seed = 0x12345678) {
-  return function rng() {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
 interface SimulationResult {
   total: {
     simulationTry: number;
@@ -44,6 +34,7 @@ interface SimulationResult {
     isTrySim: boolean;
     isSimpleMode: boolean;
     bannerFailureAction: BannerFailureAction;
+    seed: number;
   };
   perBanner: {
     id: string;
@@ -209,12 +200,14 @@ const handlePickupRollWin = (obtainedOperator: OperatorResult, rollResult: RollR
 };
 
 const executePickupRoll = ({
+  rng,
   targetOperators,
   pickupChance,
   pickupChanceByEach,
   pityRewardOperators,
   isPityReached,
 }: {
+  rng: () => number;
   targetOperators: OperatorResult[];
   pickupChance: number;
   pickupChanceByEach: number;
@@ -236,7 +229,7 @@ const executePickupRoll = ({
     rollResult.isPickupObtained = true;
     if (pityRewardOperators.length > 0) {
       const pickupChanceByEachReward = safeNumberOrZero(100 / pityRewardOperators.length);
-      const pityRoll = Math.random() * 100;
+      const pityRoll = rng() * 100;
       for (const [ci, pityRewardOperator] of pityRewardOperators.entries()) {
         if (
           pityRoll < pickupChanceByEachReward * (ci + 1) &&
@@ -253,7 +246,7 @@ const executePickupRoll = ({
     }
   } else {
     // 천장이 아닐 시
-    const nonePityRoll = Math.random() * 100;
+    const nonePityRoll = rng() * 100;
     if (nonePityRoll < pickupChance) {
       // 픽업 당첨
       logging &&
@@ -311,6 +304,7 @@ const updateResult = ({
 };
 
 const gachaRateSimulate = ({
+  seed,
   pickupDatas,
   gachaGoal,
   isTrySim,
@@ -320,6 +314,7 @@ const gachaRateSimulate = ({
   probability,
   bannerFailureAction,
 }: {
+  seed: number;
   pickupDatas: Dummy[];
   gachaGoal: 'allFirst' | 'allMax' | null;
   isSimpleMode: boolean;
@@ -329,6 +324,7 @@ const gachaRateSimulate = ({
   probability: { limited: number; normal: number };
   bannerFailureAction: BannerFailureAction;
 }) => {
+  const rng = createRNG(seed);
   const sixthRate = 2;
   const fifthRate = 8;
   const fourthRate = 50;
@@ -350,6 +346,7 @@ const gachaRateSimulate = ({
       isTrySim,
       isSimpleMode,
       bannerFailureAction,
+      seed,
     },
     perBanner: pickupDatas.map(({ id, name, gachaType }, index) => ({
       id,
@@ -610,7 +607,7 @@ const gachaRateSimulate = ({
         const isCollabPityReached =
           gachaType === 'collab' && !pityRewardOperator?.isFirstObtained && i === pity;
 
-        const roll = Math.random() * 100;
+        const roll = rng() * 100;
 
         // 콜라보 천장이 true일 시 무조건 6성 당첨 + 6성 픽업 당첨
         if (roll < simulationMetrics.adjustedSixthRate || isCollabPityReached) {
@@ -637,6 +634,7 @@ const gachaRateSimulate = ({
                   const isPityCountReached =
                     typeof pity === 'number' && (gachaType === 'collab' ? i === pity : i > pity);
                   const rollResult = executePickupRoll({
+                    rng,
                     targetOperators,
                     // 내가 얻고자 입력한 pityRewardOperator가 없어도 시스템에는 여전히 천장이 돌아가기 때문에
                     // 정해놓은 천장 보상(pityRewardOperator)이 있으면서 그 오퍼를 획득한 적 있는 게 아니라면 천장 작동
@@ -666,6 +664,7 @@ const gachaRateSimulate = ({
                       (i > 299 && rotationPityObtainedCount < 2)) &&
                     pityRewardOperators.length > 0;
                   const rollResult = executePickupRoll({
+                    rng,
                     targetOperators,
                     isPityReached: isRotationPityReached,
                     pickupChance,
@@ -684,6 +683,7 @@ const gachaRateSimulate = ({
               default:
                 {
                   const rollResult = executePickupRoll({
+                    rng,
                     targetOperators,
                     pickupChance,
                     pickupChanceByEach,
@@ -725,6 +725,7 @@ const gachaRateSimulate = ({
                         operatorType === 'limited' && rarity === 5 && !isFirstObtained,
                     );
                     const rollResult = executePickupRoll({
+                      rng,
                       targetOperators,
                       pickupChance: 50,
                       pickupChanceByEach: safeNumberOrZero(50 / newPickupOpersCount.fifth),
@@ -742,6 +743,7 @@ const gachaRateSimulate = ({
                 case 'contract':
                   {
                     const rollResult = executePickupRoll({
+                      rng,
                       targetOperators,
                       pickupChance: 100,
                       pickupChanceByEach: safeNumberOrZero(100 / newPickupOpersCount.fifth),
@@ -757,6 +759,7 @@ const gachaRateSimulate = ({
                 case 'orient':
                   {
                     const rollResult = executePickupRoll({
+                      rng,
                       targetOperators,
                       pickupChance: 60,
                       pickupChanceByEach: safeNumberOrZero(60 / newPickupOpersCount.fifth),
@@ -772,6 +775,7 @@ const gachaRateSimulate = ({
                 default:
                   {
                     const rollResult = executePickupRoll({
+                      rng,
                       targetOperators,
                       pickupChance: 50,
                       pickupChanceByEach: safeNumberOrZero(50 / newPickupOpersCount.fifth),
@@ -794,6 +798,7 @@ const gachaRateSimulate = ({
             result.statistics.fourth.totalObtained++;
             if (newPickupOpersCount.fourth > 0) {
               const rollResult = executePickupRoll({
+                rng,
                 targetOperators,
                 pickupChance: 20,
                 pickupChanceByEach: safeNumberOrZero(20 / newPickupOpersCount.fourth),
@@ -1235,6 +1240,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   const {
     type,
     payload: {
+      seed,
       pickupDatas,
       options: {
         isTrySim,
@@ -1260,6 +1266,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   const testArray2 = [limitedDummy, limitedDummy];
   const startTime = performance.now();
   const result = gachaRateSimulate({
+    seed,
     pickupDatas,
     gachaGoal,
     isSimpleMode,
