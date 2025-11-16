@@ -108,7 +108,7 @@ const FloatingActionBar = ({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               ref={listRef}
-              className="font-S-CoreDream-300 absolute -top-[216px] right-0 size-full h-[200px] overflow-y-auto rounded-xl bg-[#202020] px-4 py-3 text-sm shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]"
+              className="font-S-CoreDream-300 absolute -top-[216px] right-0 size-full h-fit max-h-[200px] overflow-y-auto rounded-xl bg-[#202020] py-3 text-sm shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]"
             >
               {chartRefs.current.map((banner, index) => (
                 <button
@@ -125,7 +125,7 @@ const FloatingActionBar = ({
                     currentBanner?.offsetTop === banner.offsetTop
                       ? 'bg-[#292929] text-sky-500'
                       : '',
-                    'block w-full cursor-pointer py-[4px] text-left hover:bg-[#303030] hover:text-amber-500',
+                    'block w-full cursor-pointer px-4 py-[4px] text-left hover:bg-[#303030] hover:text-amber-500',
                   )}
                 >
                   {banner.dataset.name}
