@@ -8,9 +8,9 @@ import { Operator } from '#/components/PickupList';
 import { operatorBadgeProps } from '#/constants/ui';
 import { operatorLimitByBannerType, rarities } from '#/constants/variables';
 import { toOpacityZero } from '#/constants/variants';
+import { useSyncedState } from '#/hooks/useSyncedState';
 import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 import { motion } from 'motion/react';
-import { useState } from 'react';
 
 export default function OperatorBadgeEditModal({
   isOpen,
@@ -32,7 +32,7 @@ export default function OperatorBadgeEditModal({
   const {
     operatorType: { limited, normal },
   } = operatorBadgeProps;
-  const [currentState, setCurrentState] = useState<{
+  const [currentState, setCurrentState] = useSyncedState<{
     operatorType: OperatorType;
     rarity: OperatorRarity;
   }>({
@@ -49,8 +49,7 @@ export default function OperatorBadgeEditModal({
   // 4성은 한정이 존재하지 않음
   const preventSelectLimited =
     currentState.rarity === 6
-      ? !(gachaType === 'limited' || gachaType === 'collab') ||
-        operators.some(({ operatorType, rarity }) => rarity === 6 && operatorType === 'limited')
+      ? !(gachaType === 'limited' || gachaType === 'collab')
       : currentState.rarity === 5
         ? gachaType !== 'collab'
         : true;
@@ -58,6 +57,7 @@ export default function OperatorBadgeEditModal({
     onClose();
     onBadgeEdit(currentState.operatorType, currentState.rarity);
   };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex w-[360px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
