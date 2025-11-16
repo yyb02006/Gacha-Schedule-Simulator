@@ -1,12 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import isEqual from 'fast-deep-equal';
 
 export const useSyncedState = <T>(propValue: T) => {
   const [state, setState] = useState(propValue);
+  const prevPropRef = useRef<T>(propValue);
 
   useEffect(() => {
-    setState(propValue);
+    if (!isEqual(prevPropRef.current, propValue)) {
+      setState(propValue);
+      prevPropRef.current = propValue;
+    }
   }, [propValue]);
 
   return [state, setState] as const;
