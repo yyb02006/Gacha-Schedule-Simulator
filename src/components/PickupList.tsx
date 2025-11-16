@@ -587,7 +587,16 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
               Object.entries(action.payload).filter(([, value]) => value !== undefined),
             ),
           }),
-        });
+        }).map<Operator>((newOperator) =>
+          // 한정배너에서 지금 오퍼레이터 이외에 다른 6성 오퍼레이터가 있다면 그 오퍼레이터와 지금 오퍼레이터의 한정 상태 서로 교환
+          gachaType === 'limited' &&
+          newOperator.operatorId !== operatorId &&
+          newOperator.rarity === 6
+            ? operatorType === 'limited'
+              ? { ...newOperator, isPityReward: false, operatorType: 'normal' }
+              : { ...newOperator, isPityReward: true, operatorType: 'limited' }
+            : newOperator,
+        );
         const currentPityRewardOpersLength = filterLimitArray(
           newOperators,
           ({ isPityReward }) => isPityReward,
