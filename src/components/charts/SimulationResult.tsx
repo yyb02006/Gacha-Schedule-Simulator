@@ -120,11 +120,11 @@ const SimulationResult = forwardRef<
               </li>
             </ul>
             <ul className="space-y-1">
-              <li>천장 획득 횟수 : {result.total.pityRewardObtained.toLocaleString()} 회</li>
+              <li>천장 획득 횟수 : {result.total.anyPityRewardObtained.toLocaleString()} 회</li>
               <li className="font-S-CoreDream-400 text-amber-400">
                 시뮬레이션 당 천장 획득 횟수 :{' '}
                 {truncateToDecimals(
-                  result.total.pityRewardObtained / result.total.simulationTry,
+                  result.total.anyPityRewardObtained / result.total.simulationTry,
                 ).toLocaleString()}{' '}
                 회
               </li>

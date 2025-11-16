@@ -128,7 +128,7 @@ const Legend = ({
   bannerType,
   bannerSuccess,
   bannerWinGachaRuns,
-  pityRewardObtained,
+  anyPityRewardObtained,
   bannerStartingCurrency,
   maxIndex,
   minIndex,
@@ -139,7 +139,7 @@ const Legend = ({
   bannerType: GachaType;
   bannerSuccess: number;
   bannerWinGachaRuns: number;
-  pityRewardObtained: number;
+  anyPityRewardObtained: number;
   bannerStartingCurrency: number;
   maxIndex: number;
   minIndex: number;
@@ -187,7 +187,7 @@ const Legend = ({
           <span className="font-S-CoreDream-500 text-amber-500">천장 없음</span>
         ) : (
           <span className="font-S-CoreDream-500 text-amber-500">
-            {truncateToDecimals(safeNumberOrZero((pityRewardObtained / bannerSuccess) * 100))}%
+            {truncateToDecimals(safeNumberOrZero((anyPityRewardObtained / bannerSuccess) * 100))}%
           </span>
         )}
       </div>
@@ -231,7 +231,7 @@ const BannerSuccessTrialCounts = forwardRef<
         bannerStartingCurrency,
         maxIndex,
         minIndex,
-        pityRewardObtained,
+        anyPityRewardObtained,
       },
       isTrySim,
       simulationTry,
@@ -309,7 +309,7 @@ const BannerSuccessTrialCounts = forwardRef<
             bannerStartingCurrency={bannerStartingCurrency}
             maxIndex={maxIndex}
             minIndex={minIndex}
-            pityRewardObtained={pityRewardObtained}
+            anyPityRewardObtained={anyPityRewardObtained}
           />
         </div>
         <LazyRender>
