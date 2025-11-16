@@ -72,6 +72,7 @@ export interface BannerResult {
   bannerTotalGachaRuns: number;
   bannerWinGachaRuns: number;
   bannerHistogram: number[];
+  pityHistogram: number[];
   anyPityRewardObtained: number;
   winPityRewardObtained: number;
   actualEntryCount: number;
@@ -963,10 +964,15 @@ export default function PickupList() {
             acc.perBanner[index].additionalResource = additionalResource;
             acc.perBanner[index].bannerType = bannerType;
             for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
-              const a = acc.perBanner[index].bannerHistogram[i] ?? 0;
-              const b = currentBanner.bannerHistogram[i] ?? 0;
+              const accBannerHistogram = acc.perBanner[index].bannerHistogram[i] ?? 0;
+              const CurrentBannerHistogram = currentBanner.bannerHistogram[i] ?? 0;
 
-              acc.perBanner[index].bannerHistogram[i] = a + b;
+              acc.perBanner[index].bannerHistogram[i] = accBannerHistogram + CurrentBannerHistogram;
+
+              const accPityHistogram = acc.perBanner[index].pityHistogram[i] ?? 0;
+              const CurrentPityHistogram = currentBanner.pityHistogram[i] ?? 0;
+
+              acc.perBanner[index].pityHistogram[i] = accPityHistogram + CurrentPityHistogram;
             }
             for (const rarityString of rarityStrings) {
               for (const obtainedType of obtainedTypes) {

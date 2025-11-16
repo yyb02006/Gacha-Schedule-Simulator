@@ -2,7 +2,7 @@
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { BannerResult } from '#/components/PickupList';
-import { cls, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
+import { cls, interpolateColor, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import {
   Dispatch,
@@ -80,12 +80,12 @@ function LazyRender({
 }
 
 const createTooltipLiteral =
-  (originalHistogram: number[]) =>
+  (bannerHistogram: number[], pityHistogram: number[]) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
     const stringifiedValue = dataset.formattedValue ?? '';
     const rawValue = dataset.raw as number;
-    const sumUpToCurrent = originalHistogram
+    const sumUpBannerHistogram = bannerHistogram
       .slice(0, dataset.dataIndex + 1)
       .reduce((a, b) => a + b, 0);
     const { dataIndex } = dataset;
@@ -97,10 +97,16 @@ const createTooltipLiteral =
     .map((b, i) => {
       return /*html*/ `
       <div class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
-        <p>
-          현재 차수 성공 횟수 :
-          <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
-        </p>
+        <div class="space-y-[3px]">
+          <p>
+            현재 차수 성공 횟수 :
+            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
+          </p>
+          <p>
+            천장 도달 횟수 :
+            <span class="font-S-CoreDream-500 text-teal-500">${pityHistogram[dataIndex]} 회</span>
+          </p>
+        </div>
         <div class="space-y-[3px]">
           <p>
             소모 재화 :
@@ -111,8 +117,8 @@ const createTooltipLiteral =
             <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(rawValue / total) * 100)}%</span>
           </p>
           <p>
-            누적 확률 :
-            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(sumUpToCurrent / total) * 100)}%</span>
+            누적 성공 확률 :
+            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(sumUpBannerHistogram / total) * 100)}%</span>
           </p>
         </div>
       </div>
@@ -121,28 +127,6 @@ const createTooltipLiteral =
     .join('')}
   </div>`;
   };
-
-function interpolateColor(color1: string, color2: string, factor: number) {
-  // factor: 0~1
-  const c1 = color1.startsWith('#') ? color1.slice(1) : color1;
-  const c2 = color2.startsWith('#') ? color2.slice(1) : color2;
-
-  const r1 = parseInt(c1.slice(0, 2), 16);
-  const g1 = parseInt(c1.slice(2, 4), 16);
-  const b1 = parseInt(c1.slice(4, 6), 16);
-
-  const r2 = parseInt(c2.slice(0, 2), 16);
-  const g2 = parseInt(c2.slice(2, 4), 16);
-  const b2 = parseInt(c2.slice(4, 6), 16);
-
-  const r = Math.round(r1 + (r2 - r1) * factor);
-  const g = Math.round(g1 + (g2 - g1) * factor);
-  const b = Math.round(b1 + (b2 - b1) * factor);
-
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
-
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
 
 const Legend = ({
   data,
@@ -366,7 +350,7 @@ const BannerSuccessTrialCounts = forwardRef<
               cutoffIndex={successIndexUntilCutoff}
               height={chartHeight}
               lazyLoading={true}
-              createTooltipLiteral={createTooltipLiteral(bannerHistogram)}
+              createTooltipLiteral={createTooltipLiteral(bannerHistogram, pityHistogram)}
               mainChartRef={mainChartRef}
             />
             {enableBrush && (
