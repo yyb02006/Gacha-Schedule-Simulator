@@ -73,6 +73,7 @@ export interface BannerResult {
   bannerWinGachaRuns: number;
   bannerHistogram: number[];
   anyPityRewardObtained: number;
+  winPityRewardObtained: number;
   actualEntryCount: number;
   bannerStartingCurrency: number;
   additionalResource: number;
@@ -653,8 +654,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       const prevBanner = pickupDatas.find((pickupData) => pickupData.id === id);
       if (!prevBanner) return pickupDatas;
       if (isSimpleMode) {
-        const { targetOpersCount: prevTargetOpersCount, pickupOpersCount: prevPickupOpersCount } =
-          prevBanner.pickupDetails.simpleMode;
+        const { targetOpersCount: prevTargetOpersCount } = prevBanner.pickupDetails.simpleMode;
         const newPickupOpersCount = operatorLimitByBannerType[gachaType];
         const newTargetOpersCount = {
           sixth: Math.min(newPickupOpersCount['sixth'], prevTargetOpersCount.sixth),
@@ -941,6 +941,7 @@ export default function PickupList() {
             bannerTotalGachaRuns,
             bannerWinGachaRuns,
             anyPityRewardObtained,
+            winPityRewardObtained,
             actualEntryCount,
             bannerStartingCurrency,
             additionalResource,
@@ -954,6 +955,7 @@ export default function PickupList() {
             acc.perBanner[index].bannerTotalGachaRuns += bannerTotalGachaRuns;
             acc.perBanner[index].bannerWinGachaRuns += bannerWinGachaRuns;
             acc.perBanner[index].anyPityRewardObtained += anyPityRewardObtained;
+            acc.perBanner[index].winPityRewardObtained += winPityRewardObtained;
             acc.perBanner[index].actualEntryCount += actualEntryCount;
             acc.perBanner[index].bannerStartingCurrency += bannerStartingCurrency;
             acc.perBanner[index].currencyShortageFailure += currencyShortageFailure;

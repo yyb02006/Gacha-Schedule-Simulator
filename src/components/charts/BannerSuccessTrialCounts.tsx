@@ -128,7 +128,7 @@ const Legend = ({
   bannerType,
   bannerSuccess,
   bannerWinGachaRuns,
-  anyPityRewardObtained,
+  winPityRewardObtained,
   bannerStartingCurrency,
   maxIndex,
   minIndex,
@@ -139,7 +139,7 @@ const Legend = ({
   bannerType: GachaType;
   bannerSuccess: number;
   bannerWinGachaRuns: number;
-  anyPityRewardObtained: number;
+  winPityRewardObtained: number;
   bannerStartingCurrency: number;
   maxIndex: number;
   minIndex: number;
@@ -153,13 +153,17 @@ const Legend = ({
   useEffect(() => {
     dispatchRef.current = setLegendData;
   }, [dispatchRef]);
+  const cumulativeProbability =
+    safeNumberOrZero(filteredData.reduce((a, b) => a + b, 0) / bannerSuccess) * 100;
   return (
     <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-[13px]">
-      <div>
+      <div className="min-w-[144px]">
         구간 누적 확률 :{' '}
         <span className="font-S-CoreDream-500 text-amber-500">
           {truncateToDecimals(
-            safeNumberOrZero(filteredData.reduce((a, b) => a + b, 0) / bannerSuccess) * 100,
+            cumulativeProbability === 100
+              ? cumulativeProbability
+              : Math.min(cumulativeProbability, 99.99),
           )}
           %
         </span>
@@ -182,12 +186,12 @@ const Legend = ({
         </div>
       )}
       <div>
-        천장 도달 확률 :{' '}
+        성공 시 천장 도달 확률 :{' '}
         {bannerType === 'orient' || bannerType === 'contract' ? (
           <span className="font-S-CoreDream-500 text-amber-500">천장 없음</span>
         ) : (
           <span className="font-S-CoreDream-500 text-amber-500">
-            {truncateToDecimals(safeNumberOrZero((anyPityRewardObtained / bannerSuccess) * 100))}%
+            {truncateToDecimals(safeNumberOrZero((winPityRewardObtained / bannerSuccess) * 100))}%
           </span>
         )}
       </div>
@@ -231,7 +235,7 @@ const BannerSuccessTrialCounts = forwardRef<
         bannerStartingCurrency,
         maxIndex,
         minIndex,
-        anyPityRewardObtained,
+        winPityRewardObtained,
       },
       isTrySim,
       simulationTry,
@@ -309,7 +313,7 @@ const BannerSuccessTrialCounts = forwardRef<
             bannerStartingCurrency={bannerStartingCurrency}
             maxIndex={maxIndex}
             minIndex={minIndex}
-            anyPityRewardObtained={anyPityRewardObtained}
+            winPityRewardObtained={winPityRewardObtained}
           />
         </div>
         <LazyRender>
