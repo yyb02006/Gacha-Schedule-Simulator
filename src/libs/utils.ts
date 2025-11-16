@@ -300,3 +300,48 @@ export function getOperatorsByRarity(operators: Operator[]) {
     },
   );
 }
+
+/**
+ * 두 HEX 색상 사이를 보간하여 새로운 색상을 반환
+ *
+ * @param {string} color1 - 시작 색상(HEX). 예: "#fe9a00"
+ * @param {string} color2 - 목표 색상(HEX). 예: "#00bba7"
+ * @param {number} factor - 0~1 사이의 보간 비율. 0이면 color1, 1이면 color2와 동일.
+ * @returns {string} 보간된 HEX 색상 문자열. 예: "#ca8f35"
+ *
+ * @example
+ * // 중간 색상을 얻기
+ * const mid = interpolateColor("#ff0000", "#0000ff", 0.5);
+ * console.log(mid); // "#800080" (보라색)
+ *
+ * @example
+ * // factor가 0이면 첫 번째 색 반환
+ * console.log(interpolateColor("#fe9a00", "#00bba7", 0));
+ * // "#fe9a00"
+ *
+ * @example
+ * // factor가 1이면 두 번째 색 반환
+ * console.log(interpolateColor("#fe9a00", "#00bba7", 1));
+ * // "#00bba7"
+ */
+export function interpolateColor(color1: string, color2: string, factor: number) {
+  // factor: 0~1
+  const c1 = color1.startsWith('#') ? color1.slice(1) : color1;
+  const c2 = color2.startsWith('#') ? color2.slice(1) : color2;
+
+  const r1 = parseInt(c1.slice(0, 2), 16);
+  const g1 = parseInt(c1.slice(2, 4), 16);
+  const b1 = parseInt(c1.slice(4, 6), 16);
+
+  const r2 = parseInt(c2.slice(0, 2), 16);
+  const g2 = parseInt(c2.slice(2, 4), 16);
+  const b2 = parseInt(c2.slice(4, 6), 16);
+
+  const r = Math.round(r1 + (r2 - r1) * factor);
+  const g = Math.round(g1 + (g2 - g1) * factor);
+  const b = Math.round(b1 + (b2 - b1) * factor);
+
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
