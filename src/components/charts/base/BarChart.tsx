@@ -389,6 +389,27 @@ export default function BarChart({
 
       if (progressIndexRef.current >= selectionIndex.end) {
         setLoading(false);
+        // animation이 관여안하게 하려면 undefined여야 함 false가 아니라
+        chart.data.datasets[0].animation = undefined;
+        chart.data.datasets[0].animations = {
+          x: {
+            duration: (ctx) => {
+              const isOverLength =
+                cutoffIndex &&
+                ctx.dataset.data.length >= 500 &&
+                ctx.dataset.data.length > cutoffIndex;
+              return isOverLength ? 600 : 200;
+            },
+          },
+        };
+        chart.data.datasets[0].transitions = {
+          active: {
+            animation: {
+              duration: 0,
+            },
+          },
+        };
+
         return;
       }
 
@@ -407,29 +428,29 @@ export default function BarChart({
     }
 
     drawChunk();
-  }, [data, labels, isMount, selectionIndex, lazyLoading]);
+  }, [data, labels, isMount, selectionIndex, lazyLoading, cutoffIndex]);
 
   useEffect(() => {
     if (mainChartRef.current && data.length > 20 && !loading) {
       const currentLength = selectionIndex.end - selectionIndex.start;
       const dataset = mainChartRef.current?.data.datasets[0];
       if (dataset) {
-        if (currentLength > 450) {
-          dataset.backgroundColor = '#fe9a00CC';
+        if (currentLength > 700) {
           dataset.categoryPercentage = 1;
-          dataset.barPercentage = 1;
-        } else if (currentLength > 300) {
-          dataset.backgroundColor = '#fe9a00E6';
-          dataset.categoryPercentage = 0.95;
+          dataset.barPercentage = 0.95;
+        } else if (currentLength > 450) {
+          dataset.categoryPercentage = 1;
           dataset.barPercentage = 0.9;
+        } else if (currentLength > 300) {
+          dataset.categoryPercentage = 0.95;
+          dataset.barPercentage = 0.85;
         } else {
-          dataset.backgroundColor = '#fe9a00';
           dataset.categoryPercentage = 0.9;
           dataset.barPercentage = 0.8;
         }
       }
     }
-  }, [loading, data.length, mainChartRef, selectionIndex]);
+  }, [loading, data.length, mainChartRef, selectionIndex, backgroundColor]);
 
   return (
     <div className={height}>

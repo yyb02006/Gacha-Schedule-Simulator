@@ -122,6 +122,28 @@ const createTooltipLiteral =
   </div>`;
   };
 
+function interpolateColor(color1: string, color2: string, factor: number) {
+  // factor: 0~1
+  const c1 = color1.startsWith('#') ? color1.slice(1) : color1;
+  const c2 = color2.startsWith('#') ? color2.slice(1) : color2;
+
+  const r1 = parseInt(c1.slice(0, 2), 16);
+  const g1 = parseInt(c1.slice(2, 4), 16);
+  const b1 = parseInt(c1.slice(4, 6), 16);
+
+  const r2 = parseInt(c2.slice(0, 2), 16);
+  const g2 = parseInt(c2.slice(2, 4), 16);
+  const b2 = parseInt(c2.slice(4, 6), 16);
+
+  const r = Math.round(r1 + (r2 - r1) * factor);
+  const g = Math.round(g1 + (g2 - g1) * factor);
+  const b = Math.round(b1 + (b2 - b1) * factor);
+
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
 const Legend = ({
   data,
   isTrySim,
@@ -188,9 +210,9 @@ const Legend = ({
       <div>
         성공 시 천장 도달 확률 :{' '}
         {bannerType === 'orient' || bannerType === 'contract' ? (
-          <span className="font-S-CoreDream-500 text-amber-500">천장 없음</span>
+          <span className="font-S-CoreDream-500 text-teal-500">천장 없음</span>
         ) : (
-          <span className="font-S-CoreDream-500 text-amber-500">
+          <span className="font-S-CoreDream-500 text-teal-500">
             {truncateToDecimals(safeNumberOrZero((winPityRewardObtained / bannerSuccess) * 100))}%
           </span>
         )}
@@ -230,6 +252,7 @@ const BannerSuccessTrialCounts = forwardRef<
         bannerWinGachaRuns,
         bannerSuccess,
         bannerHistogram,
+        pityHistogram,
         cumulativeUntilCutoff,
         successIndexUntilCutoff,
         bannerStartingCurrency,
@@ -249,9 +272,18 @@ const BannerSuccessTrialCounts = forwardRef<
   ) => {
     const [isFolded, setFolded] = useState(false);
     const padding = 16;
-    const { data, labels } = useRef({
+    const { data, labels, colors } = useRef({
       data: bannerHistogram,
       labels: Array.from({ length: bannerHistogram.length }, (_, index) => `${index + 1}`),
+      colors: winPityRewardObtained
+        ? pityHistogram.map((value, index) =>
+            interpolateColor(
+              '#fe9a00',
+              '#00bba7',
+              safeNumberOrZero(value / bannerHistogram[index]),
+            ),
+          )
+        : '#fe9a00',
     }).current;
     const mainChartRef = useRef<ChartJS<
       'bar',
@@ -320,9 +352,9 @@ const BannerSuccessTrialCounts = forwardRef<
           <div className={cls('relative space-y-1', isFolded ? 'hidden' : '')}>
             <BarChart
               labels={labels}
-              data={data}
+              data={bannerHistogram}
               colors={{
-                backgroundColor: '#fe9a00',
+                backgroundColor: colors,
                 borderColor: '#fe9a00',
                 hoverBackgroundColor: '#8e51ffCC',
                 hoverBorderColor: '#8e51ff',
@@ -348,6 +380,7 @@ const BannerSuccessTrialCounts = forwardRef<
                   backgroundColor: '#8e51ffCC',
                   borderColor: '#8e51ff',
                 }}
+                mainChartColors={{ backgroundColor: colors, borderColor: '#fe9a00' }}
                 padding={padding}
                 cutoffRatio={cutoffRatio}
                 cutoffPercentage={safeNumberOrZero(cumulativeUntilCutoff / bannerSuccess)}

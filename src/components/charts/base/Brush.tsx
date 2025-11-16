@@ -243,6 +243,7 @@ interface BaseBrushProps<T extends PartialChartType> {
     end: number;
   };
   colors: Record<'backgroundColor' | 'borderColor', string | string[]>;
+  mainChartColors?: Record<'backgroundColor' | 'borderColor', string | string[]>;
   padding: number;
   cutoffRatio: number;
   cutoffPercentage: number;
@@ -272,6 +273,7 @@ export default function Brush<T extends PartialChartType>({
   selection,
   selectionIndex,
   colors: { backgroundColor, borderColor },
+  mainChartColors,
   padding,
   cutoffRatio,
   cutoffPercentage,
@@ -309,16 +311,16 @@ export default function Brush<T extends PartialChartType>({
         const currentLength = selectionIndex.end - selectionIndex.start;
         const dataset = (mainChartRef as ChartRef<'bar'>).current?.data.datasets[0];
         if (dataset) {
-          if (currentLength > 450) {
-            dataset.backgroundColor = '#fe9a00CC';
+          if (currentLength > 700) {
             dataset.categoryPercentage = 1;
-            dataset.barPercentage = 1;
-          } else if (currentLength > 300) {
-            dataset.backgroundColor = '#fe9a00E6';
-            dataset.categoryPercentage = 0.95;
+            dataset.barPercentage = 0.95;
+          } else if (currentLength > 450) {
+            dataset.categoryPercentage = 1;
             dataset.barPercentage = 0.9;
+          } else if (currentLength > 300) {
+            dataset.categoryPercentage = 0.95;
+            dataset.barPercentage = 0.85;
           } else {
-            dataset.backgroundColor = '#fe9a00';
             dataset.categoryPercentage = 0.9;
             dataset.barPercentage = 0.8;
           }
@@ -347,16 +349,16 @@ export default function Brush<T extends PartialChartType>({
         const currentLength = selectionIndex.end - selectionIndex.start;
         const dataset = (mainChartRef as ChartRef<'bar'>).current?.data.datasets[0];
         if (dataset) {
-          if (currentLength > 450) {
-            dataset.backgroundColor = '#fe9a00CC';
+          if (currentLength > 700) {
             dataset.categoryPercentage = 1;
-            dataset.barPercentage = 1;
-          } else if (currentLength > 300) {
-            dataset.backgroundColor = '#fe9a00E6';
-            dataset.categoryPercentage = 0.95;
+            dataset.barPercentage = 0.95;
+          } else if (currentLength > 450) {
+            dataset.categoryPercentage = 1;
             dataset.barPercentage = 0.9;
+          } else if (currentLength > 300) {
+            dataset.categoryPercentage = 0.95;
+            dataset.barPercentage = 0.85;
           } else {
-            dataset.backgroundColor = '#fe9a00';
             dataset.categoryPercentage = 0.9;
             dataset.barPercentage = 0.8;
           }
