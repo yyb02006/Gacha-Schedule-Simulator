@@ -389,7 +389,6 @@ export default function BarChart({
 
       if (progressIndexRef.current >= selectionIndex.end) {
         setLoading(false);
-        chart.data.datasets[0].animation = { duration: 200 };
         return;
       }
 
