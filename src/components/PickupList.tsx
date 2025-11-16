@@ -626,13 +626,19 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           ({ operatorId: newOperatorId }) => newOperatorId === operatorId,
         );
 
+        const isSinglePityRewardLengthVaild = !newOperators[currentIndex].isPityReward
+          ? currentPityRewardOpersLength < 1
+          : currentPityRewardOpersLength < 2;
+
         const isSingleLimitPityEligible =
           (gachaType === 'collab' || gachaType === 'limited') &&
-          currentPityRewardOpersLength < 1 &&
-          currentOperatorType === 'limited';
-        const isSingleGachaEligible = gachaType === 'single' && currentPityRewardOpersLength < 1;
+          currentOperatorType === 'limited' &&
+          isSinglePityRewardLengthVaild;
+        const isSingleGachaEligible = gachaType === 'single' && isSinglePityRewardLengthVaild;
         const isRotationGachaEligible =
-          gachaType === 'rotation' && currentPityRewardOpersLength < 2;
+          gachaType === 'rotation' && !newOperators[currentIndex].isPityReward
+            ? currentPityRewardOpersLength < 2
+            : currentPityRewardOpersLength < 3;
         const isPityReward =
           currentOperatorRarity === 6 &&
           (isSingleLimitPityEligible || isSingleGachaEligible || isRotationGachaEligible);
@@ -1128,6 +1134,7 @@ export default function PickupList() {
           </AnimatePresence>
         </div>
       </div>
+      <SummaryBanner result={results} />
       <BannerAddModal
         isOpen={isModalOpen}
         bannerCount={pickupDatas.length}
@@ -1135,7 +1142,6 @@ export default function PickupList() {
         onSave={addBanner}
         onSavePreset={addBannerUsePreset}
       />
-      <SummaryBanner result={results} />
     </div>
   );
 }
