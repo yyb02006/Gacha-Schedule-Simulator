@@ -27,7 +27,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { BannerBadgeProps, operatorBadgeProps } from '#/constants/ui';
+import { bannerBadgeProps, operatorBadgeProps } from '#/constants/ui';
 import OperatorBadgeEditModal from '#/components/modals/OperatorBadgeEditModal';
 import Badge from '#/components/Badge';
 import BannerBadgeEditModal from '#/components/modals/BannerBadgeEditModal';
@@ -273,7 +273,7 @@ const BannerBadges = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHover, setIsHover] = useState(false);
-  const currentBadgeProp = BannerBadgeProps[gachaType].props;
+  const currentBadgeProp = bannerBadgeProps[gachaType].props;
   return (
     <>
       <motion.button

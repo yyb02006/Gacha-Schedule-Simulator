@@ -3,7 +3,7 @@ import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/modals/Modal';
 import { InsetNumberInput } from '#/components/PickupBanner';
 import { Dummy, ExtractPayloadFromAction, Operator } from '#/components/PickupList';
-import { BannerBadgeProps, gachaTypeButtons, rarityColor } from '#/constants/ui';
+import { bannerBadgeProps, gachaTypeButtons, rarityColor } from '#/constants/ui';
 import {
   cardVariants,
   fontPop,
@@ -217,7 +217,7 @@ const PresetModalContents = ({ onPresetClick }: { onPresetClick: (payload: Dummy
                 ) : null}
                 <div className="flex items-center justify-between gap-x-2 text-base">
                   {name}
-                  <Badge {...BannerBadgeProps[gachaType].props} />
+                  <Badge {...bannerBadgeProps[gachaType].props} />
                 </div>
               </motion.div>
             </motion.div>

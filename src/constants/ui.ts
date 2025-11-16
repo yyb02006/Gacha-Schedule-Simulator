@@ -45,7 +45,7 @@ export const operatorBadgeProps = {
   },
 } as const;
 
-export const BannerBadgeProps = {
+export const bannerBadgeProps = {
   limited: {
     id: 'limited',
     props: { name: '한정 배너', color: 'border-amber-400 text-amber-400' },
