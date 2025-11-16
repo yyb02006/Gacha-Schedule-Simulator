@@ -3,15 +3,17 @@
 import { ReactNode, RefObject, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
+import { cls } from '#/libs/utils';
 
 interface ModalProps {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
+  backdropBlur?: boolean;
   ref?: RefObject<HTMLDivElement | null>;
 }
 
-export default function Modal({ children, isOpen, onClose, ref }: ModalProps) {
+export default function Modal({ children, isOpen, onClose, backdropBlur, ref }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const isMouseDownOnTarget = useRef<boolean>(false);
@@ -48,7 +50,10 @@ export default function Modal({ children, isOpen, onClose, ref }: ModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 flex h-screen w-screen justify-center bg-[#00000090]"
+            className={cls(
+              'fixed top-0 left-0 flex h-screen w-screen justify-center bg-[#00000090]',
+              backdropBlur ? 'backdrop-blur-sm' : '',
+            )}
           >
             <div
               // tabIndex = -1의 의미는 포커스 가능한 요소이나 탭 순서 안에 안에 포함시키지는 않는다는 것
@@ -75,7 +80,7 @@ export default function Modal({ children, isOpen, onClose, ref }: ModalProps) {
               role="button"
               className="flex min-h-screen w-screen justify-center overflow-y-auto p-12"
             >
-              <div className="my-auto">{children}</div>
+              <div className="my-auto flex w-full justify-center">{children}</div>
             </div>
           </motion.div>
         )}

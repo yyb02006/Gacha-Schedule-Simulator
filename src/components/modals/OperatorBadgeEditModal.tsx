@@ -60,7 +60,7 @@ export default function OperatorBadgeEditModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="flex w-[360px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
+      <div className="flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
         <div className="flex items-center justify-between gap-x-6">
           <motion.h1
             variants={toOpacityZero}

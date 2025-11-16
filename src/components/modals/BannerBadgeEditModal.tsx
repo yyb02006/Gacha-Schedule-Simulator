@@ -44,7 +44,7 @@ const Help = ({ onClose }: { onClose: () => void }) => {
     >
       <div className="w-full max-w-[400px] cursor-default space-y-5 rounded-lg bg-[#202020] px-4 py-6">
         <div className="flex items-center justify-between">
-          <h1 className="font-S-CoreDream-500 text-lg">
+          <h1 className="font-S-CoreDream-500 text-xl">
             배너 종류별 <span className="text-red-400">오퍼레이터 제한</span>
           </h1>
           <CancelButton
@@ -144,7 +144,7 @@ export default function BannerBadgeEditModal({
         onClose();
       }}
     >
-      <div className="relative flex w-[360px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
+      <div className="relative flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
         <AnimatePresence>
           {isHelpOpen && (
             <Help

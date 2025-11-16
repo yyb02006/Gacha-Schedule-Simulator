@@ -418,9 +418,12 @@ export default function BannerAddModal({
       }}
     >
       <div
-        className={cls(isCustomMode ? '' : 'h-[calc(100vh-96px)]', 'rounded-xl bg-[#202020] p-6')}
+        className={cls(
+          isCustomMode ? '' : 'h-[calc(100vh-96px)]',
+          'w-full max-w-[480px] rounded-xl bg-[#202020] p-6',
+        )}
       >
-        <div className="flex h-full w-[360px] flex-1 flex-col gap-y-8 lg:w-[480px]">
+        <div className="flex h-full flex-1 flex-col gap-y-8">
           <div className="flex items-center justify-between gap-x-6">
             <motion.h1
               variants={toOpacityZero}
