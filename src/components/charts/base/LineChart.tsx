@@ -20,14 +20,14 @@ import {
   Point,
 } from 'chart.js';
 import { throttled } from 'chart.js/helpers';
-import { RefObject, useEffect, useRef, useState } from 'react';
+import { RefObject, useEffect, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Decimation, Filler);
 
 const adaptiveTickSpacing: Plugin<'line'> = {
   id: 'adaptiveTickSpacing',
-  afterLayout(chart) {
+  beforeBuildTicks(chart) {
     const axis = chart.scales.x;
     if (!axis || axis.type !== 'category') return;
 
@@ -243,8 +243,6 @@ export default function LineChart({
           crossAlign: 'center',
           align: 'inner',
           autoSkip: false,
-          padding: -2,
-          labelOffset: 6,
           font: { family: 'S-CoreDream-300', size: 11 },
           color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
           callback: (value, index) => {

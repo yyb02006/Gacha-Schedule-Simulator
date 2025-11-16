@@ -26,7 +26,7 @@ ChartJS.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend)
 
 const adaptiveTickSpacing: Plugin<'bar'> = {
   id: 'adaptiveTickSpacing',
-  afterLayout(chart) {
+  beforeBuildTicks(chart) {
     const axis = chart.scales.x;
     if (!axis || axis.type !== 'category') return;
 
@@ -265,9 +265,6 @@ export default function BarChart({
           crossAlign: 'center',
           align: 'center',
           autoSkip: false,
-          // 옵션 객체 프로퍼티에 값이 들어가면 그 레이아웃은 key를 가지게 되어서 이후 update('none')으로 업데이트 되어도 트랜지션이 작동함 => layout diff 계산 가능
-          padding: -2,
-          labelOffset: 6,
           font: { family: 'S-CoreDream-300', size: 11 },
           color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
           callback: function (this, value, index) {

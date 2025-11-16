@@ -28,7 +28,7 @@ ChartJS.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend)
 
 const adaptiveTickSpacing: Plugin<'bar' | 'line'> = {
   id: 'adaptiveTickSpacing',
-  afterLayout(chart) {
+  beforeBuildTicks(chart) {
     const axis = chart.scales.x;
     if (!axis || axis.type !== 'category') return;
 
@@ -292,8 +292,6 @@ export default function BarLineChart({
           crossAlign: 'center',
           align: 'center',
           autoSkip: false,
-          padding: -2,
-          labelOffset: 6,
           font: { family: 'S-CoreDream-300', size: 11 },
           color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
           callback: function (this, value, index) {
