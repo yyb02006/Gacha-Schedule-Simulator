@@ -112,71 +112,73 @@ export default function BannerBadgeEditModal({
           <div>
             뱃지 선택 시 <span className="text-amber-400">오퍼 목록 변화</span>
           </div>
-          {(['sixth', 'fifth', 'fourth'] as const).flatMap((rarity, index) => {
-            const rarityNumber = rarities[rarity];
-            if (isSimpleMode) {
-              return (
-                <div key={`${rarity}${index}`} className="flex gap-3">
-                  {(['pickupOpersCount', 'targetOpersCount'] as const).map((countType) => {
-                    const finalCount = {
-                      pickupOpersCount: targetLimit[rarity],
-                      targetOpersCount: Math.min(
-                        simpleMode.targetOpersCount[rarity],
-                        targetLimit[rarity],
-                      ),
-                    };
-                    return (
-                      <div
-                        key={`${rarity}${countType}`}
-                        className={cls(
-                          rarityColor[rarity].textColor,
-                          'font-S-CoreDream-300 text-[13px]',
-                        )}
-                      >
-                        {`${countType === 'pickupOpersCount' ? '픽업' : '목표'} ${rarityNumber}성`}{' '}
-                        <span
+          <div className="space-y-2">
+            {(['sixth', 'fifth', 'fourth'] as const).flatMap((rarity, index) => {
+              const rarityNumber = rarities[rarity];
+              if (isSimpleMode) {
+                return (
+                  <div key={`${rarity}${index}`} className="flex gap-3">
+                    {(['pickupOpersCount', 'targetOpersCount'] as const).map((countType) => {
+                      const finalCount = {
+                        pickupOpersCount: targetLimit[rarity],
+                        targetOpersCount: Math.min(
+                          simpleMode.targetOpersCount[rarity],
+                          targetLimit[rarity],
+                        ),
+                      };
+                      return (
+                        <div
+                          key={`${rarity}${countType}`}
                           className={cls(
-                            ['text-green-500', rarityColor[rarity].textColor, 'text-red-400'][
-                              Math.sign(simpleMode[countType][rarity] - finalCount[countType]) + 1
-                            ],
-                            'font-S-CoreDream-500',
+                            rarityColor[rarity].textColor,
+                            'font-S-CoreDream-300 text-[13px]',
                           )}
-                        >{`${simpleMode[countType][rarity]} ➜ ${finalCount[countType]}`}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            } else {
-              const excludedOperators = operatorsByRarity[rarity].filter(
-                (_, index) => index >= targetLimit[rarity],
-              );
-              return (
-                <div key={`${rarity}`} className="space-y-1 text-[13px]">
-                  <div className={cls(rarityColor[rarity].textColor, 'font-S-CoreDream-300')}>
-                    {`픽업 ${rarityNumber}성`}{' '}
-                    <span
-                      className={cls(
-                        ['text-green-500', rarityColor[rarity].textColor, 'text-red-400'][
-                          Math.sign(simpleMode.pickupOpersCount[rarity] - targetLimit[rarity]) + 1
-                        ],
-                        'font-S-CoreDream-500',
-                      )}
-                    >{`${simpleMode.pickupOpersCount[rarity]} ➜ ${targetLimit[rarity]}`}</span>
+                        >
+                          {`${countType === 'pickupOpersCount' ? '픽업' : '목표'} ${rarityNumber}성`}{' '}
+                          <span
+                            className={cls(
+                              ['text-green-500', rarityColor[rarity].textColor, 'text-red-400'][
+                                Math.sign(simpleMode[countType][rarity] - finalCount[countType]) + 1
+                              ],
+                              'font-S-CoreDream-500',
+                            )}
+                          >{`${simpleMode[countType][rarity]} ➜ ${finalCount[countType]}`}</span>
+                        </div>
+                      );
+                    })}
                   </div>
-                  {excludedOperators.map(({ name, operatorId }) => (
-                    <div
-                      key={operatorId}
-                      className={cls(rarityColor[rarity].textColor, 'font-S-CoreDream-400')}
-                    >
-                      {`${name} `}
-                      <span className="text-red-400">제외됨</span>
+                );
+              } else {
+                const excludedOperators = operatorsByRarity[rarity].filter(
+                  (_, index) => index >= targetLimit[rarity],
+                );
+                return (
+                  <div key={`${rarity}`} className="space-y-1 text-[13px]">
+                    <div className={cls(rarityColor[rarity].textColor, 'font-S-CoreDream-300')}>
+                      {`픽업 ${rarityNumber}성`}{' '}
+                      <span
+                        className={cls(
+                          ['text-green-500', rarityColor[rarity].textColor, 'text-red-400'][
+                            Math.sign(simpleMode.pickupOpersCount[rarity] - targetLimit[rarity]) + 1
+                          ],
+                          'font-S-CoreDream-500',
+                        )}
+                      >{`${simpleMode.pickupOpersCount[rarity]} ➜ ${targetLimit[rarity]}`}</span>
                     </div>
-                  ))}
-                </div>
-              );
-            }
-          })}
+                    {excludedOperators.map(({ name, operatorId }) => (
+                      <div
+                        key={operatorId}
+                        className={cls(rarityColor[rarity].textColor, 'font-S-CoreDream-400')}
+                      >
+                        {`${name} `}
+                        <span className="text-red-400">제외됨</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+            })}
+          </div>
         </div>
         <TypeSelectionButton
           name="수정완료"
