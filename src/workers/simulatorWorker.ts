@@ -53,6 +53,7 @@ interface SimulationResult {
     bannerTotalGachaRuns: number;
     bannerWinGachaRuns: number;
     bannerHistogram: number[];
+    pityHistogram: number[];
     anyPityRewardObtained: number;
     winPityRewardObtained: number;
     actualEntryCount: number;
@@ -358,6 +359,7 @@ const gachaRateSimulate = ({
       bannerTotalGachaRuns: 0,
       bannerWinGachaRuns: 0,
       bannerHistogram: [],
+      pityHistogram: [],
       anyPityRewardObtained: 0,
       winPityRewardObtained: 0,
       actualEntryCount: 0,
@@ -566,6 +568,7 @@ const gachaRateSimulate = ({
         if (currentBanner.bannerHistogram[i] === undefined) {
           // 히스토그램의 현재 가챠횟수가 undefined라면 0 삽입
           currentBanner.bannerHistogram[i] = 0;
+          currentBanner.pityHistogram[i] = 0;
         }
         // 연속 실패횟수 50번 부터 확률 2%씩 증가
         if (gachaType === 'limited' || gachaType === 'collab') {
@@ -588,7 +591,7 @@ const gachaRateSimulate = ({
         if (gachaType === 'limited' && i === pity) {
           // 한정 천장 달성 시 가챠와 별개로 확률업 한정 1개 증정
           // 이미 얻었는지 여부는 따지지 않음
-          logging && console.log('한정 300천장');
+          logging && console.log('🌈 한정 300천장');
           sixStats.pickupObtained++;
           sixStats.targetObtained++;
           sixStats.totalObtained++;
@@ -830,6 +833,9 @@ const gachaRateSimulate = ({
           result.bannerGachaRuns = i + 1;
           result.success = true;
           currentBanner.bannerHistogram[i]++;
+          if (result.isAnyPityRewardObtained) {
+            currentBanner.pityHistogram[i]++;
+          }
           break;
         } else if (i + 1 === gachaAttemptsLimit) {
           // 조건 완료하지 못한 채 최대값 달성 시 가챠 중지
@@ -960,7 +966,7 @@ const contractDummy: Dummy = {
     pickupChance: 100,
     simpleMode: {
       pickupOpersCount: { sixth: 4, fifth: 6, fourth: 0 },
-      targetOpersCount: { sixth: 0, fifth: 3, fourth: 0 },
+      targetOpersCount: { sixth: 4, fifth: 6, fourth: 0 },
     },
   },
   maxGachaAttempts: Infinity,
@@ -1076,7 +1082,7 @@ const collabDummy: Dummy = {
     pickupChance: 50,
     simpleMode: {
       pickupOpersCount: { sixth: 1, fifth: 2, fourth: 0 },
-      targetOpersCount: { sixth: 0, fifth: 2, fourth: 0 },
+      targetOpersCount: { sixth: 0, fifth: 1, fourth: 0 },
     },
   },
   maxGachaAttempts: Infinity,
@@ -1089,7 +1095,7 @@ const collabDummy: Dummy = {
 /**
  * 예상
  *
- * 6성 전부 뽑을 기대값: 145 회, 천장 없을 시 148.3회
+ * 6성 전부 뽑을 기대값: 145 회, 천장 없을 시 148.3회, 300뽑 이상 확률 7.22%
  * 5성 1/1 뽑을 기대값: 25회
  * 중앙값(median): 125 회
  * 표준편차(population): 86.86
@@ -1125,7 +1131,7 @@ const limitedDummy: Dummy = {
     pickupChance: 70,
     simpleMode: {
       pickupOpersCount: { sixth: 2, fifth: 1, fourth: 0 },
-      targetOpersCount: { sixth: 0, fifth: 1, fourth: 0 },
+      targetOpersCount: { sixth: 2, fifth: 1, fourth: 0 },
     },
   },
   maxGachaAttempts: Infinity,
@@ -1215,7 +1221,7 @@ const rotationDummy: Dummy = {
     pickupChance: 50,
     simpleMode: {
       pickupOpersCount: { sixth: 2, fifth: 3, fourth: 0 },
-      targetOpersCount: { sixth: 0, fifth: 3, fourth: 0 },
+      targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
     },
   },
   maxGachaAttempts: Infinity,
@@ -1254,11 +1260,11 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   const testArray2 = [limitedDummy, limitedDummy];
   const startTime = performance.now();
   const result = gachaRateSimulate({
-    pickupDatas: testArray1,
+    pickupDatas,
     gachaGoal,
     isSimpleMode,
     isTrySim,
-    simulationTry: 10000,
+    simulationTry,
     initialResource,
     probability,
     bannerFailureAction,
