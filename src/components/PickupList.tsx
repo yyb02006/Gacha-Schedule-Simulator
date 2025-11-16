@@ -897,21 +897,32 @@ export default function PickupList() {
     if (isRunning) return;
     const { isMobile, workerCount } = getOptimalWorkerCount();
     if (workerCount <= 0) return;
+    setIsRunning(true);
+
+    // 베이스 시드로부터 워커 수 만큼의 시드 생성
     const uintArray = new Uint32Array(1);
     crypto.getRandomValues(uintArray);
     const baseSeed = uintArray[0];
-    const seeds = deriveWorkerSeeds(4001629188, workerCount);
-    setIsRunning(true);
+    const seeds = deriveWorkerSeeds(baseSeed, workerCount);
+
+    // active 상태의 배너만 추출
     const activePickupDatas = pickupDatas.filter(({ active }) => active);
 
+    // 워커, 프로미스 배열 초기화
     const workers: Worker[] = [];
     const promises: Promise<GachaSimulationResult>[] = [];
+
+    // 사전 설정 준비
     const { simulationTry, probability, showBannerImage, bannerFailureAction } = options;
     const {
       current: { gachaGoal, initialResource },
     } = initialInputs;
+
+    // 모바일 환경 시도횟수 설정 (최대 가챠횟수 1천만회로 잡고 배너 하나에 150가챠정도 한다고 가정하고 나눠서 가능한 시뮬레이션 반복 횟수 설정)
     const expectedTryBySingleCycle = activePickupDatas.length * 150;
     const mobileSimulationTry = Math.floor(safeNumberOrZero(10000000 / expectedTryBySingleCycle));
+
+    // 워커에 전달할 포스트메세지 생성 함수
     const getPostMessage = (index: number): WorkerInput => {
       const inputTry = isMobile ? mobileSimulationTry : simulationTry;
       const base = Math.floor(inputTry / workerCount);
@@ -935,6 +946,7 @@ export default function PickupList() {
       };
     };
 
+    // 워커 생성 및 워커 배열에 전달, 시뮬레이션 실행 후 사전에 생성한 프로미스 배열에 전달
     for (let index = 0; index < workerCount; index++) {
       const worker = new Worker(new URL('#/workers/simulatorWorker', import.meta.url), {
         type: 'module',
@@ -953,6 +965,7 @@ export default function PickupList() {
 
     const results = await Promise.all(promises);
 
+    // 후처리
     // 인덱스 넣고 더하는 과정에서 acc에 존재하지 않는 배열 길이가 나오면 undefined + number이므로 NaN이 되어버림
     const preMergedResult = results.reduce<GachaSimulationMergedResult>(
       (acc, current) => {
@@ -971,32 +984,33 @@ export default function PickupList() {
             bannerType,
           } = currentBanner;
           current.total.totalGachaRuns += bannerTotalGachaRuns;
-          if (acc.perBanner[index]) {
-            acc.perBanner[index].bannerSuccess += bannerSuccess;
-            acc.perBanner[index].bannerTotalGachaRuns += bannerTotalGachaRuns;
-            acc.perBanner[index].bannerWinGachaRuns += bannerWinGachaRuns;
-            acc.perBanner[index].anyPityRewardObtained += anyPityRewardObtained;
-            acc.perBanner[index].winPityRewardObtained += winPityRewardObtained;
-            acc.perBanner[index].actualEntryCount += actualEntryCount;
-            acc.perBanner[index].bannerStartingCurrency += bannerStartingCurrency;
-            acc.perBanner[index].currencyShortageFailure += currencyShortageFailure;
-            acc.perBanner[index].maxAttemptsFailure += maxAttemptsFailure;
-            acc.perBanner[index].additionalResource = additionalResource;
-            acc.perBanner[index].bannerType = bannerType;
+          const currentAccBanner = acc.perBanner[index];
+          if (currentAccBanner) {
+            currentAccBanner.bannerSuccess += bannerSuccess;
+            currentAccBanner.bannerTotalGachaRuns += bannerTotalGachaRuns;
+            currentAccBanner.bannerWinGachaRuns += bannerWinGachaRuns;
+            currentAccBanner.anyPityRewardObtained += anyPityRewardObtained;
+            currentAccBanner.winPityRewardObtained += winPityRewardObtained;
+            currentAccBanner.actualEntryCount += actualEntryCount;
+            currentAccBanner.bannerStartingCurrency += bannerStartingCurrency;
+            currentAccBanner.currencyShortageFailure += currencyShortageFailure;
+            currentAccBanner.maxAttemptsFailure += maxAttemptsFailure;
+            currentAccBanner.additionalResource = additionalResource;
+            currentAccBanner.bannerType = bannerType;
             for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
-              const accBannerHistogram = acc.perBanner[index].bannerHistogram[i] ?? 0;
+              const accBannerHistogram = currentAccBanner.bannerHistogram[i] ?? 0;
               const CurrentBannerHistogram = currentBanner.bannerHistogram[i] ?? 0;
 
-              acc.perBanner[index].bannerHistogram[i] = accBannerHistogram + CurrentBannerHistogram;
+              currentAccBanner.bannerHistogram[i] = accBannerHistogram + CurrentBannerHistogram;
 
-              const accPityHistogram = acc.perBanner[index].pityHistogram[i] ?? 0;
+              const accPityHistogram = currentAccBanner.pityHistogram[i] ?? 0;
               const CurrentPityHistogram = currentBanner.pityHistogram[i] ?? 0;
 
-              acc.perBanner[index].pityHistogram[i] = accPityHistogram + CurrentPityHistogram;
+              currentAccBanner.pityHistogram[i] = accPityHistogram + CurrentPityHistogram;
             }
             for (const rarityString of rarityStrings) {
               for (const obtainedType of obtainedTypes) {
-                acc.perBanner[index][rarityString][obtainedType] +=
+                currentAccBanner[rarityString][obtainedType] +=
                   currentBanner[rarityString][obtainedType];
                 acc.total.statistics[rarityString][obtainedType] +=
                   currentBanner[rarityString][obtainedType];
@@ -1071,7 +1085,6 @@ export default function PickupList() {
       }),
     };
     console.log(mergedResult);
-    console.log(seeds);
     console.log(baseSeed);
     setResults(mergedResult);
     setIsRunning(false);
