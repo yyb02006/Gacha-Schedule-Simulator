@@ -1,15 +1,104 @@
 import Modal from '#/components/modals/Modal';
 import { GachaType } from '#/types/types';
-import { useState } from 'react';
-import { motion } from 'motion/react';
+import { useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import CancelButton from '#/components/buttons/CancelButton';
-import { toOpacityZero } from '#/constants/variants';
+import { cardVariants, toOpacityZero } from '#/constants/variants';
 import Badge from '#/components/Badge';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
-import { BannerBadgeProps, rarityColor } from '#/constants/ui';
+import { bannerBadgeProps, operatorBadgeProps, rarityColor } from '#/constants/ui';
 import { Dummy } from '#/components/PickupList';
-import { operatorLimitByBannerType, rarities } from '#/constants/variables';
+import { operatorLimitByBannerType, rarities, rarityStrings } from '#/constants/variables';
 import { cls, getOperatorsByRarity } from '#/libs/utils';
+
+const Help = ({ onClose }: { onClose: () => void }) => {
+  const badgeKeys = Object.keys(bannerBadgeProps) as (keyof typeof bannerBadgeProps)[];
+  const isMouseDownOnTarget = useRef<boolean>(false);
+  return (
+    <motion.div
+      tabIndex={-1}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          isMouseDownOnTarget.current = true;
+        } else {
+          isMouseDownOnTarget.current = false;
+        }
+      }}
+      onMouseUp={(e) => {
+        if (e.target === e.currentTarget && isMouseDownOnTarget.current) {
+          onClose();
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') {
+          onClose();
+        }
+      }}
+      role="button"
+      key="modal-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed top-0 left-0 z-1000 flex size-full cursor-pointer items-center justify-center bg-transparent backdrop-blur-sm"
+    >
+      <div className="w-full max-w-[400px] cursor-default space-y-5 rounded-lg bg-[#202020] px-4 py-6">
+        <div className="flex items-center justify-between">
+          <h1 className="font-S-CoreDream-500 text-lg">
+            배너 종류별 <span className="text-red-400">오퍼레이터 제한</span>
+          </h1>
+          <CancelButton
+            handleCancel={() => {
+              onClose();
+            }}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-4 text-sm">
+          {badgeKeys.map((badgeKey) => (
+            <motion.div
+              key={badgeKey}
+              variants={cardVariants}
+              initial="exit"
+              animate="idle"
+              exit="exit"
+              style={{ boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030' }}
+              className="rounded-xl p-2"
+            >
+              <motion.div
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="space-y-2"
+              >
+                <Badge {...bannerBadgeProps[badgeKey].props} animation={false} />
+                <div className="flex gap-3">
+                  {rarityStrings.map((rarityString) => (
+                    <div key={`${rarityString}${badgeKey}`}>
+                      <span className="font-S-CoreDream-300">{`${rarities[rarityString]}성`}</span>:{' '}
+                      <span
+                        className={cls(
+                          operatorBadgeProps.rarity[rarityString].props.color,
+                          'font-S-CoreDream-500',
+                        )}
+                      >
+                        {operatorLimitByBannerType[badgeKey][rarityString]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+        <div className="font-S-CoreDream-300 text-sm">
+          모든 배너에는 <span className="text-red-400">최소 한 명이상</span>의 오퍼레이터가
+          필요합니다.
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 export default function BannerBadgeEditModal({
   isOpen,
@@ -25,10 +114,11 @@ export default function BannerBadgeEditModal({
   onEditConfirmClick: (selectedGachaType: GachaType) => void;
 }) {
   const { operators, pickupDetails, gachaType } = pickupData;
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [currentGachaType, setCurrentGachaType] = useState<GachaType>(gachaType);
-  const { selected, unSelected } = Object.values(BannerBadgeProps).reduce<{
-    selected: (typeof BannerBadgeProps)[keyof typeof BannerBadgeProps];
-    unSelected: (typeof BannerBadgeProps)[keyof typeof BannerBadgeProps][];
+  const { selected, unSelected } = Object.values(bannerBadgeProps).reduce<{
+    selected: (typeof bannerBadgeProps)[keyof typeof bannerBadgeProps];
+    unSelected: (typeof bannerBadgeProps)[keyof typeof bannerBadgeProps][];
   }>(
     (acc, current) => {
       if (current.id === currentGachaType) {
@@ -38,7 +128,7 @@ export default function BannerBadgeEditModal({
       }
     },
     {
-      selected: BannerBadgeProps[currentGachaType],
+      selected: bannerBadgeProps[currentGachaType],
       unSelected: [],
     },
   );
@@ -54,16 +144,33 @@ export default function BannerBadgeEditModal({
         onClose();
       }}
     >
-      <div className="flex w-[360px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
+      <div className="relative flex w-[360px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
+        <AnimatePresence>
+          {isHelpOpen && (
+            <Help
+              onClose={() => {
+                setIsHelpOpen(false);
+              }}
+            />
+          )}
+        </AnimatePresence>
         <div className="flex items-center justify-between gap-x-6">
           <motion.h1
             variants={toOpacityZero}
             initial="exit"
             animate="idle"
             exit="exit"
-            className="font-S-CoreDream-700 text-2xl"
+            className="font-S-CoreDream-700 flex items-center gap-2 text-2xl"
           >
-            태그 <span className="text-amber-400">수정</span>
+            <div>
+              태그 <span className="text-amber-400">수정</span>
+            </div>
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              className="font-S-CoreDream-400 flex aspect-square size-[26px] cursor-pointer items-center justify-center rounded-full border border-[#606060] text-[16px] text-[#606060] hover:border-amber-400 hover:text-amber-400"
+            >
+              <p className="select-none">?</p>
+            </button>
           </motion.h1>
           <CancelButton
             handleCancel={() => {
