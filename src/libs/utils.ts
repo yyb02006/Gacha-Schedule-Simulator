@@ -345,3 +345,56 @@ export function interpolateColor(color1: string, color2: string, factor: number)
 
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+/**
+ * 지정한 시드로 재현 가능한 난수 생성 함수를 반환
+ *
+ * @param {number} [seed=0x12345678] - 초기 시드 값. 동일한 시드로 생성하면 항상 동일한 난수 시퀀스 생성
+ * @returns {() => number} 0 이상 1 미만의 난수를 반환하는 함수
+ *
+ * @example
+ * const rng = createRNG(12345);
+ * console.log(rng()); // 항상 동일한 값 출력
+ * console.log(rng()); // 다음 난수 출력, 항상 동일한 순서
+ *
+ * @example
+ * // 기본 시드 사용
+ * const rngDefault = createRNG();
+ * console.log(rngDefault()); // 재현 가능, 기본 시드 기반
+ */
+export function createRNG(seed = 0x12345678) {
+  return function rng() {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * 기본 시드(baseSeed)로부터 재현 가능한 n개의 워커용 시드를 생성
+ *
+ * @param {number} baseSeed - 시드 파생의 기준이 되는 기본 시드
+ * @param {number} n - 생성할 워커용 시드 개수
+ * @returns {number[]} 0~0xFFFFFFFF 범위의 워커용 시드 배열
+ *
+ * @example
+ * const workerSeeds = deriveWorkerSeeds(12345, 3);
+ * console.log(workerSeeds); // [예: 305419896, 2596069104, 267242409]
+ *
+ * @example
+ * // 동일한 baseSeed와 n으로 다시 호출하면 항상 동일한 시드 배열 반환
+ * const seeds1 = deriveWorkerSeeds(42, 5);
+ * const seeds2 = deriveWorkerSeeds(42, 5);
+ * console.log(seeds1); // [같은 값]
+ * console.log(seeds2); // [같은 값]
+ */
+export function deriveWorkerSeeds(baseSeed: number, n: number): number[] {
+  const seeds: number[] = [];
+  const tempRNG = createRNG(baseSeed);
+  for (let i = 0; i < n; i++) {
+    seeds.push(Math.floor(tempRNG() * 0xffffffff));
+  }
+  return seeds;
+}
