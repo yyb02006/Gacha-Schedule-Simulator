@@ -1,0 +1,340 @@
+'use client';
+
+import Badge from '#/components/Badge';
+import CancelButton from '#/components/buttons/CancelButton';
+import Modal from '#/components/modals/Modal';
+import { bannerBadgeProps, rarityColor } from '#/constants/ui';
+import { cls } from '#/libs/utils';
+import Image from 'next/image';
+import { useState } from 'react';
+
+const GachaSystemInfoModalContent = ({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) => {
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        onClose();
+      }}
+      backdropBlur
+    >
+      <div className="relative flex w-full max-w-[1280px] flex-col gap-y-4 rounded-xl bg-[#202020] py-8">
+        <div className="flex items-center justify-between px-6">
+          <h1 className="font-S-CoreDream-500 text-2xl">
+            <span className="text-amber-400">가챠 룰</span>에 대한 안내
+          </h1>
+          <CancelButton
+            handleCancel={() => {
+              onClose();
+            }}
+          />
+        </div>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch">
+            <div className="my-[2px] w-[5px] self-stretch bg-amber-500" />
+            <span className="ml-1.5">
+              기본적인 희귀도별 <span className="text-amber-400">등장 확률</span>
+            </span>
+          </h1>
+          <div className="flex gap-x-6 gap-y-2">
+            <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+              <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                6성
+              </div>
+              <span className="font-S-CoreDream-500 text-xl">2%</span>
+            </div>
+            <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+              <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                5성
+              </div>
+              <span className="font-S-CoreDream-500 text-xl">8%</span>
+            </div>
+            <div className={cls(rarityColor['fourth'].textColor, 'flex items-center gap-x-2')}>
+              <div className="text-standard flex items-center justify-center rounded-full border border-violet-400 px-2 py-1">
+                4성
+              </div>
+              <span className="font-S-CoreDream-500 text-xl">50%</span>
+            </div>
+            <div className={cls(rarityColor['third'].textColor, 'flex items-center gap-x-2')}>
+              <div className="text-standard flex items-center justify-center rounded-full border border-sky-500 px-2 py-1">
+                3성
+              </div>
+              <span className="font-S-CoreDream-500 text-xl">40%</span>
+            </div>
+          </div>
+        </section>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch">
+            <div className="my-[2px] w-[5px] self-stretch bg-amber-500" />
+            <span className="ml-1.5">
+              <span className="text-amber-400">첫 10회 5성 이상 등장 확정</span> 시스템
+            </span>
+          </h1>
+          <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
+            <li>
+              9회 뽑기까지 5성 이상이 등장하지 않았다면 10회에서는 5성 이상의 등장이 확정됩니다.
+            </li>
+            <li className="space-y-2">
+              <p>
+                10회에서 5성 이상의 등장이 확정될 때, 5성과 6성 각각의 등장 확률은 아래와 같습니다.
+              </p>
+              <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
+                <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                    6성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">2%</span>
+                </div>
+                <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                    5성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">98%</span>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </section>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch">
+            <div className="my-[2px] w-[5px] self-stretch bg-amber-500" />
+            <span className="ml-1.5">
+              <span className="text-amber-400">6성 등장 확률 누적 상승</span> 시스템
+            </span>
+          </h1>
+          <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
+            <li>
+              6성 오퍼레이터가 n회 연속으로 등장하지 않았을 때, n회만큼의 스택을 가지게 됩니다.
+            </li>
+            <li className="space-y-1">
+              <p>
+                6성 오퍼레이터가 50회 연속으로 등장하지 않아 스택이 50회 쌓인 경우, 51회부터 6성
+                등장 확률이 2%p씩 증가하여 98회 연속 실패 시 100%가 됩니다.
+              </p>
+              <p className="text-sm text-[#bababa]">
+                70회 연속 실패 확률 = 0.0037%, 80회 연속 실패 확률 = 0.0000488%
+              </p>
+            </li>
+            <li>6성 오퍼레이터 등장 시 스택은 0으로, 6성 등장 확률은 2%로 초기화됩니다.</li>
+            <li className="mb-4 space-y-2">
+              <p>
+                이번 배너에서 스택이 남겨진 채로 다음 배너 진입시 연속으로 등장하지 않은 스택은 아래
+                배너종류에 한해 서로 이월됩니다.
+              </p>
+              <div className="font-S-CoreDream-400 flex gap-x-2">
+                {(['single', 'rotation', 'orient', 'contract'] as const).map((bannerType) => (
+                  <Badge
+                    key={bannerType}
+                    {...bannerBadgeProps[bannerType].props}
+                    animation={false}
+                  />
+                ))}
+              </div>
+            </li>
+            <li className="space-y-2">
+              <p>
+                아래 한정 배너들은 서로간에도, 같은 종류의 배너 간에도 스택이 이월되지 않습니다.
+              </p>
+              <div className="font-S-CoreDream-400 flex gap-x-2">
+                {(['limited', 'collab'] as const).map((bannerType) => (
+                  <Badge
+                    key={bannerType}
+                    {...bannerBadgeProps[bannerType].props}
+                    animation={false}
+                  />
+                ))}
+              </div>
+            </li>
+          </ol>
+        </section>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch">
+            <div className="my-[2px] w-[5px] self-stretch bg-amber-500" />
+            <span className="ml-1.5">
+              6성 누적 확률 상승 시스템 <span className="text-amber-400">보정 등장 확률</span>
+            </span>
+          </h1>
+          <p className="text-standard font-S-CoreDream-300">
+            따라서 우리가 실제로 기대할 수 있는 기본적인 확률은 아래와 같으며, 배너에 따라서 천장
+            시스템이 있을 수 있으므로 약간의 차이가 있을 수 있습니다.
+          </p>
+          <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
+            <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+              <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                6성
+              </div>
+              <span className="font-S-CoreDream-500 text-xl">2.89%</span>
+            </div>
+            <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+              <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                5성
+              </div>
+              <span className="font-S-CoreDream-500 text-xl">8%</span>
+            </div>
+            <div className={cls(rarityColor['fourth'].textColor, 'flex items-center gap-x-2')}>
+              <div className="text-standard flex items-center justify-center rounded-full border border-violet-400 px-2 py-1">
+                4성
+              </div>
+              <span className="font-S-CoreDream-500 text-xl">50%</span>
+            </div>
+            <div className={cls(rarityColor['third'].textColor, 'flex items-center gap-x-2')}>
+              <div className="text-standard flex items-center justify-center rounded-full border border-sky-500 px-2 py-1">
+                3성
+              </div>
+              <span className="font-S-CoreDream-500 text-xl">39.11%</span>
+            </div>
+          </div>
+        </section>
+        <div className="my-3 flex items-center justify-between px-6">
+          <h1 className="font-S-CoreDream-500 text-2xl">
+            배너 종류별 <span className="text-red-400">천장 및 픽업 확률</span>에 대한 안내
+          </h1>
+        </div>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
+            <div className="my-[2px] w-[5px] self-stretch bg-sky-500" />
+            <span className="ml-1.5 text-sky-500">단일 통상 배너</span>
+          </h1>
+          <Image
+            src="/images/banner_single.jpg"
+            width={1230}
+            height={530}
+            alt="rotation"
+            className="rounded-lg"
+          />
+          <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
+            <li>
+              한 명의 통상 오퍼레이터를 정해진 기간 동안 확률상승으로 얻을 수 있는 배너입니다.
+            </li>
+            <li>약 1년 뒤 한 번 복각할 수 있습니다.</li>
+            <li className="mb-4 space-y-2">
+              <p>
+                픽업 오퍼레이터의 구성과 각 희귀도 당첨 시 픽업 등장 확률은 아래와 같으며, 4성
+                오퍼레이터는 구성에 포함되어있지 않을 수 있습니다.
+              </p>
+              <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
+                <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                    6성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">1명 / 50%</span>
+                </div>
+                <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                    5성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">2명 / 50%</span>
+                </div>
+                <div className={cls(rarityColor['fourth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-purple-400 px-2 py-1">
+                    4성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">1명 / 20%</span>
+                  <span className="text-sm">(미확정)</span>
+                </div>
+              </div>
+            </li>
+            <li>본 시뮬레이터에서도 배너를 구성할 시 위의 제한 조건을 따릅니다.</li>
+            <li>
+              단일 통상 배너에서 150회까지 픽업 6성 오퍼레이터를 획득하지 못했을 시, 이후 등장하는
+              6성 오퍼레이터는 단 한 번 해당 배너의 픽업 6성 오퍼레이터로 확정됩니다.
+            </li>
+          </ol>
+        </section>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
+            <div className="my-[2px] w-[5px] self-stretch bg-violet-400" />
+            <span className="ml-1.5 text-violet-400">로테이션 배너</span>
+          </h1>
+          <Image
+            src="/images/banner_rotation.jpg"
+            width={1230}
+            height={530}
+            alt="rotation"
+            className="rounded-lg"
+          />
+          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+        </section>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
+            <div className="my-[2px] w-[5px] self-stretch bg-amber-400" />
+            <span className="ml-1.5 text-amber-400">한정 배너</span>
+          </h1>
+          <Image
+            src="/images/banner_limited.jpg"
+            width={1230}
+            height={530}
+            alt="rotation"
+            className="rounded-lg"
+          />
+          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+        </section>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
+            <div className="my-[2px] w-[5px] self-stretch bg-rose-400" />
+            <span className="ml-1.5 text-rose-400">콜라보 배너</span>
+          </h1>
+          <Image
+            src="/images/banner_collab.jpg"
+            width={1230}
+            height={530}
+            alt="rotation"
+            className="rounded-lg"
+          />
+          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+        </section>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
+            <div className="my-[2px] w-[5px] self-stretch bg-orange-500" />
+            <span className="ml-1.5 text-orange-500">지향 배너(3중 배너)</span>
+          </h1>
+          <Image
+            src="/images/banner_orient.jpg"
+            width={1230}
+            height={530}
+            alt="rotation"
+            className="rounded-lg"
+          />
+          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+        </section>
+        <section className="space-y-5 bg-[#303030] px-6 py-5">
+          <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
+            <div className="my-[2px] w-[5px] self-stretch bg-teal-500" />
+            <span className="ml-1.5 text-teal-500">협약 배너(4중 배너)</span>
+          </h1>
+          <Image
+            src="/images/banner_contract.jpg"
+            width={1230}
+            height={530}
+            alt="rotation"
+            className="rounded-lg"
+          />
+          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+        </section>
+      </div>
+    </Modal>
+  );
+};
+
+export default function GachaSystemInfoModal() {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="absolute top-4 right-6">
+      <button
+        onClick={() => setIsOpen(true)}
+        className="font-S-CoreDream-500 group flex cursor-pointer items-center justify-center gap-1.5 text-sm text-[#606060] hover:text-amber-400"
+      >
+        <p className="select-none">Rule</p>
+        <div className="font-S-CoreDream-400 flex aspect-square size-[22px] cursor-pointer items-center justify-center rounded-full border border-[#606060] group-hover:border-amber-400">
+          <p className="select-none">?</p>
+        </div>
+      </button>
+      <GachaSystemInfoModalContent isOpen={isOpen} onClose={() => setIsOpen(false)} />
+    </div>
+  );
+}
