@@ -16,6 +16,7 @@ interface ModalProps {
 export default function Modal({ children, isOpen, onClose, backdropBlur, ref }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const isMouseDownOnTarget = useRef<boolean>(false);
 
   useEffect(() => {
@@ -61,14 +62,17 @@ export default function Modal({ children, isOpen, onClose, backdropBlur, ref }: 
               ref={modalRef}
               tabIndex={-1}
               onMouseDown={(e) => {
-                if (e.target === e.currentTarget) {
+                if (e.target === e.currentTarget || e.target === wrapperRef.current) {
                   isMouseDownOnTarget.current = true;
                 } else {
                   isMouseDownOnTarget.current = false;
                 }
               }}
               onMouseUp={(e) => {
-                if (e.target === e.currentTarget && isMouseDownOnTarget.current) {
+                if (
+                  (e.target === e.currentTarget || e.target === wrapperRef.current) &&
+                  isMouseDownOnTarget.current
+                ) {
                   onClose();
                 }
               }}
@@ -80,7 +84,9 @@ export default function Modal({ children, isOpen, onClose, backdropBlur, ref }: 
               role="button"
               className="flex min-h-screen w-screen justify-center overflow-y-auto p-12"
             >
-              <div className="my-auto flex w-full justify-center">{children}</div>
+              <div ref={wrapperRef} className="my-auto flex w-full justify-center">
+                {children}
+              </div>
             </div>
           </motion.div>
         )}
