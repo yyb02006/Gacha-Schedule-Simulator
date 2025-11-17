@@ -846,7 +846,7 @@ const PickupOperatorDetail = ({
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              max={6}
+              max={5}
               onFocus={(e: FocusEvent<HTMLInputElement>) => {
                 if (e.currentTarget.value === '0') {
                   e.currentTarget.setSelectionRange(0, 1);
@@ -862,7 +862,7 @@ const PickupOperatorDetail = ({
               }}
               onBlur={(e: FocusEvent<HTMLInputElement>) => {
                 const newQty = stringToNumber(e.currentTarget.value);
-                const clampQty = newQty > 6 ? 6 : newQty;
+                const clampQty = newQty > 5 ? 5 : newQty;
                 onChangeOperatorDetails({
                   operatorId,
                   currentQty: isNaN(newQty) ? undefined : clampQty,
