@@ -79,15 +79,16 @@ const GachaSystemInfoModalContent = ({
           </h1>
           <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
             <li>
-              9회 뽑기까지 5성 이상이 등장하지 않았다면{' '}
+              9회 뽑기까지 5성 이상의 오퍼레이터가 등장하지 않았다면{' '}
               <span className="font-S-CoreDream-400 text-amber-400">
-                10회에서는 5성 이상의 등장이 확정
+                10회에서는 5성 이상의 오퍼레이터 등장이 확정
               </span>
               됩니다.
             </li>
             <li className="space-y-2">
               <p>
-                10회에서 5성 이상의 등장이 확정될 때, 5성과 6성 각각의 등장 확률은 아래와 같습니다.
+                10회에서 5성 이상의 오퍼레이터 등장이 확정될 때, 5성과 6성 오퍼레이터 각각의 등장
+                확률은 아래와 같습니다.
               </p>
               <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
                 <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
