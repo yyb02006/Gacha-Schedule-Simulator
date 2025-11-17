@@ -303,9 +303,16 @@ export default function Brush<T extends PartialChartType>({
       }
 
       const filteredData = data.slice(selectionIndex.start, selectionIndex.end);
+      const filteredLabels = labels.slice(selectionIndex.start, selectionIndex.end);
+      const filteredColors = mainChartColors?.backgroundColor.slice(
+        selectionIndex.start,
+        selectionIndex.end,
+      );
 
       mainChartRef.current.data.datasets[0].data = filteredData;
-      mainChartRef.current.data.labels = labels.slice(selectionIndex.start, selectionIndex.end);
+      mainChartRef.current.data.labels = filteredLabels;
+      mainChartRef.current.data.datasets[0].backgroundColor =
+        filteredColors || mainChartRef.current.data.datasets[0].backgroundColor;
 
       if (mainChartRef.current?.data.datasets[0].type === 'bar' && data.length > 20) {
         const currentLength = selectionIndex.end - selectionIndex.start;
@@ -343,8 +350,6 @@ export default function Brush<T extends PartialChartType>({
         selectionIndex.end = Math.round((data.length - 1) * selection.end) + 1;
       }
 
-      const filteredData = data.slice(selectionIndex.start, selectionIndex.end);
-
       if (mainChartRef.current?.data.datasets[0].type === 'bar' && data.length > 20) {
         const currentLength = selectionIndex.end - selectionIndex.start;
         const dataset = (mainChartRef as ChartRef<'bar'>).current?.data.datasets[0];
@@ -366,8 +371,17 @@ export default function Brush<T extends PartialChartType>({
       }
 
       if ((selection.end <= cutoffRatio || data.length < 500) && mainChartRef.current) {
+        const filteredData = data.slice(selectionIndex.start, selectionIndex.end);
+        const filteredLabels = labels.slice(selectionIndex.start, selectionIndex.end);
+        const filteredColors = mainChartColors?.backgroundColor.slice(
+          selectionIndex.start,
+          selectionIndex.end,
+        );
+
         mainChartRef.current.data.datasets[0].data = filteredData;
-        mainChartRef.current.data.labels = labels.slice(selectionIndex.start, selectionIndex.end);
+        mainChartRef.current.data.labels = filteredLabels;
+        mainChartRef.current.data.datasets[0].backgroundColor =
+          filteredColors || mainChartRef.current.data.datasets[0].backgroundColor;
         mainChartRef.current.update();
       }
 
