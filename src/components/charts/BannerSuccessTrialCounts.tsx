@@ -20,6 +20,7 @@ import { LegendData } from '#/components/charts/BannerEntryCurrency';
 import FoldButton from '#/components/buttons/MaximizeButton';
 import { motion } from 'motion/react';
 import { GachaType } from '#/types/types';
+import { toOpacityZero } from '#/constants/variants';
 
 function LazyRender({
   children,
@@ -162,7 +163,12 @@ const Legend = ({
   const cumulativeProbability =
     safeNumberOrZero(filteredData.reduce((a, b) => a + b, 0) / bannerSuccess) * 100;
   return (
-    <div className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-[13px]">
+    <motion.div
+      variants={toOpacityZero}
+      initial="exit"
+      animate="idle"
+      className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-[13px]"
+    >
       <div className="min-w-[144px]">
         구간 누적 확률 :{' '}
         <span className="font-S-CoreDream-500 text-amber-500">
@@ -211,7 +217,7 @@ const Legend = ({
         최단 성공 차수 :{' '}
         <span className="font-S-CoreDream-500 text-amber-500">{minIndex + 1}회</span>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
