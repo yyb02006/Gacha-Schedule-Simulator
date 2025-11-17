@@ -31,6 +31,8 @@
   --font-S-CoreDream-400: 'S-CoreDream-400', sans-serif;
   --font-S-CoreDream-500: 'S-CoreDream-500', sans-serif;
   --font-S-CoreDream-700: 'S-CoreDream-700', sans-serif;
+  --text-standard: 0.9375rem;
+  --text-standard--line-height: calc(1.375 / 0.9375);
 }
 
 @media (prefers-color-scheme: dark) {

@@ -806,7 +806,7 @@ const PickupOperatorDetail = ({
               onChangeOperatorDetails({ name: e.currentTarget.value, operatorId });
             }}
             value={localName}
-            className="w-full text-[15px]"
+            className="text-standard w-full"
           />
           <OperatorBadges
             isPityReward={isPityReward}

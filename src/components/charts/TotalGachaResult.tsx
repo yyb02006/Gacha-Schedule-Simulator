@@ -67,7 +67,7 @@ const RarityResultDetail = ({
   rarity: OperatorRarityForString;
 }) => {
   return (
-    <ul className="font-S-CoreDream-500 flex-1 space-y-[6px] text-[15px] whitespace-nowrap">
+    <ul className="font-S-CoreDream-500 text-standard flex-1 space-y-[6px] whitespace-nowrap">
       <h1 className={cls(rarityColor[rarity].textColor, 'mb-[10px]')}>
         {`${rarities[rarity]}성 결과`} (
         {truncateToDecimals(
@@ -152,7 +152,7 @@ const TotalGachaResult = forwardRef<
             </div>
             <div className="flex flex-1 flex-wrap gap-4">
               <RarityResultDetail rarity="fourth" result={result} />
-              <div className="font-S-CoreDream-500 flex-1 space-y-1 text-[15px] whitespace-nowrap">
+              <div className="font-S-CoreDream-500 text-standard flex-1 space-y-1 whitespace-nowrap">
                 <h1 className="mb-[10px] text-sky-500">
                   3성 결과 (
                   {truncateToDecimals(
