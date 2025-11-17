@@ -23,7 +23,7 @@ const GachaSystemInfoModalContent = ({
       }}
       backdropBlur
     >
-      <div className="relative flex w-full max-w-[1280px] flex-col gap-y-4 rounded-xl bg-[#202020] py-8">
+      <div className="relative flex w-full max-w-[1280px] flex-col gap-y-5 rounded-xl bg-[#202020] py-8">
         <div className="flex items-center justify-between px-6">
           <h1 className="font-S-CoreDream-500 text-2xl">
             <span className="text-amber-400">가챠 룰</span>에 대한 안내
@@ -36,7 +36,7 @@ const GachaSystemInfoModalContent = ({
         </div>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
-            <div className="my-[2px] w-[5px] self-stretch bg-amber-500" />
+            <div className="my-[3px] w-[5px] self-stretch bg-amber-500" />
             <span className="ml-1.5">
               기본적인 희귀도별 <span className="text-amber-400">등장 확률</span>
             </span>
@@ -70,7 +70,7 @@ const GachaSystemInfoModalContent = ({
         </section>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
-            <div className="my-[2px] w-[5px] self-stretch bg-amber-500" />
+            <div className="my-[3px] w-[5px] self-stretch bg-amber-500" />
             <span className="ml-1.5">
               <span className="text-amber-400">첫 10회 5성 이상 등장 확정</span> 시스템
             </span>
@@ -102,7 +102,7 @@ const GachaSystemInfoModalContent = ({
         </section>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
-            <div className="my-[2px] w-[5px] self-stretch bg-amber-500" />
+            <div className="my-[3px] w-[5px] self-stretch bg-amber-500" />
             <span className="ml-1.5">
               <span className="text-amber-400">6성 등장 확률 누적 상승</span> 시스템
             </span>
@@ -154,7 +154,7 @@ const GachaSystemInfoModalContent = ({
         </section>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
-            <div className="my-[2px] w-[5px] self-stretch bg-amber-500" />
+            <div className="my-[3px] w-[5px] self-stretch bg-amber-500" />
             <span className="ml-1.5">
               6성 누적 확률 상승 시스템 <span className="text-amber-400">보정 등장 확률</span>
             </span>
@@ -197,7 +197,7 @@ const GachaSystemInfoModalContent = ({
         </div>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
-            <div className="my-[2px] w-[5px] self-stretch bg-sky-500" />
+            <div className="my-[3px] w-[5px] self-stretch bg-sky-500" />
             <span className="ml-1.5 text-sky-500">단일 통상 배너</span>
           </h1>
           <Image
@@ -209,7 +209,8 @@ const GachaSystemInfoModalContent = ({
           />
           <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
             <li>
-              한 명의 통상 오퍼레이터를 정해진 기간 동안 확률상승으로 얻을 수 있는 배너입니다.
+              한 명의 신규 통상 6성 오퍼레이터를 정해진 기간 동안 확률상승으로 얻을 수 있는
+              배너입니다.
             </li>
             <li>약 1년 뒤 한 번 복각할 수 있습니다.</li>
             <li className="mb-4 space-y-2">
@@ -240,15 +241,19 @@ const GachaSystemInfoModalContent = ({
               </div>
             </li>
             <li>본 시뮬레이터에서도 배너를 구성할 시 위의 제한 조건을 따릅니다.</li>
+            <h1 className="font-S-CoreDream-500 mt-5 -ml-4 flex items-stretch space-x-1.5 text-base">
+              <span className="text-teal-400">❱❱❱</span>
+              <span className="text-teal-400">천장 시스템</span>
+            </h1>
             <li>
-              단일 통상 배너에서 150회까지 픽업 6성 오퍼레이터를 획득하지 못했을 시, 이후 등장하는
-              6성 오퍼레이터는 단 한 번 해당 배너의 픽업 6성 오퍼레이터로 확정됩니다.
+              단일 통상 배너에서 단 한 번, 150회까지 픽업 6성 오퍼레이터를 획득하지 못했을 시, 이후
+              등장하는 6성 오퍼레이터는 해당 배너의 픽업 6성 오퍼레이터로 확정됩니다.
             </li>
           </ol>
         </section>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
-            <div className="my-[2px] w-[5px] self-stretch bg-violet-400" />
+            <div className="my-[3px] w-[5px] self-stretch bg-violet-400" />
             <span className="ml-1.5 text-violet-400">로테이션 배너</span>
           </h1>
           <Image
@@ -258,11 +263,55 @@ const GachaSystemInfoModalContent = ({
             alt="rotation"
             className="rounded-lg"
           />
-          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+          <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
+            <li>
+              두 명의 통상 6성 오퍼레이터를 확률상승으로 얻을 수 있는 2주동안 유지되는 배너입니다.
+            </li>
+            <li>
+              2주마다 다른 오퍼레이터 풀로 변경되며, 출시된 지 일정 시간이 지난 오퍼레이터들로
+              구성되어 있습니다.
+            </li>
+            <li className="mb-4 space-y-2">
+              <p>픽업 오퍼레이터의 구성과 각 희귀도 당첨 시 픽업 등장 확률은 아래와 같습니다.</p>
+              <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
+                <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                    6성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">2명 / 50%</span>
+                </div>
+                <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                    5성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">3명 / 50%</span>
+                </div>
+              </div>
+            </li>
+            <li>본 시뮬레이터에서도 배너를 구성할 시 위의 제한 조건을 따릅니다.</li>
+            <h1 className="font-S-CoreDream-500 mt-5 -ml-4 flex items-stretch space-x-1.5 text-base">
+              <span className="text-teal-400">❱❱❱</span>
+              <span className="text-teal-400">천장 시스템</span>
+            </h1>
+            <li className="leading-7">
+              <p>
+                로테이션 배너에서 150회까지 획득하지 못한 6성 오퍼레이터가 존재할 시, 이후 등장하는
+                6성 오퍼레이터는 해당 배너의 픽업 6성 오퍼레이터로 확정됩니다. 300회 이후에도 얻지
+                못한 픽업 6성 오퍼레이터가 남아있을 시, 이후 등장하는 6성 오퍼레이터는 해당 배너의
+                아직 얻지 못한 픽업 6성 오퍼레이터로 확정됩니다.
+              </p>
+              <p className="font-S-CoreDream-400 text-[13px] leading-5 text-red-400">
+                ⚠ 획득하지 못한 픽업 오퍼레이터가 있을 시 해당 오퍼레이터로 확정되는 지, 획득
+                여부에 상관 없이 150회 이후 둘 중 하나로 확정되는지에 대해서 확실하지 않습니다.
+                그러나 본 시뮬레이션에서는 천장 시스템의 문맥상 위 내용으로 해석하고 있으며, PRTS
+                홈페이지 로테이션 가챠 시뮬레이터 룰의 내용과 동일합니다.
+              </p>
+            </li>
+          </ol>
         </section>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
-            <div className="my-[2px] w-[5px] self-stretch bg-amber-400" />
+            <div className="my-[3px] w-[5px] self-stretch bg-amber-400" />
             <span className="ml-1.5 text-amber-400">한정 배너</span>
           </h1>
           <Image
@@ -272,11 +321,48 @@ const GachaSystemInfoModalContent = ({
             alt="rotation"
             className="rounded-lg"
           />
-          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+          <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
+            <li>
+              신규 한정 6성 오퍼레이터와 신규 통상 6성 오퍼레이터를 한 명씩 정해진 기간 동안
+              확률상승으로 얻을 수 있는 배너입니다.
+            </li>
+            <li>
+              복각은 없으며 한정 6성 오퍼레이터의 경우, 약 1년 뒤 같은 종류의 한정 이벤트 배너(춘절,
+              N년, 여름, N.5년)에서 가챠 1회 실행시마다 얻을 수 있는 재화 300개로 교환 가능합니다.
+            </li>
+            <li className="mb-4 space-y-2">
+              <p>픽업 오퍼레이터의 구성과 각 희귀도 당첨 시 픽업 등장 확률은 아래와 같습니다.</p>
+              <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
+                <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                    6성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">2명 / 70%</span>
+                </div>
+                <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                    5성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">1명 / 50%</span>
+                </div>
+              </div>
+            </li>
+            <li>본 시뮬레이터에서도 배너를 구성할 시 위의 제한 조건을 따릅니다.</li>
+            <h1 className="font-S-CoreDream-500 mt-5 -ml-4 flex items-stretch space-x-1.5 text-base">
+              <span className="text-teal-400">❱❱❱</span>
+              <span className="text-teal-400">적용된 천장 시스템</span>
+            </h1>
+            <li>
+              한정 배너에서 가챠 300회를 시도하면 6성 한정 오퍼레이터를 보너스로 얻을 수 있습니다.
+              이는 가챠 1회마다 얻을 수 있는 [헤드헌팅 데이터 계약]을 모아서 지난 한정 오페레이터와
+              교환하는 것과는 별개이며, 가챠에 대한 확률 확정이 아닌 추가로 주는 보상이기 때문에
+              300회 가챠 결과와도 별개입니다.
+            </li>
+          </ol>
         </section>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
-            <div className="my-[2px] w-[5px] self-stretch bg-rose-400" />
+            <div className="my-[3px] w-[5px] self-stretch bg-rose-400" />
             <span className="ml-1.5 text-rose-400">콜라보 배너</span>
           </h1>
           <Image
@@ -286,11 +372,50 @@ const GachaSystemInfoModalContent = ({
             alt="rotation"
             className="rounded-lg"
           />
-          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+          <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
+            <li>
+              신규 한정 6성 오퍼레이터 한 명과 신규 한정 5성 오퍼레이터 두 명을 정해진 기간 동안
+              확률상승으로 얻을 수 있는 배너입니다.
+            </li>
+            <li>
+              일반적으로 복각은 없으며, 이후 다시 해당 픽업 캐릭터를 얻을 수 있는 방법도 존재하지
+              않지만, 같은 IP와 다시 콜라보를 할 경우 복각 가능성이 있습니다.
+            </li>
+            <li className="mb-4 space-y-2">
+              <p>픽업 오퍼레이터의 구성과 각 희귀도 당첨 시 픽업 등장 확률은 아래와 같습니다.</p>
+              <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
+                <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                    6성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">1명 / 50%</span>
+                </div>
+                <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                    5성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">2명 / 50%</span>
+                </div>
+              </div>
+            </li>
+            <li>본 시뮬레이터에서도 배너를 구성할 시 위의 제한 조건을 따릅니다.</li>
+            <h1 className="font-S-CoreDream-500 mt-5 -ml-4 flex items-stretch space-x-1.5 text-base">
+              <span className="text-teal-400">❱❱❱</span>
+              <span className="text-teal-400">적용된 천장 시스템</span>
+            </h1>
+            <li>
+              콜라보 배너에서 가챠 119회를 시도하는 동안 픽업 한정 6성 오퍼레이터를 얻지 못했다면,
+              120회 가챠 결과로 픽업 한정 6성 오퍼레이터의 등장이 확정됩니다.
+            </li>
+            <li>
+              5성 등장 시 등장한 5성 오퍼레이터가 이번 배너에서 처음으로 얻는 픽업 5성이라면, 그
+              다음으로 등장하는 5성은 픽업 5성 둘 중 얻지 못한 쪽으로 확정됩니다.
+            </li>
+          </ol>
         </section>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
-            <div className="my-[2px] w-[5px] self-stretch bg-orange-500" />
+            <div className="my-[3px] w-[5px] self-stretch bg-orange-500" />
             <span className="ml-1.5 text-orange-500">지향 배너(3중 배너)</span>
           </h1>
           <Image
@@ -300,11 +425,43 @@ const GachaSystemInfoModalContent = ({
             alt="rotation"
             className="rounded-lg"
           />
-          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+          <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
+            <li>
+              주어진 통상 6성 오퍼레이터 6명 중 3명, 주어진 통상 5성 오퍼레이터 6명 중 3명을 선택해
+              정해진 기간동안 확률상승으로 얻을 수 있는 배너입니다.
+            </li>
+            <li>
+              6성 오퍼레이터가 등장했으나, 픽업 오퍼레이터가 아닌 6성을 얻게 되는 픽뚫이 존재하지
+              않습니다. 5성의 픽업 확률도 50%가 아닌 60%로 10%p 더 높습니다.
+            </li>
+            <li className="mb-4 space-y-2">
+              <p>픽업 오퍼레이터의 구성과 각 희귀도 당첨 시 픽업 등장 확률은 아래와 같습니다.</p>
+              <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
+                <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                    6성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">3명 / 100%</span>
+                </div>
+                <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                    5성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">3명 / 60%</span>
+                </div>
+              </div>
+            </li>
+            <li>본 시뮬레이터에서도 배너를 구성할 시 위의 제한 조건을 따릅니다.</li>
+            <h1 className="font-S-CoreDream-500 mt-5 -ml-4 flex items-stretch space-x-1.5 text-base">
+              <span className="text-teal-400">❱❱❱</span>
+              <span className="text-teal-400">적용된 천장 시스템</span>
+            </h1>
+            <li>천장이 없는 배너입니다.</li>
+          </ol>
         </section>
         <section className="space-y-5 bg-[#303030] px-6 py-5">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
-            <div className="my-[2px] w-[5px] self-stretch bg-teal-500" />
+            <div className="my-[3px] w-[5px] self-stretch bg-teal-500" />
             <span className="ml-1.5 text-teal-500">협약 배너(4중 배너)</span>
           </h1>
           <Image
@@ -314,7 +471,39 @@ const GachaSystemInfoModalContent = ({
             alt="rotation"
             className="rounded-lg"
           />
-          <div className="flex gap-x-6 gap-y-2">천장 및 픽업</div>
+          <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
+            <li>
+              통상 6성 오퍼레이터 4명, 통상 5성 오퍼레이터 6명을 정해진 기간동안 확률상승으로 얻을
+              수 있는 배너입니다.
+            </li>
+            <li>
+              위기협약 이벤트 시기에 같이 진행되며, 6성 오퍼레이터와 5성 오퍼레이터 모두 픽뚫이
+              존재하지 않습니다.
+            </li>
+            <li className="mb-4 space-y-2">
+              <p>픽업 오퍼레이터의 구성과 각 희귀도 당첨 시 픽업 등장 확률은 아래와 같습니다.</p>
+              <div className="font-S-CoreDream-400 flex gap-x-6 gap-y-2">
+                <div className={cls(rarityColor['sixth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
+                    6성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">4명 / 100%</span>
+                </div>
+                <div className={cls(rarityColor['fifth'].textColor, 'flex items-center gap-x-2')}>
+                  <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
+                    5성
+                  </div>
+                  <span className="font-S-CoreDream-500 text-xl">6명 / 100%</span>
+                </div>
+              </div>
+            </li>
+            <li>본 시뮬레이터에서도 배너를 구성할 시 위의 제한 조건을 따릅니다.</li>
+            <h1 className="font-S-CoreDream-500 mt-5 -ml-4 flex items-stretch space-x-1.5 text-base">
+              <span className="text-teal-400">❱❱❱</span>
+              <span className="text-teal-400">적용된 천장 시스템</span>
+            </h1>
+            <li>천장이 없는 배너입니다.</li>
+          </ol>
         </section>
       </div>
     </Modal>
