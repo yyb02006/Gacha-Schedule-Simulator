@@ -25,7 +25,7 @@ const GachaSystemInfoModalContent = ({
       }}
       backdropBlur
     >
-      <div className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 rounded-xl bg-[#202020] py-8">
+      <div className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 rounded-xl bg-[#202020] pt-6 pb-8">
         <div className="flex items-center justify-between px-6">
           <h1 className="font-S-CoreDream-500 text-2xl">
             <span className="text-amber-400">가챠 룰</span>에 대한 안내
@@ -605,8 +605,8 @@ export default function GachaSystemInfoModal() {
         onClick={() => setIsOpen(true)}
         className="font-S-CoreDream-500 group flex cursor-pointer items-center justify-center gap-1.5 text-sm text-[#606060] hover:text-amber-400"
       >
-        <p className="select-none">Rule</p>
-        <div className="font-S-CoreDream-400 flex aspect-square size-[22px] cursor-pointer items-center justify-center rounded-full border border-[#606060] group-hover:border-amber-400">
+        <p className="select-none">Rules</p>
+        <div className="font-S-CoreDream-500 flex aspect-square size-[22px] cursor-pointer items-center justify-center rounded-full border border-[#606060] group-hover:border-amber-400">
           <p className="select-none">?</p>
         </div>
       </button>
