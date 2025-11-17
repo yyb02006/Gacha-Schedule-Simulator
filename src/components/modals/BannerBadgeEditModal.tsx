@@ -167,7 +167,7 @@ export default function BannerBadgeEditModal({
             </div>
             <button
               onClick={() => setIsHelpOpen(true)}
-              className="font-S-CoreDream-400 flex aspect-square size-[26px] cursor-pointer items-center justify-center rounded-full border border-[#606060] text-[16px] text-[#606060] hover:border-amber-400 hover:text-amber-400"
+              className="font-S-CoreDream-500 flex aspect-square size-[26px] cursor-pointer items-center justify-center rounded-full border border-[#606060] text-[18px] text-[#606060] hover:border-amber-400 hover:text-amber-400"
             >
               <p className="select-none">?</p>
             </button>
