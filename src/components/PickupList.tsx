@@ -562,9 +562,10 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       return modifyBannerDetails(id, (pickupBanner) => {
         const { maxGachaAttempts, minGachaAttempts } = pickupBanner;
         if (target === 'max') {
+          const newAttempts = attempts > 3000 ? 3000 : attempts;
           return {
-            maxGachaAttempts: attempts,
-            minGachaAttempts: attempts < minGachaAttempts ? attempts : minGachaAttempts,
+            maxGachaAttempts: newAttempts,
+            minGachaAttempts: newAttempts < minGachaAttempts ? attempts : minGachaAttempts,
             firstSixthTry: false,
           };
         } else if (target === 'min') {
@@ -901,7 +902,9 @@ export default function PickupList() {
 
   const runSimulation = async () => {
     if (isRunning) return;
-    const { isMobile, workerCount } = getOptimalWorkerCount();
+    // const { isMobile, workerCount } = getOptimalWorkerCount();
+    const { isMobile } = getOptimalWorkerCount();
+    const workerCount = 1;
     if (workerCount <= 0) return;
     setIsRunning(true);
 

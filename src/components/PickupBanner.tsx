@@ -40,7 +40,7 @@ import FoldButton from '#/components/buttons/MaximizeButton';
 import ChevronDown from '#/icons/ChevronDown.svg';
 import ChevronUp from '#/icons/ChevronUp.svg';
 import Tag from '#/icons/Tag.svg';
-import { operatorLimitByBannerType, rarities } from '#/constants/variables';
+import { operatorLimitByBannerType } from '#/constants/variables';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -61,7 +61,7 @@ const MaxAttempts = ({
       isFirstSixthTry={isFirstSixthTry}
       className="text-amber-400"
       inputWidth="w-10"
-      max={9999}
+      max={3000}
       showAttemptsSign
     >
       <TypeSelectionButton
