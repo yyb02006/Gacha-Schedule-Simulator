@@ -527,7 +527,7 @@ const gachaRateSimulate = ({
 
         targetOperators = acc;
       }
-      const systemGachaLimit = 9999;
+      const systemGachaLimit = 3000;
       const gachaAttemptsLimit = isSimpleMode
         ? systemGachaLimit
         : maxGachaAttempts === Infinity
@@ -1141,7 +1141,7 @@ const limitedDummy: Dummy = {
   },
   maxGachaAttempts: Infinity,
   minGachaAttempts: 0,
-  firstSixthTry: false,
+  firstSixthTry: true,
   additionalResource: { simpleMode: 16000, extendedMode: 0 },
   active: true,
 };
@@ -1266,12 +1266,12 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   const testArray2 = [limitedDummy, limitedDummy];
   const startTime = performance.now();
   const result = gachaRateSimulate({
-    seed,
-    pickupDatas,
+    pickupDatas: [limitedDummy],
     gachaGoal,
+    seed,
     isSimpleMode,
     isTrySim,
-    simulationTry,
+    simulationTry: 1,
     initialResource,
     probability,
     bannerFailureAction,
