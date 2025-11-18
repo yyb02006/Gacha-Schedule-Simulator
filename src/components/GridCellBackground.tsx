@@ -28,10 +28,11 @@ export default function GridCellBackground({
                 stroke={strokeColor}
                 strokeWidth="1"
                 strokeDasharray={cellSize}
-                strokeDashoffset={cellSize}
+                strokeDashoffset={0}
                 initial={{ strokeDashoffset: cellSize }}
                 animate={{ strokeDashoffset: 0 }}
-                transition={{ delay: i * 0.15, duration: 0.5 }}
+                exit={{ strokeDashoffset: -cellSize }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
               />
             );
           })}
@@ -50,9 +51,10 @@ export default function GridCellBackground({
                 stroke={strokeColor}
                 strokeWidth="1"
                 strokeDasharray={cellSize}
-                strokeDashoffset={cellSize}
+                strokeDashoffset={0}
                 initial={{ strokeDashoffset: cellSize }}
                 animate={{ strokeDashoffset: 0 }}
+                exit={{ strokeDashoffset: -cellSize }}
                 transition={{ delay: i * 0.15, duration: 0.5 }}
               />
             );
