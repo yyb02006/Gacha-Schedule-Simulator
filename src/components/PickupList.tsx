@@ -26,6 +26,7 @@ import {
   safeNumberOrZero,
   truncateToDecimals,
 } from '#/libs/utils';
+import LoadingSpinner from '#/components/LoadingSpinner';
 
 export type Operator = {
   operatorId: string;
@@ -898,15 +899,15 @@ export default function PickupList() {
 
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const runSimulation = async () => {
-    if (isRunning) return;
+    if (isLoading) return;
     // const { isMobile, workerCount } = getOptimalWorkerCount();
     const { isMobile } = getOptimalWorkerCount();
     const workerCount = 1;
     if (workerCount <= 0) return;
-    setIsRunning(true);
+    setIsLoading(true);
 
     // 베이스 시드로부터 워커 수 만큼의 시드 생성
     const uintArray = new Uint32Array(1);
@@ -1096,55 +1097,58 @@ export default function PickupList() {
     console.log(mergedResult);
     console.log(baseSeed);
     setResults(mergedResult);
-    setIsRunning(false);
+    setIsLoading(false);
   };
 
   return (
-    <div className="mt-12 flex space-x-6">
-      <div className="flex w-[984px] flex-col items-center space-y-6">
-        <div className="mb-12 flex space-x-16">
-          <ResetButton onResetClick={() => {}} />
-          <PlayButton
-            onPlayClick={() => {
-              runSimulation();
-            }}
+    <>
+      <div className="mt-12 flex space-x-6">
+        <div className="flex w-[984px] flex-col items-center space-y-6">
+          <div className="mb-12 flex space-x-16">
+            <ResetButton onResetClick={() => {}} />
+            <PlayButton
+              onPlayClick={() => {
+                runSimulation();
+              }}
+            />
+          </div>
+          <OptionBar
+            isTrySim={isTrySim}
+            setIsGachaSim={setIsGachaSim}
+            isSimpleMode={isSimpleMode}
+            setIsSimpleMode={setIsSimpleMode}
+            initialInputs={initialInputs.current}
+            options={options}
+            setOptions={setOptions}
           />
+          <div className="flex w-full flex-col gap-y-6">
+            <AddBannerCard isAddPrevent={pickupDatas.length >= 20} openModal={openModal} />
+            <AnimatePresence>
+              {pickupDatas.map((pickupData, index) => (
+                <PickupBanner
+                  key={pickupData.id}
+                  pickupData={pickupData}
+                  dispatch={dispatch}
+                  index={index}
+                  isSimpleMode={isSimpleMode}
+                  isTrySim={isTrySim}
+                  bannerCount={pickupDatas.length}
+                  isImageVisible={options.showBannerImage}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
-        <OptionBar
-          isTrySim={isTrySim}
-          setIsGachaSim={setIsGachaSim}
-          isSimpleMode={isSimpleMode}
-          setIsSimpleMode={setIsSimpleMode}
-          initialInputs={initialInputs.current}
-          options={options}
-          setOptions={setOptions}
+        <SummaryBanner result={results} />
+        <BannerAddModal
+          isOpen={isModalOpen}
+          bannerCount={pickupDatas.length}
+          onClose={closeModal}
+          onSave={addBanner}
+          onSavePreset={addBannerUsePreset}
         />
-        <div className="flex w-full flex-col gap-y-6">
-          <AddBannerCard isAddPrevent={pickupDatas.length >= 20} openModal={openModal} />
-          <AnimatePresence>
-            {pickupDatas.map((pickupData, index) => (
-              <PickupBanner
-                key={pickupData.id}
-                pickupData={pickupData}
-                dispatch={dispatch}
-                index={index}
-                isSimpleMode={isSimpleMode}
-                isTrySim={isTrySim}
-                bannerCount={pickupDatas.length}
-                isImageVisible={options.showBannerImage}
-              />
-            ))}
-          </AnimatePresence>
-        </div>
       </div>
-      <SummaryBanner result={results} />
-      <BannerAddModal
-        isOpen={isModalOpen}
-        bannerCount={pickupDatas.length}
-        onClose={closeModal}
-        onSave={addBanner}
-        onSavePreset={addBannerUsePreset}
-      />
-    </div>
+      <LoadingSpinner isLoading={isLoading} />
+    </>
   );
 }
