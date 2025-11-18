@@ -153,70 +153,6 @@ export default function SimulatorOptionModal({
           <CancelButton handleCancel={onClose} />
         </div>
         <div className="flex flex-col gap-y-6">
-          {/*           <div className="flex flex-col gap-y-3">
-            <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-              가챠확률 수정
-            </motion.div>
-            <div className="flex gap-x-3">
-              <InsetNumberInput
-                name="한정 확률"
-                className="text-sm text-orange-400"
-                onInputBlur={(e) => {
-                  const { value } = e.currentTarget;
-                  if (!value) return;
-                  setLocalOptions((p) => ({
-                    ...p,
-                    probability: {
-                      ...p.probability,
-                      limited: stringToNumber(value),
-                    },
-                  }));
-                }}
-                currentValue={localOptions.probability.limited.toString()}
-                max={100}
-                animate
-              >
-                <motion.div
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="relative top-[2px] mr-3 -ml-2 text-sm select-none"
-                >
-                  %
-                </motion.div>
-              </InsetNumberInput>
-              <InsetNumberInput
-                name="통상 확률"
-                className="text-sm text-sky-500"
-                onInputBlur={(e) => {
-                  const { value } = e.currentTarget;
-                  if (!value) return;
-                  setLocalOptions((p) => ({
-                    ...p,
-                    probability: {
-                      ...p.probability,
-                      normal: stringToNumber(value),
-                    },
-                  }));
-                }}
-                currentValue={localOptions.probability.normal.toString()}
-                max={100}
-                animate
-              >
-                {' '}
-                <motion.div
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="relative top-[2px] mr-3 -ml-2 text-sm select-none"
-                >
-                  %
-                </motion.div>
-              </InsetNumberInput>
-            </div>
-          </div> */}
           <div className="flex flex-col gap-y-3">
             <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
               시뮬레이션 횟수
@@ -224,18 +160,22 @@ export default function SimulatorOptionModal({
             <InsetNumberInput
               name=""
               className="text-sky-500"
-              onInputBlur={(e) => {
+              onInputBlur={(e, syncLocalValue) => {
                 const { value } = e.currentTarget;
                 if (!value) return;
                 const newValue = value.replace(/,/g, '');
-                setLocalOptions((p) => ({
-                  ...p,
-                  simulationTry: stringToNumber(newValue),
-                }));
+                if (stringToNumber(newValue) <= 500000) {
+                  setLocalOptions((p) => ({
+                    ...p,
+                    simulationTry: stringToNumber(newValue),
+                  }));
+                } else {
+                  syncLocalValue(localOptions.simulationTry.toLocaleString());
+                }
               }}
               currentValue={localOptions.simulationTry.toLocaleString()}
               inputWidth="w-20"
-              max={100000}
+              max={500000}
               animate
             >
               <motion.div
