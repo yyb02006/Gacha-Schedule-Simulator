@@ -899,7 +899,8 @@ export default function PickupList() {
   };
 
   const progressRef = useRef({ progressTry: 0, total: 0, gachaRuns: 0, success: 0 });
-  const [progress, setProgress] = useState({ progressTry: 0, total: 0, gachaRuns: 0, success: 0 });
+  const isRunning = useRef(false);
+  const [runningTime, setRunningTime] = useState<number | null>(null);
   const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -910,6 +911,7 @@ export default function PickupList() {
     // const workerCount = 1;
     if (workerCount <= 0) return;
     setIsLoading(true);
+    isRunning.current = true;
 
     // 베이스 시드로부터 워커 수 만큼의 시드 생성
     const uintArray = new Uint32Array(1);
@@ -1169,6 +1171,7 @@ export default function PickupList() {
             initialInputs={initialInputs.current}
             options={options}
             setOptions={setOptions}
+            runningTime={runningTime}
           />
           <div className="flex w-full flex-col gap-y-6">
             <AddBannerCard isAddPrevent={pickupDatas.length >= 20} openModal={openModal} />
@@ -1197,7 +1200,12 @@ export default function PickupList() {
           onSavePreset={addBannerUsePreset}
         />
       </div>
-      <LoadingSpinner isLoading={isLoading} progressRef={progressRef} />
+      <LoadingSpinner
+        isLoading={isLoading}
+        isRunning={isRunning}
+        progressRef={progressRef}
+        setRunningTime={setRunningTime}
+      />
     </>
   );
 }

@@ -9,7 +9,7 @@ import { ChangeEvent, Dispatch, FocusEvent, SetStateAction, useState } from 'rea
 import SimulatorTypeButton from '#/components/buttons/SimulatorTypeButton';
 import ToggleButton from '#/components/buttons/ToggleButton';
 import { InitialInputs, SimulationOptions } from '#/components/PickupList';
-import { clamp, normalizeNumberString, stringToNumber } from '#/libs/utils';
+import { clamp, normalizeNumberString, stringToNumber, truncateToDecimals } from '#/libs/utils';
 import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 import Modal from '#/components/modals/Modal';
 import CancelButton from '#/components/buttons/CancelButton';
@@ -399,6 +399,7 @@ export default function OptionBar({
   initialInputs,
   options,
   setOptions,
+  runningTime,
 }: {
   isTrySim: boolean;
   setIsGachaSim: Dispatch<SetStateAction<boolean>>;
@@ -407,6 +408,7 @@ export default function OptionBar({
   initialInputs: InitialInputs;
   options: SimulationOptions;
   setOptions: Dispatch<SetStateAction<SimulationOptions>>;
+  runningTime: number | null;
 }) {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -434,9 +436,21 @@ export default function OptionBar({
         className="font-S-CoreDream-500 flex justify-between"
       >
         <div className="flex items-center gap-x-2">
-          <span>
-            <span className="text-amber-400">플레이 버튼(▶)</span>을 눌러 시뮬레이션을 시작해보세요
-          </span>
+          {runningTime ? (
+            <span className="space-x-2.5">
+              <span>
+                시뮬레이션 <span className="text-amber-400">완료</span>
+              </span>
+              <span className="font-S-CoreDream-300 text-sm">
+                ⏱ {truncateToDecimals(runningTime / 1000)}초
+              </span>
+            </span>
+          ) : (
+            <span>
+              <span className="text-amber-400">플레이 버튼(▶)</span>을 눌러 시뮬레이션을
+              시작해보세요
+            </span>
+          )}
           <button
             onClick={() => isSettingsModalOpen || setIsHelpOpen(true)}
             className="font-S-CoreDream-500 flex aspect-square size-[22px] cursor-pointer items-center justify-center rounded-full border border-[#606060] text-[15px] text-[#606060] hover:border-amber-400 hover:text-amber-400"

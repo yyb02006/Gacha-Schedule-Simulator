@@ -1,7 +1,7 @@
 'use client';
 
 import { useIsMount } from '#/hooks/useIsMount';
-import { RefObject, useEffect, useRef, useState } from 'react';
+import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
 import {
   animate,
   AnimatePresence,
@@ -401,23 +401,29 @@ const LoadingSpinnerContent = ({
 
 export default function LoadingSpinner({
   isLoading,
+  isRunning,
   progressRef,
+  setRunningTime,
 }: {
   isLoading: boolean;
+  isRunning: RefObject<boolean>;
   progressRef: RefObject<{
     progressTry: number;
     total: number;
     gachaRuns: number;
     success: number;
   }>;
+  setRunningTime: Dispatch<SetStateAction<number | null>>;
 }) {
   const MIN_DURATION = 1000; // 최소 로딩 시간(ms)
+  const EXIT_DELAY = 300;
   const [visible, setVisible] = useState(false);
   const mountTimeRef = useRef<number | null>(null);
   const loadingRef = useRef(true);
 
   useEffect(() => {
     loadingRef.current = isLoading;
+    if (!isRunning.current) return;
     if (isLoading) {
       setVisible(true);
       // 시작 시간 측정
@@ -426,27 +432,30 @@ export default function LoadingSpinner({
       // 데이터 종료 시간 측정
       const now = performance.now();
       const elapsed = now - (mountTimeRef.current ?? now);
-      const baseExitDelay = 300;
 
       if (elapsed >= MIN_DURATION) {
         // 최소 시간 지난 상태 → 즉시 종료
         const timer = setTimeout(() => {
           setVisible(false);
-        }, baseExitDelay);
+          isRunning.current = false;
+          setRunningTime(elapsed + EXIT_DELAY);
+        }, EXIT_DELAY);
 
         return () => clearTimeout(timer);
       } else {
         // 최소 시간 안 지남 → 나머지 시간 기다린 뒤 종료
-        const remaining = MIN_DURATION - elapsed + baseExitDelay;
+        const remaining = MIN_DURATION - elapsed + EXIT_DELAY;
 
         const timer = setTimeout(() => {
           setVisible(false);
+          isRunning.current = false;
+          setRunningTime(MIN_DURATION + EXIT_DELAY);
         }, remaining);
 
         return () => clearTimeout(timer);
       }
     }
-  }, [isLoading, progressRef]);
+  }, [isLoading, progressRef, setRunningTime, isRunning]);
 
   return (
     <AnimatePresence

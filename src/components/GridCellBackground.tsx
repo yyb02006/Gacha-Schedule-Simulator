@@ -17,7 +17,7 @@ export default function GridCellBackground({
     total: number;
     gachaRuns: number;
     success: number;
-  }>;
+  } | null>;
 }) {
   const step = cellSize / (divisions - 1); // 각 간격
   const [progress, setProgress] = useState(0);
