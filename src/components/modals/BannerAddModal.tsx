@@ -173,14 +173,6 @@ const reducer = (
   }
 };
 
-const initialPickupDatas: Dummy[] = prePickupDatas.datas.map((data) => ({
-  ...data,
-  operators: data.operators as Operator[],
-  gachaType: data.gachaType as GachaType,
-  maxGachaAttempts:
-    data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
-}));
-
 const Help = ({ onClose }: { onClose: () => void }) => {
   const badgeKeys = Object.keys(bannerBadgeProps) as (keyof typeof bannerBadgeProps)[];
   const isMouseDownOnTarget = useRef<boolean>(false);
@@ -270,11 +262,35 @@ const Help = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-const PresetModalContents = ({ onPresetClick }: { onPresetClick: (payload: Dummy) => void }) => {
+const PresetImage = ({ imagePath }: { imagePath: string }) => {
+  const [isImageValid, setIsImageValid] = useState(true);
+  return isImageValid ? (
+    <div>
+      <Image
+        src={`https://pub-cee3b616ec754cb4b3678740fdae72a5.r2.dev${imagePath}`}
+        width={1560}
+        height={500}
+        alt="babel"
+        className="rounded-t-lg"
+        onError={() => {
+          setIsImageValid(false);
+        }}
+      />
+    </div>
+  ) : null;
+};
+
+const PresetModalContents = ({
+  pickupDataPresets,
+  onPresetClick,
+}: {
+  pickupDataPresets: Dummy[];
+  onPresetClick: (payload: Dummy) => void;
+}) => {
   return (
     <SimpleBar autoHide={false} className="-mx-4 h-full p-4" style={{ minHeight: 0 }}>
       <div className="space-y-6">
-        {initialPickupDatas.map((pickupData) => {
+        {pickupDataPresets.map((pickupData) => {
           const { id, image, name, gachaType } = pickupData;
           return (
             <motion.div
@@ -298,17 +314,7 @@ const PresetModalContents = ({ onPresetClick }: { onPresetClick: (payload: Dummy
                 exit="exit"
                 className="space-y-2 rounded-xl p-2 hover:ring-[2px] hover:ring-amber-400"
               >
-                {image ? (
-                  <div>
-                    <Image
-                      src={image}
-                      width={1560}
-                      height={500}
-                      alt="babel"
-                      className="rounded-t-lg"
-                    />
-                  </div>
-                ) : null}
+                {image ? <PresetImage imagePath={image} /> : null}
                 <div className="flex items-center justify-between gap-x-2 text-base">
                   {name}
                   <Badge {...bannerBadgeProps[gachaType].props} />
@@ -467,12 +473,14 @@ const BannerAddTypeToggle = ({
 export default function BannerAddModal({
   isOpen,
   bannerCount,
+  pickupDataPresets,
   onClose,
   onSave,
   onSavePreset,
 }: {
   isOpen: boolean;
   bannerCount: number;
+  pickupDataPresets: Dummy[];
   onClose: () => void;
   onSave: (payload: ExtractPayloadFromAction<'addBanner'>) => void;
   onSavePreset: (payload: Dummy) => void;
@@ -504,6 +512,7 @@ export default function BannerAddModal({
     onSavePreset(payload);
     onClose();
   };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -575,7 +584,10 @@ export default function BannerAddModal({
               />
             </>
           ) : (
-            <PresetModalContents onPresetClick={onPresetSaveClick} />
+            <PresetModalContents
+              pickupDataPresets={pickupDataPresets}
+              onPresetClick={onPresetSaveClick}
+            />
           )}
         </div>
       </div>

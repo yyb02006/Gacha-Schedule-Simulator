@@ -889,16 +889,8 @@ export type SimulationOptions = {
   showBannerImage: boolean;
 };
 
-const initialPickupDatas: Dummy[] = prePickupDatas.datas.map((data) => ({
-  ...data,
-  operators: data.operators as Operator[],
-  gachaType: data.gachaType as GachaType,
-  maxGachaAttempts:
-    data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
-}));
-
-export default function PickupList() {
-  const [pickupDatas, dispatch] = useReducer(reducer, initialPickupDatas);
+export default function PickupList({ pickupDataPresets }: { pickupDataPresets: Dummy[] }) {
+  const [pickupDatas, dispatch] = useReducer(reducer, pickupDataPresets);
   const [isTrySim, setIsGachaSim] = useState(true);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
   const [options, setOptions] = useState<SimulationOptions>({
@@ -1272,6 +1264,7 @@ export default function PickupList() {
           onClose={closeModal}
           onSave={addBanner}
           onSavePreset={addBannerUsePreset}
+          pickupDataPresets={pickupDataPresets}
         />
         <ResetAlert
           isOpen={isAlertOpen}
