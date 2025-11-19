@@ -108,6 +108,11 @@ const MinAttempts = ({
   );
 };
 
+export type onInsetNumberInputBlur = (
+  e: FocusEvent<HTMLInputElement>,
+  syncLocalValue: React.Dispatch<React.SetStateAction<string>>,
+) => void;
+
 export const InsetNumberInput = ({
   children,
   onInputBlur,
@@ -123,10 +128,7 @@ export const InsetNumberInput = ({
   animate = false,
 }: {
   children?: ReactNode;
-  onInputBlur: (
-    e: FocusEvent<HTMLInputElement>,
-    syncLocalValue: React.Dispatch<React.SetStateAction<string>>,
-  ) => void;
+  onInputBlur: onInsetNumberInputBlur;
   currentValue: string;
   name: ReactNode;
   inputWidth?: string;
@@ -215,47 +217,6 @@ export const InsetNumberInput = ({
         </motion.div>
         {children}
       </motion.div>
-    </div>
-  );
-};
-
-const AdditionalResUntilBannerEnd = ({
-  onInputBlur,
-  additionalResource,
-}: {
-  onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
-  additionalResource: string;
-}) => {
-  const [localValue, setLocalValue] = useState(additionalResource);
-  return (
-    <div className="flex items-center gap-x-3 text-sm">
-      <span className="font-S-CoreDream-400 whitespace-nowrap">배너 종료시까지 추가재화</span>
-      <div className="relative flex items-center rounded-lg px-3 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
-        <div className="relative flex items-center px-2 py-2">
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            onFocus={(e: FocusEvent<HTMLInputElement>) => {
-              if (e.currentTarget.value === '0') {
-                e.currentTarget.setSelectionRange(0, 1);
-              }
-            }}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const { value } = e.currentTarget;
-              const newValue = value.replace(/,/g, '');
-              const numberString = normalizeNumberString(newValue);
-              if (numberString === undefined) return;
-              const normalizedString = Math.floor(clamp(parseFloat(numberString), 0)).toString();
-              setLocalValue(normalizedString);
-            }}
-            onBlur={onInputBlur}
-            className="relative w-14 min-w-0 text-right"
-            value={stringToNumber(localValue).toLocaleString()}
-          />
-        </div>
-        <div className="select-none">합성옥</div>
-      </div>
     </div>
   );
 };
@@ -463,7 +424,6 @@ const SimplePreInfoField = ({
     pickupDetails: {
       simpleMode: { pickupOpersCount, targetOpersCount },
     },
-    id,
     additionalResource,
   } = pickupData;
 
@@ -582,14 +542,28 @@ const SimplePreInfoField = ({
         </div>
         <div className="mt-2 flex w-full justify-end">
           {isTrySim || (
-            <AdditionalResUntilBannerEnd
-              key={`res-${`${id} ${isTrySim}` ? 'hidden' : 'shown'}`}
-              additionalResource={additionalResource.simpleMode.toString()}
-              onInputBlur={(e) => {
-                const newValue = e.currentTarget.value.replace(/,/g, '');
-                updateAdditionalResource('simpleMode', stringToNumber(newValue));
-              }}
-            />
+            <div className="flex items-center gap-x-3 text-sm">
+              <InsetNumberInput
+                name="추가재화"
+                className="font-S-CoreDream-400"
+                onInputBlur={(e, syncLocalValue) => {
+                  const { value } = e.currentTarget;
+                  const newValue = value.replace(/,/g, '');
+                  const numberValue = stringToNumber(newValue);
+                  if (numberValue <= 9999999) {
+                    updateAdditionalResource('simpleMode', numberValue);
+                  } else {
+                    syncLocalValue('9999999');
+                    updateAdditionalResource('simpleMode', numberValue);
+                  }
+                }}
+                currentValue={additionalResource.simpleMode.toLocaleString()}
+                max={9999999}
+                inputWidth={'w-20'}
+              >
+                <div className="font-S-CoreDream-400 relative top-[1px] mr-3 -ml-2">합성옥</div>
+              </InsetNumberInput>
+            </div>
           )}
         </div>
       </div>
@@ -787,7 +761,6 @@ const PickupOperatorDetail = ({
 }) => {
   const { name, operatorId, currentQty, targetCount, isPityReward } = operator;
   const [localName, setLocalName] = useState(name);
-  const [localQty, setLocalQty] = useState(currentQty.toString());
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
       <div className="flex grow gap-6">
@@ -840,38 +813,27 @@ const PickupOperatorDetail = ({
           />
         </div>
         <div className="flex items-center gap-2">
-          <span>현재 잠재</span>
-          <div className="flex items-center rounded-lg px-4 py-2 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              max={5}
-              onFocus={(e: FocusEvent<HTMLInputElement>) => {
-                if (e.currentTarget.value === '0') {
-                  e.currentTarget.setSelectionRange(0, 1);
-                }
-              }}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const numberString = normalizeNumberString(e.currentTarget.value);
-                if (numberString === undefined) return;
-                const normalizedString = Math.floor(
-                  clamp(parseFloat(numberString), 0, 6),
-                ).toString();
-                setLocalQty(normalizedString);
-              }}
-              onBlur={(e: FocusEvent<HTMLInputElement>) => {
-                const newQty = stringToNumber(e.currentTarget.value);
-                const clampQty = newQty > 5 ? 5 : newQty;
+          <InsetNumberInput
+            name="현재 잠재"
+            className="font-S-CoreDream-400"
+            onInputBlur={(e, syncLocalValue) => {
+              const count = stringToNumber(e.currentTarget.value);
+              if (count <= 5) {
                 onChangeOperatorDetails({
                   operatorId,
-                  currentQty: isNaN(newQty) ? undefined : clampQty,
+                  currentQty: count,
                 });
-              }}
-              className="w-6 min-w-0 text-right"
-              value={localQty}
-            />
-          </div>
+              } else {
+                onChangeOperatorDetails({
+                  operatorId,
+                  currentQty: 5,
+                });
+                syncLocalValue('5');
+              }
+            }}
+            currentValue={currentQty.toString()}
+            max={5}
+          />
         </div>
       </div>
     </div>
@@ -913,7 +875,7 @@ export default function PickupBanner({
   bannerCount,
   isImageVisible,
 }: PickupBannerProps) {
-  const { gachaType, name, operators, id, image, active } = pickupData;
+  const { gachaType, name, operators, id, image, active, additionalResource } = pickupData;
   const ref = useRef<HTMLDivElement>(null);
   const [isView, setIsView] = useState(false);
   const [isHover, setIsHover] = useState(false);
@@ -1146,14 +1108,30 @@ export default function PickupBanner({
                       <span className="text-amber-400">목표</span> 픽업 목록
                     </span>
                     {isTrySim || (
-                      <AdditionalResUntilBannerEnd
-                        key={`res-${`${id} ${isTrySim}` ? 'hidden' : 'shown'}`}
-                        additionalResource={pickupData.additionalResource.extendedMode.toString()}
-                        onInputBlur={(e) => {
-                          const newValue = e.currentTarget.value.replace(/,/g, '');
-                          updateAdditionalResource('extendedMode', stringToNumber(newValue));
-                        }}
-                      />
+                      <div className="flex items-center gap-x-3 text-sm">
+                        <InsetNumberInput
+                          name="추가재화"
+                          className="font-S-CoreDream-400"
+                          onInputBlur={(e, syncLocalValue) => {
+                            const { value } = e.currentTarget;
+                            const newValue = value.replace(/,/g, '');
+                            const numberValue = stringToNumber(newValue);
+                            if (numberValue <= 9999999) {
+                              updateAdditionalResource('extendedMode', numberValue);
+                            } else {
+                              updateAdditionalResource('extendedMode', numberValue);
+                              syncLocalValue('9999999');
+                            }
+                          }}
+                          currentValue={additionalResource.extendedMode.toLocaleString()}
+                          max={9999999}
+                          inputWidth={'w-20'}
+                        >
+                          <div className="font-S-CoreDream-400 relative top-[1px] mr-3 -ml-2">
+                            합성옥
+                          </div>
+                        </InsetNumberInput>
+                      </div>
                     )}
                   </div>
                   <div className="space-y-6 lg:space-y-4">
