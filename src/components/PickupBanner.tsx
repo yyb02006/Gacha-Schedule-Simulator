@@ -887,6 +887,7 @@ export default function PickupBanner({
   const [isHover, setIsHover] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isAnimateLocked, setIsAnimateLocked] = useState(false);
+  const [isImageValid, setIsImageValid] = useState(true);
   const targetLimit = operatorLimitByBannerType[gachaType];
 
   const isOperatorsFull =
@@ -1080,9 +1081,19 @@ export default function PickupBanner({
             }}
             onToggle={toggleActive}
           />
-          {!isMinimized && image && active && isImageVisible ? (
+          {!isMinimized && image && active && isImageVisible && isImageValid ? (
             <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
-              <Image src={image} width={1560} height={500} alt="babel" />
+              <Image
+                src={`https://pub-cee3b616ec754cb4b3678740fdae72a5.r2.dev${image}`}
+                width={1560}
+                height={500}
+                alt={name}
+                onError={() => {
+                  console.log('run');
+                  setIsImageValid(false);
+                }}
+                priority={index < 2}
+              />
             </motion.div>
           ) : null}
           {!isMinimized && isView && active ? (
