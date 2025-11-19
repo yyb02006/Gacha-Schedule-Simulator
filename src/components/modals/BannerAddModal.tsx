@@ -21,7 +21,7 @@ import { GachaType, OperatorRarity } from '#/types/types';
 import { AnimatePresence, motion, useMotionValue } from 'motion/react';
 import { ChangeEvent, useEffect, useReducer, useRef, useState } from 'react';
 import SimpleBar from 'simplebar-react';
-import pickupDatas from '#/data/pickupDatas.json';
+import prePickupDatas from '#/data/prePickupDatas.json';
 import 'simplebar-react/dist/simplebar.min.css';
 import Image from 'next/image';
 import Badge from '#/components/Badge';
@@ -173,7 +173,7 @@ const reducer = (
   }
 };
 
-const prePickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
+const initialPickupDatas: Dummy[] = prePickupDatas.datas.map((data) => ({
   ...data,
   operators: data.operators as Operator[],
   gachaType: data.gachaType as GachaType,
@@ -274,7 +274,7 @@ const PresetModalContents = ({ onPresetClick }: { onPresetClick: (payload: Dummy
   return (
     <SimpleBar autoHide={false} className="-mx-4 h-full p-4" style={{ minHeight: 0 }}>
       <div className="space-y-6">
-        {prePickupDatas.map((pickupData) => {
+        {initialPickupDatas.map((pickupData) => {
           const { id, image, name, gachaType } = pickupData;
           return (
             <motion.div
