@@ -144,7 +144,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
   const chartRefs = useRef<HTMLDivElement[]>([]);
 
   return result ? (
-    <Modal isOpen={isOpen} onClose={onClose} ref={modalRef}>
+    <Modal isOpen={isOpen} onClose={onClose} ref={modalRef} backdropBlur>
       <section className="mb-[120px] w-full max-w-[1280px] space-y-6 rounded-xl bg-[#202020] p-6">
         <div className="flex items-center justify-between">
           <motion.div

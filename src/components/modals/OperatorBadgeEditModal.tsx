@@ -159,7 +159,7 @@ export default function OperatorBadgeEditModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} backdropBlur>
       <div className="flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
         <AnimatePresence>
           {isHelpOpen && (

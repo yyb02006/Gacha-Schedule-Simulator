@@ -122,7 +122,7 @@ export default function SimulatorOptionModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} backdropBlur>
       <div className="flex h-full w-full max-w-[400px] flex-1 flex-col gap-4 gap-y-8 rounded-xl bg-[#202020] p-6 lg:w-[480px]">
         <AnimatePresence>
           {isHelpOpen && (

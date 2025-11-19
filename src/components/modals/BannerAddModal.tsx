@@ -511,6 +511,7 @@ export default function BannerAddModal({
         dispatch({ type: 'initialIzation' });
         onClose();
       }}
+      backdropBlur
     >
       <div
         className={cls(
