@@ -2,7 +2,7 @@
 
 import SummaryBanner from '#/components/SummaryBanner';
 import { AnimatePresence } from 'motion/react';
-import { useReducer, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
@@ -141,7 +141,8 @@ export type ActionType =
   | 'updateGachaType'
   | 'toggleActive'
   | 'swapIndex'
-  | 'reset';
+  | 'reset'
+  | 'initialize';
 
 export type PickupDatasAction =
   | {
@@ -246,7 +247,8 @@ export type PickupDatasAction =
         toIndex: number;
       };
     }
-  | { type: 'reset' };
+  | { type: 'reset' }
+  | { type: 'initialize'; payload: { initialData: Dummy[] } };
 
 export type ExtractPayloadFromAction<K extends ActionType> =
   Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
@@ -293,6 +295,10 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       { sixth: 0, fifth: 0, fourth: 0 },
     );
   switch (action.type) {
+    case 'initialize': {
+      const { initialData } = action.payload;
+      return initialData;
+    }
     case 'reset': {
       const resetDatas = prePickupDatas.datas.map((data) => ({
         ...data,
@@ -936,6 +942,24 @@ export default function PickupList() {
     isRunning.current = false;
     dispatch({ type: 'reset' });
   };
+
+  useEffect(() => {
+    const stored = localStorage.getItem('pickupDatas');
+    if (stored) {
+      try {
+        dispatch({ type: 'initialize', payload: { initialData: JSON.parse(stored) } });
+      } catch {
+        console.warn('로컬스토리지 데이터 파싱 실패, 기본 데이터 사용');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      localStorage.setItem('pickupDatas', JSON.stringify(pickupDatas));
+    }, 200);
+    return () => clearTimeout(id);
+  }, [pickupDatas]);
 
   const runSimulation = async () => {
     if (isLoading) return;
