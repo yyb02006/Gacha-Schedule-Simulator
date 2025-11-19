@@ -304,6 +304,7 @@ const updateResult = ({
 };
 
 const gachaRateSimulate = ({
+  workerIndex,
   seed,
   pickupDatas,
   gachaGoal,
@@ -314,6 +315,7 @@ const gachaRateSimulate = ({
   probability,
   bannerFailureAction,
 }: {
+  workerIndex: number;
   seed: number;
   pickupDatas: Dummy[];
   gachaGoal: 'allFirst' | 'allMax' | null;
@@ -325,6 +327,7 @@ const gachaRateSimulate = ({
   bannerFailureAction: BannerFailureAction;
 }) => {
   const rng = createRNG(seed);
+  const batchSize = (Math.floor(simulationTry / 10000) + 1) * 1000;
   const sixthRate = 2;
   const fifthRate = 8;
   const fourthRate = 50;
@@ -872,6 +875,7 @@ const gachaRateSimulate = ({
         simulationResult.total.anyPityRewardObtained++;
       }
       currentBanner.bannerTotalGachaRuns += result.bannerGachaRuns;
+      simulationResult.total.totalGachaRuns += result.bannerGachaRuns;
       const rarityStrings = ['sixth', 'fifth', 'fourth'] as const;
       for (const rarityString of rarityStrings) {
         const obtainedTypes = ['totalObtained', 'pickupObtained', 'targetObtained'] as const;
@@ -888,7 +892,33 @@ const gachaRateSimulate = ({
     // 배너 전부 성공시 총 성공카운트 1증가
     if (singleSimulationSuccessCount === pickupDatas.length)
       simulationResult.total.simulationSuccess++;
+
+    if ((ti + 1) % batchSize === 0) {
+      (self as unknown as Worker).postMessage({
+        type: 'progress',
+        workerIndex,
+        partialResult: {
+          progressTry: ti + 1,
+          total: simulationTry,
+          gachaRuns: simulationResult.total.totalGachaRuns,
+          success: simulationResult.total.simulationSuccess,
+        },
+        // partialResult: simulationResult,
+      });
+    }
   }
+
+  (self as unknown as Worker).postMessage({
+    type: 'progress',
+    workerIndex,
+    partialResult: {
+      progressTry: simulationTry,
+      total: simulationTry,
+      gachaRuns: simulationResult.total.totalGachaRuns,
+      success: simulationResult.total.simulationSuccess,
+    },
+    // partialResult: simulationResult,
+  });
   /* for (let bi = 0; bi < simulationResult.perBanner.length; bi++) {
     simulationResult.total.totalGachaRuns += simulationResult.perBanner[bi].bannerGachaRuns;
     simulationResult.total.anyPityRewardObtained += simulationResult.perBanner[bi].anyPityRewardObtained;
@@ -1239,6 +1269,7 @@ const rotationDummy: Dummy = {
 self.onmessage = (e: MessageEvent<WorkerInput>) => {
   const {
     type,
+    workerIndex,
     payload: {
       seed,
       pickupDatas,
@@ -1253,7 +1284,6 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
       },
     },
   } = e.data;
-  // console.log('[Worker] 메인으로부터 데이터 수신:', pickupDatas);
   if (type !== 'start') return;
   const testArray1 = [
     contractDummy,
@@ -1266,12 +1296,13 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   const testArray2 = [limitedDummy, limitedDummy];
   const startTime = performance.now();
   const result = gachaRateSimulate({
-    pickupDatas: [limitedDummy],
+    workerIndex,
+    pickupDatas,
     gachaGoal,
     seed,
     isSimpleMode,
     isTrySim,
-    simulationTry: 1,
+    simulationTry,
     initialResource,
     probability,
     bannerFailureAction,
@@ -1281,24 +1312,9 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
 
   console.log(`걸린 시간: ${elapsedTime} 밀리초`);
 
-  const { total, perBanner } = result;
-  const expectedValues = perBanner.map(({ bannerWinGachaRuns, bannerSuccess }) =>
-    safeNumberOrZero(bannerWinGachaRuns / bannerSuccess),
-  );
-
-  /* console.log(
-    `전체 시뮬레이션 횟수 :`,
-    total.simulationTry,
-    `성공한 시뮬레이션 횟수 :`,
-    total.successCount,
-    '개별 통계 :',
-    JSON.stringify(perBanner, null, 2),
-    '개별 배너 성공 기대값 :',
-    expectedValues,
-  ); */
-
   (self as unknown as Worker).postMessage({
     type: 'done',
+    workerIndex,
     result,
   });
 };

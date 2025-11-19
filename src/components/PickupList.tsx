@@ -847,6 +847,7 @@ const prepickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
 
 export interface WorkerInput {
   type: string;
+  workerIndex: number;
   payload: {
     seed: number;
     pickupDatas: Dummy[];
@@ -897,15 +898,16 @@ export default function PickupList() {
     dispatch({ type: 'addBannerUsePreset', payload });
   };
 
-  const [progress, setProgress] = useState(0);
+  const progressRef = useRef({ progressTry: 0, total: 0, gachaRuns: 0, success: 0 });
+  const [progress, setProgress] = useState({ progressTry: 0, total: 0, gachaRuns: 0, success: 0 });
   const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const runSimulation = async () => {
     if (isLoading) return;
-    // const { isMobile, workerCount } = getOptimalWorkerCount();
-    const { isMobile } = getOptimalWorkerCount();
-    const workerCount = 1;
+    const { isMobile, workerCount } = getOptimalWorkerCount();
+    // const { isMobile } = getOptimalWorkerCount();
+    // const workerCount = 1;
     if (workerCount <= 0) return;
     setIsLoading(true);
 
@@ -939,6 +941,7 @@ export default function PickupList() {
       const remainder = inputTry % workerCount;
       return {
         type: 'start',
+        workerIndex: index,
         payload: {
           seed: seeds[index],
           pickupDatas: activePickupDatas,
@@ -956,6 +959,13 @@ export default function PickupList() {
       };
     };
 
+    const progressPerWorker = Array.from({ length: workerCount }, () => ({
+      progressTry: 0,
+      total: 0,
+      gachaRuns: 0,
+      success: 0,
+    }));
+
     // 워커 생성 및 워커 배열에 전달, 시뮬레이션 실행 후 사전에 생성한 프로미스 배열에 전달
     for (let index = 0; index < workerCount; index++) {
       const worker = new Worker(new URL('#/workers/simulatorWorker', import.meta.url), {
@@ -964,9 +974,48 @@ export default function PickupList() {
       workers.push(worker);
 
       const promise = new Promise<GachaSimulationResult>((resolve) => {
-        worker.onmessage = (e: MessageEvent<{ type: string; result: GachaSimulationResult }>) => {
-          resolve(e.data.result);
-          worker.terminate(); // 작업 끝나면 종료
+        worker.onmessage = (
+          e: MessageEvent<{
+            type: 'done' | 'progress';
+            workerIndex: number;
+            partialResult?: {
+              progressTry: number;
+              total: number;
+              gachaRuns: number;
+              success: number;
+            };
+            result: GachaSimulationResult;
+          }>,
+        ) => {
+          const { type, workerIndex, partialResult, result } = e.data;
+
+          if (type === 'progress' && partialResult !== undefined) {
+            const { gachaRuns, progressTry, success } = partialResult;
+
+            progressPerWorker[workerIndex].gachaRuns = gachaRuns;
+            progressPerWorker[workerIndex].progressTry = progressTry;
+            progressPerWorker[workerIndex].success = success;
+
+            const totalProgress = progressPerWorker.reduce(
+              (a, b) => {
+                a.gachaRuns += b.gachaRuns;
+                a.progressTry += b.progressTry;
+                a.success += b.success;
+                return a;
+              },
+              {
+                gachaRuns: 0,
+                progressTry: 0,
+                success: 0,
+                total: simulationTry,
+              },
+            );
+            progressRef.current = totalProgress;
+            // setProgress(totalProgressTry);
+          } else if (type === 'done') {
+            resolve(result);
+            worker.terminate(); // 작업 끝나면 종료
+          }
         };
         worker.postMessage(getPostMessage(index));
       });
@@ -993,7 +1042,7 @@ export default function PickupList() {
             maxAttemptsFailure,
             bannerType,
           } = currentBanner;
-          current.total.totalGachaRuns += bannerTotalGachaRuns;
+          // current.total.totalGachaRuns += bannerTotalGachaRuns;
           const currentAccBanner = acc.perBanner[index];
           if (currentAccBanner) {
             currentAccBanner.bannerSuccess += bannerSuccess;
@@ -1148,7 +1197,7 @@ export default function PickupList() {
           onSavePreset={addBannerUsePreset}
         />
       </div>
-      <LoadingSpinner isLoading={isLoading} />
+      <LoadingSpinner isLoading={isLoading} progressRef={progressRef} />
     </>
   );
 }
