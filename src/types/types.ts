@@ -1,3 +1,5 @@
+import { Dummy } from '#/components/PickupList';
+
 export type SimulationMode = 'simple' | 'extended';
 
 export type GachaType = 'limited' | 'single' | 'collab' | 'rotation' | 'contract' | 'orient';
@@ -31,3 +33,5 @@ export type OperatorRarityForString = 'sixth' | 'fifth' | 'fourth';
 export type SizeClass = `size-[${number}px]` | `size-${number}` | `size-full`;
 
 export type ElementOfArray<Arr> = Arr extends (infer E)[] ? E : never;
+
+export type PickupDataPresets = (Dummy & { deactivationDate: string })[];
