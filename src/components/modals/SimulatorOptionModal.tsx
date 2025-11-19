@@ -162,9 +162,8 @@ export default function SimulatorOptionModal({
               className="text-sky-500"
               onInputBlur={(e, syncLocalValue) => {
                 const { value } = e.currentTarget;
-                if (!value) return;
                 const newValue = value.replace(/,/g, '');
-                if (stringToNumber(newValue) <= 500000) {
+                if (stringToNumber(newValue) <= 1000000) {
                   setLocalOptions((p) => ({
                     ...p,
                     simulationTry: stringToNumber(newValue),
@@ -175,7 +174,7 @@ export default function SimulatorOptionModal({
               }}
               currentValue={localOptions.simulationTry.toLocaleString()}
               inputWidth="w-20"
-              max={500000}
+              max={1000000}
               animate
             >
               <motion.div
@@ -208,7 +207,7 @@ export default function SimulatorOptionModal({
                         : 'continueExecution',
                 }));
               }}
-              labels={{ left: '끝까지 진행', right: '해당 회차 중단' }}
+              labels={{ left: '해당 회차 중단', right: '끝까지 진행' }}
               className="h-[36px]"
             />
           </div>
