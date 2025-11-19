@@ -10,7 +10,7 @@ import PickupBanner from '#/components/PickupBanner';
 import { useModal } from '#/hooks/useModal';
 import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
 import BannerAddModal from '#/components/modals/BannerAddModal';
-import pickupDatas from '#/data/pickupDatas.json';
+import prePickupDatas from '#/data/prePickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
 import {
   obtainedTypes,
@@ -27,6 +27,8 @@ import {
   truncateToDecimals,
 } from '#/libs/utils';
 import LoadingSpinner from '#/components/LoadingSpinner';
+import { useAlert } from '#/hooks/useAlert';
+import ResetAlert from '#/components/modals/ResetAlert';
 
 export type Operator = {
   operatorId: string;
@@ -137,7 +139,8 @@ export type ActionType =
   | 'updateAdditionalResource'
   | 'updateGachaType'
   | 'toggleActive'
-  | 'swapIndex';
+  | 'swapIndex'
+  | 'reset';
 
 export type PickupDatasAction =
   | {
@@ -241,7 +244,8 @@ export type PickupDatasAction =
         fromIndex: number;
         toIndex: number;
       };
-    };
+    }
+  | { type: 'reset' };
 
 export type ExtractPayloadFromAction<K extends ActionType> =
   Extract<PickupDatasAction, { type: K }> extends { payload: infer P } ? P : never;
@@ -288,8 +292,20 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       { sixth: 0, fifth: 0, fourth: 0 },
     );
   switch (action.type) {
+    case 'reset': {
+      const resetDatas = prePickupDatas.datas.map((data) => ({
+        ...data,
+        operators: data.operators as Operator[],
+        gachaType: data.gachaType as GachaType,
+        maxGachaAttempts:
+          data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
+      }));
+      console.log(resetDatas);
+
+      return resetDatas;
+    }
     case 'addBanner': {
-      if (pickupDatas.length >= 20) {
+      if (pickupDatas.length > 20) {
         return pickupDatas;
       }
       const { gachaType, pickupOpersCount, targetOpersCount } = action.payload;
@@ -837,14 +853,6 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
   }
 };
 
-const prepickupDatas: Dummy[] = pickupDatas.datas.map((data) => ({
-  ...data,
-  operators: data.operators as Operator[],
-  gachaType: data.gachaType as GachaType,
-  maxGachaAttempts:
-    data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
-}));
-
 export interface WorkerInput {
   type: string;
   workerIndex: number;
@@ -874,8 +882,16 @@ export type SimulationOptions = {
   showBannerImage: boolean;
 };
 
+const initialPickupDatas: Dummy[] = prePickupDatas.datas.map((data) => ({
+  ...data,
+  operators: data.operators as Operator[],
+  gachaType: data.gachaType as GachaType,
+  maxGachaAttempts:
+    data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
+}));
+
 export default function PickupList() {
-  const [pickupDatas, dispatch] = useReducer(reducer, prepickupDatas);
+  const [pickupDatas, dispatch] = useReducer(reducer, initialPickupDatas);
   const [isTrySim, setIsGachaSim] = useState(true);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
   const [options, setOptions] = useState<SimulationOptions>({
@@ -884,11 +900,20 @@ export default function PickupList() {
     bannerFailureAction: 'interruption',
     showBannerImage: true,
   });
+  const [batchGachaGoal, setBatchGachaGoal] = useState<'allFirst' | 'allMax' | null>(null);
+  const [initialResource, setInitialResource] = useState(0);
   const initialInputs = useRef<InitialInputs>({
     gachaGoal: null,
     initialResource: 0,
   });
+  const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
   const { isOpen: isModalOpen, openModal: openModal, closeModal: closeModal } = useModal();
+
+  const progressRef = useRef({ progressTry: 0, total: 0, gachaRuns: 0, success: 0 });
+  const isRunning = useRef(false);
+  const [runningTime, setRunningTime] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { isAlertOpen, openAlert, alertMessage, confirm, cancel } = useAlert();
 
   const addBanner = (payload: ExtractPayloadFromAction<'addBanner'>) => {
     dispatch({ type: 'addBanner', payload });
@@ -898,11 +923,17 @@ export default function PickupList() {
     dispatch({ type: 'addBannerUsePreset', payload });
   };
 
-  const progressRef = useRef({ progressTry: 0, total: 0, gachaRuns: 0, success: 0 });
-  const isRunning = useRef(false);
-  const [runningTime, setRunningTime] = useState<number | null>(null);
-  const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const resetSimulator = () => {
+    setIsSimpleMode(true);
+    setIsGachaSim(true);
+    setResults(null);
+    setRunningTime(null);
+    setIsLoading(false);
+    setBatchGachaGoal(null);
+    setInitialResource(0);
+    isRunning.current = false;
+    dispatch({ type: 'reset' });
+  };
 
   const runSimulation = async () => {
     if (isLoading) return;
@@ -1156,7 +1187,21 @@ export default function PickupList() {
       <div className="mt-12 flex space-x-6">
         <div className="flex w-[984px] flex-col items-center space-y-6">
           <div className="mb-12 flex space-x-16">
-            <ResetButton onResetClick={() => {}} />
+            <ResetButton
+              onResetClick={async () => {
+                const result = await openAlert(
+                  <span>
+                    시스템 설정을 제외한 모든{' '}
+                    <span className="text-amber-400">시뮬레이션 설정</span>과{' '}
+                    <span className="text-amber-400">가챠일정 배너의 구성</span>이{' '}
+                    <span className="text-red-400">초기화</span>됩니다.
+                  </span>,
+                );
+                if (result) {
+                  resetSimulator();
+                }
+              }}
+            />
             <PlayButton
               onPlayClick={() => {
                 runSimulation();
@@ -1168,10 +1213,13 @@ export default function PickupList() {
             setIsGachaSim={setIsGachaSim}
             isSimpleMode={isSimpleMode}
             setIsSimpleMode={setIsSimpleMode}
-            initialInputs={initialInputs.current}
+            batchGachaGoal={batchGachaGoal}
+            initialResource={initialResource}
+            setInitialResource={setInitialResource}
             options={options}
             setOptions={setOptions}
             runningTime={runningTime}
+            setBatchGachaGoal={setBatchGachaGoal}
           />
           <div className="flex w-full flex-col gap-y-6">
             <AddBannerCard isAddPrevent={pickupDatas.length >= 20} openModal={openModal} />
@@ -1198,6 +1246,12 @@ export default function PickupList() {
           onClose={closeModal}
           onSave={addBanner}
           onSavePreset={addBannerUsePreset}
+        />
+        <ResetAlert
+          isOpen={isAlertOpen}
+          onCancel={cancel}
+          onConfirm={confirm}
+          message={alertMessage}
         />
       </div>
       <LoadingSpinner
