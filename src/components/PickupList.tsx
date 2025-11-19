@@ -29,6 +29,7 @@ import {
 import LoadingSpinner from '#/components/LoadingSpinner';
 import { useAlert } from '#/hooks/useAlert';
 import ResetAlert from '#/components/modals/ResetAlert';
+import ToTopButton from '#/components/buttons/ToTopButton';
 
 export type Operator = {
   operatorId: string;
@@ -914,6 +915,7 @@ export default function PickupList() {
   const [runningTime, setRunningTime] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { isAlertOpen, openAlert, alertMessage, confirm, cancel } = useAlert();
+  const listRef = useRef<HTMLDivElement>(null);
 
   const addBanner = (payload: ExtractPayloadFromAction<'addBanner'>) => {
     dispatch({ type: 'addBanner', payload });
@@ -1184,7 +1186,7 @@ export default function PickupList() {
 
   return (
     <>
-      <div className="mt-12 flex space-x-6">
+      <div ref={listRef} className="mt-12 flex space-x-6">
         <div className="flex w-[984px] flex-col items-center space-y-6">
           <div className="mb-12 flex space-x-16">
             <ResetButton
@@ -1260,6 +1262,13 @@ export default function PickupList() {
         progressRef={progressRef}
         setRunningTime={setRunningTime}
       />
+      <div className="fixed right-4 bottom-4">
+        <ToTopButton
+          handleToTop={() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      </div>
     </>
   );
 }

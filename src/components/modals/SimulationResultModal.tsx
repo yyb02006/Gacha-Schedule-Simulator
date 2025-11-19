@@ -81,7 +81,7 @@ const FloatingActionBar = ({
         .find((banner) => banner.dataset.id === currentBanner?.dataset.id);
 
       if (currentItem && listRef.current) {
-        listRef.current.scrollTo({ top: currentItem.offsetTop });
+        listRef.current.scrollTo({ top: currentItem.offsetTop, behavior: 'smooth' });
       }
     }
 
@@ -113,7 +113,10 @@ const FloatingActionBar = ({
               {chartRefs.current.map((banner, index) => (
                 <button
                   onClick={() => {
-                    modalRef.current?.scrollTo({ top: Math.max(banner.offsetTop - 32, 0) });
+                    modalRef.current?.scrollTo({
+                      top: Math.max(banner.offsetTop - 32, 0),
+                      behavior: 'smooth',
+                    });
                   }}
                   key={index}
                   data-id={banner.dataset.id}
@@ -288,7 +291,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
       </section>
       <FloatingActionBar
         handleToTop={() => {
-          modalRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+          modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         chartRefs={chartRefs}
         modalRef={modalRef}
