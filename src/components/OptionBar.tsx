@@ -3,161 +3,20 @@
 import AdjustmentButton from '#/components/buttons/AdjustmentButton';
 import SimulatorOptionModal from '#/components/modals/SimulatorOptionModal';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
-import { cardVariants, insetInputVariants, toOpacityZero } from '#/constants/variants';
+import { cardVariants, toOpacityZero } from '#/constants/variants';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChangeEvent, Dispatch, FocusEvent, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import SimulatorTypeButton from '#/components/buttons/SimulatorTypeButton';
 import ToggleButton from '#/components/buttons/ToggleButton';
-import { InitialInputs, SimulationOptions } from '#/components/PickupList';
-import { clamp, normalizeNumberString, stringToNumber, truncateToDecimals } from '#/libs/utils';
-import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
+import { SimulationOptions } from '#/components/PickupList';
+import { stringToNumber, truncateToDecimals } from '#/libs/utils';
 import Modal from '#/components/modals/Modal';
 import CancelButton from '#/components/buttons/CancelButton';
 import ChevronDown from '#/icons/ChevronDown.svg';
 import ChevronUp from '#/icons/ChevronUp.svg';
 import Maximize from '#/icons/Maximize.svg';
 import Minimize from '#/icons/Minimize.svg';
-
-const ControlPanel = ({
-  isTrySim,
-  onTypeClick,
-  isSimpleMode,
-  onViewModeToggle,
-  initialInputs,
-}: {
-  isTrySim: boolean;
-  onTypeClick: (isLeft?: boolean) => void;
-  isSimpleMode: boolean;
-  onViewModeToggle: (isLeft?: boolean) => void;
-  initialInputs: InitialInputs;
-}) => {
-  const [initialGachaGoal, setInitialGachaGoal] = useState<'allFirst' | 'allMax' | null>(null);
-  const [initialResource, setInitialResource] = useState('0');
-  return (
-    <div className="flex flex-col gap-4">
-      <SimulatorTypeButton isTrySim={isTrySim} onTypeClick={onTypeClick} />
-      <div className="flex flex-wrap justify-between">
-        <div className="flex flex-wrap gap-x-6 gap-y-3">
-          <div className="flex items-center gap-x-3 text-sm">
-            <motion.span
-              variants={toOpacityZero}
-              initial="exit"
-              animate="idle"
-              exit="exit"
-              className="font-S-CoreDream-400 whitespace-nowrap"
-            >
-              일괄 목표
-            </motion.span>
-            <div className="flex w-fit gap-x-3">
-              <TypeSelectionButton
-                name="6성 올명함"
-                hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-                onTypeClick={() => {
-                  if (initialInputs.gachaGoal !== 'allFirst') {
-                    initialInputs.gachaGoal = 'allFirst';
-                    setInitialGachaGoal('allFirst');
-                  } else {
-                    initialInputs.gachaGoal = null;
-                    setInitialGachaGoal(null);
-                  }
-                }}
-                isActive={initialGachaGoal === 'allFirst'}
-                className="px-4 whitespace-nowrap"
-              />
-              <TypeSelectionButton
-                name="6성 올풀잠"
-                hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-                onTypeClick={() => {
-                  if (initialInputs.gachaGoal !== 'allMax') {
-                    initialInputs.gachaGoal = 'allMax';
-                    setInitialGachaGoal('allMax');
-                  } else {
-                    initialInputs.gachaGoal = null;
-                    setInitialGachaGoal(null);
-                  }
-                }}
-                isActive={initialGachaGoal === 'allMax'}
-                className="px-4 whitespace-nowrap"
-              />
-            </div>
-          </div>
-          <AnimatePresence>
-            {isTrySim || (
-              <div className="flex items-center gap-x-3 text-sm">
-                <motion.span
-                  variants={toOpacityZero}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="font-S-CoreDream-400 whitespace-nowrap"
-                >
-                  초기재화
-                </motion.span>
-                <motion.div
-                  variants={insetInputVariants}
-                  initial="exit"
-                  animate="idle"
-                  exit="exit"
-                  className="relative flex items-center rounded-lg px-3"
-                >
-                  <motion.div
-                    variants={toOpacityZero}
-                    initial="exit"
-                    animate="idle"
-                    exit="exit"
-                    className="relative flex items-center px-2 py-2"
-                  >
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern={LOCALE_NUMBER_PATTERN.source}
-                      onFocus={(e: FocusEvent<HTMLInputElement>) => {
-                        if (e.currentTarget.value === '0') {
-                          e.currentTarget.setSelectionRange(0, 1);
-                        }
-                      }}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                        const { value } = e.currentTarget;
-                        const newValue = value.replace(/,/g, '');
-                        const numberString = normalizeNumberString(newValue);
-                        if (numberString === undefined) return;
-                        const normalizedString = Math.floor(
-                          clamp(parseFloat(numberString), 0),
-                        ).toString();
-                        setInitialResource(normalizedString);
-                      }}
-                      onBlur={(e: FocusEvent<HTMLInputElement>) => {
-                        if (!e.currentTarget.value) return;
-                        const newValue = e.currentTarget.value.replace(/,/g, '');
-                        initialInputs.initialResource = stringToNumber(newValue);
-                      }}
-                      className="relative w-18 min-w-0 text-right"
-                      value={stringToNumber(initialResource).toLocaleString()}
-                    />
-                  </motion.div>
-                  <motion.div
-                    variants={toOpacityZero}
-                    initial="exit"
-                    animate="idle"
-                    exit="exit"
-                    className="select-none"
-                  >
-                    합성옥
-                  </motion.div>
-                </motion.div>
-              </div>
-            )}
-          </AnimatePresence>
-        </div>
-        <ToggleButton
-          isLeft={isSimpleMode}
-          labels={{ left: '기본옵션', right: '세부옵션' }}
-          onToggle={onViewModeToggle}
-        />
-      </div>
-    </div>
-  );
-};
+import { InsetNumberInput, onInsetNumberInputBlur } from '#/components/PickupBanner';
 
 const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   return (
@@ -391,35 +250,142 @@ const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
   );
 };
 
+const ControlPanel = ({
+  isTrySim,
+  onSimulationModeToggle,
+  isSimpleMode,
+  onOptionModeToggle,
+  batchGachaGoal,
+  onBatchGachaGoalClick,
+  initialResource,
+  onInitialResourceBlur,
+}: {
+  isTrySim: boolean;
+  onSimulationModeToggle: (isLeft?: boolean) => void;
+  isSimpleMode: boolean;
+  onOptionModeToggle: (isLeft?: boolean) => void;
+  batchGachaGoal: 'allFirst' | 'allMax' | null;
+  onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => void;
+  initialResource: number;
+  onInitialResourceBlur: onInsetNumberInputBlur;
+}) => {
+  return (
+    <div className="flex flex-col gap-4">
+      <SimulatorTypeButton isTrySim={isTrySim} onTypeClick={onSimulationModeToggle} />
+      <div className="flex flex-wrap justify-between">
+        <div className="flex flex-wrap gap-x-6 gap-y-3">
+          <div className="flex items-center gap-x-3 text-sm">
+            <motion.span
+              variants={toOpacityZero}
+              initial="exit"
+              animate="idle"
+              exit="exit"
+              className="font-S-CoreDream-400 whitespace-nowrap"
+            >
+              일괄 목표
+            </motion.span>
+            <div className="flex w-fit gap-x-3">
+              <TypeSelectionButton
+                name="6성 올명함"
+                hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+                onTypeClick={() => {
+                  onBatchGachaGoalClick('allFirst');
+                }}
+                isActive={batchGachaGoal === 'allFirst'}
+                className="px-4 whitespace-nowrap"
+              />
+              <TypeSelectionButton
+                name="6성 올풀잠"
+                hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+                onTypeClick={() => {
+                  onBatchGachaGoalClick('allMax');
+                }}
+                isActive={batchGachaGoal === 'allMax'}
+                className="px-4 whitespace-nowrap"
+              />
+            </div>
+          </div>
+          <AnimatePresence>
+            {isTrySim || (
+              <div className="flex items-center gap-x-3 text-sm">
+                <InsetNumberInput
+                  name="초기재화"
+                  onInputBlur={onInitialResourceBlur}
+                  currentValue={initialResource.toLocaleString()}
+                  max={9999999}
+                  inputWidth={'w-20'}
+                >
+                  <div className="relative top-[1px] mr-3 -ml-2">합성옥</div>
+                </InsetNumberInput>
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+        <ToggleButton
+          isLeft={isSimpleMode}
+          labels={{ left: '기본옵션', right: '세부옵션' }}
+          onToggle={onOptionModeToggle}
+        />
+      </div>
+    </div>
+  );
+};
+
 export default function OptionBar({
   isTrySim,
   setIsGachaSim,
   isSimpleMode,
   setIsSimpleMode,
-  initialInputs,
   options,
   setOptions,
   runningTime,
+  batchGachaGoal,
+  setBatchGachaGoal,
+  initialResource,
+  setInitialResource,
 }: {
   isTrySim: boolean;
   setIsGachaSim: Dispatch<SetStateAction<boolean>>;
   isSimpleMode: boolean;
   setIsSimpleMode: Dispatch<SetStateAction<boolean>>;
-  initialInputs: InitialInputs;
   options: SimulationOptions;
   setOptions: Dispatch<SetStateAction<SimulationOptions>>;
   runningTime: number | null;
+  batchGachaGoal: 'allFirst' | 'allMax' | null;
+  setBatchGachaGoal: Dispatch<SetStateAction<'allFirst' | 'allMax' | null>>;
+  initialResource: number;
+  setInitialResource: Dispatch<SetStateAction<number>>;
 }) {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const onViewModeToggle = (isLeft?: boolean) => {
+  const onOptionModeToggle = (isLeft?: boolean) => {
     setIsSimpleMode((p) => (isLeft === undefined ? !p : isLeft));
   };
-  const onGachaSimToggle = (isLeft?: boolean) => {
+  const onSimulationModeToggle = (isLeft?: boolean) => {
     if (isLeft === undefined) {
       setIsGachaSim((p) => !p);
     } else {
       setIsGachaSim(isLeft);
+    }
+  };
+
+  const onInitialResourceBlur: onInsetNumberInputBlur = (e, syncLocalValue) => {
+    const { value } = e.currentTarget;
+    const newValue = value.replace(/,/g, '');
+    const numberValue = stringToNumber(newValue);
+    if (numberValue <= 9999999) {
+      setInitialResource(numberValue);
+    } else {
+      syncLocalValue('9999999');
+      setInitialResource(9999999);
+    }
+  };
+
+  const onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => void = (type) => {
+    if (batchGachaGoal !== type) {
+      setBatchGachaGoal(type);
+    } else {
+      setBatchGachaGoal(null);
     }
   };
   return (
@@ -469,10 +435,13 @@ export default function OptionBar({
       <Help isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
       <ControlPanel
         isTrySim={isTrySim}
-        onTypeClick={onGachaSimToggle}
+        onSimulationModeToggle={onSimulationModeToggle}
         isSimpleMode={isSimpleMode}
-        onViewModeToggle={onViewModeToggle}
-        initialInputs={initialInputs}
+        onOptionModeToggle={onOptionModeToggle}
+        batchGachaGoal={batchGachaGoal}
+        onBatchGachaGoalClick={onBatchGachaGoalClick}
+        initialResource={initialResource}
+        onInitialResourceBlur={onInitialResourceBlur}
       />
     </motion.div>
   );
