@@ -1089,7 +1089,6 @@ export default function PickupBanner({
                 height={500}
                 alt={name}
                 onError={() => {
-                  console.log('run');
                   setIsImageValid(false);
                 }}
                 priority={index < 2}
