@@ -41,6 +41,7 @@ import ChevronDown from '#/icons/ChevronDown.svg';
 import ChevronUp from '#/icons/ChevronUp.svg';
 import Tag from '#/icons/Tag.svg';
 import { operatorLimitByBannerType } from '#/constants/variables';
+import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -118,6 +119,7 @@ export const InsetNumberInput = ({
   onInputBlur,
   currentValue,
   name,
+  pattern = '[0-9]*',
   inputWidth,
   className = '',
   max,
@@ -131,6 +133,7 @@ export const InsetNumberInput = ({
   onInputBlur: onInsetNumberInputBlur;
   currentValue: string;
   name: ReactNode;
+  pattern?: string;
   inputWidth?: string;
   className?: string;
   max?: number;
@@ -185,7 +188,7 @@ export const InsetNumberInput = ({
           <input
             type="text"
             inputMode="numeric"
-            pattern="[0-9]*"
+            pattern={pattern}
             onFocus={(e: FocusEvent<HTMLInputElement>) => {
               if (e.currentTarget.value === '0') {
                 e.currentTarget.setSelectionRange(0, 1);
@@ -215,7 +218,9 @@ export const InsetNumberInput = ({
             }
           />
         </motion.div>
-        {children}
+        <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+          {children}
+        </motion.div>
       </motion.div>
     </div>
   );
@@ -545,6 +550,7 @@ const SimplePreInfoField = ({
             <div className="flex items-center gap-x-3 text-sm">
               <InsetNumberInput
                 name="추가재화"
+                pattern={LOCALE_NUMBER_PATTERN.source}
                 className="font-S-CoreDream-400"
                 onInputBlur={(e, syncLocalValue) => {
                   const { value } = e.currentTarget;
@@ -1111,6 +1117,7 @@ export default function PickupBanner({
                       <div className="flex items-center gap-x-3 text-sm">
                         <InsetNumberInput
                           name="추가재화"
+                          pattern={LOCALE_NUMBER_PATTERN.source}
                           className="font-S-CoreDream-400"
                           onInputBlur={(e, syncLocalValue) => {
                             const { value } = e.currentTarget;

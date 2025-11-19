@@ -17,6 +17,7 @@ import ChevronUp from '#/icons/ChevronUp.svg';
 import Maximize from '#/icons/Maximize.svg';
 import Minimize from '#/icons/Minimize.svg';
 import { InsetNumberInput, onInsetNumberInputBlur } from '#/components/PickupBanner';
+import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 
 const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   return (
@@ -310,6 +311,7 @@ const ControlPanel = ({
               <div className="flex items-center gap-x-3 text-sm">
                 <InsetNumberInput
                   name="초기재화"
+                  pattern={LOCALE_NUMBER_PATTERN.source}
                   onInputBlur={onInitialResourceBlur}
                   currentValue={initialResource.toLocaleString()}
                   max={9999999}

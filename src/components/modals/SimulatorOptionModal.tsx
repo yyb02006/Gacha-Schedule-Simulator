@@ -10,6 +10,7 @@ import { toOpacityZero } from '#/constants/variants';
 import { SimulationOptions } from '#/components/PickupList';
 import { stringToNumber } from '#/libs/utils';
 import ToggleButton from '#/components/buttons/ToggleButton';
+import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 
 const Help = ({ onClose }: { onClose: () => void }) => {
   const isMouseDownOnTarget = useRef<boolean>(false);
@@ -159,6 +160,7 @@ export default function SimulatorOptionModal({
             </motion.div>
             <InsetNumberInput
               name=""
+              pattern={LOCALE_NUMBER_PATTERN.source}
               className="text-sky-500"
               onInputBlur={(e, syncLocalValue) => {
                 const { value } = e.currentTarget;
