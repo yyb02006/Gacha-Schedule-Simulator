@@ -21,7 +21,7 @@ import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 
 const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} backdropBlur>
+    <Modal isOpen={isOpen} onClose={onClose} activeToTop backdropBlur>
       <section className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 rounded-xl bg-[#202020] pt-6 pb-8">
         <div className="flex items-center justify-between px-6">
           <h1 className="font-S-CoreDream-500 text-2xl">

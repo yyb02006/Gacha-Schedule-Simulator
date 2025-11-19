@@ -23,6 +23,7 @@ const GachaSystemInfoModalContent = ({
       onClose={() => {
         onClose();
       }}
+      activeToTop
       backdropBlur
     >
       <div className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 rounded-xl bg-[#202020] pt-6 pb-8">

@@ -4,6 +4,7 @@ import { ReactNode, RefObject, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { cls } from '#/libs/utils';
+import ToTopButton from '#/components/buttons/ToTopButton';
 
 interface ModalProps {
   children: ReactNode;
@@ -11,9 +12,17 @@ interface ModalProps {
   onClose: () => void;
   backdropBlur?: boolean;
   ref?: RefObject<HTMLDivElement | null>;
+  activeToTop?: boolean;
 }
 
-export default function Modal({ children, isOpen, onClose, backdropBlur, ref }: ModalProps) {
+export default function Modal({
+  children,
+  isOpen,
+  onClose,
+  backdropBlur,
+  ref,
+  activeToTop = false,
+}: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -88,6 +97,16 @@ export default function Modal({ children, isOpen, onClose, backdropBlur, ref }: 
                 {children}
               </div>
             </div>
+            {activeToTop && (
+              <div className="fixed right-6 bottom-6">
+                <ToTopButton
+                  handleToTop={() => {
+                    if (!modalRef.current) return;
+                    modalRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>,
