@@ -410,6 +410,7 @@ export function deriveWorkerSeeds(baseSeed: number, n: number): number[] {
  * 배너 히스토그램과 피티(histogram)도 합쳐서 후처리
  *
  * @param {GachaSimulationResult[]} results - 병합할 시뮬레이션 결과 배열
+ * @param {number} simulationTry - 별도로 넣을 시뮬레이션 시도 횟수
  * @returns {GachaSimulationMergedResult} 병합된 결과
  *
  * @example
@@ -421,7 +422,10 @@ export function deriveWorkerSeeds(baseSeed: number, n: number): number[] {
  * - `rarityStrings`와 `obtainedTypes`는 외부 상수 파일에 있음
  * - 내부적으로 각 배너의 cumulative, min/max index, successIndexUntilCutoff 등도 추가적으로 계산함
  */
-export function mergeGachaSimulationResults(results: GachaSimulationResult[]) {
+export function mergeGachaSimulationResults(
+  results: GachaSimulationResult[],
+  simulationTry?: number,
+) {
   const preMergedResult = results.reduce<GachaSimulationMergedResult>(
     (acc, current) => {
       current.perBanner.forEach((currentBanner, index) => {
@@ -484,7 +488,11 @@ export function mergeGachaSimulationResults(results: GachaSimulationResult[]) {
         }
       });
 
-      acc.total.simulationTry += current.total.simulationTry;
+      if (simulationTry) {
+        acc.total.simulationTry = simulationTry;
+      } else {
+        acc.total.simulationTry += current.total.simulationTry;
+      }
       acc.total.simulationSuccess += current.total.simulationSuccess;
       acc.total.totalGachaRuns += current.total.totalGachaRuns;
       acc.total.anyPityRewardObtained += current.total.anyPityRewardObtained;
