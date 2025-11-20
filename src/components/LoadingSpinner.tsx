@@ -436,7 +436,7 @@ const LoadingSpinnerContent = ({
             onHoverStart={() => hoverMV.set(1)}
             onHoverEnd={() => hoverMV.set(0)}
             onClick={onStopClick}
-            scaleMV={scaleMV}
+            scaleMV={hoverScaleMV}
           />
 
           <g className="pointer-events-none">
