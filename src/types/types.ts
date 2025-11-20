@@ -1,4 +1,4 @@
-import { Dummy } from '#/components/PickupList';
+import { Dummy, GachaSimulationResult } from '#/components/PickupList';
 
 export type SimulationMode = 'simple' | 'extended';
 
@@ -35,3 +35,13 @@ export type SizeClass = `size-[${number}px]` | `size-${number}` | `size-full`;
 export type ElementOfArray<Arr> = Arr extends (infer E)[] ? E : never;
 
 export type PickupDataPresets = (Dummy & { deactivationDate: string })[];
+
+export type BatchGachaGoal = 'allFirst' | 'allMax' | null;
+
+export interface ProgressRefProps {
+  progressTry: number;
+  total: number;
+  gachaRuns: number;
+  success: number;
+  results: GachaSimulationResult[];
+}
