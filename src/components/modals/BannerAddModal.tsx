@@ -2,7 +2,7 @@ import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/modals/Modal';
 import { InsetNumberInput } from '#/components/PickupBanner';
-import { Dummy, ExtractPayloadFromAction, Operator } from '#/components/PickupList';
+import { Dummy, ExtractPayloadFromAction } from '#/components/PickupList';
 import {
   bannerBadgeProps,
   gachaTypeButtons,
@@ -21,7 +21,6 @@ import { GachaType, OperatorRarity } from '#/types/types';
 import { AnimatePresence, motion, useMotionValue } from 'motion/react';
 import { ChangeEvent, useEffect, useReducer, useRef, useState } from 'react';
 import SimpleBar from 'simplebar-react';
-import prePickupDatas from '#/data/prePickupDatas.json';
 import 'simplebar-react/dist/simplebar.min.css';
 import Image from 'next/image';
 import Badge from '#/components/Badge';
