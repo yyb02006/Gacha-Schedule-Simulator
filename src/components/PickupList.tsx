@@ -8,7 +8,14 @@ import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
 import PickupBanner from '#/components/PickupBanner';
 import { useModal } from '#/hooks/useModal';
-import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
+import {
+  BatchGachaGoal,
+  GachaType,
+  OperatorRarity,
+  OperatorRarityForString,
+  OperatorType,
+  ProgressRefProps,
+} from '#/types/types';
 import BannerAddModal from '#/components/modals/BannerAddModal';
 import prePickupDatas from '#/data/prePickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
@@ -94,7 +101,7 @@ export interface BannerResult {
   fourth: ObtainedStatistics;
 }
 
-interface GachaSimulationResult {
+export interface GachaSimulationResult {
   total: {
     simulationTry: number;
     simulationSuccess: number;
@@ -866,7 +873,12 @@ export interface WorkerInput {
   payload: {
     seed: number;
     pickupDatas: Dummy[];
-    options: { isTrySim: boolean; isSimpleMode: boolean } & SimulationOptions & InitialInputs;
+    options: {
+      isTrySim: boolean;
+      isSimpleMode: boolean;
+      batchGachaGoal: BatchGachaGoal;
+      initialResource: number;
+    } & SimulationOptions;
   };
 }
 
@@ -874,12 +886,6 @@ export interface WorkerOutput {
   type: string;
   result: GachaSimulationMergedResult;
 }
-
-export type InitialInputs = {
-  gachaGoal: 'allFirst' | 'allMax' | null;
-  initialResource: number;
-};
-
 export type BannerFailureAction = 'interruption' | 'continueExecution';
 
 export type SimulationOptions = {
@@ -901,14 +907,16 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   });
   const [batchGachaGoal, setBatchGachaGoal] = useState<'allFirst' | 'allMax' | null>(null);
   const [initialResource, setInitialResource] = useState(0);
-  const initialInputs = useRef<InitialInputs>({
-    gachaGoal: null,
-    initialResource: 0,
-  });
   const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
   const { isOpen: isModalOpen, openModal: openModal, closeModal: closeModal } = useModal();
 
-  const progressRef = useRef({ progressTry: 0, total: 0, gachaRuns: 0, success: 0 });
+  const progressRef = useRef<ProgressRefProps>({
+    progressTry: 0,
+    total: 0,
+    gachaRuns: 0,
+    success: 0,
+    results: [],
+  });
   const isRunning = useRef(false);
   const [runningTime, setRunningTime] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -977,9 +985,6 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
     // 사전 설정 준비
     const { simulationTry, probability, showBannerImage, bannerFailureAction } = options;
-    const {
-      current: { gachaGoal, initialResource },
-    } = initialInputs;
 
     // 모바일 환경 시도횟수 설정 (최대 가챠횟수 1천만회로 잡고 배너 하나에 150가챠정도 한다고 가정하고 나눠서 가능한 시뮬레이션 반복 횟수 설정)
     const expectedTryBySingleCycle = activePickupDatas.length * 150;
@@ -999,7 +1004,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
           options: {
             isTrySim,
             isSimpleMode,
-            gachaGoal,
+            batchGachaGoal,
             initialResource,
             simulationTry: index === 0 ? base + remainder : base,
             probability,
@@ -1010,11 +1015,18 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
       };
     };
 
-    const progressPerWorker = Array.from({ length: workerCount }, () => ({
+    const progressPerWorker: {
+      progressTry: number;
+      total: number;
+      gachaRuns: number;
+      success: number;
+      data: GachaSimulationResult | null;
+    }[] = Array.from({ length: workerCount }, () => ({
       progressTry: 0,
       total: 0,
       gachaRuns: 0,
       success: 0,
+      data: null,
     }));
 
     // 워커 생성 및 워커 배열에 전달, 시뮬레이션 실행 후 사전에 생성한 프로미스 배열에 전달
@@ -1034,6 +1046,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
               total: number;
               gachaRuns: number;
               success: number;
+              data: GachaSimulationResult;
             };
             result: GachaSimulationResult;
           }>,
@@ -1041,17 +1054,27 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
           const { type, workerIndex, partialResult, result } = e.data;
 
           if (type === 'progress' && partialResult !== undefined) {
-            const { gachaRuns, progressTry, success } = partialResult;
+            const { gachaRuns, progressTry, success, data } = partialResult;
 
             progressPerWorker[workerIndex].gachaRuns = gachaRuns;
             progressPerWorker[workerIndex].progressTry = progressTry;
             progressPerWorker[workerIndex].success = success;
+            progressPerWorker[workerIndex].data = data;
 
-            const totalProgress = progressPerWorker.reduce(
-              (a, b) => {
+            const totalProgress = progressPerWorker.reduce<{
+              gachaRuns: number;
+              progressTry: number;
+              success: number;
+              total: number;
+              results: GachaSimulationResult[];
+            }>(
+              (a, b, index) => {
                 a.gachaRuns += b.gachaRuns;
                 a.progressTry += b.progressTry;
                 a.success += b.success;
+                if (b.data) {
+                  a.results[index] = b.data;
+                }
                 return a;
               },
               {
@@ -1059,6 +1082,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
                 progressTry: 0,
                 success: 0,
                 total: simulationTry,
+                results: [],
               },
             );
             progressRef.current = totalProgress;

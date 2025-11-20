@@ -1,6 +1,12 @@
 import { BannerFailureAction, Dummy, WorkerInput } from '#/components/PickupList';
 import { createRNG, safeNumberOrZero } from '#/libs/utils';
-import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
+import {
+  BatchGachaGoal,
+  GachaType,
+  OperatorRarity,
+  OperatorRarityForString,
+  OperatorType,
+} from '#/types/types';
 
 export default {} as typeof Worker & { new (): Worker };
 
@@ -303,11 +309,13 @@ const updateResult = ({
   if (rollResult.isTargetObtained) currentStatistics.targetObtained++;
 };
 
+let stopFlag = false;
+
 const gachaRateSimulate = ({
   workerIndex,
   seed,
   pickupDatas,
-  gachaGoal,
+  batchGachaGoal,
   isTrySim,
   isSimpleMode,
   simulationTry,
@@ -318,7 +326,7 @@ const gachaRateSimulate = ({
   workerIndex: number;
   seed: number;
   pickupDatas: Dummy[];
-  gachaGoal: 'allFirst' | 'allMax' | null;
+  batchGachaGoal: BatchGachaGoal;
   isSimpleMode: boolean;
   isTrySim: boolean;
   simulationTry: number;
@@ -327,11 +335,12 @@ const gachaRateSimulate = ({
   bannerFailureAction: BannerFailureAction;
 }) => {
   const rng = createRNG(seed);
-  const batchSize = (Math.floor(simulationTry / 10000) + 1) * 1000;
+  const batchSize = Math.min(5000, (Math.floor(simulationTry / 100000) + 1) * 1000);
   const sixthRate = 2;
   const fifthRate = 8;
   const fourthRate = 50;
-  const globalGachaGoalCount = gachaGoal === 'allMax' ? 6 : gachaGoal === 'allFirst' ? 1 : null;
+  const globalGachaGoalCount =
+    batchGachaGoal === 'allMax' ? 6 : batchGachaGoal === 'allFirst' ? 1 : null;
   // const simulationConfig = { initialOrundum: initialResource, isSimpleMode, isTrySim };
   // gachasim에서만 쓰이는 result 재화소모 시뮬레이션에서는 어디서 실패했는지 같은 정보가 더 필요
   // 최소 경우 최대 경우 식으로 툭 튀는 기록들 보관할지?
@@ -902,6 +911,7 @@ const gachaRateSimulate = ({
           total: simulationTry,
           gachaRuns: simulationResult.total.totalGachaRuns,
           success: simulationResult.total.simulationSuccess,
+          data: simulationResult,
         },
         // partialResult: simulationResult,
       });
@@ -916,6 +926,7 @@ const gachaRateSimulate = ({
       total: simulationTry,
       gachaRuns: simulationResult.total.totalGachaRuns,
       success: simulationResult.total.simulationSuccess,
+      data: simulationResult,
     },
     // partialResult: simulationResult,
   });
@@ -1267,6 +1278,10 @@ const rotationDummy: Dummy = {
 };
 
 self.onmessage = (e: MessageEvent<WorkerInput>) => {
+  if (e.data.type === 'stop') {
+    stopFlag = true;
+  }
+
   const {
     type,
     workerIndex,
@@ -1276,7 +1291,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
       options: {
         isTrySim,
         isSimpleMode,
-        gachaGoal,
+        batchGachaGoal,
         simulationTry,
         initialResource,
         probability,
@@ -1298,7 +1313,7 @@ self.onmessage = (e: MessageEvent<WorkerInput>) => {
   const result = gachaRateSimulate({
     workerIndex,
     pickupDatas,
-    gachaGoal,
+    batchGachaGoal,
     seed,
     isSimpleMode,
     isTrySim,

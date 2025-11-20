@@ -1,3 +1,4 @@
+import { ProgressRefProps } from '#/types/types';
 import { motion } from 'motion/react';
 import { RefObject, useEffect, useRef, useState } from 'react';
 
@@ -12,12 +13,7 @@ export default function GridCellBackground({
   divisions?: number;
   strokeColor?: string;
   activeColor?: string;
-  progressRef: RefObject<{
-    progressTry: number;
-    total: number;
-    gachaRuns: number;
-    success: number;
-  } | null>;
+  progressRef: RefObject<ProgressRefProps | null>;
 }) {
   const step = cellSize / (divisions - 1); // 각 간격
   const [progress, setProgress] = useState(0);

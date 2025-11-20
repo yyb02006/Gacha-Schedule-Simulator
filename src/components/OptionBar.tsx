@@ -18,6 +18,7 @@ import Maximize from '#/icons/Maximize.svg';
 import Minimize from '#/icons/Minimize.svg';
 import { InsetNumberInput, onInsetNumberInputBlur } from '#/components/PickupBanner';
 import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
+import { BatchGachaGoal } from '#/types/types';
 
 const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   return (
@@ -265,7 +266,7 @@ const ControlPanel = ({
   onSimulationModeToggle: (isLeft?: boolean) => void;
   isSimpleMode: boolean;
   onOptionModeToggle: (isLeft?: boolean) => void;
-  batchGachaGoal: 'allFirst' | 'allMax' | null;
+  batchGachaGoal: BatchGachaGoal;
   onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => void;
   initialResource: number;
   onInitialResourceBlur: onInsetNumberInputBlur;
@@ -353,8 +354,8 @@ export default function OptionBar({
   options: SimulationOptions;
   setOptions: Dispatch<SetStateAction<SimulationOptions>>;
   runningTime: number | null;
-  batchGachaGoal: 'allFirst' | 'allMax' | null;
-  setBatchGachaGoal: Dispatch<SetStateAction<'allFirst' | 'allMax' | null>>;
+  batchGachaGoal: BatchGachaGoal;
+  setBatchGachaGoal: Dispatch<SetStateAction<BatchGachaGoal>>;
   initialResource: number;
   setInitialResource: Dispatch<SetStateAction<number>>;
 }) {
