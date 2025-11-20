@@ -615,11 +615,13 @@ export default function LoadingSpinner({
   isLoading,
   isRunning,
   progressRef,
+  onStopClick,
   setRunningTime,
 }: {
   isLoading: boolean;
   isRunning: RefObject<boolean>;
   progressRef: RefObject<ProgressRefProps>;
+  onStopClick: () => void;
   setRunningTime: Dispatch<SetStateAction<number | null>>;
 }) {
   const MIN_DURATION = 1000; // 최소 로딩 시간(ms)
@@ -629,13 +631,6 @@ export default function LoadingSpinner({
   const loadingRef = useRef(true);
 
   const testLoadingRef = useRef(true);
-  const testRef = useRef({
-    gachaRuns: 10000000,
-    progressTry: 10000,
-    success: 10000,
-    total: 10000,
-    results: [],
-  });
 
   useEffect(() => {
     loadingRef.current = isLoading;
@@ -683,7 +678,7 @@ export default function LoadingSpinner({
         <LoadingSpinnerContent
           progressRef={progressRef}
           loadingRef={testLoadingRef}
-          onStopClick={() => {}}
+          onStopClick={onStopClick}
         />
       )}
     </AnimatePresence>
