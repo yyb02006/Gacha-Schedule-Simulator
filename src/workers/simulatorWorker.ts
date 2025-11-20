@@ -542,7 +542,7 @@ const gachaRateSimulate = ({
       const systemGachaLimit = 3000;
       const gachaAttemptsLimit = isSimpleMode
         ? systemGachaLimit
-        : maxGachaAttempts === Infinity
+        : maxGachaAttempts === 9999
           ? systemGachaLimit
           : maxGachaAttempts;
       const newPickupOpersCount = isSimpleMode ? simpleMode.pickupOpersCount : pickupOpersCount;
@@ -1015,7 +1015,7 @@ const contractDummy: Dummy = {
       targetOpersCount: { sixth: 4, fifth: 6, fourth: 0 },
     },
   },
-  maxGachaAttempts: Infinity,
+  maxGachaAttempts: 9999,
   minGachaAttempts: 0,
   firstSixthTry: false,
   additionalResource: { simpleMode: 0, extendedMode: 0 },
@@ -1073,7 +1073,7 @@ const orientDummy: Dummy = {
       targetOpersCount: { sixth: 0, fifth: 3, fourth: 0 },
     },
   },
-  maxGachaAttempts: Infinity,
+  maxGachaAttempts: 9999,
   minGachaAttempts: 0,
   firstSixthTry: false,
   additionalResource: { simpleMode: 0, extendedMode: 0 },
@@ -1131,7 +1131,7 @@ const collabDummy: Dummy = {
       targetOpersCount: { sixth: 0, fifth: 1, fourth: 0 },
     },
   },
-  maxGachaAttempts: Infinity,
+  maxGachaAttempts: 9999,
   minGachaAttempts: 0,
   firstSixthTry: false,
   additionalResource: { simpleMode: 0, extendedMode: 0 },
@@ -1180,7 +1180,7 @@ const limitedDummy: Dummy = {
       targetOpersCount: { sixth: 2, fifth: 1, fourth: 0 },
     },
   },
-  maxGachaAttempts: Infinity,
+  maxGachaAttempts: 9999,
   minGachaAttempts: 0,
   firstSixthTry: true,
   additionalResource: { simpleMode: 16000, extendedMode: 0 },
@@ -1220,7 +1220,7 @@ const singleDummy: Dummy = {
       targetOpersCount: { sixth: 0, fifth: 2, fourth: 0 },
     },
   },
-  maxGachaAttempts: Infinity,
+  maxGachaAttempts: 9999,
   minGachaAttempts: 0,
   firstSixthTry: false,
   additionalResource: { simpleMode: 0, extendedMode: 0 },
@@ -1270,7 +1270,7 @@ const rotationDummy: Dummy = {
       targetOpersCount: { sixth: 1, fifth: 0, fourth: 0 },
     },
   },
-  maxGachaAttempts: Infinity,
+  maxGachaAttempts: 9999,
   minGachaAttempts: 0,
   firstSixthTry: false,
   additionalResource: { simpleMode: 0, extendedMode: 0 },

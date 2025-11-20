@@ -17,21 +17,14 @@ import {
   ProgressRefProps,
 } from '#/types/types';
 import BannerAddModal from '#/components/modals/BannerAddModal';
-import prePickupDatas from '#/data/prePickupDatas.json';
 import AddBannerCard from '#/components/AddBannerCard';
-import {
-  obtainedTypes,
-  operatorLimitByBannerType,
-  rarities,
-  rarityStrings,
-} from '#/constants/variables';
+import { operatorLimitByBannerType, rarities } from '#/constants/variables';
 import {
   canHaveLimited,
   deriveWorkerSeeds,
   filterLimitArray,
-  getPercentileIndex,
+  mergeGachaSimulationResults,
   safeNumberOrZero,
-  truncateToDecimals,
 } from '#/libs/utils';
 import LoadingSpinner from '#/components/LoadingSpinner';
 import { useAlert } from '#/hooks/useAlert';
@@ -254,7 +247,6 @@ export type PickupDatasAction =
         toIndex: number;
       };
     }
-  | { type: 'reset' }
   | { type: 'initialize'; payload: { initialData: Dummy[] } };
 
 export type ExtractPayloadFromAction<K extends ActionType> =
@@ -305,18 +297,6 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
     case 'initialize': {
       const { initialData } = action.payload;
       return initialData;
-    }
-    case 'reset': {
-      const resetDatas = prePickupDatas.datas.map((data) => ({
-        ...data,
-        operators: data.operators as Operator[],
-        gachaType: data.gachaType as GachaType,
-        maxGachaAttempts:
-          data.maxGachaAttempts === 'Infinity' ? Infinity : parseInt(data.maxGachaAttempts),
-      }));
-      console.log(resetDatas);
-
-      return resetDatas;
     }
     case 'addBanner': {
       if (pickupDatas.length > 20) {
@@ -389,7 +369,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
               targetOpersCount,
             },
           },
-          maxGachaAttempts: Infinity,
+          maxGachaAttempts: 9999,
           minGachaAttempts: 0,
           firstSixthTry: false,
           name: `새 가챠 배너`,
@@ -593,7 +573,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       return modifyBannerDetails(id, (pickupBanner) => {
         const { maxGachaAttempts, minGachaAttempts } = pickupBanner;
         if (target === 'max') {
-          const newAttempts = attempts > 3000 ? 3000 : attempts;
+          const newAttempts = attempts > 3000 ? 9999 : attempts;
           return {
             maxGachaAttempts: newAttempts,
             minGachaAttempts: newAttempts < minGachaAttempts ? attempts : minGachaAttempts,
@@ -940,7 +920,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     setBatchGachaGoal(null);
     setInitialResource(0);
     isRunning.current = false;
-    dispatch({ type: 'reset' });
+    dispatch({ type: 'initialize', payload: { initialData: pickupDataPresets } });
   };
 
   useEffect(() => {
@@ -1099,125 +1079,8 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
     const results = await Promise.all(promises);
 
-    // 후처리
-    // 인덱스 넣고 더하는 과정에서 acc에 존재하지 않는 배열 길이가 나오면 undefined + number이므로 NaN이 되어버림
-    const preMergedResult = results.reduce<GachaSimulationMergedResult>(
-      (acc, current) => {
-        current.perBanner.forEach((currentBanner, index) => {
-          const {
-            bannerSuccess,
-            bannerTotalGachaRuns,
-            bannerWinGachaRuns,
-            anyPityRewardObtained,
-            winPityRewardObtained,
-            actualEntryCount,
-            bannerStartingCurrency,
-            additionalResource,
-            currencyShortageFailure,
-            maxAttemptsFailure,
-            bannerType,
-          } = currentBanner;
-          // current.total.totalGachaRuns += bannerTotalGachaRuns;
-          const currentAccBanner = acc.perBanner[index];
-          if (currentAccBanner) {
-            currentAccBanner.bannerSuccess += bannerSuccess;
-            currentAccBanner.bannerTotalGachaRuns += bannerTotalGachaRuns;
-            currentAccBanner.bannerWinGachaRuns += bannerWinGachaRuns;
-            currentAccBanner.anyPityRewardObtained += anyPityRewardObtained;
-            currentAccBanner.winPityRewardObtained += winPityRewardObtained;
-            currentAccBanner.actualEntryCount += actualEntryCount;
-            currentAccBanner.bannerStartingCurrency += bannerStartingCurrency;
-            currentAccBanner.currencyShortageFailure += currencyShortageFailure;
-            currentAccBanner.maxAttemptsFailure += maxAttemptsFailure;
-            currentAccBanner.additionalResource = additionalResource;
-            currentAccBanner.bannerType = bannerType;
-            for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
-              const accBannerHistogram = currentAccBanner.bannerHistogram[i] ?? 0;
-              const CurrentBannerHistogram = currentBanner.bannerHistogram[i] ?? 0;
+    const mergedResult = mergeGachaSimulationResults(results);
 
-              currentAccBanner.bannerHistogram[i] = accBannerHistogram + CurrentBannerHistogram;
-
-              const accPityHistogram = currentAccBanner.pityHistogram[i] ?? 0;
-              const CurrentPityHistogram = currentBanner.pityHistogram[i] ?? 0;
-
-              currentAccBanner.pityHistogram[i] = accPityHistogram + CurrentPityHistogram;
-            }
-            for (const rarityString of rarityStrings) {
-              for (const obtainedType of obtainedTypes) {
-                currentAccBanner[rarityString][obtainedType] +=
-                  currentBanner[rarityString][obtainedType];
-                acc.total.statistics[rarityString][obtainedType] +=
-                  currentBanner[rarityString][obtainedType];
-              }
-            }
-          } else {
-            acc.perBanner.push(currentBanner);
-            for (const rarityString of rarityStrings) {
-              for (const obtainedType of obtainedTypes) {
-                acc.total.statistics[rarityString][obtainedType] +=
-                  currentBanner[rarityString][obtainedType];
-              }
-            }
-          }
-        });
-
-        acc.total.simulationTry += current.total.simulationTry;
-        acc.total.simulationSuccess += current.total.simulationSuccess;
-        acc.total.totalGachaRuns += current.total.totalGachaRuns;
-        acc.total.anyPityRewardObtained += current.total.anyPityRewardObtained;
-        acc.total.seeds.push(current.total.seed);
-
-        return acc;
-      },
-      {
-        total: {
-          seeds: [],
-          simulationTry: 0,
-          simulationSuccess: 0,
-          totalGachaRuns: 0,
-          anyPityRewardObtained: 0,
-          initialResource: results[0].total.initialResource,
-          isTrySim: results[0].total.isTrySim,
-          isSimpleMode: results[0].total.isSimpleMode,
-          bannerFailureAction: results[0].total.bannerFailureAction,
-          statistics: {
-            sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
-            fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
-            fourth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
-          },
-        },
-        perBanner: [],
-      },
-    );
-    const mergedResult: GachaSimulationMergedResult = {
-      total: preMergedResult.total,
-      perBanner: preMergedResult.perBanner.map((bannerResult) => {
-        const { cumulative, cutoffIndex } = getPercentileIndex(
-          bannerResult.bannerHistogram,
-          bannerResult.bannerSuccess,
-          0.99,
-        );
-        return {
-          ...bannerResult,
-          successIndexUntilCutoff: cutoffIndex,
-          cumulativeUntilCutoff: cumulative,
-          minIndex: Math.max(
-            0,
-            Math.min(bannerResult.bannerHistogram.findIndex((value) => value > 0)),
-          ),
-          maxIndex: Math.max(
-            0,
-            Math.min(bannerResult.bannerHistogram.findLastIndex((value) => value > 0)),
-          ),
-          bannerStartingCurrency: truncateToDecimals(
-            safeNumberOrZero(
-              Math.floor(bannerResult.bannerStartingCurrency / bannerResult.actualEntryCount),
-            ),
-            0,
-          ),
-        };
-      }),
-    };
     console.log(mergedResult);
     console.log(baseSeed);
     setResults(mergedResult);

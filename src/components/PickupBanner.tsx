@@ -62,7 +62,8 @@ const MaxAttempts = ({
       isFirstSixthTry={isFirstSixthTry}
       className="text-amber-400"
       inputWidth="w-10"
-      max={3000}
+      max={9999}
+      isMaxAttepmts
       showAttemptsSign
     >
       <TypeSelectionButton
@@ -119,6 +120,7 @@ export const InsetNumberInput = ({
   onInputBlur,
   currentValue,
   name,
+  isMaxAttepmts,
   pattern = '[0-9]*',
   inputWidth,
   className = '',
@@ -133,6 +135,7 @@ export const InsetNumberInput = ({
   onInputBlur: onInsetNumberInputBlur;
   currentValue: string;
   name: ReactNode;
+  isMaxAttepmts?: boolean;
   pattern?: string;
   inputWidth?: string;
   className?: string;
@@ -144,7 +147,7 @@ export const InsetNumberInput = ({
   animate?: boolean;
 }) => {
   const [localValue, setLocalValue] = useSyncedState(currentValue);
-  const isInfinity = currentValue === 'Infinity' && localValue === 'Infinity';
+  const isInfinity = isMaxAttepmts && currentValue === '9999' && localValue === '9999';
   const firstSixthTry = currentValue === '0' && localValue === '0' && isFirstSixthTry;
   /*   const isParentPresent = usePresenceData();
   const preventedTransition = { duration: 0, delay: 0 };
@@ -199,10 +202,13 @@ export const InsetNumberInput = ({
               const newValue = value.replace(/,/g, '');
               const numberString = normalizeNumberString(newValue);
               if (numberString === undefined) return;
-              const normalizedString = Math.floor(
-                clamp(parseFloat(numberString), 0, max),
-              ).toString();
-              setLocalValue(normalizedString);
+              const numeric = parseFloat(numberString);
+              if (!isMaxAttepmts) {
+                const normalizedString = Math.floor(clamp(numeric, 0, max)).toString();
+                setLocalValue(normalizedString);
+              } else {
+                setLocalValue(numeric > 3000 ? '9999' : numeric.toString());
+              }
             }}
             onBlur={(e: FocusEvent<HTMLInputElement>) => {
               if (!e.currentTarget.value) return;
@@ -610,7 +616,7 @@ const PreInfoField = ({
               updateAttempts(stringToNumber(newValue), 'max');
             }}
             onUnlimitedClick={() => {
-              updateAttempts(Infinity, 'max');
+              updateAttempts(9999, 'max');
             }}
             isFirstSixthTry={firstSixthTry}
           />

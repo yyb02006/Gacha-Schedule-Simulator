@@ -1,5 +1,9 @@
-import { Operator } from '#/components/PickupList';
-import { rarities } from '#/constants/variables';
+import {
+  GachaSimulationMergedResult,
+  GachaSimulationResult,
+  Operator,
+} from '#/components/PickupList';
+import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
 import { GachaType, OperatorRarity, OperatorRarityForString } from '#/types/types';
 
 /**
@@ -397,4 +401,145 @@ export function deriveWorkerSeeds(baseSeed: number, n: number): number[] {
     seeds.push(Math.floor(tempRNG() * 0xffffffff));
   }
   return seeds;
+}
+
+/**
+ * 여러 시뮬레이션 결과를 병합하여 단일 GachaSimulationMergedResult 생성
+ *
+ * 각 배너별, 희귀도별, 획득 타입별 통계를 합산하고,
+ * 배너 히스토그램과 피티(histogram)도 합쳐서 후처리
+ *
+ * @param {GachaSimulationResult[]} results - 병합할 시뮬레이션 결과 배열
+ * @returns {GachaSimulationMergedResult} 병합된 결과
+ *
+ * @example
+ * const merged = mergeGachaSimulationResults(simulationResults);
+ * console.log(merged.total.simulationTry); // 전체 시도 수
+ * console.log(merged.perBanner[0].bannerHistogram); // 첫 번째 배너의 히스토그램
+ *
+ * @note
+ * - `rarityStrings`와 `obtainedTypes`는 외부 상수 파일에 있음
+ * - 내부적으로 각 배너의 cumulative, min/max index, successIndexUntilCutoff 등도 추가적으로 계산함
+ */
+export function mergeGachaSimulationResults(results: GachaSimulationResult[]) {
+  const preMergedResult = results.reduce<GachaSimulationMergedResult>(
+    (acc, current) => {
+      current.perBanner.forEach((currentBanner, index) => {
+        const currentAccBanner = acc.perBanner[index];
+        if (currentAccBanner) {
+          const {
+            bannerSuccess,
+            bannerTotalGachaRuns,
+            bannerWinGachaRuns,
+            anyPityRewardObtained,
+            winPityRewardObtained,
+            actualEntryCount,
+            bannerStartingCurrency,
+            additionalResource,
+            currencyShortageFailure,
+            maxAttemptsFailure,
+            bannerType,
+          } = currentBanner;
+
+          currentAccBanner.bannerSuccess += bannerSuccess;
+          currentAccBanner.bannerTotalGachaRuns += bannerTotalGachaRuns;
+          currentAccBanner.bannerWinGachaRuns += bannerWinGachaRuns;
+          currentAccBanner.anyPityRewardObtained += anyPityRewardObtained;
+          currentAccBanner.winPityRewardObtained += winPityRewardObtained;
+          currentAccBanner.actualEntryCount += actualEntryCount;
+          currentAccBanner.bannerStartingCurrency += bannerStartingCurrency;
+          currentAccBanner.currencyShortageFailure += currencyShortageFailure;
+          currentAccBanner.maxAttemptsFailure += maxAttemptsFailure;
+          currentAccBanner.additionalResource = additionalResource;
+          currentAccBanner.bannerType = bannerType;
+
+          for (let i = 0; i < currentBanner.bannerHistogram.length; i++) {
+            const accBannerHistogram = currentAccBanner.bannerHistogram[i] ?? 0;
+            const CurrentBannerHistogram = currentBanner.bannerHistogram[i] ?? 0;
+
+            currentAccBanner.bannerHistogram[i] = accBannerHistogram + CurrentBannerHistogram;
+
+            const accPityHistogram = currentAccBanner.pityHistogram[i] ?? 0;
+            const CurrentPityHistogram = currentBanner.pityHistogram[i] ?? 0;
+
+            currentAccBanner.pityHistogram[i] = accPityHistogram + CurrentPityHistogram;
+          }
+          for (const rarityString of rarityStrings) {
+            for (const obtainedType of obtainedTypes) {
+              currentAccBanner[rarityString][obtainedType] +=
+                currentBanner[rarityString][obtainedType];
+              acc.total.statistics[rarityString][obtainedType] +=
+                currentBanner[rarityString][obtainedType];
+            }
+          }
+        } else {
+          // 인덱스 넣고 더하는 과정에서 acc에 존재하지 않는 배열 길이가 나오면 undefined + number이므로 NaN이 되어버림
+          acc.perBanner.push(currentBanner);
+          for (const rarityString of rarityStrings) {
+            for (const obtainedType of obtainedTypes) {
+              acc.total.statistics[rarityString][obtainedType] +=
+                currentBanner[rarityString][obtainedType];
+            }
+          }
+        }
+      });
+
+      acc.total.simulationTry += current.total.simulationTry;
+      acc.total.simulationSuccess += current.total.simulationSuccess;
+      acc.total.totalGachaRuns += current.total.totalGachaRuns;
+      acc.total.anyPityRewardObtained += current.total.anyPityRewardObtained;
+      acc.total.seeds.push(current.total.seed);
+
+      return acc;
+    },
+    {
+      total: {
+        seeds: [],
+        simulationTry: 0,
+        simulationSuccess: 0,
+        totalGachaRuns: 0,
+        anyPityRewardObtained: 0,
+        initialResource: results[0].total.initialResource,
+        isTrySim: results[0].total.isTrySim,
+        isSimpleMode: results[0].total.isSimpleMode,
+        bannerFailureAction: results[0].total.bannerFailureAction,
+        statistics: {
+          sixth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
+          fifth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
+          fourth: { pickupObtained: 0, targetObtained: 0, totalObtained: 0 },
+        },
+      },
+      perBanner: [],
+    },
+  );
+  const mergedResult: GachaSimulationMergedResult = {
+    total: preMergedResult.total,
+    perBanner: preMergedResult.perBanner.map((bannerResult) => {
+      const { cumulative, cutoffIndex } = getPercentileIndex(
+        bannerResult.bannerHistogram,
+        bannerResult.bannerSuccess,
+        0.99,
+      );
+      return {
+        ...bannerResult,
+        successIndexUntilCutoff: cutoffIndex,
+        cumulativeUntilCutoff: cumulative,
+        minIndex: Math.max(
+          0,
+          Math.min(bannerResult.bannerHistogram.findIndex((value) => value > 0)),
+        ),
+        maxIndex: Math.max(
+          0,
+          Math.min(bannerResult.bannerHistogram.findLastIndex((value) => value > 0)),
+        ),
+        bannerStartingCurrency: truncateToDecimals(
+          safeNumberOrZero(
+            Math.floor(bannerResult.bannerStartingCurrency / bannerResult.actualEntryCount),
+          ),
+          0,
+        ),
+      };
+    }),
+  };
+  return mergedResult;
 }
