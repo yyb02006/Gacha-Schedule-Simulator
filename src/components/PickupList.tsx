@@ -890,6 +890,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
   const { isOpen: isModalOpen, openModal: openModal, closeModal: closeModal } = useModal();
 
+  const workersRef = useRef<Worker[]>([]);
   const progressRef = useRef<ProgressRefProps>({
     progressTry: 0,
     total: 0,
@@ -941,6 +942,19 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     return () => clearTimeout(id);
   }, [pickupDatas]);
 
+  const stopSimulation = async () => {
+    if (workersRef.current.length > 0) {
+      for (const worker of workersRef.current) {
+        worker.terminate();
+      }
+
+      const { results, progressTry } = progressRef.current;
+      const mergedResult = mergeGachaSimulationResults(results, progressTry);
+      setResults(mergedResult);
+      setIsLoading(false);
+    }
+  };
+
   const runSimulation = async () => {
     if (isLoading) return;
     const { isMobile, workerCount } = getOptimalWorkerCount();
@@ -960,7 +974,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     const activePickupDatas = pickupDatas.filter(({ active }) => active);
 
     // 워커, 프로미스 배열 초기화
-    const workers: Worker[] = [];
+    workersRef.current = [];
     const promises: Promise<GachaSimulationResult>[] = [];
 
     // 사전 설정 준비
@@ -1014,7 +1028,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
       const worker = new Worker(new URL('#/workers/simulatorWorker', import.meta.url), {
         type: 'module',
       });
-      workers.push(worker);
+      workersRef.current.push(worker);
 
       const promise = new Promise<GachaSimulationResult>((resolve) => {
         worker.onmessage = (
@@ -1164,6 +1178,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
         isLoading={isLoading}
         isRunning={isRunning}
         progressRef={progressRef}
+        onStopClick={stopSimulation}
         setRunningTime={setRunningTime}
       />
       <div className="fixed right-4 bottom-4">
