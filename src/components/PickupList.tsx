@@ -23,8 +23,8 @@ import {
   canHaveLimited,
   deriveWorkerSeeds,
   filterLimitArray,
+  getDeviceType,
   mergeGachaSimulationResults,
-  safeNumberOrZero,
 } from '#/libs/utils';
 import LoadingSpinner from '#/components/LoadingSpinner';
 import { useAlert } from '#/hooks/useAlert';
@@ -254,18 +254,31 @@ export type ExtractPayloadFromAction<K extends ActionType> =
 
 const getOptimalWorkerCount = (): { isMobile: boolean; workerCount: number } => {
   const cores = navigator.hardwareConcurrency || 4;
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const deviceType = getDeviceType();
 
-  if (isMobile) {
-    if (cores <= 8) return { isMobile: true, workerCount: 2 }; // 중, 저급기
-    return { isMobile: true, workerCount: 3 }; // 고급기
+  const isIpadOS =
+    /iPad/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  switch (deviceType) {
+    case 'mobile': {
+      if (cores <= 6) return { isMobile: true, workerCount: 2 }; // 저사양 모바일
+      return { isMobile: true, workerCount: 3 }; // 고급기 (스냅 8Gen2 / A16)
+    }
+    case 'tablet': {
+      if (isIpadOS) {
+        return { isMobile: true, workerCount: Math.min(Math.ceil(cores * 0.5), 6) };
+      }
+      if (cores <= 6) return { isMobile: true, workerCount: 2 };
+      return { isMobile: true, workerCount: 3 };
+    }
+    default: {
+      if (cores <= 4) return { isMobile: false, workerCount: 2 };
+      if (cores <= 8) return { isMobile: false, workerCount: Math.ceil(cores * 0.75) }; // 6개 정도
+      if (cores <= 12) return { isMobile: false, workerCount: Math.ceil(cores * 0.6) }; // 7~8개
+      return { isMobile: false, workerCount: Math.min(Math.ceil(cores * 0.5), 8) }; // 과도한 병렬 방지
+    }
   }
-
-  // PC 환경
-  if (cores <= 4) return { isMobile: false, workerCount: 2 };
-  if (cores <= 8) return { isMobile: false, workerCount: Math.ceil(cores * 0.75) }; // 6개 정도
-  if (cores <= 12) return { isMobile: false, workerCount: Math.ceil(cores * 0.6) }; // 7~8개
-  return { isMobile: false, workerCount: Math.min(Math.ceil(cores * 0.5), 8) }; // 과도한 병렬 방지
 };
 
 const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
@@ -980,13 +993,9 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     // 사전 설정 준비
     const { simulationTry, probability, showBannerImage, bannerFailureAction } = options;
 
-    // 모바일 환경 시도횟수 설정 (최대 가챠횟수 1천만회로 잡고 배너 하나에 150가챠정도 한다고 가정하고 나눠서 가능한 시뮬레이션 반복 횟수 설정)
-    const expectedTryBySingleCycle = activePickupDatas.length * 150;
-    const mobileSimulationTry = Math.floor(safeNumberOrZero(10000000 / expectedTryBySingleCycle));
-
     // 워커에 전달할 포스트메세지 생성 함수
     const getPostMessage = (index: number): WorkerInput => {
-      const inputTry = isMobile ? mobileSimulationTry : simulationTry;
+      const inputTry = simulationTry;
       const base = Math.floor(inputTry / workerCount);
       const remainder = inputTry % workerCount;
       return {
