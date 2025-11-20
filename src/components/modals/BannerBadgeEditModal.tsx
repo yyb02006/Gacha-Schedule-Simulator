@@ -195,7 +195,7 @@ export default function BannerBadgeEditModal({
               <Badge
                 key={filteredBadge.id}
                 {...filteredBadge.props}
-                animation={true}
+                animation
                 onBadgeClick={() => {
                   setCurrentGachaType(filteredBadge.id);
                 }}

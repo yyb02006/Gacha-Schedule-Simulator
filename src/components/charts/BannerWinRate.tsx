@@ -180,7 +180,7 @@ const BannerWinRate = forwardRef<
           total={result.total.simulationTry}
           padding={16}
           enableBrush={enableBrush}
-          isPercentYAxis={true}
+          isPercentYAxis
           chartHeight={chartHeight}
           brushHeight={brushHeight}
           createTooltipLiteral={createTooltipLiteral}

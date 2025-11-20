@@ -355,7 +355,7 @@ const BannerSuccessTrialCounts = forwardRef<
               enableBrush={enableBrush}
               cutoffIndex={successIndexUntilCutoff}
               height={chartHeight}
-              lazyLoading={true}
+              lazyLoading
               createTooltipLiteral={createTooltipLiteral(bannerHistogram, pityHistogram)}
               mainChartRef={mainChartRef}
             />

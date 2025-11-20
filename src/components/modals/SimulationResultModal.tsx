@@ -252,7 +252,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                 name: `${index + 1}. ${bannerResult.name}`,
               })),
             }}
-            isColspanTwo={true}
+            isColspanTwo
           />
         </div>
         <motion.div
