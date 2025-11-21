@@ -970,7 +970,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
   const runSimulation = async () => {
     if (isLoading) return;
-    const { isMobile, workerCount } = getOptimalWorkerCount();
+    const { workerCount } = getOptimalWorkerCount();
     // const { isMobile } = getOptimalWorkerCount();
     // const workerCount = 1;
     if (workerCount <= 0) return;
@@ -1112,8 +1112,8 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
   return (
     <>
-      <div ref={listRef} className="mt-12 flex space-x-6">
-        <div className="flex w-[984px] flex-col items-center space-y-6">
+      <div ref={listRef} className="mt-12 flex w-full px-4 sm:w-auto sm:space-x-6 sm:px-0">
+        <div className="flex flex-col items-center space-y-6 2xl:w-[984px]">
           <div className="mb-12 flex space-x-16">
             <ResetButton
               onResetClick={async () => {
@@ -1149,7 +1149,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
             runningTime={runningTime}
             setBatchGachaGoal={setBatchGachaGoal}
           />
-          <div className="flex w-full flex-col gap-y-6">
+          <div className="flex flex-col gap-y-6 sm:w-full">
             <AddBannerCard isAddPrevent={pickupDatas.length >= 20} openModal={openModal} />
             <AnimatePresence>
               {pickupDatas.map((pickupData, index) => (
@@ -1168,21 +1168,21 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
           </div>
         </div>
         <SummaryBanner result={results} />
-        <BannerAddModal
-          isOpen={isModalOpen}
-          bannerCount={pickupDatas.length}
-          onClose={closeModal}
-          onSave={addBanner}
-          onSavePreset={addBannerUsePreset}
-          pickupDataPresets={pickupDataPresets}
-        />
-        <ResetAlert
-          isOpen={isAlertOpen}
-          onCancel={cancel}
-          onConfirm={confirm}
-          message={alertMessage}
-        />
       </div>
+      <BannerAddModal
+        isOpen={isModalOpen}
+        bannerCount={pickupDatas.length}
+        onClose={closeModal}
+        onSave={addBanner}
+        onSavePreset={addBannerUsePreset}
+        pickupDataPresets={pickupDataPresets}
+      />
+      <ResetAlert
+        isOpen={isAlertOpen}
+        onCancel={cancel}
+        onConfirm={confirm}
+        message={alertMessage}
+      />
       <LoadingSpinner
         isLoading={isLoading}
         isRunning={isRunning}
