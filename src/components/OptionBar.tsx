@@ -23,9 +23,9 @@ import { BatchGachaGoal } from '#/types/types';
 const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} activeToTop backdropBlur>
-      <section className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 rounded-xl bg-[#202020] pt-6 pb-8">
-        <div className="flex items-center justify-between px-6">
-          <h1 className="font-S-CoreDream-500 text-2xl">
+      <section className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 rounded-xl bg-[#202020] pt-5 pb-8 sm:pt-6">
+        <div className="flex items-start justify-between px-4 sm:items-center sm:px-6">
+          <h1 className="font-S-CoreDream-500 flex-1 text-xl sm:text-2xl">
             <span className="text-amber-400">시뮬레이션 및 배너 사전설정</span>에 대한 안내
           </h1>
           <CancelButton
@@ -34,7 +34,7 @@ const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
             }}
           />
         </div>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 sm:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
             <div className="my-[3px] w-[5px] self-stretch bg-teal-400" />
             <span className="ml-1.5 text-teal-400">
@@ -76,7 +76,7 @@ const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
             </li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 sm:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
             <div className="my-[3px] w-[5px] self-stretch bg-teal-400" />
             <span className="ml-1.5 text-teal-400">
@@ -184,7 +184,7 @@ const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
             </li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 sm:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
             <div className="my-[3px] w-[5px] self-stretch bg-teal-400" />
             <span className="ml-1.5 text-teal-400">
@@ -274,19 +274,10 @@ const ControlPanel = ({
   return (
     <div className="flex flex-col gap-4">
       <SimulatorTypeButton isTrySim={isTrySim} onTypeClick={onSimulationModeToggle} />
-      <div className="flex flex-wrap justify-between">
-        <div className="flex flex-wrap gap-x-6 gap-y-3">
-          <div className="flex items-center gap-x-3 text-sm">
-            <motion.span
-              variants={toOpacityZero}
-              initial="exit"
-              animate="idle"
-              exit="exit"
-              className="font-S-CoreDream-400 whitespace-nowrap"
-            >
-              일괄 목표
-            </motion.span>
-            <div className="flex w-fit gap-x-3">
+      <div className="flex flex-wrap justify-between space-y-4 sm:space-y-0">
+        <div className="flex w-full flex-wrap gap-x-6 gap-y-4 sm:w-auto sm:gap-y-3">
+          <div className="flex w-full items-center gap-x-3 text-sm sm:w-auto">
+            <div className="flex w-full gap-x-3 sm:w-fit">
               <TypeSelectionButton
                 name="6성 올명함"
                 hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
@@ -294,7 +285,7 @@ const ControlPanel = ({
                   onBatchGachaGoalClick('allFirst');
                 }}
                 isActive={batchGachaGoal === 'allFirst'}
-                className="px-4 whitespace-nowrap"
+                className="w-full px-4 whitespace-nowrap sm:w-auto"
               />
               <TypeSelectionButton
                 name="6성 올풀잠"
@@ -303,20 +294,21 @@ const ControlPanel = ({
                   onBatchGachaGoalClick('allMax');
                 }}
                 isActive={batchGachaGoal === 'allMax'}
-                className="px-4 whitespace-nowrap"
+                className="w-full px-4 whitespace-nowrap sm:w-auto"
               />
             </div>
           </div>
           <AnimatePresence>
             {isTrySim || (
-              <div className="flex items-center gap-x-3 text-sm">
+              <div className="flex w-full items-center gap-x-3 text-sm sm:w-auto">
                 <InsetNumberInput
                   name="초기재화"
                   pattern={LOCALE_NUMBER_PATTERN.source}
                   onInputBlur={onInitialResourceBlur}
                   currentValue={initialResource.toLocaleString()}
                   max={9999999}
-                  inputWidth={'w-20'}
+                  inputWidth="w-full sm:w-20"
+                  fullSize="w-full sm:w-auto"
                 >
                   <div className="relative top-[1px] mr-3 -ml-2">합성옥</div>
                 </InsetNumberInput>
@@ -328,6 +320,7 @@ const ControlPanel = ({
           isLeft={isSimpleMode}
           labels={{ left: '기본옵션', right: '세부옵션' }}
           onToggle={onOptionModeToggle}
+          className="h-[40px] w-full sm:h-auto sm:w-auto"
         />
       </div>
     </div>
@@ -396,13 +389,13 @@ export default function OptionBar({
       variants={cardVariants}
       initial="exit"
       animate="idle"
-      className="flex w-full flex-col gap-y-4 rounded-xl p-4"
+      className="flex w-full flex-col gap-y-4 rounded-xl p-3"
     >
       <motion.div
         variants={toOpacityZero}
         initial="exit"
         animate="idle"
-        className="font-S-CoreDream-500 flex justify-between"
+        className="font-S-CoreDream-400 sm:font-S-CoreDream-500 flex justify-between"
       >
         <div className="flex items-center gap-x-2">
           {runningTime ? (
@@ -415,10 +408,15 @@ export default function OptionBar({
               </span>
             </span>
           ) : (
-            <span>
-              <span className="text-amber-400">플레이 버튼(▶)</span>을 눌러 시뮬레이션을
-              시작해보세요
-            </span>
+            <>
+              <span className="sm:hidden">
+                <span className="text-standard text-amber-400">▶ </span>버튼을 눌러 시뮬레이션 시작
+              </span>
+              <span className="hidden sm:inline">
+                <span className="text-amber-400">플레이 버튼(▶)</span>을 눌러 시뮬레이션을
+                시작해보세요
+              </span>
+            </>
           )}
           <button
             onClick={() => isSettingsModalOpen || setIsHelpOpen(true)}
@@ -429,13 +427,6 @@ export default function OptionBar({
         </div>
         <AdjustmentButton onClick={() => isHelpOpen || setIsSettingsModalOpen(true)} />
       </motion.div>
-      <SimulatorOptionModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-        options={options}
-        setOptions={setOptions}
-      />
-      <Help isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
       <ControlPanel
         isTrySim={isTrySim}
         onSimulationModeToggle={onSimulationModeToggle}
@@ -446,6 +437,13 @@ export default function OptionBar({
         initialResource={initialResource}
         onInitialResourceBlur={onInitialResourceBlur}
       />
+      <SimulatorOptionModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        options={options}
+        setOptions={setOptions}
+      />
+      <Help isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </motion.div>
   );
 }

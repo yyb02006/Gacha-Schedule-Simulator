@@ -53,7 +53,7 @@ export default function DeleteButton({
         }
       }}
       aria-pressed={isClicked}
-      className={cls(size, className, 'cursor-pointer rounded-xl p-1 text-[#ff637e]')}
+      className={cls('cursor-pointer rounded-xl p-1 text-[#ff637e]', size, className)}
     >
       <div className="relative size-full">
         <motion.div

@@ -35,7 +35,7 @@ export default function ToggleButton({
   }, [isLeft, x]);
 
   return (
-    <div className={cls(className, 'flex min-w-[100px] flex-col space-y-1')}>
+    <div className={cls('flex min-w-[100px] flex-col space-y-1', className)}>
       <motion.div
         variants={insetInputVariants}
         animate="idle"

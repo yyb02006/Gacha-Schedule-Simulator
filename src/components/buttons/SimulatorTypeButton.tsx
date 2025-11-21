@@ -30,7 +30,7 @@ export default function SimulatorTypeButton({
     animate(x, isTrySim ? 0 : maxX, { type: 'spring', stiffness: 400, damping: 30 });
   }, [isTrySim, x]);
   return (
-    <div className="flex min-w-[100px] flex-col space-y-1">
+    <div className="text-standard font-S-CoreDream-500 sm:font-S-CoreDream-700 flex min-w-[100px] flex-col space-y-1 sm:text-base">
       <motion.div
         variants={insetInputVariants}
         animate="idle"
@@ -41,7 +41,7 @@ export default function SimulatorTypeButton({
           if (isDragging) return;
           onTypeClick();
         }}
-        className="relative flex h-[48px] cursor-pointer items-center justify-center rounded-xl px-4 pt-3 pb-2 font-bold"
+        className="relative flex h-[48px] cursor-pointer items-center justify-center rounded-xl pt-3 pb-2"
       >
         <motion.div
           variants={toOpacityZero}
@@ -55,7 +55,7 @@ export default function SimulatorTypeButton({
             animate={isTrySim ? 'inAcitve' : 'active'}
             initial={isTrySim ? 'active' : 'inAcitve'}
             exit="exit"
-            className="font-S-CoreDream-700 select-none"
+            className="select-none"
           >
             가챠 확률 시뮬레이션
           </motion.div>
@@ -72,7 +72,7 @@ export default function SimulatorTypeButton({
             animate={isTrySim ? 'inAcitve' : 'active'}
             initial={isTrySim ? 'active' : 'inAcitve'}
             exit="exit"
-            className="font-S-CoreDream-700"
+            className="select-none"
           >
             재화 소모 시뮬레이션
           </motion.div>

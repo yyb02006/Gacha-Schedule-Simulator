@@ -43,7 +43,7 @@ export default function AddBannerCard({
         if (isAddPrevent) return;
         openModal();
       }}
-      className="flex cursor-pointer items-center justify-center gap-x-24 overflow-hidden rounded-xl py-8"
+      className="flex cursor-pointer items-center justify-center gap-x-12 overflow-hidden rounded-xl py-6 sm:gap-x-24 sm:py-8"
     >
       <motion.div
         variants={toOpacityZero}

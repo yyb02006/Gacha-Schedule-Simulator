@@ -13,6 +13,7 @@ interface ModalProps {
   backdropBlur?: boolean;
   ref?: RefObject<HTMLDivElement | null>;
   activeToTop?: boolean;
+  className?: string;
 }
 
 export default function Modal({
@@ -22,6 +23,7 @@ export default function Modal({
   backdropBlur,
   ref,
   activeToTop = false,
+  className = '',
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -91,7 +93,10 @@ export default function Modal({
                 }
               }}
               role="button"
-              className="flex min-h-screen w-screen justify-center overflow-y-auto p-12"
+              className={cls(
+                'flex min-h-screen w-screen justify-center overflow-y-auto p-4 sm:p-12',
+                className,
+              )}
             >
               <div ref={wrapperRef} className="my-auto flex w-full justify-center">
                 {children}

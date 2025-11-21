@@ -42,6 +42,7 @@ import ChevronUp from '#/icons/ChevronUp.svg';
 import Tag from '#/icons/Tag.svg';
 import { operatorLimitByBannerType } from '#/constants/variables';
 import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
+import { ResponsiveHide, ResponsiveShow } from '#/components/ResponsiveSpan';
 
 const MaxAttempts = ({
   maxGachaAttempts,
@@ -61,7 +62,8 @@ const MaxAttempts = ({
       onInputBlur={onInputBlur}
       isFirstSixthTry={isFirstSixthTry}
       className="text-amber-400"
-      inputWidth="w-10"
+      inputWidth="w-full sm:w-10"
+      fullSize="sm:w-auto w-full"
       max={9999}
       isMaxAttepmts
       showAttemptsSign
@@ -88,25 +90,24 @@ const MinAttempts = ({
   onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
 }) => {
   return (
-    <div className="flex gap-x-3">
-      <InsetNumberInput
-        currentValue={minGachaAttempts.toString()}
-        name="최소 시도"
-        onInputBlur={onInputBlur}
-        isFirstSixthTry={isFirstSixthTry}
-        className="text-sky-500"
-        inputWidth="w-10"
-        max={999}
-        showAttemptsSign
-      >
-        <TypeSelectionButton
-          name="첫 6성"
-          className="px-3 text-sm"
-          onTypeClick={onFirstSixth}
-          hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
-        />
-      </InsetNumberInput>
-    </div>
+    <InsetNumberInput
+      currentValue={minGachaAttempts.toString()}
+      name="최소 시도"
+      onInputBlur={onInputBlur}
+      isFirstSixthTry={isFirstSixthTry}
+      className="text-sky-500"
+      inputWidth="w-full sm:w-10"
+      fullSize="sm:w-auto w-full"
+      max={999}
+      showAttemptsSign
+    >
+      <TypeSelectionButton
+        name="첫 6성"
+        className="px-3 text-sm"
+        onTypeClick={onFirstSixth}
+        hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+      />
+    </InsetNumberInput>
   );
 };
 
@@ -120,9 +121,10 @@ export const InsetNumberInput = ({
   onInputBlur,
   currentValue,
   name,
+  fullSize = '',
   isMaxAttepmts,
   pattern = '[0-9]*',
-  inputWidth,
+  inputWidth = 'w-8',
   className = '',
   max,
   maxLength,
@@ -135,6 +137,7 @@ export const InsetNumberInput = ({
   onInputBlur: onInsetNumberInputBlur;
   currentValue: string;
   name: ReactNode;
+  fullSize?: string;
   isMaxAttepmts?: boolean;
   pattern?: string;
   inputWidth?: string;
@@ -154,7 +157,7 @@ export const InsetNumberInput = ({
   const preventTransition = immediateExit && isParentPresent; */
 
   return (
-    <div className="flex items-center gap-2 whitespace-nowrap">
+    <div className={cls('flex items-center gap-2 whitespace-nowrap', fullSize)}>
       {name ? (
         <motion.div
           variants={toOpacityZero}
@@ -171,14 +174,17 @@ export const InsetNumberInput = ({
         initial="exit"
         animate="idle"
         exit="exit"
-        className="relative flex items-center rounded-lg shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]"
+        className={cls(
+          'relative flex items-center rounded-lg shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]',
+          fullSize,
+        )}
       >
         <motion.div
           variants={toOpacityZero}
           initial="exit"
           animate="idle"
           exit="exit"
-          className="relative flex items-center px-4 py-2"
+          className={cls('relative flex items-center px-4 py-2', fullSize)}
         >
           {showAttemptsSign && isInfinity && (
             <div className="absolute right-0 mr-4 text-3xl">∞</div>
@@ -214,7 +220,7 @@ export const InsetNumberInput = ({
               if (!e.currentTarget.value) return;
               onInputBlur(e, setLocalValue);
             }}
-            className={cls('relative h-full min-w-0 text-right', inputWidth ?? 'w-8')}
+            className={cls('relative h-full min-w-0 text-right', inputWidth)}
             max={max}
             maxLength={maxLength}
             value={
@@ -236,62 +242,68 @@ const BannerBadges = ({
   gachaType,
   isSimpleMode,
   pickupData,
+  className = '',
   onBannerBadgeChange,
 }: {
   gachaType: GachaType;
   isSimpleMode: boolean;
   pickupData: Dummy;
+  className?: string;
   onBannerBadgeChange: (gachaType: GachaType) => void;
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHover, setIsHover] = useState(false);
   const currentBadgeProp = bannerBadgeProps[gachaType].props;
   return (
-    <>
-      <motion.button
-        onHoverStart={() => {
-          setIsHover(true);
-        }}
-        onHoverEnd={() => {
-          setIsHover(false);
-        }}
-        onClick={() => {
-          setIsModalOpen(true);
-        }}
-        className="flex h-full cursor-pointer gap-x-1"
-      >
-        <div
-          className={cls(
-            currentBadgeProp.color,
-            'rounded-full border px-3 py-1 text-sm whitespace-nowrap',
-          )}
+    <div className="w-full self-stretch py-2 text-xl">
+      <div className="flex h-full w-full justify-end">
+        <motion.button
+          onHoverStart={() => {
+            setIsHover(true);
+          }}
+          onHoverEnd={() => {
+            setIsHover(false);
+          }}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+          className={cls('font-S-CoreDream-400 flex h-full cursor-pointer gap-x-1', className)}
         >
-          <div className="relative top-[1px] select-none">{currentBadgeProp.name}</div>
-        </div>
-        <motion.div
-          animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
-          transition={{ duration: 0.2 }}
-          className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
-        >
-          <motion.div
-            animate={isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }}
-            transition={{ duration: 0.2 }}
-            className="text-amber-400"
+          <div
+            className={cls(
+              currentBadgeProp.color,
+              'rounded-full border bg-[#262626] px-3 py-1 text-sm whitespace-nowrap sm:bg-transparent',
+            )}
           >
-            <Tag className="size-full" />
+            <div className="relative top-[1px] select-none">{currentBadgeProp.name}</div>
+          </div>
+          <motion.div
+            animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
+            transition={{ duration: 0.2 }}
+            className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400 bg-[#262626] sm:bg-transparent"
+          >
+            <motion.div
+              animate={
+                isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }
+              }
+              transition={{ duration: 0.2 }}
+              className="text-amber-400"
+            >
+              <Tag className="size-full" />
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </motion.button>
-      <BannerBadgeEditModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-        }}
-        isSimpleMode={isSimpleMode}
-        pickupData={pickupData}
-        onEditConfirmClick={onBannerBadgeChange}
-      />
-    </>
+        </motion.button>
+        <BannerBadgeEditModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
+          isSimpleMode={isSimpleMode}
+          pickupData={pickupData}
+          onEditConfirmClick={onBannerBadgeChange}
+        />
+      </div>
+    </div>
   );
 };
 
@@ -365,6 +377,40 @@ const BannerHeader = ({
           className="shrink-0"
         />
       </div>
+      <div className="flex sm:hidden">
+        <div className="flex grow gap-4">
+          <SmallButton
+            background="linear-gradient(135deg, #bb4d00, #ffb900)"
+            color="#eaeaea"
+            onButtonClick={() => {
+              onUpdateIndex('increase');
+            }}
+            isAnimateLocked={isAnimateLocked}
+            className="text-amber-400"
+            isClickPrevent={index < 1}
+          >
+            <ChevronUp className="size-full" />
+          </SmallButton>
+          <SmallButton
+            background="linear-gradient(135deg, #bb4d00, #ffb900)"
+            color="#eaeaea"
+            onButtonClick={() => {
+              onUpdateIndex('decrease');
+            }}
+            isAnimateLocked={isAnimateLocked}
+            className="text-amber-400"
+            isClickPrevent={index >= dataLength - 1}
+          >
+            <ChevronDown className="size-full" />
+          </SmallButton>
+        </div>
+        <BannerBadges
+          gachaType={gachaType}
+          isSimpleMode={isSimpleMode}
+          pickupData={pickupData}
+          onBannerBadgeChange={onBannerBadgeChange}
+        />
+      </div>
       <div className="flex grow gap-4">
         <SmallButton
           background="linear-gradient(135deg, #bb4d00, #ffb900)"
@@ -373,7 +419,7 @@ const BannerHeader = ({
             onUpdateIndex('increase');
           }}
           isAnimateLocked={isAnimateLocked}
-          className="text-amber-400"
+          className="hidden text-amber-400 sm:inline-block"
           isClickPrevent={index < 1}
         >
           <ChevronUp className="size-full" />
@@ -385,7 +431,7 @@ const BannerHeader = ({
             onUpdateIndex('decrease');
           }}
           isAnimateLocked={isAnimateLocked}
-          className="text-amber-400"
+          className="hidden text-amber-400 sm:inline-block"
           isClickPrevent={index >= dataLength - 1}
         >
           <ChevronDown className="size-full" />
@@ -395,7 +441,7 @@ const BannerHeader = ({
             {index + 1}.
           </span>
         </div>
-        <div className="font-S-CoreDream-500 flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+        <div className="font-S-CoreDream-500 relative flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
           <input
             type="text"
             onChange={onNameChange}
@@ -403,12 +449,14 @@ const BannerHeader = ({
             value={localValue}
             className="w-full"
           />
-          <BannerBadges
-            gachaType={gachaType}
-            isSimpleMode={isSimpleMode}
-            pickupData={pickupData}
-            onBannerBadgeChange={onBannerBadgeChange}
-          />
+          <div className="hidden sm:flex">
+            <BannerBadges
+              gachaType={gachaType}
+              isSimpleMode={isSimpleMode}
+              pickupData={pickupData}
+              onBannerBadgeChange={onBannerBadgeChange}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -439,13 +487,14 @@ const SimplePreInfoField = ({
   } = pickupData;
 
   return (
-    <div className="font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
+    <div className="font-S-CoreDream-400 sm:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex flex-wrap justify-between gap-x-6 gap-y-3">
         <div className="flex flex-wrap gap-x-10 gap-y-3">
           <div className="flex gap-x-3">
             <InsetNumberInput
               name="픽업 6성"
               className="text-orange-400"
+              inputWidth="sm:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -463,6 +512,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 6성"
               className="text-orange-400"
+              inputWidth="sm:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -482,6 +532,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 5성"
               className="text-amber-400"
+              inputWidth="sm:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -499,6 +550,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 5성"
               className="text-amber-400"
+              inputWidth="sm:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -518,6 +570,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 4성"
               className="text-sky-500"
+              inputWidth="sm:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -535,6 +588,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 4성"
               className="text-sky-500"
+              inputWidth="sm:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -606,7 +660,7 @@ const PreInfoField = ({
 
   const operatorsByRarity = getOperatorsByRarity(operators);
   return (
-    <div className="font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
+    <div className="font-S-CoreDream-400 sm:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex w-full flex-wrap justify-between gap-x-6 gap-y-3">
         <div className="flex flex-wrap gap-x-6 gap-y-3">
           <MaxAttempts
@@ -632,10 +686,19 @@ const PreInfoField = ({
             isFirstSixthTry={firstSixthTry}
           />
         </div>
-        <div className="flex flex-wrap gap-x-6 gap-y-3">
+        <div className="mt-2 text-base sm:hidden">
+          배너 총 <span className="text-amber-400">픽업</span> 수
+        </div>
+        <div className="flex w-full gap-x-6 gap-y-3 sm:w-auto sm:gap-x-6">
           <InsetNumberInput
-            name="픽업 6성"
+            name={
+              <>
+                <ResponsiveHide above="sm">6성</ResponsiveHide>
+                <ResponsiveShow above="sm">픽업 6성</ResponsiveShow>
+              </>
+            }
             className="text-orange-400"
+            inputWidth="w-full sm:w-8"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -649,8 +712,14 @@ const PreInfoField = ({
             max={targetLimit.sixth}
           />
           <InsetNumberInput
-            name="픽업 5성"
+            name={
+              <>
+                <ResponsiveHide above="sm">5성</ResponsiveHide>
+                <ResponsiveShow above="sm">픽업 5성</ResponsiveShow>
+              </>
+            }
             className="text-amber-400"
+            inputWidth="w-full sm:w-8"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -664,8 +733,14 @@ const PreInfoField = ({
             max={targetLimit.fifth}
           />
           <InsetNumberInput
-            name="픽업 4성"
+            name={
+              <>
+                <ResponsiveHide above="sm">4성</ResponsiveHide>
+                <ResponsiveShow above="sm">픽업 4성</ResponsiveShow>
+              </>
+            }
             className="text-purple-400"
+            inputWidth="w-full sm:w-8"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -689,12 +764,14 @@ const OperatorBadges = ({
   isPityReward,
   gachaType,
   operators,
+  className = '',
   onChangeOperatorDetails,
 }: {
   operator: Operator;
   isPityReward: boolean;
   gachaType: GachaType;
   operators: Operator[];
+  className?: string;
   onChangeOperatorDetails: (payload: UpdateOperatorDetails) => void;
 }) => {
   const { operatorId, operatorType, rarity } = operator;
@@ -704,57 +781,61 @@ const OperatorBadges = ({
     onChangeOperatorDetails({ operatorId, operatorType: newType, rarity: newRarity });
   };
   return (
-    <>
-      <motion.button
-        onHoverStart={() => {
-          setIsHover(true);
-        }}
-        onHoverEnd={() => {
-          setIsHover(false);
-        }}
-        onClick={() => {
-          setIsModalOpen(true);
-        }}
-        className="flex h-full cursor-pointer gap-x-1 *:pointer-events-none"
-      >
-        {isPityReward && <Badge name="천장" color="border-teal-400 text-teal-400" />}
-        {operatorType === 'limited' ? (
-          <Badge {...operatorBadgeProps.operatorType.limited.props} />
-        ) : (
-          <Badge {...operatorBadgeProps.operatorType.normal.props} />
-        )}
-        {rarity === 6 ? (
-          <Badge {...operatorBadgeProps.rarity.sixth.props} />
-        ) : rarity === 5 ? (
-          <Badge {...operatorBadgeProps.rarity.fifth.props} />
-        ) : (
-          <Badge {...operatorBadgeProps.rarity.fourth.props} />
-        )}
-        <motion.div
-          animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
-          className="border-rose relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
+    <div className={cls('flex', className)}>
+      <div className="flex justify-end">
+        <motion.button
+          onHoverStart={() => {
+            setIsHover(true);
+          }}
+          onHoverEnd={() => {
+            setIsHover(false);
+          }}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+          className="flex h-full cursor-pointer gap-x-1 *:pointer-events-none"
         >
+          {isPityReward && <Badge name="천장" color="border-teal-400 text-teal-400" />}
+          {operatorType === 'limited' ? (
+            <Badge {...operatorBadgeProps.operatorType.limited.props} />
+          ) : (
+            <Badge {...operatorBadgeProps.operatorType.normal.props} />
+          )}
+          {rarity === 6 ? (
+            <Badge {...operatorBadgeProps.rarity.sixth.props} />
+          ) : rarity === 5 ? (
+            <Badge {...operatorBadgeProps.rarity.fifth.props} />
+          ) : (
+            <Badge {...operatorBadgeProps.rarity.fourth.props} />
+          )}
           <motion.div
-            animate={isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }}
-            transition={{ duration: 0.2 }}
-            className="size-full p-1 text-amber-400"
+            animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
+            className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
           >
-            <Tag className="size-full" />
+            <motion.div
+              animate={
+                isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }
+              }
+              transition={{ duration: 0.2 }}
+              className="size-full p-1 text-amber-400"
+            >
+              <Tag className="size-full" />
+            </motion.div>
           </motion.div>
-        </motion.div>
-      </motion.button>
-      <OperatorBadgeEditModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-        }}
-        operatorType={operatorType}
-        rarity={rarity}
-        operators={operators}
-        gachaType={gachaType}
-        onBadgeEdit={editBadge}
-      />
-    </>
+        </motion.button>
+        <OperatorBadgeEditModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
+          operatorType={operatorType}
+          rarity={rarity}
+          operators={operators}
+          gachaType={gachaType}
+          onBadgeEdit={editBadge}
+        />
+      </div>
+    </div>
   );
 };
 
@@ -775,13 +856,28 @@ const PickupOperatorDetail = ({
   const [localName, setLocalName] = useState(name);
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+      <div className="flex w-full items-center justify-between sm:hidden">
+        <DeleteButton
+          onDelete={onOperatorDelete}
+          isDeletePrevent={operators.length === 1}
+          className="-mr-2 aspect-square"
+        />
+        <OperatorBadges
+          isPityReward={isPityReward}
+          onChangeOperatorDetails={onChangeOperatorDetails}
+          operator={operator}
+          gachaType={gachaType}
+          operators={operators}
+          className="flex w-full flex-row-reverse"
+        />
+      </div>
       <div className="flex grow gap-6">
         <DeleteButton
           onDelete={onOperatorDelete}
           isDeletePrevent={operators.length === 1}
-          className="-mr-2"
+          className="-mr-2 hidden sm:inline-block"
         />
-        <div className="flex grow items-center rounded-lg py-2 pr-2 pl-4 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+        <div className="flex flex-1 items-center rounded-lg py-2 pr-2 pl-4 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
           <input
             type="text"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
@@ -791,7 +887,7 @@ const PickupOperatorDetail = ({
               onChangeOperatorDetails({ name: e.currentTarget.value, operatorId });
             }}
             value={localName}
-            className="text-standard w-full"
+            className="text-standard w-full flex-1"
           />
           <OperatorBadges
             isPityReward={isPityReward}
@@ -799,12 +895,13 @@ const PickupOperatorDetail = ({
             operator={operator}
             gachaType={gachaType}
             operators={operators}
+            className="hidden sm:flex"
           />
         </div>
       </div>
       <div className="flex gap-x-6 gap-y-3">
         <div className="flex items-center gap-2">
-          <span className="whitespace-nowrap">가챠 목표</span>
+          <span className="whitespace-nowrap">목표</span>
           <TypeSelectionButton
             name="명함"
             hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
@@ -1114,7 +1211,7 @@ export default function PickupBanner({
             ) : (
               <div
                 key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
-                className="space-y-6 text-sm lg:space-y-7"
+                className="space-y-6 text-sm sm:space-y-7"
               >
                 <PreInfoField
                   // isPresent={isPresent}
@@ -1126,11 +1223,11 @@ export default function PickupBanner({
                 />
                 <div className="space-y-3">
                   <div className="font-S-CoreDream-500 flex flex-wrap justify-between gap-x-6 gap-y-4 text-xl">
-                    <span className="py-1 whitespace-nowrap">
+                    <span className="order-2 py-1 whitespace-nowrap sm:order-1">
                       <span className="text-amber-400">목표</span> 픽업 목록
                     </span>
                     {isTrySim || (
-                      <div className="flex items-center gap-x-3 text-sm">
+                      <div className="order-1 flex flex-1 items-center justify-end gap-x-3 text-sm sm:order-2 sm:flex-initial sm:justify-start">
                         <InsetNumberInput
                           name="추가재화"
                           pattern={LOCALE_NUMBER_PATTERN.source}
@@ -1157,7 +1254,7 @@ export default function PickupBanner({
                       </div>
                     )}
                   </div>
-                  <div className="space-y-6 lg:space-y-4">
+                  <div className="space-y-8 sm:space-y-4">
                     {operators.map((operator) => {
                       return (
                         <PickupOperatorDetail

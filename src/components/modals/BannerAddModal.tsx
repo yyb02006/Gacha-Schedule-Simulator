@@ -27,6 +27,7 @@ import Badge from '#/components/Badge';
 import { useResizeDragToggle } from '#/hooks/useResizeDragToggle';
 import { animate } from 'motion';
 import { operatorLimitByBannerType, rarities, rarityStrings } from '#/constants/variables';
+import { ResponsiveHide, ResponsiveShow } from '#/components/ResponsiveSpan';
 
 const CustomModalContents = ({
   modalState,
@@ -172,7 +173,7 @@ const reducer = (
   }
 };
 
-const Help = ({ onClose }: { onClose: () => void }) => {
+export const Help = ({ onClose }: { onClose: () => void }) => {
   const badgeKeys = Object.keys(bannerBadgeProps) as (keyof typeof bannerBadgeProps)[];
   const isMouseDownOnTarget = useRef<boolean>(false);
   return (
@@ -201,7 +202,7 @@ const Help = ({ onClose }: { onClose: () => void }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed top-0 left-0 z-1000 flex size-full cursor-pointer items-center justify-center bg-transparent backdrop-blur-sm"
+      className="fixed top-0 left-0 z-1000 flex size-full cursor-pointer items-center justify-center bg-transparent p-4"
     >
       <div className="w-full max-w-[400px] cursor-default space-y-5 rounded-lg bg-[#202020] px-4 py-6">
         <div className="flex items-center justify-between">
@@ -235,16 +236,40 @@ const Help = ({ onClose }: { onClose: () => void }) => {
                 <Badge {...bannerBadgeProps[badgeKey].props} animation={false} />
                 <div className="flex gap-3">
                   {rarityStrings.map((rarityString) => (
-                    <div key={`${rarityString}${badgeKey}`}>
-                      <span className="font-S-CoreDream-300">{`${rarities[rarityString]}성`}</span>:{' '}
-                      <span
-                        className={cls(
-                          operatorBadgeProps.rarity[rarityString].props.color,
-                          'font-S-CoreDream-500',
-                        )}
-                      >
-                        {operatorLimitByBannerType[badgeKey][rarityString]}
-                      </span>
+                    <div
+                      key={`${rarityString}${badgeKey}`}
+                      className="flex w-full flex-col items-center sm:block"
+                    >
+                      <>
+                        <ResponsiveShow
+                          above="sm"
+                          className="font-S-CoreDream-300"
+                        >{`${rarities[rarityString]}성: `}</ResponsiveShow>
+                        <ResponsiveShow
+                          above="sm"
+                          className={cls(
+                            operatorBadgeProps.rarity[rarityString].props.color,
+                            'font-S-CoreDream-500',
+                          )}
+                        >
+                          {operatorLimitByBannerType[badgeKey][rarityString]}
+                        </ResponsiveShow>
+                      </>
+                      <>
+                        <ResponsiveHide
+                          above="sm"
+                          className="font-S-CoreDream-300"
+                        >{`${rarities[rarityString]}성`}</ResponsiveHide>
+                        <ResponsiveHide
+                          above="sm"
+                          className={cls(
+                            operatorBadgeProps.rarity[rarityString].props.color,
+                            'font-S-CoreDream-500',
+                          )}
+                        >
+                          {operatorLimitByBannerType[badgeKey][rarityString]}
+                        </ResponsiveHide>
+                      </>
                     </div>
                   ))}
                 </div>

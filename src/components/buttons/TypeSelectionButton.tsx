@@ -48,15 +48,15 @@ export default function TypeSelectionButton({
       custom={custom}
       aria-pressed={isActive}
       className={cls(
+        'font-S-CoreDream-400 sm:font-S-CoreDream-500 flex cursor-pointer items-center justify-center rounded-xl p-2',
         className,
-        'font-S-CoreDream-500 flex cursor-pointer items-center justify-center rounded-xl p-2',
       )}
     >
       <motion.div
         variants={toOpacityZero}
         initial="exit"
         animate="idle"
-        className="relative top-[1px] select-none"
+        className="relative top-[1px] whitespace-nowrap select-none"
       >
         {name}
       </motion.div>

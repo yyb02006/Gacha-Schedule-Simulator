@@ -40,9 +40,9 @@ const Help = ({ onClose }: { onClose: () => void }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed top-0 left-0 z-1000 flex size-full items-center justify-center bg-transparent backdrop-blur-sm"
+      className="fixed top-0 left-0 z-1000 flex size-full justify-center overflow-y-auto bg-transparent sm:items-center"
     >
-      <div className="w-full max-w-[400px] space-y-5 rounded-lg bg-[#202020] px-4 py-6">
+      <div className="h-fit max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-20 sm:rounded-lg sm:py-6">
         <div className="flex items-center justify-between">
           <h1 className="font-S-CoreDream-500 text-xl">
             <span className="text-red-400">옵션 작동</span> 안내
@@ -73,8 +73,8 @@ const Help = ({ onClose }: { onClose: () => void }) => {
             </div>
           </div>
           <div className="space-y-2">
-            <div className="font-S-CoreDream-500 flex gap-1 text-lg text-red-400">
-              <div className="my-[4px] w-[5px] self-stretch bg-red-400" />
+            <div className="font-S-CoreDream-500 flex gap-1 text-lg text-teal-500">
+              <div className="my-[4px] w-[5px] self-stretch bg-teal-500" />
               배너 실패시 동작
             </div>
             <div className="space-y-2 leading-7">
@@ -123,7 +123,7 @@ export default function SimulatorOptionModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdropBlur>
-      <div className="flex h-full w-full max-w-[400px] flex-1 flex-col gap-4 gap-y-8 rounded-xl bg-[#202020] p-6 lg:w-[480px]">
+      <div className="flex h-full w-full max-w-[400px] flex-1 flex-col gap-4 gap-y-8 rounded-xl bg-[#202020] p-4 sm:w-[480px] sm:p-6">
         <AnimatePresence>
           {isHelpOpen && (
             <Help
