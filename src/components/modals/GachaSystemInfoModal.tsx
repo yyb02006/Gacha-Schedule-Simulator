@@ -25,9 +25,9 @@ const GachaSystemInfoModalContent = ({
       }}
       activeToTop
       backdropBlur
-      className="px-0 py-0 sm:px-4 sm:py-4"
+      className="px-0 py-0 lg:px-4 lg:py-4"
     >
-      <div className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 bg-[#202020] pt-6 pb-8 sm:rounded-xl">
+      <div className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 bg-[#202020] pt-6 pb-8 lg:rounded-xl">
         <div className="flex items-center justify-between px-6">
           <h1 className="font-S-CoreDream-500 text-2xl">
             <span className="text-amber-400">가챠 룰</span>에 대한 안내
@@ -49,7 +49,7 @@ const GachaSystemInfoModalContent = ({
             <div
               className={cls(
                 rarityColor['sixth'].textColor,
-                'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:flex-nowrap sm:justify-normal sm:gap-y-0',
+                'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 lg:flex-nowrap lg:justify-normal lg:gap-y-0',
               )}
             >
               <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1 whitespace-nowrap">
@@ -60,7 +60,7 @@ const GachaSystemInfoModalContent = ({
             <div
               className={cls(
                 rarityColor['fifth'].textColor,
-                'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:flex-nowrap sm:justify-normal sm:gap-y-0',
+                'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 lg:flex-nowrap lg:justify-normal lg:gap-y-0',
               )}
             >
               <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1 whitespace-nowrap">
@@ -71,7 +71,7 @@ const GachaSystemInfoModalContent = ({
             <div
               className={cls(
                 rarityColor['fourth'].textColor,
-                'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:flex-nowrap sm:justify-normal sm:gap-y-0',
+                'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 lg:flex-nowrap lg:justify-normal lg:gap-y-0',
               )}
             >
               <div className="text-standard flex items-center justify-center rounded-full border border-violet-400 px-2 py-1 whitespace-nowrap">
@@ -82,7 +82,7 @@ const GachaSystemInfoModalContent = ({
             <div
               className={cls(
                 rarityColor['third'].textColor,
-                'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:flex-nowrap sm:justify-normal sm:gap-y-0',
+                'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 lg:flex-nowrap lg:justify-normal lg:gap-y-0',
               )}
             >
               <div className="text-standard flex items-center justify-center rounded-full border border-sky-500 px-2 py-1 whitespace-nowrap">
@@ -112,7 +112,7 @@ const GachaSystemInfoModalContent = ({
                 10회에서 5성 이상의 오퍼레이터 등장이 확정될 때, 5성과 6성 오퍼레이터 각각의 등장
                 확률은 아래와 같습니다.
               </p>
-              <div className="font-S-CoreDream-400 mt-3 flex gap-x-6 gap-y-2 sm:mt-0">
+              <div className="font-S-CoreDream-400 mt-3 flex gap-x-6 gap-y-2 lg:mt-0">
                 <div
                   className={cls(
                     rarityColor['sixth'].textColor,
@@ -214,11 +214,11 @@ const GachaSystemInfoModalContent = ({
             은 아래와 같으며, 배너에 따라서 천장 시스템이 있을 수 있으므로 약간의 차이가 있을 수
             있습니다.
           </p>
-          <div className="font-S-CoreDream-400 flex sm:gap-x-6 sm:gap-y-2">
+          <div className="font-S-CoreDream-400 flex lg:gap-x-6 lg:gap-y-2">
             <div
               className={cls(
                 rarityColor['sixth'].textColor,
-                'flex flex-1 flex-col items-center gap-x-2 gap-y-1 sm:w-auto sm:flex-initial sm:flex-row',
+                'flex flex-1 flex-col items-center gap-x-2 gap-y-1 lg:w-auto lg:flex-initial lg:flex-row',
               )}
             >
               <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1 whitespace-nowrap">
@@ -229,7 +229,7 @@ const GachaSystemInfoModalContent = ({
             <div
               className={cls(
                 rarityColor['fifth'].textColor,
-                'flex flex-1 flex-col items-center gap-x-2 gap-y-1 sm:w-auto sm:flex-initial sm:flex-row',
+                'flex flex-1 flex-col items-center gap-x-2 gap-y-1 lg:w-auto lg:flex-initial lg:flex-row',
               )}
             >
               <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1 whitespace-nowrap">
@@ -240,7 +240,7 @@ const GachaSystemInfoModalContent = ({
             <div
               className={cls(
                 rarityColor['fourth'].textColor,
-                'flex flex-1 flex-col items-center gap-x-2 gap-y-1 sm:w-auto sm:flex-initial sm:flex-row',
+                'flex flex-1 flex-col items-center gap-x-2 gap-y-1 lg:w-auto lg:flex-initial lg:flex-row',
               )}
             >
               <div className="text-standard flex items-center justify-center rounded-full border border-violet-400 px-2 py-1 whitespace-nowrap">
@@ -251,7 +251,7 @@ const GachaSystemInfoModalContent = ({
             <div
               className={cls(
                 rarityColor['third'].textColor,
-                'flex flex-1 flex-col items-center gap-x-2 gap-y-1 sm:w-auto sm:flex-initial sm:flex-row',
+                'flex flex-1 flex-col items-center gap-x-2 gap-y-1 lg:w-auto lg:flex-initial lg:flex-row',
               )}
             >
               <div className="text-standard flex items-center justify-center rounded-full border border-sky-500 px-2 py-1 whitespace-nowrap">
@@ -291,39 +291,39 @@ const GachaSystemInfoModalContent = ({
                 <span className="font-S-CoreDream-400 text-amber-400">픽업 등장 확률</span>은 아래와
                 같으며, 4성 오퍼레이터는 구성에 포함되어있지 않을 수 있습니다.
               </p>
-              <div className="font-S-CoreDream-400 mt-3 flex sm:mt-0 sm:gap-x-6 sm:gap-y-2">
+              <div className="font-S-CoreDream-400 mt-3 flex lg:mt-0 lg:gap-x-6 lg:gap-y-2">
                 <div
                   className={cls(
                     rarityColor['sixth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
                     6성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">1명 / 50%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">1명 / 50%</span>
                 </div>
                 <div
                   className={cls(
                     rarityColor['fifth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
                     5성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">2명 / 50%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">2명 / 50%</span>
                 </div>
                 <div
                   className={cls(
                     rarityColor['fourth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-purple-400 px-2 py-1">
                     4성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">1명 / 20%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">1명 / 20%</span>
                   <span className="text-sm">(미확정)</span>
                 </div>
               </div>
@@ -369,28 +369,28 @@ const GachaSystemInfoModalContent = ({
                 <span className="font-S-CoreDream-400 text-amber-400">픽업 등장 확률</span>은 아래와
                 같습니다.
               </p>
-              <div className="font-S-CoreDream-400 mt-3 flex sm:mt-0 sm:gap-x-6 sm:gap-y-2">
+              <div className="font-S-CoreDream-400 mt-3 flex lg:mt-0 lg:gap-x-6 lg:gap-y-2">
                 <div
                   className={cls(
                     rarityColor['sixth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
                     6성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">2명 / 50%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">2명 / 50%</span>
                 </div>
                 <div
                   className={cls(
                     rarityColor['fifth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
                     5성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">3명 / 50%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">3명 / 50%</span>
                 </div>
               </div>
             </li>
@@ -449,28 +449,28 @@ const GachaSystemInfoModalContent = ({
                 <span className="font-S-CoreDream-400 text-amber-400">픽업 등장 확률</span>은 아래와
                 같습니다.
               </p>
-              <div className="font-S-CoreDream-400 mt-3 flex sm:mt-0 sm:gap-x-6 sm:gap-y-2">
+              <div className="font-S-CoreDream-400 mt-3 flex lg:mt-0 lg:gap-x-6 lg:gap-y-2">
                 <div
                   className={cls(
                     rarityColor['sixth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
                     6성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">2명 / 70%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">2명 / 70%</span>
                 </div>
                 <div
                   className={cls(
                     rarityColor['fifth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
                     5성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">1명 / 50%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">1명 / 50%</span>
                 </div>
               </div>
             </li>
@@ -526,28 +526,28 @@ const GachaSystemInfoModalContent = ({
                 <span className="font-S-CoreDream-400 text-amber-400">픽업 등장 확률</span>은 아래와
                 같습니다.
               </p>
-              <div className="font-S-CoreDream-400 mt-3 flex sm:mt-0 sm:gap-x-6 sm:gap-y-2">
+              <div className="font-S-CoreDream-400 mt-3 flex lg:mt-0 lg:gap-x-6 lg:gap-y-2">
                 <div
                   className={cls(
                     rarityColor['sixth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
                     6성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">1명 / 50%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">1명 / 50%</span>
                 </div>
                 <div
                   className={cls(
                     rarityColor['fifth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
                     5성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">2명 / 50%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">2명 / 50%</span>
                 </div>
               </div>
             </li>
@@ -610,28 +610,28 @@ const GachaSystemInfoModalContent = ({
                 <span className="font-S-CoreDream-400 text-amber-400">픽업 등장 확률</span>은 아래와
                 같습니다.
               </p>
-              <div className="font-S-CoreDream-400 mt-3 flex sm:mt-0 sm:gap-x-6 sm:gap-y-2">
+              <div className="font-S-CoreDream-400 mt-3 flex lg:mt-0 lg:gap-x-6 lg:gap-y-2">
                 <div
                   className={cls(
                     rarityColor['sixth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
                     6성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">3명 / 100%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">3명 / 100%</span>
                 </div>
                 <div
                   className={cls(
                     rarityColor['fifth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
                     5성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">3명 / 60%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">3명 / 60%</span>
                 </div>
               </div>
             </li>
@@ -671,28 +671,28 @@ const GachaSystemInfoModalContent = ({
                 <span className="font-S-CoreDream-400 text-amber-400">픽업 등장 확률</span>은 아래와
                 같습니다.
               </p>
-              <div className="font-S-CoreDream-400 mt-3 flex sm:mt-0 sm:gap-x-6 sm:gap-y-2">
+              <div className="font-S-CoreDream-400 mt-3 flex lg:mt-0 lg:gap-x-6 lg:gap-y-2">
                 <div
                   className={cls(
                     rarityColor['sixth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-orange-400 px-2 py-1">
                     6성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">4명 / 100%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">4명 / 100%</span>
                 </div>
                 <div
                   className={cls(
                     rarityColor['fifth'].textColor,
-                    'flex flex-1 flex-col items-center gap-y-1 sm:flex-initial sm:flex-row sm:gap-x-2',
+                    'flex flex-1 flex-col items-center gap-y-1 lg:flex-initial lg:flex-row lg:gap-x-2',
                   )}
                 >
                   <div className="text-standard flex items-center justify-center rounded-full border border-amber-400 px-2 py-1">
                     5성
                   </div>
-                  <span className="font-S-CoreDream-500 text-base sm:text-xl">6명 / 100%</span>
+                  <span className="font-S-CoreDream-500 text-base lg:text-xl">6명 / 100%</span>
                 </div>
               </div>
             </li>

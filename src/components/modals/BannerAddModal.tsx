@@ -238,7 +238,7 @@ export const Help = ({ onClose }: { onClose: () => void }) => {
                   {rarityStrings.map((rarityString) => (
                     <div
                       key={`${rarityString}${badgeKey}`}
-                      className="flex w-full flex-col items-center sm:block"
+                      className="flex w-full flex-col items-center lg:block"
                     >
                       <>
                         <ResponsiveShow

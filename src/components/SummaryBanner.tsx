@@ -13,7 +13,7 @@ import { useState } from 'react';
 export default function SummaryBanner({ result }: { result: GachaSimulationMergedResult | null }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
-    <div className="hidden sm:w-[480px] lg:block lg:space-y-6">
+    <div className="hidden lg:block lg:w-[480px] lg:space-y-6">
       <motion.div
         variants={cardVariants}
         whileInView="idle"

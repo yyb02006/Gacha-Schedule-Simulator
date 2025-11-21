@@ -48,7 +48,7 @@ export default function TypeSelectionButton({
       custom={custom}
       aria-pressed={isActive}
       className={cls(
-        'font-S-CoreDream-400 sm:font-S-CoreDream-500 flex cursor-pointer items-center justify-center rounded-xl p-2',
+        'font-S-CoreDream-400 lg:font-S-CoreDream-500 flex cursor-pointer items-center justify-center rounded-xl p-2',
         className,
       )}
     >

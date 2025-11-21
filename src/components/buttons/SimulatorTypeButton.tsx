@@ -30,7 +30,7 @@ export default function SimulatorTypeButton({
     animate(x, isTrySim ? 0 : maxX, { type: 'spring', stiffness: 400, damping: 30 });
   }, [isTrySim, x]);
   return (
-    <div className="text-standard font-S-CoreDream-500 sm:font-S-CoreDream-700 flex min-w-[100px] flex-col space-y-1 sm:text-base">
+    <div className="text-standard font-S-CoreDream-500 lg:font-S-CoreDream-700 flex min-w-[100px] flex-col space-y-1 lg:text-base">
       <motion.div
         variants={insetInputVariants}
         animate="idle"

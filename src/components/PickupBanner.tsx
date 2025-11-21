@@ -62,8 +62,8 @@ const MaxAttempts = ({
       onInputBlur={onInputBlur}
       isFirstSixthTry={isFirstSixthTry}
       className="text-amber-400"
-      inputWidth="w-full sm:w-10"
-      fullSize="sm:w-auto w-full"
+      inputWidth="w-full lg:w-10"
+      fullSize="lg:w-auto w-full"
       max={9999}
       isMaxAttepmts
       showAttemptsSign
@@ -96,8 +96,8 @@ const MinAttempts = ({
       onInputBlur={onInputBlur}
       isFirstSixthTry={isFirstSixthTry}
       className="text-sky-500"
-      inputWidth="w-full sm:w-10"
-      fullSize="sm:w-auto w-full"
+      inputWidth="w-full lg:w-10"
+      fullSize="lg:w-auto w-full"
       max={999}
       showAttemptsSign
     >
@@ -272,7 +272,7 @@ const BannerBadges = ({
           <div
             className={cls(
               currentBadgeProp.color,
-              'rounded-full border bg-[#262626] px-3 py-1 text-sm whitespace-nowrap sm:bg-transparent',
+              'rounded-full border bg-[#262626] px-3 py-1 text-sm whitespace-nowrap lg:bg-transparent',
             )}
           >
             <div className="relative top-[1px] select-none">{currentBadgeProp.name}</div>
@@ -280,7 +280,7 @@ const BannerBadges = ({
           <motion.div
             animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
             transition={{ duration: 0.2 }}
-            className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400 bg-[#262626] sm:bg-transparent"
+            className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400 bg-[#262626] lg:bg-transparent"
           >
             <motion.div
               animate={
@@ -377,7 +377,7 @@ const BannerHeader = ({
           className="shrink-0"
         />
       </div>
-      <div className="flex sm:hidden">
+      <div className="flex lg:hidden">
         <div className="flex grow gap-4">
           <SmallButton
             background="linear-gradient(135deg, #bb4d00, #ffb900)"
@@ -419,7 +419,7 @@ const BannerHeader = ({
             onUpdateIndex('increase');
           }}
           isAnimateLocked={isAnimateLocked}
-          className="hidden text-amber-400 sm:inline-block"
+          className="hidden text-amber-400 lg:inline-block"
           isClickPrevent={index < 1}
         >
           <ChevronUp className="size-full" />
@@ -431,7 +431,7 @@ const BannerHeader = ({
             onUpdateIndex('decrease');
           }}
           isAnimateLocked={isAnimateLocked}
-          className="hidden text-amber-400 sm:inline-block"
+          className="hidden text-amber-400 lg:inline-block"
           isClickPrevent={index >= dataLength - 1}
         >
           <ChevronDown className="size-full" />
@@ -449,7 +449,7 @@ const BannerHeader = ({
             value={localValue}
             className="w-full"
           />
-          <div className="hidden sm:flex">
+          <div className="hidden lg:flex">
             <BannerBadges
               gachaType={gachaType}
               isSimpleMode={isSimpleMode}
@@ -487,14 +487,14 @@ const SimplePreInfoField = ({
   } = pickupData;
 
   return (
-    <div className="font-S-CoreDream-400 sm:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
+    <div className="font-S-CoreDream-400 lg:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex flex-wrap justify-between gap-x-6 gap-y-3">
         <div className="flex flex-wrap gap-x-10 gap-y-3">
           <div className="flex gap-x-3">
             <InsetNumberInput
               name="픽업 6성"
               className="text-orange-400"
-              inputWidth="sm:w-8 w-full"
+              inputWidth="lg:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -512,7 +512,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 6성"
               className="text-orange-400"
-              inputWidth="sm:w-8 w-full"
+              inputWidth="lg:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -532,7 +532,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 5성"
               className="text-amber-400"
-              inputWidth="sm:w-8 w-full"
+              inputWidth="lg:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -550,7 +550,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 5성"
               className="text-amber-400"
-              inputWidth="sm:w-8 w-full"
+              inputWidth="lg:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -570,7 +570,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="픽업 4성"
               className="text-sky-500"
-              inputWidth="sm:w-8 w-full"
+              inputWidth="lg:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -588,7 +588,7 @@ const SimplePreInfoField = ({
             <InsetNumberInput
               name="목표 4성"
               className="text-sky-500"
-              inputWidth="sm:w-8 w-full"
+              inputWidth="lg:w-8 w-full"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -660,7 +660,7 @@ const PreInfoField = ({
 
   const operatorsByRarity = getOperatorsByRarity(operators);
   return (
-    <div className="font-S-CoreDream-400 sm:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
+    <div className="font-S-CoreDream-400 lg:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex w-full flex-wrap justify-between gap-x-6 gap-y-3">
         <div className="flex flex-wrap gap-x-6 gap-y-3">
           <MaxAttempts
@@ -686,10 +686,10 @@ const PreInfoField = ({
             isFirstSixthTry={firstSixthTry}
           />
         </div>
-        <div className="mt-2 text-base sm:hidden">
+        <div className="mt-2 text-base lg:hidden">
           배너 총 <span className="text-amber-400">픽업</span> 수
         </div>
-        <div className="flex w-full gap-x-6 gap-y-3 sm:w-auto sm:gap-x-6">
+        <div className="flex w-full gap-x-6 gap-y-3 lg:w-auto lg:gap-x-6">
           <InsetNumberInput
             name={
               <>
@@ -698,7 +698,7 @@ const PreInfoField = ({
               </>
             }
             className="text-orange-400"
-            inputWidth="w-full sm:w-8"
+            inputWidth="w-full lg:w-8"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -719,7 +719,7 @@ const PreInfoField = ({
               </>
             }
             className="text-amber-400"
-            inputWidth="w-full sm:w-8"
+            inputWidth="w-full lg:w-8"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -740,7 +740,7 @@ const PreInfoField = ({
               </>
             }
             className="text-purple-400"
-            inputWidth="w-full sm:w-8"
+            inputWidth="w-full lg:w-8"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -856,7 +856,7 @@ const PickupOperatorDetail = ({
   const [localName, setLocalName] = useState(name);
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-      <div className="flex w-full items-center justify-between sm:hidden">
+      <div className="flex w-full items-center justify-between lg:hidden">
         <DeleteButton
           onDelete={onOperatorDelete}
           isDeletePrevent={operators.length === 1}
@@ -875,7 +875,7 @@ const PickupOperatorDetail = ({
         <DeleteButton
           onDelete={onOperatorDelete}
           isDeletePrevent={operators.length === 1}
-          className="-mr-2 hidden sm:inline-block"
+          className="-mr-2 hidden lg:inline-block"
         />
         <div className="flex flex-1 items-center rounded-lg py-2 pr-2 pl-4 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
           <input
@@ -895,7 +895,7 @@ const PickupOperatorDetail = ({
             operator={operator}
             gachaType={gachaType}
             operators={operators}
-            className="hidden sm:flex"
+            className="hidden lg:flex"
           />
         </div>
       </div>
@@ -1211,7 +1211,7 @@ export default function PickupBanner({
             ) : (
               <div
                 key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
-                className="space-y-6 text-sm sm:space-y-7"
+                className="space-y-6 text-sm lg:space-y-7"
               >
                 <PreInfoField
                   // isPresent={isPresent}
@@ -1223,11 +1223,11 @@ export default function PickupBanner({
                 />
                 <div className="space-y-3">
                   <div className="font-S-CoreDream-500 flex flex-wrap justify-between gap-x-6 gap-y-4 text-xl">
-                    <span className="order-2 py-1 whitespace-nowrap sm:order-1">
+                    <span className="order-2 py-1 whitespace-nowrap lg:order-1">
                       <span className="text-amber-400">목표</span> 픽업 목록
                     </span>
                     {isTrySim || (
-                      <div className="order-1 flex flex-1 items-center justify-end gap-x-3 text-sm sm:order-2 sm:flex-initial sm:justify-start">
+                      <div className="order-1 flex flex-1 items-center justify-end gap-x-3 text-sm lg:order-2 lg:flex-initial lg:justify-start">
                         <InsetNumberInput
                           name="추가재화"
                           pattern={LOCALE_NUMBER_PATTERN.source}
@@ -1254,7 +1254,7 @@ export default function PickupBanner({
                       </div>
                     )}
                   </div>
-                  <div className="space-y-8 sm:space-y-4">
+                  <div className="space-y-8 lg:space-y-4">
                     {operators.map((operator) => {
                       return (
                         <PickupOperatorDetail

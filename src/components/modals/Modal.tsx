@@ -94,7 +94,7 @@ export default function Modal({
               }}
               role="button"
               className={cls(
-                'flex min-h-screen w-screen justify-center overflow-y-auto p-4 sm:p-12',
+                'flex min-h-screen w-screen justify-center overflow-y-auto p-4 lg:p-12',
                 className,
               )}
             >

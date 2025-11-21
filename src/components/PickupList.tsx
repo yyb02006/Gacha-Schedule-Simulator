@@ -1112,7 +1112,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
   return (
     <>
-      <div ref={listRef} className="mt-12 flex w-full px-4 sm:w-auto sm:space-x-6 sm:px-0">
+      <div ref={listRef} className="mt-12 flex w-full px-4 lg:w-auto lg:space-x-6 lg:px-0">
         <div className="flex flex-col items-center space-y-6 2xl:w-[984px]">
           <div className="mb-12 flex space-x-16">
             <ResetButton
@@ -1149,7 +1149,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
             runningTime={runningTime}
             setBatchGachaGoal={setBatchGachaGoal}
           />
-          <div className="flex flex-col gap-y-6 sm:w-full">
+          <div className="flex flex-col gap-y-6 lg:w-full">
             <AddBannerCard isAddPrevent={pickupDatas.length >= 20} openModal={openModal} />
             <AnimatePresence>
               {pickupDatas.map((pickupData, index) => (

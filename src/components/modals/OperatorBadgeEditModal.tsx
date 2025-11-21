@@ -41,9 +41,9 @@ const Help = ({ onClose }: { onClose: () => void }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed top-0 left-0 z-1000 flex size-full justify-center overflow-auto bg-transparent sm:items-center"
+      className="fixed top-0 left-0 z-1000 flex size-full justify-center overflow-auto bg-transparent lg:items-center"
     >
-      <div className="h-fit w-full max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-20 sm:rounded-lg sm:py-6">
+      <div className="h-fit w-full max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-20 lg:rounded-lg lg:py-6">
         <div className="flex items-center justify-between">
           <h1 className="font-S-CoreDream-500 text-xl">
             천장 오퍼레이터 <span className="text-red-400">결정 규칙</span>
