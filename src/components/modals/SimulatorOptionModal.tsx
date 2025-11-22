@@ -1,13 +1,13 @@
 'use client';
 
 import Modal from '#/components/modals/Modal';
-import { Dispatch, SetStateAction, useRef, useState } from 'react';
+import { Dispatch, SetStateAction, useLayoutEffect, useRef, useState } from 'react';
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { InsetNumberInput } from '#/components/PickupBanner';
 import { AnimatePresence, motion } from 'motion/react';
 import { toOpacityZero } from '#/constants/variants';
-import { SimulationOptions } from '#/components/PickupList';
+import { initialOptions, SimulationOptions } from '#/components/PickupList';
 import { stringToNumber } from '#/libs/utils';
 import ToggleButton from '#/components/buttons/ToggleButton';
 import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
@@ -128,6 +128,18 @@ export default function SimulatorOptionModal({
     setOptions(localOptions);
     onClose();
   };
+
+  useLayoutEffect(() => {
+    const initialOptions = localStorage.getItem('options');
+    if (initialOptions) {
+      const { options }: initialOptions = JSON.parse(initialOptions);
+      try {
+        setLocalOptions(options);
+      } catch {
+        console.warn('로컬스토리지 데이터 파싱 실패, 기본 로컬 옵션 데이터 사용');
+      }
+    }
+  }, []);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdropBlur>

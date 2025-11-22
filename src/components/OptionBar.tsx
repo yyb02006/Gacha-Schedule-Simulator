@@ -332,7 +332,7 @@ const ControlPanel = ({
 
 export default function OptionBar({
   isTrySim,
-  setIsGachaSim,
+  setIsTrySim,
   isSimpleMode,
   setIsSimpleMode,
   options,
@@ -344,7 +344,7 @@ export default function OptionBar({
   setInitialResource,
 }: {
   isTrySim: boolean;
-  setIsGachaSim: Dispatch<SetStateAction<boolean>>;
+  setIsTrySim: Dispatch<SetStateAction<boolean>>;
   isSimpleMode: boolean;
   setIsSimpleMode: Dispatch<SetStateAction<boolean>>;
   options: SimulationOptions;
@@ -362,9 +362,9 @@ export default function OptionBar({
   };
   const onSimulationModeToggle = (isLeft?: boolean) => {
     if (isLeft === undefined) {
-      setIsGachaSim((p) => !p);
+      setIsTrySim((p) => !p);
     } else {
-      setIsGachaSim(isLeft);
+      setIsTrySim(isLeft);
     }
   };
 

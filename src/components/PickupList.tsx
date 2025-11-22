@@ -2,7 +2,7 @@
 
 import SummaryBanner from '#/components/SummaryBanner';
 import { AnimatePresence } from 'motion/react';
-import { useEffect, useReducer, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
@@ -875,9 +875,17 @@ export type SimulationOptions = {
   showBannerImage: boolean;
 };
 
+export type initialOptions = {
+  initialResource: number;
+  batchGachaGoal: 'allFirst' | 'allMax' | null;
+  isTrySim: boolean;
+  isSimpleMode: boolean;
+  options: SimulationOptions;
+};
+
 export default function PickupList({ pickupDataPresets }: { pickupDataPresets: Dummy[] }) {
   const [pickupDatas, dispatch] = useReducer(reducer, pickupDataPresets);
-  const [isTrySim, setIsGachaSim] = useState(true);
+  const [isTrySim, setIsTrySim] = useState(true);
   const [isSimpleMode, setIsSimpleMode] = useState(true);
   const [options, setOptions] = useState<SimulationOptions>({
     probability: { limited: 70, normal: 50 },
@@ -914,7 +922,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
   const resetSimulator = () => {
     setIsSimpleMode(true);
-    setIsGachaSim(true);
+    setIsTrySim(true);
     setResults(null);
     setRunningTime(null);
     setIsLoading(false);
@@ -924,13 +932,28 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     dispatch({ type: 'initialize', payload: { initialData: pickupDataPresets } });
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const stored = localStorage.getItem('pickupDatas');
     if (stored) {
       try {
         dispatch({ type: 'initialize', payload: { initialData: JSON.parse(stored) } });
       } catch {
-        console.warn('로컬스토리지 데이터 파싱 실패, 기본 데이터 사용');
+        console.warn('로컬스토리지 데이터 파싱 실패, 기본 픽업 데이터 사용');
+      }
+    }
+
+    const initialOptions = localStorage.getItem('options');
+    if (initialOptions) {
+      const { batchGachaGoal, initialResource, isSimpleMode, isTrySim, options }: initialOptions =
+        JSON.parse(initialOptions);
+      try {
+        setInitialResource(initialResource);
+        setBatchGachaGoal(batchGachaGoal);
+        setIsTrySim(isTrySim);
+        setIsSimpleMode(isSimpleMode);
+        setOptions(options);
+      } catch {
+        console.warn('로컬스토리지 데이터 파싱 실패, 기본 옵션 데이터 사용');
       }
     }
   }, []);
@@ -938,9 +961,13 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   useEffect(() => {
     const id = setTimeout(() => {
       localStorage.setItem('pickupDatas', JSON.stringify(pickupDatas));
+      localStorage.setItem(
+        'options',
+        JSON.stringify({ initialResource, batchGachaGoal, isTrySim, isSimpleMode, options }),
+      );
     }, 200);
     return () => clearTimeout(id);
-  }, [pickupDatas]);
+  }, [pickupDatas, initialResource, batchGachaGoal, isTrySim, isSimpleMode, options]);
 
   const stopSimulation = async () => {
     if (workersRef.current.length > 0) {
@@ -1125,7 +1152,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
           </div>
           <OptionBar
             isTrySim={isTrySim}
-            setIsGachaSim={setIsGachaSim}
+            setIsTrySim={setIsTrySim}
             isSimpleMode={isSimpleMode}
             setIsSimpleMode={setIsSimpleMode}
             batchGachaGoal={batchGachaGoal}
