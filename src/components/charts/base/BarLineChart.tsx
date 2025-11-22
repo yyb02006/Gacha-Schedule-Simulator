@@ -2,7 +2,7 @@
 
 import { CreateTooltipLiteral, CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { useIsMount } from '#/hooks/useIsMount';
-import { truncateToDecimals } from '#/libs/utils';
+import { cls, truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
   ChartOptions,
@@ -21,7 +21,7 @@ import {
   ChartDataset,
 } from 'chart.js';
 import { throttled } from 'chart.js/helpers';
-import { RefObject, useEffect, useRef, useState } from 'react';
+import { RefObject, useEffect, useRef } from 'react';
 import { Chart } from 'react-chartjs-2';
 
 ChartJS.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend);
@@ -73,10 +73,14 @@ const externalTooltipHandler =
       canvasParent.appendChild(tooltipEl);
     }
 
-    if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
+    if (tooltip.opacity === 0 || !tooltip.body) {
       tooltipEl.style.opacity = '0';
       lastChartId.current = null;
       return;
+    }
+
+    if (hoveredIndexRef.current === null && tooltip.dataPoints.length > 0) {
+      hoveredIndexRef.current = tooltip.dataPoints[0].dataIndex;
     }
 
     const canvasRect = chart.canvas.getBoundingClientRect();
@@ -344,7 +348,7 @@ export default function BarLineChart({
     const chart = chartRef.current;
     if (!canvas || !chart) return;
 
-    const handleMouseMove = (e: PointerEvent) => {
+    const handlePointerMove = (e: PointerEvent | TouchEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
       const colorsArray = [
@@ -398,27 +402,101 @@ export default function BarLineChart({
       }
     };
 
-    const handleMouseLeave = () => {
+    const handlePointerLeave = () => {
       if (hoveredIndexRef.current !== null) {
         hoveredIndexRef.current = null;
         chart.update(); // <- 즉시 리렌더 (ticks.color 재평가)
       }
     };
 
-    canvas.addEventListener('pointermove', handleMouseMove);
-    canvas.addEventListener('pointerleave', handleMouseLeave);
+    canvas.addEventListener('pointermove', handlePointerMove);
+    canvas.addEventListener('pointerleave', handlePointerLeave);
+    canvas.addEventListener('touchmove', handlePointerMove);
     return () => {
-      canvas.removeEventListener('pointermove', handleMouseMove);
-      canvas.removeEventListener('pointerleave', handleMouseLeave);
+      canvas.removeEventListener('pointermove', handlePointerMove);
+      canvas.removeEventListener('pointerleave', handlePointerLeave);
+      canvas.removeEventListener('touchmove', handlePointerMove);
     };
   }, [chartThrottledUpdate, chartThrottledDraw, fullDatas, primaryData.length]);
+
+  useEffect(() => {
+    const colorsArray = [
+      ...fullDatas.line.map(({ color }) => color),
+      ...fullDatas.bar.map(({ color }) => color),
+    ];
+    const handleTouch = (e: TouchEvent) => {
+      if (!chartRef.current) return;
+      const canvas = chartRef.current.canvas;
+      const chart = chartRef.current;
+
+      const canvasRect = canvas.getBoundingClientRect();
+
+      const { chartArea } = chart;
+
+      const rect = {
+        top: canvasRect.top + chartArea.top,
+        bottom: canvasRect.top + chartArea.bottom,
+        left: canvasRect.left + chartArea.left,
+        right: canvasRect.right + chartArea.right,
+      };
+
+      if (canvasRect.width === 0 || canvasRect.height === 0) return;
+
+      const touch = e.touches[0];
+
+      const touchX = touch.clientX;
+      const touchY = touch.clientY;
+
+      const isInsideCanvas =
+        touchX >= rect.left && touchX <= rect.right && touchY >= rect.top && touchY <= rect.bottom;
+
+      if (!isInsideCanvas) {
+        // 캔버스 밖 터치 감지
+        hoveredIndexRef.current = null;
+
+        chart.data.datasets.forEach((dataset, index) => {
+          dataset.hoverBackgroundColor = colorsArray[index].backgroundColor;
+          dataset.hoverBorderColor = colorsArray[index].borderColor;
+
+          if (dataset.type === 'line') {
+            dataset.pointHoverBorderWidth = 3;
+          }
+        });
+
+        const tooltipEl = canvas.parentElement?.querySelector('#custom-tooltip') as HTMLElement;
+        if (tooltipEl) tooltipEl.style.opacity = '0';
+
+        if (chartRef.current.tooltip) {
+          chartRef.current.tooltip.setActiveElements([], { x: 0, y: 0 });
+          chartRef.current.update();
+        }
+      } else {
+        // 캔버스 안 터치 감지
+        chart.data.datasets.forEach((dataset, index) => {
+          dataset.hoverBackgroundColor = colorsArray[index].hoverBackgroundColor;
+          dataset.hoverBorderColor = colorsArray[index].hoverBorderColor;
+          if (dataset.type === 'line') {
+            dataset.pointHoverBorderWidth = 6;
+          }
+        });
+
+        chartRef.current.update();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouch);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouch);
+    };
+  }, [fullDatas]);
 
   useEffect(() => {
     mainChartRef.current = chartRef.current;
   }, [mainChartRef]);
 
   return (
-    <div className={height}>
+    <div className={cls(height ?? '', 'relative overflow-hidden')}>
       <Chart
         type="bar"
         ref={chartRef}
