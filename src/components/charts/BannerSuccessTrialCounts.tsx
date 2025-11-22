@@ -167,7 +167,7 @@ const Legend = ({
       variants={toOpacityZero}
       initial="exit"
       animate="idle"
-      className="font-S-CoreDream-300 flex flex-wrap gap-8 px-4 text-[13px]"
+      className="font-S-CoreDream-300 flex flex-col gap-y-1 px-4 text-[13px] lg:flex-row lg:gap-x-8 lg:gap-y-0"
     >
       <div className="min-w-[144px]">
         구간 누적 확률 :{' '}
@@ -302,13 +302,13 @@ const BannerSuccessTrialCounts = forwardRef<
       <ChartWrapper
         header={
           <div className="flex items-center justify-between">
-            <div className="flex items-end gap-3 text-amber-400">
-              <span className="text-xl">{name}</span>{' '}
+            <div className="flex items-end gap-1 text-amber-400">
+              <span className="text-xl">{name}</span>
               <div className="font-S-CoreDream-300 text-sm text-[#eaeaea]">
-                ( 배너 성공률 :{' '}
+                (
                 <span className="font-S-CoreDream-500 text-amber-500">
                   {truncateToDecimals((bannerSuccess / simulationTry) * 100)}%
-                </span>{' '}
+                </span>
                 )
               </div>
             </div>

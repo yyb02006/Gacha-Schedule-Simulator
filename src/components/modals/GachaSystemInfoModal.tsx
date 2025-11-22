@@ -25,20 +25,23 @@ const GachaSystemInfoModalContent = ({
       }}
       activeToTop
       backdropBlur
-      className="px-0 py-0 lg:px-4 lg:py-4"
+      className="px-0 py-0 lg:p-12"
     >
-      <div className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 bg-[#202020] pt-6 pb-8 lg:rounded-xl">
-        <div className="flex items-center justify-between px-6">
+      <div className="relative flex w-full max-w-[1280px] flex-col gap-y-5 bg-[#202020] pt-6 pb-[120px] lg:mb-[120px] lg:rounded-xl">
+        <div className="flex items-center justify-between px-4 lg:px-6">
           <h1 className="font-S-CoreDream-500 text-2xl">
             <span className="text-amber-400">가챠 룰</span>에 대한 안내
           </h1>
-          <CancelButton
-            handleCancel={() => {
-              onClose();
-            }}
-          />
+          <div className="size-11" />
+          <div className="fixed right-4 z-[1000] lg:relative lg:right-auto lg:z-auto">
+            <CancelButton
+              handleCancel={() => {
+                onClose();
+              }}
+            />
+          </div>
         </div>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
             <div className="my-[3px] w-[5px] self-stretch bg-amber-500" />
             <span className="ml-1.5">
@@ -92,7 +95,7 @@ const GachaSystemInfoModalContent = ({
             </div>
           </div>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
             <div className="my-[3px] w-[5px] self-stretch bg-amber-500" />
             <span className="ml-1.5">
@@ -139,7 +142,7 @@ const GachaSystemInfoModalContent = ({
             </li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
             <div className="my-[3px] w-[5px] self-stretch bg-amber-500" />
             <span className="ml-1.5">
@@ -199,7 +202,7 @@ const GachaSystemInfoModalContent = ({
             </li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch">
             <div className="my-[3px] w-[5px] self-stretch bg-amber-500" />
             <span className="ml-1.5">
@@ -261,12 +264,12 @@ const GachaSystemInfoModalContent = ({
             </div>
           </div>
         </section>
-        <div className="my-3 flex items-center justify-between px-6">
+        <div className="my-3 flex items-center justify-between px-4 lg:px-6">
           <h1 className="font-S-CoreDream-500 text-2xl">
             배너 종류별 <span className="text-red-400">천장 및 픽업 확률</span>에 대한 안내
           </h1>
         </div>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
             <div className="my-[3px] w-[5px] self-stretch bg-sky-500" />
             <span className="ml-1.5 text-sky-500">단일 통상 배너</span>
@@ -341,7 +344,7 @@ const GachaSystemInfoModalContent = ({
             </li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
             <div className="my-[3px] w-[5px] self-stretch bg-violet-400" />
             <span className="ml-1.5 text-violet-400">로테이션 배너</span>
@@ -417,7 +420,7 @@ const GachaSystemInfoModalContent = ({
             </li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
             <div className="my-[3px] w-[5px] self-stretch bg-amber-400" />
             <span className="ml-1.5 text-amber-400">한정 배너</span>
@@ -494,7 +497,7 @@ const GachaSystemInfoModalContent = ({
             </li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
             <div className="my-[3px] w-[5px] self-stretch bg-rose-400" />
             <span className="ml-1.5 text-rose-400">콜라보 배너</span>
@@ -573,7 +576,7 @@ const GachaSystemInfoModalContent = ({
             </li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
             <div className="my-[3px] w-[5px] self-stretch bg-orange-500" />
             <span className="ml-1.5 text-orange-500">지향 배너(3중 배너)</span>
@@ -643,7 +646,7 @@ const GachaSystemInfoModalContent = ({
             <li>천장이 없는 배너입니다.</li>
           </ol>
         </section>
-        <section className="space-y-5 bg-[#303030] px-6 py-5">
+        <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch text-lg">
             <div className="my-[3px] w-[5px] self-stretch bg-teal-500" />
             <span className="ml-1.5 text-teal-500">협약 배너(4중 배너)</span>

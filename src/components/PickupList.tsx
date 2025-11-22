@@ -21,6 +21,7 @@ import AddBannerCard from '#/components/AddBannerCard';
 import { operatorLimitByBannerType, rarities } from '#/constants/variables';
 import {
   canHaveLimited,
+  cls,
   deriveWorkerSeeds,
   filterLimitArray,
   getDeviceType,
@@ -1112,8 +1113,8 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
   return (
     <>
-      <div ref={listRef} className="mt-12 flex w-full px-4 lg:w-auto lg:space-x-6 lg:px-0">
-        <div className="flex flex-col items-center space-y-6 2xl:w-[984px]">
+      <div ref={listRef} className="mt-12 flex w-full px-4 lg:w-auto lg:space-x-6 lg:px-4">
+        <div className="flex flex-col items-center space-y-6 lg:flex-2 2xl:w-[984px]">
           <div className="mb-12 flex space-x-16">
             <ResetButton
               onResetClick={async () => {
@@ -1190,7 +1191,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
         onStopClick={stopSimulation}
         setRunningTime={setRunningTime}
       />
-      <div className="fixed right-4 bottom-4">
+      <div className={cls('fixed right-4', results ? 'bottom-24' : 'bottom-4')}>
         <ToTopButton
           handleToTop={() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });

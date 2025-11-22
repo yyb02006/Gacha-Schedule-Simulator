@@ -22,17 +22,20 @@ import { BatchGachaGoal } from '#/types/types';
 
 const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} activeToTop backdropBlur>
-      <section className="relative mb-[120px] flex w-full max-w-[1280px] flex-col gap-y-5 rounded-xl bg-[#202020] pt-5 pb-8 lg:pt-6">
+    <Modal isOpen={isOpen} onClose={onClose} activeToTop backdropBlur padding="lg:p-12">
+      <section className="relative flex w-full max-w-[1280px] flex-col gap-y-5 bg-[#202020] pt-6 pb-[120px] lg:mb-[120px] lg:rounded-xl">
         <div className="flex items-start justify-between px-4 lg:items-center lg:px-6">
           <h1 className="font-S-CoreDream-500 flex-1 text-xl lg:text-2xl">
             <span className="text-amber-400">시뮬레이션 및 배너 사전설정</span>에 대한 안내
           </h1>
-          <CancelButton
-            handleCancel={() => {
-              onClose();
-            }}
-          />
+          <div className="size-11" />
+          <div className="fixed right-4 z-[1000] lg:relative lg:right-auto lg:z-auto">
+            <CancelButton
+              handleCancel={() => {
+                onClose();
+              }}
+            />
+          </div>
         </div>
         <section className="space-y-5 bg-[#303030] px-4 py-5 lg:px-6">
           <h1 className="font-S-CoreDream-500 flex items-stretch">

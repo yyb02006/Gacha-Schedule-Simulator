@@ -104,7 +104,7 @@ const createTooltipLiteral = ({
 
 const createLegendHTML = (labels: string[], colors: string[], values: number[]) => {
   const total = values.reduce((a, b) => a + b, 0);
-  return `<div class="flex flex-wrap h-fit gap-y-3 gap-x-12 text-base">${labels
+  return `<div class="flex flex-1 w-full flex-wrap gap-y-2 gap-x-4 text-sm">${labels
     .map((label, i) => {
       const color = colors[i];
       const percentage = truncateToDecimals((values[i] / total) * 100);
@@ -158,7 +158,7 @@ const BannerEVShareRate = forwardRef<
       className={isColspanTwo ? 'col-span-2' : ''}
     >
       {result ? (
-        <div className="p-4 text-sm">
+        <div className="chart-sm:grid chart-sm:grid-cols-[4fr_3fr] w-full">
           <DonutChart
             data={data}
             labels={labels}
@@ -166,11 +166,9 @@ const BannerEVShareRate = forwardRef<
               (HEX) => HEX + 'CC',
             )}
             borderColor={colors[Math.ceil(result.perBanner.length / 5) - 1].map((HEX) => HEX)}
-            legendPosition="after"
+            isBodyPostionLegend
             createLegendHTML={createLegendHTML}
             createTooltipLiteral={createTooltipLiteral}
-            containerClassName="grid grid-cols-[4fr_3fr]"
-            legendClassName="flex justify-center items-center"
           />
         </div>
       ) : null}

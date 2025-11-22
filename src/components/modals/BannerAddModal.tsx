@@ -202,9 +202,9 @@ export const Help = ({ onClose }: { onClose: () => void }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed top-0 left-0 z-1000 flex size-full cursor-pointer items-center justify-center bg-transparent p-4"
+      className="fixed top-0 left-0 z-1000 flex size-full cursor-pointer items-center justify-center bg-transparent p-4 backdrop-blur-sm"
     >
-      <div className="w-full max-w-[400px] cursor-default space-y-5 rounded-lg bg-[#202020] px-4 py-6">
+      <div className="w-full max-w-[400px] cursor-default space-y-5 rounded-lg bg-[#202020] px-4 py-6 lg:px-6">
         <div className="flex items-center justify-between">
           <h1 className="font-S-CoreDream-500 text-xl">
             배너 종류별 <span className="text-red-400">오퍼레이터 제한</span>
@@ -549,7 +549,7 @@ export default function BannerAddModal({
       <div
         className={cls(
           isCustomMode ? '' : 'h-[calc(100vh-96px)]',
-          'w-full max-w-[480px] rounded-xl bg-[#202020] p-6',
+          'w-full max-w-[480px] rounded-xl bg-[#202020] px-4 py-6 lg:px-6',
         )}
       >
         <AnimatePresence>

@@ -17,7 +17,7 @@ export default function ResetAlert({
 }) {
   return (
     <AlertModal isOpen={isOpen}>
-      <div className="flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
+      <div className="flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] p-4 lg:p-6">
         <h1 className="font-S-CoreDream-500 text-xl">
           시뮬레이션 <span className="text-red-400">초기화</span>
         </h1>
