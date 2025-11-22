@@ -83,7 +83,7 @@ const FloatingActionBar = ({
         .find((banner) => banner.dataset.id === currentBanner?.dataset.id);
 
       if (currentItem && listRef.current) {
-        listRef.current.scrollTo({ top: currentItem.offsetTop, behavior: 'smooth' });
+        listRef.current.scrollTo({ top: currentItem.offsetTop - 32, behavior: 'instant' });
       }
     }
 
@@ -94,14 +94,20 @@ const FloatingActionBar = ({
     <div className="fixed bottom-6 left-1/2 flex w-[400px] max-w-[calc(100vw-32px)] -translate-x-1/2 gap-2 text-stone-50">
       <ToTopButton handleToTop={handleToTop} />
       <div className="relative flex flex-1 items-center justify-between self-stretch rounded-xl bg-[#202020] pl-4 text-base shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]">
-        {currentBanner ? currentBanner.dataset.name : '시뮬레이션 결과'}
         <button
           onClick={() => {
             setIsListOpen((p) => !p);
           }}
-          className="aspect-square h-full cursor-pointer p-[6px] hover:text-amber-500"
+          className="flex size-full cursor-pointer items-center justify-between"
         >
-          {isListOpen ? <ChevronDown className="size-full" /> : <ChevronUp className="size-full" />}
+          {currentBanner ? currentBanner.dataset.name : '시뮬레이션 결과'}
+          <div className="aspect-square h-full p-[6px] hover:text-amber-500">
+            {isListOpen ? (
+              <ChevronDown className="size-full" />
+            ) : (
+              <ChevronUp className="size-full" />
+            )}
+          </div>
         </button>
         <AnimatePresence>
           {isListOpen && (
