@@ -19,6 +19,7 @@ import ToTopButton from '#/components/buttons/ToTopButton';
 import ChevronDown from '#/icons/ChevronDown.svg';
 import ChevronUp from '#/icons/ChevronUp.svg';
 import { cls } from '#/libs/utils';
+import { OverlayScrollbarsComponentRef } from 'overlayscrollbars-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -36,7 +37,7 @@ const FloatingActionBar = ({
   result: GachaSimulationMergedResult | null;
   isOpen: boolean;
   chartRefs: RefObject<HTMLDivElement[]>;
-  scrollRef: RefObject<HTMLDivElement | null>;
+  scrollRef: RefObject<OverlayScrollbarsComponentRef<'div'> | null>;
   handleToTop: () => void;
 }) => {
   const [currentBanner, setCurrentBanner] = useState<HTMLDivElement | undefined>(undefined);
@@ -114,10 +115,13 @@ const FloatingActionBar = ({
               {chartRefs.current.map((banner, index) => (
                 <button
                   onClick={() => {
-                    scrollRef.current?.scrollTo({
-                      top: Math.max(banner.offsetTop - 32, 0),
-                      behavior: 'smooth',
-                    });
+                    scrollRef.current
+                      ?.osInstance()
+                      ?.elements()
+                      .viewport.scrollTo({
+                        top: Math.max(banner.offsetTop - 32, 0),
+                        behavior: 'smooth',
+                      });
                   }}
                   key={index}
                   data-id={banner.dataset.id}
@@ -146,7 +150,7 @@ const FloatingActionBar = ({
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<HTMLDivElement[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<OverlayScrollbarsComponentRef<'div'>>(null);
   const chartHeight = 'h-[320px] chart-sm:h-[400px]';
 
   return result ? (
@@ -303,7 +307,10 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
       </section>
       <FloatingActionBar
         handleToTop={() => {
-          scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+          scrollRef.current
+            ?.osInstance()
+            ?.elements()
+            .viewport.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         chartRefs={chartRefs}
         scrollRef={scrollRef}

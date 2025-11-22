@@ -25,7 +25,7 @@ const GachaSystemInfoModalContent = ({
       }}
       activeToTop
       backdropBlur
-      className="px-0 py-0 lg:p-12"
+      className="px-0 py-0 lg:p-16"
     >
       <div className="relative flex w-full max-w-[1280px] flex-col gap-y-5 bg-[#202020] pt-6 pb-[120px] lg:mb-[120px] lg:rounded-xl">
         <div className="flex items-center justify-between px-4 lg:px-6">

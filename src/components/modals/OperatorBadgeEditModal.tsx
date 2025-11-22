@@ -4,6 +4,7 @@ import Badge from '#/components/Badge';
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import Modal from '#/components/modals/Modal';
+import OverlayScrollbar from '#/components/OverlayScrollbar';
 import { Operator } from '#/components/PickupList';
 import { bannerBadgeProps, operatorBadgeProps } from '#/constants/ui';
 import { operatorLimitByBannerType, rarities } from '#/constants/variables';
@@ -12,7 +13,6 @@ import { useSyncedState } from '#/hooks/useSyncedState';
 import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRef, useState } from 'react';
-import SimpleBar from 'simplebar-react';
 
 const Help = ({ onClose }: { onClose: () => void }) => {
   const isMouseDownOnTarget = useRef<boolean>(false);
@@ -44,18 +44,21 @@ const Help = ({ onClose }: { onClose: () => void }) => {
       transition={{ duration: 0.2 }}
       className="fixed top-0 left-0 z-1000 size-full backdrop-blur-sm"
     >
-      <SimpleBar className="h-full min-h-screen">
-        <div className="flex w-full justify-center">
-          <div className="h-fit w-full max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] lg:rounded-lg lg:py-6">
+      <OverlayScrollbar className="size-full">
+        <div className="flex h-full justify-center">
+          <div className="my-auto h-fit w-full max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] lg:rounded-lg lg:py-6">
             <div className="flex items-center justify-between">
               <h1 className="font-S-CoreDream-500 text-xl">
                 천장 오퍼레이터 <span className="text-red-400">결정 규칙</span>
               </h1>
-              <CancelButton
-                handleCancel={() => {
-                  onClose();
-                }}
-              />
+              <div className="size-11" />
+              <div className="fixed right-4 z-[1000] lg:relative lg:right-auto lg:z-auto">
+                <CancelButton
+                  handleCancel={() => {
+                    onClose();
+                  }}
+                />
+              </div>
             </div>
             <div className="text-standard font-S-CoreDream-300 space-y-6">
               <div className="space-y-2">
@@ -111,7 +114,7 @@ const Help = ({ onClose }: { onClose: () => void }) => {
             </div>
           </div>
         </div>
-      </SimpleBar>
+      </OverlayScrollbar>
     </motion.div>
   );
 };
@@ -165,7 +168,7 @@ export default function OperatorBadgeEditModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdropBlur>
-      <div className="flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] p-6">
+      <div className="flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] px-4 py-6 lg:px-6">
         <AnimatePresence>
           {isHelpOpen && (
             <Help

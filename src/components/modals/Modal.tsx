@@ -5,7 +5,8 @@ import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { cls } from '#/libs/utils';
 import ToTopButton from '#/components/buttons/ToTopButton';
-import SimpleBar from 'simplebar-react';
+import OverlayScrollbar from '#/components/OverlayScrollbar';
+import { OverlayScrollbarsComponentRef } from 'overlayscrollbars-react';
 
 interface ModalProps {
   children: ReactNode;
@@ -13,7 +14,7 @@ interface ModalProps {
   onClose: () => void;
   backdropBlur?: boolean;
   ref?: RefObject<HTMLDivElement | null>;
-  scrollRef?: RefObject<HTMLDivElement | null>;
+  scrollRef?: RefObject<OverlayScrollbarsComponentRef<'div'> | null>;
   activeToTop?: boolean;
   className?: string;
   padding?: string;
@@ -32,8 +33,9 @@ export default function Modal({
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
-  const simpleBarRef = useRef<HTMLDivElement>(null);
+  const scrollBarRef = useRef<OverlayScrollbarsComponentRef<'div'>>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const isMouseDownOnTarget = useRef<boolean>(false);
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function Modal({
 
   useEffect(() => {
     if (scrollRef) {
-      scrollRef.current = simpleBarRef.current;
+      scrollRef.current = scrollBarRef.current;
     }
     if (!ref) return;
     ref.current = modalRef.current;
@@ -67,6 +69,36 @@ export default function Modal({
         {isOpen && (
           <motion.div
             key="modal-backdrop"
+            ref={modalRef}
+            tabIndex={-1}
+            onMouseDown={(e) => {
+              if (
+                e.target === e.currentTarget ||
+                e.target === wrapperRef.current ||
+                e.target === scrollBarRef.current?.osInstance()?.elements().viewport ||
+                e.target === contentRef.current
+              ) {
+                isMouseDownOnTarget.current = true;
+              } else {
+                isMouseDownOnTarget.current = false;
+              }
+            }}
+            onMouseUp={(e) => {
+              if (
+                e.target === e.currentTarget ||
+                e.target === wrapperRef.current ||
+                e.target === scrollBarRef.current?.osInstance()?.elements().viewport ||
+                (e.target === contentRef.current && isMouseDownOnTarget.current)
+              ) {
+                onClose();
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') {
+                onClose();
+              }
+            }}
+            role="button"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -76,55 +108,25 @@ export default function Modal({
               backdropBlur ? 'backdrop-blur-sm' : '',
             )}
           >
-            <div
-              // tabIndex = -1의 의미는 포커스 가능한 요소이나 탭 순서 안에 안에 포함시키지는 않는다는 것
-              // div는 원래 포커스 가능한 요소가 아니기 때문에 tabIndex = -1을 주어야 focus() 메서드가 정상 작동함
-              ref={modalRef}
-              tabIndex={-1}
-              onMouseDown={(e) => {
-                if (e.target === e.currentTarget || e.target === wrapperRef.current) {
-                  isMouseDownOnTarget.current = true;
-                } else {
-                  isMouseDownOnTarget.current = false;
-                }
-              }}
-              onMouseUp={(e) => {
-                if (
-                  (e.target === e.currentTarget || e.target === wrapperRef.current) &&
-                  isMouseDownOnTarget.current
-                ) {
-                  onClose();
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') {
-                  onClose();
-                }
-              }}
-              role="button"
-              // className={cls(
-              //   'flex min-h-dvh w-dvw justify-center overflow-y-auto p-4 lg:p-12',
-              //   className,
-              // )}
+            <OverlayScrollbar
+              ref={scrollBarRef}
+              className={cls('h-full w-full', padding, className)}
             >
-              <SimpleBar
-                scrollableNodeProps={{
-                  ref: simpleBarRef,
-                }}
-                autoHide={false}
-                className={cls('h-full min-h-screen w-screen', padding, className)}
-              >
-                <div ref={wrapperRef} className="my-auto flex w-full justify-center">
+              <div ref={wrapperRef} className="flex h-full">
+                <div ref={contentRef} className="my-auto flex w-full justify-center">
                   {children}
                 </div>
-              </SimpleBar>
-            </div>
+              </div>
+            </OverlayScrollbar>
             {activeToTop && (
               <div className="fixed right-4 bottom-4 lg:right-6">
                 <ToTopButton
                   handleToTop={() => {
-                    if (!simpleBarRef.current) return;
-                    simpleBarRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                    if (!scrollBarRef.current) return;
+                    scrollBarRef.current
+                      .osInstance()
+                      ?.elements()
+                      .viewport.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 />
               </div>

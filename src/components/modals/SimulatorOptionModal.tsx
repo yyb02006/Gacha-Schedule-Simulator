@@ -11,7 +11,7 @@ import { SimulationOptions } from '#/components/PickupList';
 import { stringToNumber } from '#/libs/utils';
 import ToggleButton from '#/components/buttons/ToggleButton';
 import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
-import SimpleBar from 'simplebar-react';
+import OverlayScrollbar from '#/components/OverlayScrollbar';
 
 const Help = ({ onClose }: { onClose: () => void }) => {
   const isMouseDownOnTarget = useRef<boolean>(false);
@@ -43,9 +43,9 @@ const Help = ({ onClose }: { onClose: () => void }) => {
       transition={{ duration: 0.2 }}
       className="fixed top-0 left-0 z-1000 size-full backdrop-blur-sm"
     >
-      <SimpleBar className="h-full min-h-screen">
-        <div className="flex w-full justify-center">
-          <div className="h-fit max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] lg:rounded-lg lg:px-6 lg:py-6">
+      <OverlayScrollbar className="size-full">
+        <div className="flex h-full justify-center">
+          <div className="my-auto h-fit max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] lg:rounded-lg lg:px-6 lg:py-6">
             <div className="flex items-center justify-between">
               <h1 className="font-S-CoreDream-500 text-xl">
                 <span className="text-red-400">옵션 작동</span> 안내
@@ -103,7 +103,7 @@ const Help = ({ onClose }: { onClose: () => void }) => {
             </div>
           </div>
         </div>
-      </SimpleBar>
+      </OverlayScrollbar>
     </motion.div>
   );
 };
@@ -131,7 +131,7 @@ export default function SimulatorOptionModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} backdropBlur>
-      <div className="flex h-full w-full max-w-[400px] flex-1 flex-col gap-4 gap-y-8 rounded-xl bg-[#202020] p-4 lg:w-[480px] lg:p-6">
+      <div className="flex h-fit w-full max-w-[400px] flex-1 flex-col gap-4 gap-y-8 rounded-xl bg-[#202020] px-4 py-6 lg:w-[480px] lg:px-6">
         <AnimatePresence>
           {isHelpOpen && (
             <Help

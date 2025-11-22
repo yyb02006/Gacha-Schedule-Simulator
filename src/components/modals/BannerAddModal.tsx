@@ -20,14 +20,13 @@ import { cls, stringToNumber } from '#/libs/utils';
 import { GachaType, OperatorRarity } from '#/types/types';
 import { AnimatePresence, motion, useMotionValue } from 'motion/react';
 import { ChangeEvent, useEffect, useReducer, useRef, useState } from 'react';
-import SimpleBar from 'simplebar-react';
-import 'simplebar-react/dist/simplebar.min.css';
 import Image from 'next/image';
 import Badge from '#/components/Badge';
 import { useResizeDragToggle } from '#/hooks/useResizeDragToggle';
 import { animate } from 'motion';
 import { operatorLimitByBannerType, rarities, rarityStrings } from '#/constants/variables';
 import { ResponsiveHide, ResponsiveShow } from '#/components/ResponsiveSpan';
+import OverlayScrollbar from '#/components/OverlayScrollbar';
 
 const CustomModalContents = ({
   modalState,
@@ -312,7 +311,7 @@ const PresetModalContents = ({
   onPresetClick: (payload: Dummy) => void;
 }) => {
   return (
-    <SimpleBar autoHide={false} className="-mx-4 h-full p-4" style={{ minHeight: 0 }}>
+    <OverlayScrollbar className="-mx-4 px-4 py-3">
       <div className="space-y-6">
         {pickupDataPresets.map((pickupData) => {
           const { id, image, name, gachaType } = pickupData;
@@ -348,7 +347,7 @@ const PresetModalContents = ({
           );
         })}
       </div>
-    </SimpleBar>
+    </OverlayScrollbar>
   );
 };
 
@@ -548,7 +547,7 @@ export default function BannerAddModal({
     >
       <div
         className={cls(
-          isCustomMode ? '' : 'h-[calc(100vh-96px)]',
+          isCustomMode ? '' : 'h-[calc(100dvh-96px)]',
           'w-full max-w-[480px] rounded-xl bg-[#202020] px-4 py-6 lg:px-6',
         )}
       >

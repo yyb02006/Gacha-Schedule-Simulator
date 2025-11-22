@@ -57,7 +57,7 @@ export default function BannerBadgeEditModal({
       }}
       backdropBlur
     >
-      <div className="relative flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] p-4 lg:p-6">
+      <div className="relative flex w-full max-w-[400px] flex-col gap-y-6 rounded-xl bg-[#202020] px-4 py-6 lg:px-6">
         <AnimatePresence>
           {isHelpOpen && (
             <Help
