@@ -262,7 +262,7 @@ const LoadingSpinnerContent = ({
           backdropFilter: { duration: 0.15, delay: 0.15 },
         },
       }}
-      className="fixed top-0 left-0 z-[1000] flex h-screen w-screen items-center justify-center"
+      className="fixed top-0 left-0 z-[1000] flex h-dvh w-dvw items-center justify-center"
     >
       {progressRef && (
         <GridCellBackground

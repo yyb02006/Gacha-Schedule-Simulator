@@ -1191,7 +1191,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
         onStopClick={stopSimulation}
         setRunningTime={setRunningTime}
       />
-      <div className={cls('fixed right-4', results ? 'bottom-24' : 'bottom-4')}>
+      <div className={cls('fixed right-4 lg:bottom-6', results ? 'bottom-24' : 'bottom-4')}>
         <ToTopButton
           handleToTop={() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -88,7 +88,7 @@ function BaseModal(
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 flex h-screen w-screen justify-center bg-black/60"
+            className="fixed top-0 left-0 flex h-dvh w-dvw justify-center bg-black/60"
           >
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
             <div

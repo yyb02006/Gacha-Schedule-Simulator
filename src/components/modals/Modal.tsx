@@ -72,7 +72,7 @@ export default function Modal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className={cls(
-              'fixed top-0 left-0 flex h-screen w-screen justify-center bg-[#00000090]',
+              'fixed top-0 left-0 flex h-dvh w-dvw justify-center bg-[#00000090]',
               backdropBlur ? 'backdrop-blur-sm' : '',
             )}
           >
@@ -103,7 +103,7 @@ export default function Modal({
               }}
               role="button"
               // className={cls(
-              //   'flex min-h-screen w-screen justify-center overflow-y-auto p-4 lg:p-12',
+              //   'flex min-h-dvh w-dvw justify-center overflow-y-auto p-4 lg:p-12',
               //   className,
               // )}
             >
@@ -113,7 +113,6 @@ export default function Modal({
                 }}
                 autoHide={false}
                 className={cls('h-full min-h-screen w-screen', padding, className)}
-                style={{ minHeight: 4 }}
               >
                 <div ref={wrapperRef} className="my-auto flex w-full justify-center">
                   {children}

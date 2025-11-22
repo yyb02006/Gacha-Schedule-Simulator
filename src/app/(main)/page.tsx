@@ -21,7 +21,7 @@ export default async function Home() {
   }, []);
 
   return (
-    <section className="relative flex w-screen justify-center">
+    <section className="relative flex w-dvw justify-center">
       <PickupList pickupDataPresets={filteredPickupDataPresets} />
       <GachaSystemInfoModal />
     </section>
