@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { cls } from '#/libs/utils';
 import ToTopButton from '#/components/buttons/ToTopButton';
+import SimpleBar from 'simplebar-react';
 
 interface ModalProps {
   children: ReactNode;
@@ -12,8 +13,10 @@ interface ModalProps {
   onClose: () => void;
   backdropBlur?: boolean;
   ref?: RefObject<HTMLDivElement | null>;
+  scrollRef?: RefObject<HTMLDivElement | null>;
   activeToTop?: boolean;
   className?: string;
+  padding?: string;
 }
 
 export default function Modal({
@@ -22,11 +25,14 @@ export default function Modal({
   onClose,
   backdropBlur,
   ref,
+  scrollRef,
   activeToTop = false,
+  padding = 'p-4 lg:p-12',
   className = '',
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const simpleBarRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isMouseDownOnTarget = useRef<boolean>(false);
 
@@ -47,9 +53,12 @@ export default function Modal({
   }, [isOpen]);
 
   useEffect(() => {
+    if (scrollRef) {
+      scrollRef.current = simpleBarRef.current;
+    }
     if (!ref) return;
     ref.current = modalRef.current;
-  }, [ref, isOpen]);
+  }, [ref, isOpen, scrollRef]);
 
   return (
     mounted &&
@@ -93,21 +102,30 @@ export default function Modal({
                 }
               }}
               role="button"
-              className={cls(
-                'flex min-h-screen w-screen justify-center overflow-y-auto p-4 lg:p-12',
-                className,
-              )}
+              // className={cls(
+              //   'flex min-h-screen w-screen justify-center overflow-y-auto p-4 lg:p-12',
+              //   className,
+              // )}
             >
-              <div ref={wrapperRef} className="my-auto flex w-full justify-center">
-                {children}
-              </div>
+              <SimpleBar
+                scrollableNodeProps={{
+                  ref: simpleBarRef,
+                }}
+                autoHide={false}
+                className={cls('h-full min-h-screen w-screen', padding, className)}
+                style={{ minHeight: 4 }}
+              >
+                <div ref={wrapperRef} className="my-auto flex w-full justify-center">
+                  {children}
+                </div>
+              </SimpleBar>
             </div>
             {activeToTop && (
-              <div className="fixed right-6 bottom-6">
+              <div className="fixed right-4 bottom-4 lg:right-6">
                 <ToTopButton
                   handleToTop={() => {
-                    if (!modalRef.current) return;
-                    modalRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                    if (!simpleBarRef.current) return;
+                    simpleBarRef.current.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                 />
               </div>
