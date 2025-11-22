@@ -13,12 +13,16 @@ export default function TypeSelectionButton({
   isActive = false,
   onTypeClick,
   className = '',
+  shadow,
+  innerShadow,
 }: {
   name: string;
   hoverBackground: string;
   isActive?: boolean;
   onTypeClick: () => void;
   className?: string;
+  shadow?: string;
+  innerShadow?: string;
 }) {
   const [isHover, setIsHover] = useState(false);
   const [isMouseDown, setIsMouseDown] = useState(false);
@@ -28,6 +32,8 @@ export default function TypeSelectionButton({
     hoverBackground,
     state: isMount ? 'normal' : 'initial',
     isActive,
+    shadow,
+    innerShadow,
   };
   return (
     <motion.button
