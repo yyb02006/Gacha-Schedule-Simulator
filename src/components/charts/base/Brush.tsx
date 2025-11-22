@@ -544,6 +544,7 @@ export default function Brush<T extends PartialChartType>({
           brushBackground(brushConfigRef.current.background),
           brushPlugin(selection, brushConfigRef.current),
         ]}
+        style={{ touchAction: 'none' }}
       />
     </div>
   );
