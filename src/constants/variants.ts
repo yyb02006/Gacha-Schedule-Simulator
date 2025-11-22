@@ -70,7 +70,7 @@ export const smallButtonVariants: Variants = {
 
 export const gachaTypeButtonVariants: Variants = {
   idle: (custom: GachaTypeButtonCustom) => ({
-    boxShadow: '4px 4px 12px #101010, -5px -4px 10px #303030',
+    boxShadow: custom.shadow || '4px 4px 12px #101010, -5px -4px 10px #303030',
     background: 'linear-gradient(155deg, #181818, #2e2e2e)',
     transition:
       custom.state === 'initial'
@@ -85,12 +85,12 @@ export const gachaTypeButtonVariants: Variants = {
       : secondLevelTransition.fadeOut,
   }),
   hover: (custom: GachaTypeButtonCustom) => ({
-    boxShadow: '4px 4px 12px #101010, -5px -4px 12px #404040',
+    boxShadow: custom.shadow || '4px 4px 12px #101010, -5px -4px 12px #404040',
     background: custom.hoverBackground,
     transition: { duration: 0.3 },
   }),
   active: (custom: GachaTypeButtonCustom) => ({
-    boxShadow: 'inset 3px 3px 6px #101010, inset -3px -3px 6px #303030',
+    boxShadow: custom.innerShadow || 'inset 3px 3px 6px #101010, inset -3px -3px 6px #303030',
     background: custom.hoverBackground,
     transition:
       custom.state === 'initial'
