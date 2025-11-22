@@ -2,7 +2,7 @@
 
 import { CreateTooltipLiteral, CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { useIsMount } from '#/hooks/useIsMount';
-import { truncateToDecimals } from '#/libs/utils';
+import { cls, truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
   ChartOptions,
@@ -72,29 +72,11 @@ const externalTooltipHandler =
       canvasParent.appendChild(tooltipEl);
     }
 
-    /*     if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
-      tooltipEl.style.opacity = '0';
-      lastChartId.current = null;
-      return;
-    } */
-
-    /* if (tooltip.dataPoints.length === 0) {
-      tooltipEl.style.opacity = '0';
-      lastChartId.current = null;
-      return;
-    } */
-
     if (tooltip.opacity === 0 || !tooltip.body) {
       tooltipEl.style.opacity = '0';
       lastChartId.current = null;
       return;
     }
-
-    /*     if (!tooltip.body) {
-      tooltipEl.style.opacity = '0';
-      lastChartId.current = null;
-      return;
-    } */
 
     if (hoveredIndexRef.current === null && tooltip.dataPoints.length > 0) {
       hoveredIndexRef.current = tooltip.dataPoints[0].dataIndex;
@@ -355,8 +337,6 @@ export default function BarChart({
         chart.update();
       } else if (newIndex !== null && hoveredIndexRef.current !== newIndex) {
         // Move
-        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
-        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
         hoveredIndexRef.current = newIndex;
         if (data.length > 20) {
           chartThrottledDraw();
@@ -385,11 +365,11 @@ export default function BarChart({
     };
 
     canvas.addEventListener('pointermove', handlePointerMove);
-    canvas.addEventListener('mouseleave', handlePointerLeave);
+    canvas.addEventListener('pointerleave', handlePointerLeave);
     canvas.addEventListener('touchmove', handlePointerMove);
     return () => {
       canvas.removeEventListener('pointermove', handlePointerMove);
-      canvas.removeEventListener('mouseleave', handlePointerLeave);
+      canvas.removeEventListener('pointerleave', handlePointerLeave);
       canvas.removeEventListener('touchmove', handlePointerMove);
     };
   }, [
@@ -540,10 +520,10 @@ export default function BarChart({
   }, [loading, data.length, mainChartRef, selectionIndex, backgroundColor]);
 
   return (
-    <div className={height}>
+    <div className={cls(height ?? '', 'relative overflow-hidden')}>
       {!loading || (
         <div className="absolute inset-0 flex items-center justify-center rounded-b-lg bg-[#00050] backdrop-blur-sm">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
         </div>
       )}
       <Bar

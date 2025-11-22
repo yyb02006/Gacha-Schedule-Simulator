@@ -337,7 +337,12 @@ export default function DonutChart({
 
   return (
     <>
-      <div className={cls('relative flex size-full min-w-0 flex-col', containerClassName)}>
+      <div
+        className={cls(
+          'relative flex size-full min-w-0 flex-col overflow-hidden',
+          containerClassName,
+        )}
+      >
         {isBodyPostionLegend || (
           <div
             ref={legendRef}

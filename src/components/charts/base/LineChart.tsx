@@ -3,7 +3,7 @@
 import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
 import { TooltipCallback } from '#/components/charts/base/BarChart';
 import { useIsMount } from '#/hooks/useIsMount';
-import { truncateToDecimals } from '#/libs/utils';
+import { cls, truncateToDecimals } from '#/libs/utils';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -422,7 +422,7 @@ export default function LineChart({
   }, [mainChartRef]);
 
   return (
-    <div className={height}>
+    <div className={cls(height ?? '', 'relative overflow-hidden')}>
       <Line ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />
     </div>
   );
