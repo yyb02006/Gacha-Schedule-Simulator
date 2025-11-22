@@ -16,6 +16,8 @@ export type GachaTypeButtonCustom = {
   state: 'initial' | 'normal';
   hoverBackground: string;
   isActive: boolean;
+  shadow?: string;
+  innerShadow?: string;
 };
 
 export type GachaTypeButton = {
