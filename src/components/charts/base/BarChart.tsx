@@ -60,6 +60,7 @@ const externalTooltipHandler =
   (context: { chart: ChartJS; tooltip: TooltipModel<'bar'> }) => {
     const { chart, tooltip } = context;
     const chartId = chart.id;
+
     const canvasParent = chart.canvas.parentElement;
     if (!canvasParent) return;
 
@@ -71,10 +72,32 @@ const externalTooltipHandler =
       canvasParent.appendChild(tooltipEl);
     }
 
-    if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
+    /*     if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
       tooltipEl.style.opacity = '0';
       lastChartId.current = null;
       return;
+    } */
+
+    /* if (tooltip.dataPoints.length === 0) {
+      tooltipEl.style.opacity = '0';
+      lastChartId.current = null;
+      return;
+    } */
+
+    if (tooltip.opacity === 0 || !tooltip.body) {
+      tooltipEl.style.opacity = '0';
+      lastChartId.current = null;
+      return;
+    }
+
+    /*     if (!tooltip.body) {
+      tooltipEl.style.opacity = '0';
+      lastChartId.current = null;
+      return;
+    } */
+
+    if (hoveredIndexRef.current === null && tooltip.dataPoints.length > 0) {
+      hoveredIndexRef.current = tooltip.dataPoints[0].dataIndex;
     }
 
     const canvasRect = chart.canvas.getBoundingClientRect();
@@ -232,6 +255,7 @@ export default function BarChart({
         },
       },
     },
+    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
     layout: {
       padding: { top: padding, left: padding, bottom: enableBrush ? 0 : padding, right: padding },
     },
@@ -266,7 +290,10 @@ export default function BarChart({
           align: 'center',
           autoSkip: false,
           font: { family: 'S-CoreDream-300', size: 11 },
-          color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
+          color: (ctx) => {
+            // console.log(ctx, hoveredIndexRef.current);
+            return ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666';
+          },
           callback: function (this, value, index) {
             const isValueSring = typeof value === 'string';
             const gapMultiplier = Math.min(Math.ceil(this.ticks.length / 199), 10);
@@ -317,7 +344,7 @@ export default function BarChart({
     const chart = chartRef.current;
     if (!canvas || !chart) return;
 
-    const handleMouseMove = (e: PointerEvent) => {
+    const handlePointerMove = (e: PointerEvent | TouchEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current === null && hoveredIndexRef.current !== newIndex) {
@@ -328,6 +355,8 @@ export default function BarChart({
         chart.update();
       } else if (newIndex !== null && hoveredIndexRef.current !== newIndex) {
         // Move
+        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
+        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
         hoveredIndexRef.current = newIndex;
         if (data.length > 20) {
           chartThrottledDraw();
@@ -348,18 +377,20 @@ export default function BarChart({
       }
     };
 
-    const handleMouseLeave = () => {
+    const handlePointerLeave = () => {
       if (hoveredIndexRef.current !== null) {
         hoveredIndexRef.current = null;
         chart.update(); // <- 즉시 리렌더 (ticks.color 재평가)
       }
     };
 
-    canvas.addEventListener('pointermove', handleMouseMove);
-    canvas.addEventListener('pointerleave', handleMouseLeave);
+    canvas.addEventListener('pointermove', handlePointerMove);
+    canvas.addEventListener('mouseleave', handlePointerLeave);
+    canvas.addEventListener('touchmove', handlePointerMove);
     return () => {
-      canvas.removeEventListener('pointermove', handleMouseMove);
-      canvas.removeEventListener('pointerleave', handleMouseLeave);
+      canvas.removeEventListener('pointermove', handlePointerMove);
+      canvas.removeEventListener('mouseleave', handlePointerLeave);
+      canvas.removeEventListener('touchmove', handlePointerMove);
     };
   }, [
     chartThrottledUpdate,
@@ -370,6 +401,62 @@ export default function BarChart({
     hoverBorderColor,
     data.length,
   ]);
+
+  useEffect(() => {
+    const handleTouch = (e: TouchEvent) => {
+      if (!chartRef.current) return;
+      const canvas = chartRef.current.canvas;
+      const chart = chartRef.current;
+
+      const canvasRect = canvas.getBoundingClientRect();
+
+      const { chartArea } = chart;
+
+      const rect = {
+        top: canvasRect.top + chartArea.top,
+        bottom: canvasRect.top + chartArea.bottom,
+        left: canvasRect.left + chartArea.left,
+        right: canvasRect.right + chartArea.right,
+      };
+
+      if (canvasRect.width === 0 || canvasRect.height === 0) return;
+
+      const touch = e.touches[0];
+
+      const touchX = touch.clientX;
+      const touchY = touch.clientY;
+
+      const isInsideCanvas =
+        touchX >= rect.left && touchX <= rect.right && touchY >= rect.top && touchY <= rect.bottom;
+
+      if (!isInsideCanvas) {
+        // 캔버스 밖 터치 감지
+        hoveredIndexRef.current = null;
+
+        chart.data.datasets[0].hoverBackgroundColor = backgroundColor;
+        chart.data.datasets[0].hoverBorderColor = borderColor;
+
+        const tooltipEl = canvas.parentElement?.querySelector('#custom-tooltip') as HTMLElement;
+        if (tooltipEl) tooltipEl.style.opacity = '0';
+
+        if (chartRef.current.tooltip) {
+          chartRef.current.tooltip.setActiveElements([], { x: 0, y: 0 });
+          chartRef.current.update();
+        }
+      } else {
+        // 캔버스 안 터치 감지
+        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
+        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
+        chartRef.current.update();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouch);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouch);
+    };
+  }, [backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor]);
 
   useEffect(() => {
     mainChartRef.current = chartRef.current;

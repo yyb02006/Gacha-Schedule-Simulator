@@ -70,10 +70,14 @@ const externalTooltipHandler =
       canvasParent.appendChild(tooltipEl);
     }
 
-    if (tooltip.opacity === 0 || !tooltip.body || hoveredIndexRef.current === null) {
+    if (tooltip.opacity === 0 || !tooltip.body) {
       tooltipEl.style.opacity = '0';
       lastChartId.current = null;
       return;
+    }
+
+    if (hoveredIndexRef.current === null && tooltip.dataPoints.length > 0) {
+      hoveredIndexRef.current = tooltip.dataPoints[0].dataIndex;
     }
 
     const canvasRect = chart.canvas.getBoundingClientRect();
@@ -295,7 +299,7 @@ export default function LineChart({
     if (!canvas || !chart) return;
     const dataset = chart.data.datasets[0];
 
-    const handleMouseMove = (e: PointerEvent) => {
+    const handlePointerMove = (e: PointerEvent | TouchEvent) => {
       const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
       const newIndex = elements.length > 0 ? elements[0].index : null;
       if (hoveredIndexRef.current === null && hoveredIndexRef.current !== newIndex) {
@@ -332,18 +336,20 @@ export default function LineChart({
       }
     };
 
-    const handleMouseLeave = () => {
+    const handlePointerLeave = () => {
       if (hoveredIndexRef.current !== null) {
         hoveredIndexRef.current = null;
         chart.update(); // <- 즉시 리렌더 (ticks.color 재평가)
       }
     };
 
-    canvas.addEventListener('pointermove', handleMouseMove);
-    canvas.addEventListener('pointerleave', handleMouseLeave);
+    canvas.addEventListener('pointermove', handlePointerMove);
+    canvas.addEventListener('pointerleave', handlePointerLeave);
+    canvas.addEventListener('touchmove', handlePointerMove);
     return () => {
-      canvas.removeEventListener('pointermove', handleMouseMove);
-      canvas.removeEventListener('pointerleave', handleMouseLeave);
+      canvas.removeEventListener('pointermove', handlePointerMove);
+      canvas.removeEventListener('pointerleave', handlePointerLeave);
+      canvas.removeEventListener('touchmove', handlePointerMove);
     };
   }, [
     chartThrottledUpdate,
@@ -354,6 +360,62 @@ export default function LineChart({
     hoverBorderColor,
     data.length,
   ]);
+
+  useEffect(() => {
+    const handleTouch = (e: TouchEvent) => {
+      if (!chartRef.current) return;
+      const canvas = chartRef.current.canvas;
+      const chart = chartRef.current;
+
+      const canvasRect = canvas.getBoundingClientRect();
+
+      const { chartArea } = chart;
+
+      const rect = {
+        top: canvasRect.top + chartArea.top,
+        bottom: canvasRect.top + chartArea.bottom,
+        left: canvasRect.left + chartArea.left,
+        right: canvasRect.right + chartArea.right,
+      };
+
+      if (canvasRect.width === 0 || canvasRect.height === 0) return;
+
+      const touch = e.touches[0];
+
+      const touchX = touch.clientX;
+      const touchY = touch.clientY;
+
+      const isInsideCanvas =
+        touchX >= rect.left && touchX <= rect.right && touchY >= rect.top && touchY <= rect.bottom;
+
+      if (!isInsideCanvas) {
+        // 캔버스 밖 터치 감지
+        hoveredIndexRef.current = null;
+
+        chart.data.datasets[0].hoverBackgroundColor = backgroundColor;
+        chart.data.datasets[0].hoverBorderColor = borderColor;
+
+        const tooltipEl = canvas.parentElement?.querySelector('#custom-tooltip') as HTMLElement;
+        if (tooltipEl) tooltipEl.style.opacity = '0';
+
+        if (chartRef.current.tooltip) {
+          chartRef.current.tooltip.setActiveElements([], { x: 0, y: 0 });
+          chartRef.current.update();
+        }
+      } else {
+        // 캔버스 안 터치 감지
+        chart.data.datasets[0].hoverBackgroundColor = hoverBackgroundColor;
+        chart.data.datasets[0].hoverBorderColor = hoverBorderColor;
+        chartRef.current.update();
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouch);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouch);
+    };
+  }, [backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor]);
 
   useEffect(() => {
     mainChartRef.current = chartRef.current;

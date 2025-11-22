@@ -2,6 +2,7 @@
 
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import EmptyDonutChart from '#/components/charts/base/EmptyDonut';
+import { useScreenWidth } from '#/hooks/useScreenWidth';
 import { cls, truncateToDecimals } from '#/libs/utils';
 import { doughnutConnectorPlugin } from '#/plugins/chartJsPlugin';
 import { Chart as ChartJS, ArcElement, Tooltip, ChartData, ChartOptions } from 'chart.js';
@@ -11,7 +12,8 @@ import { Doughnut } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, ChartDataLabels);
 
-const getLabelPosition = (context: Context, total: number | undefined) => {
+const getLabelPosition = (context: Context) => {
+  const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
   const dataset = context.chart.data.datasets[0].data as number[];
   const data = (context.dataset?.data as (number | null)[]) ?? [];
   const currentValue = data[context.dataIndex] ?? 0;
@@ -28,6 +30,7 @@ export default function DonutChart({
   legendPosition = 'after',
   containerClassName = '',
   legendClassName = '',
+  isBodyPostionLegend,
   createLegendHTML,
   createTooltipLiteral,
 }: {
@@ -38,9 +41,11 @@ export default function DonutChart({
   legendPosition?: 'after' | 'before';
   containerClassName?: string;
   legendClassName?: string;
+  isBodyPostionLegend?: boolean;
   createLegendHTML: (labels: string[], colors: string[], values: number[]) => string;
   createTooltipLiteral: (data: CreateTooltipLiteralProps<'doughnut'>) => string;
 }) {
+  // const screenWidth = useScreenWidth();
   const chartRef = useRef<ChartJS<'doughnut'>>(null);
   const legendRef = useRef<HTMLDivElement>(null);
   const rawDataRef = useRef<number[]>([]);
@@ -157,8 +162,19 @@ export default function DonutChart({
   const options: ChartOptions<'doughnut'> = {
     rotation: 270,
     circumference: 360,
+    maintainAspectRatio: true,
     responsive: true,
-    layout: { padding: 76 },
+    layout: {
+      padding: (context) => {
+        const {
+          chart: { width: w, height: h },
+        } = context;
+
+        const base = Math.min(w, h);
+
+        return w < 480 ? base * 0.1 : base * 0.15;
+      },
+    },
     plugins: {
       tooltip: {
         enabled: false,
@@ -244,18 +260,25 @@ export default function DonutChart({
         offset: 10,
         formatter: (value, context) => {
           const dataset = context.chart.data.datasets[0].data as number[];
+          const { width } = context.chart;
           const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
           const totalizedVaule = total ? total : dataset.reduce((a, b) => a + b, 0);
           const percentage = truncateToDecimals((value / totalizedVaule) * 100);
-          return percentage > 0 ? `${percentage}%` : null;
+          return width >= 480
+            ? percentage > 0
+              ? `${percentage}%`
+              : null
+            : percentage >= 5
+              ? `${percentage}%`
+              : null;
         },
         align: (context) => {
-          const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
-          return getLabelPosition(context, total);
+          // const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+          return getLabelPosition(context);
         },
         anchor: (context) => {
-          const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
-          return getLabelPosition(context, total);
+          // const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+          return getLabelPosition(context);
         },
       },
       legend: {
@@ -265,26 +288,82 @@ export default function DonutChart({
     cutout: '30%',
   };
 
+  useEffect(() => {
+    const handleTouch = (e: TouchEvent) => {
+      if (!chartRef.current) return;
+      const canvas = chartRef.current.canvas;
+      const chart = chartRef.current;
+
+      const canvasRect = canvas.getBoundingClientRect();
+
+      const { chartArea } = chart;
+
+      const rect = {
+        top: canvasRect.top + chartArea.top,
+        bottom: canvasRect.top + chartArea.bottom,
+        left: canvasRect.left + chartArea.left,
+        right: canvasRect.right + chartArea.right,
+      };
+
+      if (canvasRect.width === 0 || canvasRect.height === 0) return;
+
+      const touch = e.touches[0];
+
+      const touchX = touch.clientX;
+      const touchY = touch.clientY;
+
+      const isInsideCanvas =
+        touchX >= rect.left && touchX <= rect.right && touchY >= rect.top && touchY <= rect.bottom;
+
+      if (!isInsideCanvas) {
+        // 캔버스 밖 터치 감지
+        const tooltipEl = canvas.parentElement?.querySelector('#custom-tooltip') as HTMLElement;
+        if (tooltipEl) tooltipEl.style.opacity = '0';
+
+        if (chartRef.current.tooltip) {
+          chart.setActiveElements([]);
+          chartRef.current.tooltip.setActiveElements([], { x: 0, y: 0 });
+          chartRef.current.update();
+        }
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouch);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouch);
+    };
+  }, []);
+
   return (
-    <div className={cls('relative flex size-full flex-col', containerClassName)}>
-      <div
-        ref={legendRef}
-        className={cls(
-          legendPosition === 'after' ? 'order-3' : 'order-1',
-          'relative px-4',
-          legendClassName,
+    <>
+      <div className={cls('relative flex size-full min-w-0 flex-col', containerClassName)}>
+        {isBodyPostionLegend || (
+          <div
+            ref={legendRef}
+            className={cls(
+              legendPosition === 'after' ? 'order-3' : 'order-1',
+              'relative px-4',
+              legendClassName,
+            )}
+          />
         )}
-      />
-      <div className="relative order-2">
-        <Doughnut
-          ref={chartRef}
-          data={chartData}
-          options={options}
-          plugins={[doughnutConnectorPlugin()]}
-          className={!data.some((dataEl) => dataEl > 0) ? 'absolute' : ''}
-        />
-        {!data.some((dataEl) => dataEl > 0) ? <EmptyDonutChart /> : null}
+        <div className="relative order-2 aspect-square w-full">
+          <Doughnut
+            ref={chartRef}
+            data={chartData}
+            options={options}
+            plugins={[doughnutConnectorPlugin()]}
+          />
+          {!data.some((dataEl) => dataEl > 0) ? <EmptyDonutChart /> : null}
+        </div>
       </div>
-    </div>
+      {isBodyPostionLegend && (
+        <div
+          ref={legendRef}
+          className={cls('relative flex items-center p-4 pb-10', legendClassName)}
+        />
+      )}
+    </>
   );
 }
