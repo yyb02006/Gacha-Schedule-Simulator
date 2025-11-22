@@ -5,6 +5,7 @@ export const doughnutConnectorPlugin = () => ({
   id: 'connectorLines',
   afterDraw(chart: Chart<'doughnut'>) {
     const ctx = chart.ctx;
+    const { width } = chart;
     const dataset = chart.data.datasets[0];
     const total = dataset.data.reduce((a, b) => a + b, 0);
     const totalizedValue = total
@@ -13,6 +14,7 @@ export const doughnutConnectorPlugin = () => ({
     dataset.data.forEach((value: number, index: number) => {
       const isVisible = chart.getDataVisibility(index);
       if (!isVisible) return; // 숨겨졌다면 connector line도 숨기기
+      if (width < 480) return;
       const ratio = safeNumberOrZero(value / totalizedValue);
       if (ratio < 0.05 && ratio > 0) {
         const meta = chart.getDatasetMeta(0);
