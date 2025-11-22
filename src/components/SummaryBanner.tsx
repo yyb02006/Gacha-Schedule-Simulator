@@ -6,12 +6,14 @@ import TotalGachaResult from '#/components/charts/TotalGachaResult';
 import SimulationResultModal from '#/components/modals/SimulationResultModal';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
+import { useScreenWidth } from '#/hooks/useScreenWidth';
 import { cls, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 
 export default function SummaryBanner({ result }: { result: GachaSimulationMergedResult | null }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const screenWidth = useScreenWidth();
   return (
     <div
       className={cls(
@@ -25,7 +27,10 @@ export default function SummaryBanner({ result }: { result: GachaSimulationMerge
         viewport={{ once: true, amount: 0.5 }}
         transition={{ ...cardTransition, ease: 'easeIn' }}
         initial="exit"
-        custom={{ background: 'linear-gradient(135deg, #e67a00, #ffb900)' }}
+        custom={{
+          background:
+            screenWidth.width > 1024 ? undefined : 'linear-gradient(135deg, #e67a00, #ffb900)',
+        }}
         className="font-S-CoreDream-500 rounded-xl p-2 lg:p-4"
       >
         <motion.div
