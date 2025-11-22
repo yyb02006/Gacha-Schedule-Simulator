@@ -129,7 +129,11 @@ const LoadingSpinnerContent = ({
             const progressRate = progressRef.current.progressTry / progressRef.current.total;
             const winRate = progressRef.current.success / progressRef.current.progressTry;
             animate(progressMV, safeNumberOrZero(progressRate), { duration: 0.3 });
-            animate(scaleMV, safeNumberOrZero(winRate), { duration: 2 });
+            if (loadingRef.current) {
+              animate(scaleMV, safeNumberOrZero(winRate), { duration: 1.5 });
+            } else {
+              animate(scaleMV, safeNumberOrZero(winRate), { duration: 0.6 });
+            }
 
             if (
               !(
@@ -280,7 +284,7 @@ const LoadingSpinnerContent = ({
       >
         <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
           <defs>
-            <mask id="myMask" maskUnits="userSpaceOnUse">
+            <mask id="innerMask" maskUnits="userSpaceOnUse">
               <rect width="100%" height="100%" fill="white" />
               <rect x="7%" y="7%" width="86%" height="86%" fill="black" />
             </mask>
@@ -297,14 +301,14 @@ const LoadingSpinnerContent = ({
               'radial-gradient(circle at center, #20202000 50%, #20202000 75%, #20202000 100%)',
             transition: { duration: 0.4, delay: 0.2 },
           }}
-          style={{ mask: 'url(#myMask)', WebkitMask: 'url(#myMask)' }}
+          style={{ mask: 'url(#innerMask)', WebkitMask: 'url(#innerMask)' }}
           className="relative flex size-full items-center justify-center p-4"
         />
       </motion.div>
       <motion.div
         variants={toOpacityZero}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+        animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
         exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
         className="absolute h-[200px] w-full max-w-[200px] min-w-[200px]"
       >
@@ -386,7 +390,7 @@ const LoadingSpinnerContent = ({
               textAnchor="middle"
               dominantBaseline="middle"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+              animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
               exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
               fontSize={14}
               fontFamily="S-CoreDream-500, monospace"
@@ -416,7 +420,7 @@ const LoadingSpinnerContent = ({
               textAnchor="middle"
               dominantBaseline="middle"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+              animate={{ opacity: 1, transition: { delay: 0.2, duration: 0.3 } }}
               exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
               fontSize={14}
               fontFamily="S-CoreDream-500, monospace"
@@ -489,7 +493,7 @@ const LoadingSpinnerContent = ({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+                animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
                 exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
                 fontSize={textSize}
                 fontFamily="S-CoreDream-500, monospace"
@@ -507,7 +511,7 @@ const LoadingSpinnerContent = ({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+                animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
                 exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
                 fontSize={textSize}
                 fontFamily="S-CoreDream-500, monospace"
@@ -525,7 +529,7 @@ const LoadingSpinnerContent = ({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+                animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
                 exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
                 fontSize={textSize}
                 fontFamily="S-CoreDream-500, monospace"
@@ -543,7 +547,7 @@ const LoadingSpinnerContent = ({
                 textAnchor="middle"
                 dominantBaseline="middle"
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+                animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
                 exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
                 fontSize={textSize}
                 fontFamily="S-CoreDream-500, monospace"
@@ -560,7 +564,7 @@ const LoadingSpinnerContent = ({
               textAnchor="middle"
               dominantBaseline="middle"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+              animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
               exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
               fontSize={winRateSize}
               fontFamily="S-CoreDream-400, monospace"
@@ -581,7 +585,7 @@ const LoadingSpinnerContent = ({
               textAnchor="middle"
               dominantBaseline="middle"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: 0.8, duration: 0.4 } }}
+              animate={{ opacity: 1, transition: { delay: 0.3, duration: 0.4 } }}
               exit={{ opacity: 0, transition: { delay: 0.3, duration: 0.4 } }}
               fontSize={winRateSize}
               fontFamily="S-CoreDream-400, monospace"
@@ -630,8 +634,6 @@ export default function LoadingSpinner({
   const mountTimeRef = useRef<number | null>(null);
   const loadingRef = useRef(true);
 
-  const testLoadingRef = useRef(true);
-
   useEffect(() => {
     loadingRef.current = isLoading;
     if (!isRunning.current) return;
@@ -677,7 +679,7 @@ export default function LoadingSpinner({
       {visible && (
         <LoadingSpinnerContent
           progressRef={progressRef}
-          loadingRef={testLoadingRef}
+          loadingRef={loadingRef}
           onStopClick={onStopClick}
         />
       )}
