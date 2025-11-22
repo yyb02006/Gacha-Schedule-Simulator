@@ -24,7 +24,7 @@ import {
   cls,
   deriveWorkerSeeds,
   filterLimitArray,
-  getDeviceType,
+  isMobileDevice,
   mergeGachaSimulationResults,
 } from '#/libs/utils';
 import LoadingSpinner from '#/components/LoadingSpinner';
@@ -255,30 +255,16 @@ export type ExtractPayloadFromAction<K extends ActionType> =
 
 const getOptimalWorkerCount = (): { isMobile: boolean; workerCount: number } => {
   const cores = navigator.hardwareConcurrency || 4;
-  const deviceType = getDeviceType();
+  const isMobile = isMobileDevice();
 
-  const isIpadOS =
-    /iPad/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-  switch (deviceType) {
-    case 'mobile': {
-      if (cores <= 6) return { isMobile: true, workerCount: 2 }; // 저사양 모바일
-      return { isMobile: true, workerCount: 3 }; // 고급기 (스냅 8Gen2 / A16)
-    }
-    case 'tablet': {
-      if (isIpadOS) {
-        return { isMobile: true, workerCount: Math.min(Math.ceil(cores * 0.5), 6) };
-      }
-      if (cores <= 6) return { isMobile: true, workerCount: 2 };
-      return { isMobile: true, workerCount: 3 };
-    }
-    default: {
-      if (cores <= 4) return { isMobile: false, workerCount: 2 };
-      if (cores <= 8) return { isMobile: false, workerCount: Math.ceil(cores * 0.75) }; // 6개 정도
-      if (cores <= 12) return { isMobile: false, workerCount: Math.ceil(cores * 0.6) }; // 7~8개
-      return { isMobile: false, workerCount: Math.min(Math.ceil(cores * 0.5), 8) }; // 과도한 병렬 방지
-    }
+  if (isMobile) {
+    if (cores <= 6) return { isMobile: true, workerCount: 2 }; // 저사양 모바일
+    return { isMobile: true, workerCount: 3 }; // 고급기 (스냅 8Gen2 / A16)
+  } else {
+    if (cores <= 4) return { isMobile: false, workerCount: 2 };
+    if (cores <= 8) return { isMobile: false, workerCount: Math.ceil(cores * 0.75) }; // 6개 정도
+    if (cores <= 12) return { isMobile: false, workerCount: Math.ceil(cores * 0.6) }; // 7~8개
+    return { isMobile: false, workerCount: Math.min(Math.ceil(cores * 0.5), 8) }; // 과도한 병렬 방지
   }
 };
 

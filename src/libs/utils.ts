@@ -553,48 +553,26 @@ export function mergeGachaSimulationResults(
 }
 
 /**
- * 디바이스 타입을 모바일 / 태블릿 / 데스크탑으로 구분
+ * 모바일인지 아닌지 판단 후 불리언 반환
  *
- * @returns {"mobile" | "tablet" | "desktop"}
- *
- * 기준:
- * 1. UA 기반 확실한 디바이스 분류
- * 2. iPadOS에서 iPad가 desktop으로 속이려는 UA 문제 해결
- * 3. 화면 크기 fallback 판단 (orientation 대비 길이 기준)
+ * @returns {boolean} 모바일 환경 여부
  */
-export function getDeviceType(): 'mobile' | 'tablet' | 'desktop' {
-  if (typeof window === 'undefined') return 'desktop';
+export function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
 
   const ua = navigator.userAgent.toLowerCase();
 
-  const isAndroid = /android/.test(ua);
-  const isIOS = /iphone|ipod/.test(ua);
-  const isIPad =
-    /ipad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isiPhone = /iphone|ipod/.test(ua);
+  const isAndroidPhone = /android/.test(ua) && /mobile/.test(ua);
+  const isWindowsPhone = /windows phone/.test(ua);
 
-  const isMobileUA = /mobile/.test(ua);
+  // iPadOS (MacIntel + touch)
+  const isIPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
 
-  // ───────────────────────────────────────
-  // 1. 확실한 모바일
-  // ───────────────────────────────────────
-  if (isIOS && !isIPad) return 'mobile';
-  if (isAndroid && isMobileUA) return 'mobile';
+  // 모바일로 취급되는 조건들
+  if (isiPhone || isAndroidPhone || isWindowsPhone || isIPadOS) {
+    return true;
+  }
 
-  // ───────────────────────────────────────
-  // 2. 확실한 태블릿 (iPad / Android Tablet)
-  // ───────────────────────────────────────
-  if (isIPad) return 'tablet';
-  if (isAndroid && !isMobileUA) return 'tablet';
-
-  // ───────────────────────────────────────
-  // 3. Fallback: 화면 크기 기반
-  //    (길이가 768px 이하 = 모바일, 1024px 이하면 태블릿)
-  // ───────────────────────────────────────
-  const minScreen = Math.min(window.innerWidth, window.innerHeight);
-
-  if (minScreen <= 768) return 'mobile';
-  if (minScreen <= 1024) return 'tablet';
-
-  // 나머지는 데스크탑
-  return 'desktop';
+  return false;
 }
