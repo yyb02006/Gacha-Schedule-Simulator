@@ -947,11 +947,30 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
       const { batchGachaGoal, initialResource, isSimpleMode, isTrySim, options }: initialOptions =
         JSON.parse(initialOptions);
       try {
-        setInitialResource(initialResource);
-        setBatchGachaGoal(batchGachaGoal);
-        setIsTrySim(isTrySim);
-        setIsSimpleMode(isSimpleMode);
-        setOptions(options);
+        const isMobile = isMobileDevice();
+        setInitialResource(initialResource > 9999999 ? 9999999 : initialResource);
+        setBatchGachaGoal(
+          ['allFirst', 'allMax', null].includes(batchGachaGoal) ? batchGachaGoal : null,
+        );
+        setIsTrySim(typeof isSimpleMode === 'boolean' ? isSimpleMode : true);
+        setIsSimpleMode(typeof isSimpleMode === 'boolean' ? isSimpleMode : true);
+        setOptions({
+          bannerFailureAction: ['continueExecution', 'interruption'].includes(
+            options.bannerFailureAction,
+          )
+            ? options.bannerFailureAction
+            : 'interruption',
+          showBannerImage:
+            typeof options.showBannerImage === 'boolean' ? options.showBannerImage : true,
+          simulationTry: isMobile
+            ? options.simulationTry > 200000
+              ? 200000
+              : options.simulationTry
+            : options.simulationTry > 1000000
+              ? 1000000
+              : options.simulationTry,
+          probability: { limited: 70, normal: 50 },
+        });
       } catch {
         console.warn('로컬스토리지 데이터 파싱 실패, 기본 옵션 데이터 사용');
       }

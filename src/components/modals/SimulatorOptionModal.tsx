@@ -8,7 +8,7 @@ import { InsetNumberInput } from '#/components/PickupBanner';
 import { AnimatePresence, motion } from 'motion/react';
 import { toOpacityZero } from '#/constants/variants';
 import { initialOptions, SimulationOptions } from '#/components/PickupList';
-import { stringToNumber } from '#/libs/utils';
+import { isMobileDevice, stringToNumber } from '#/libs/utils';
 import ToggleButton from '#/components/buttons/ToggleButton';
 import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 import OverlayScrollbar from '#/components/OverlayScrollbar';
@@ -123,6 +123,8 @@ export default function SimulatorOptionModal({
 }: SimulatorOptionModalProps) {
   const [localOptions, setLocalOptions] = useState<SimulationOptions>(options);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const isMobile = isMobileDevice();
+  const tryLimit = isMobile ? 200000 : 1000000;
 
   const onSaveClick = () => {
     setOptions(localOptions);
@@ -132,9 +134,24 @@ export default function SimulatorOptionModal({
   useLayoutEffect(() => {
     const initialOptions = localStorage.getItem('options');
     if (initialOptions) {
-      const { options }: initialOptions = JSON.parse(initialOptions);
+      const {
+        options: { bannerFailureAction, showBannerImage, simulationTry },
+      }: initialOptions = JSON.parse(initialOptions);
       try {
-        setLocalOptions(options);
+        setLocalOptions({
+          bannerFailureAction: ['continueExecution', 'interruption'].includes(bannerFailureAction)
+            ? bannerFailureAction
+            : 'interruption',
+          showBannerImage: typeof showBannerImage === 'boolean' ? showBannerImage : true,
+          simulationTry: isMobile
+            ? simulationTry > 200000
+              ? 200000
+              : simulationTry
+            : simulationTry > 1000000
+              ? 1000000
+              : simulationTry,
+          probability: { limited: 70, normal: 50 },
+        });
       } catch {
         console.warn('로컬스토리지 데이터 파싱 실패, 기본 로컬 옵션 데이터 사용');
       }
@@ -185,7 +202,7 @@ export default function SimulatorOptionModal({
               onInputBlur={(e, syncLocalValue) => {
                 const { value } = e.currentTarget;
                 const newValue = value.replace(/,/g, '');
-                if (stringToNumber(newValue) <= 1000000) {
+                if (stringToNumber(newValue) <= tryLimit) {
                   setLocalOptions((p) => ({
                     ...p,
                     simulationTry: stringToNumber(newValue),
