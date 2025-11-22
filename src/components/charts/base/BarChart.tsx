@@ -522,7 +522,33 @@ export default function BarChart({
     <div className={cls(height ?? '', 'relative overflow-hidden')}>
       {!loading || (
         <div className="absolute inset-0 flex items-center justify-center rounded-b-lg bg-[#00050] backdrop-blur-sm">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+          <div className="relative flex size-[100px] animate-[spin_1.5s_linear_infinite]">
+            <svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }}>
+              <defs>
+                <mask id="innerMask" maskUnits="userSpaceOnUse">
+                  <rect width="100%" height="100%" fill="white" />
+                  <rect x="10%" y="10%" width="80%" height="80%" fill="black" />
+                </mask>
+              </defs>
+            </svg>
+            <svg width="100%" height="100%">
+              <defs>
+                <radialGradient id="grad1" cx="50%" cy="50%" r="65%">
+                  <stop offset="50%" stopColor="#808080" />
+                  <stop offset="75%" stopColor="#c0c0c0" />
+                  <stop offset="100%" stopColor="#ffffff" />
+                </radialGradient>
+              </defs>
+              <rect
+                mask="url(#innerMask)"
+                x="0%"
+                y="0%"
+                width="100%"
+                height="100%"
+                fill="url(#grad1)"
+              />
+            </svg>
+          </div>
         </div>
       )}
       <Bar
