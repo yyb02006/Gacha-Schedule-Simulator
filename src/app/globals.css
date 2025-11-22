@@ -12,6 +12,12 @@
   background: #ffd044;
 }
 
+.simplebar-content {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -33,6 +39,7 @@
   --font-S-CoreDream-700: 'S-CoreDream-700', sans-serif;
   --text-standard: 0.9375rem;
   --text-standard--line-height: calc(1.375 / 0.9375);
+  --breakpoint-chart-sm: 55rem;
 }
 
 @media (prefers-color-scheme: dark) {
