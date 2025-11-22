@@ -30,13 +30,13 @@ const FloatingActionBar = ({
   result,
   isOpen,
   chartRefs,
-  modalRef,
+  scrollRef,
   handleToTop,
 }: {
   result: GachaSimulationMergedResult | null;
   isOpen: boolean;
   chartRefs: RefObject<HTMLDivElement[]>;
-  modalRef: RefObject<HTMLDivElement | null>;
+  scrollRef: RefObject<HTMLDivElement | null>;
   handleToTop: () => void;
 }) => {
   const [currentBanner, setCurrentBanner] = useState<HTMLDivElement | undefined>(undefined);
@@ -47,6 +47,7 @@ const FloatingActionBar = ({
 
   useEffect(() => {
     if (!result || !isOpen) return;
+    const chart = chartRefs.current;
     const observer = new IntersectionObserver(
       (entries) => {
         const visibleCharts = entries
@@ -61,10 +62,10 @@ const FloatingActionBar = ({
       { threshold: 0.5 }, // 화면에 50% 이상 보여야 진입으로 간주
     );
 
-    chartRefs.current.forEach((el) => el && observer.observe(el));
+    chart.forEach((el) => el && observer.observe(el));
 
     return () => {
-      chartRefs.current.forEach((el) => el && observer.unobserve(el));
+      chart.forEach((el) => el && observer.unobserve(el));
     };
   }, [isOpen, result, chartRefs]);
 
@@ -89,7 +90,7 @@ const FloatingActionBar = ({
   }, [isListOpen, currentBanner?.dataset.id]);
 
   return (
-    <div className="fixed bottom-6 left-1/2 flex w-[400px] -translate-x-1/2 gap-2 text-stone-50">
+    <div className="fixed bottom-6 left-1/2 flex w-[400px] max-w-[calc(100vw-32px)] -translate-x-1/2 gap-2 text-stone-50">
       <ToTopButton handleToTop={handleToTop} />
       <div className="relative flex flex-1 items-center justify-between self-stretch rounded-xl bg-[#202020] pl-4 text-base shadow-[4px_4px_12px_#101010,-5px_-4px_10px_#303030]">
         {currentBanner ? currentBanner.dataset.name : '시뮬레이션 결과'}
@@ -113,7 +114,7 @@ const FloatingActionBar = ({
               {chartRefs.current.map((banner, index) => (
                 <button
                   onClick={() => {
-                    modalRef.current?.scrollTo({
+                    scrollRef.current?.scrollTo({
                       top: Math.max(banner.offsetTop - 32, 0),
                       behavior: 'smooth',
                     });
@@ -145,10 +146,19 @@ const FloatingActionBar = ({
 export default function SimulationResultModal({ isOpen, onClose, result }: SettingsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<HTMLDivElement[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const chartHeight = 'h-[320px] chart-sm:h-[400px]';
 
   return result ? (
-    <Modal isOpen={isOpen} onClose={onClose} ref={modalRef} backdropBlur>
-      <section className="mb-[120px] w-full max-w-[1280px] space-y-6 rounded-xl bg-[#202020] p-6">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      ref={modalRef}
+      scrollRef={scrollRef}
+      padding="lg:p-12"
+      backdropBlur
+    >
+      <section className="w-full max-w-[1280px] space-y-4 bg-[#202020] px-4 pt-6 pb-[120px] lg:mb-[120px] lg:space-y-6 lg:rounded-xl lg:p-6">
         <div className="flex items-center justify-between">
           <motion.div
             variants={toOpacityZero}
@@ -159,9 +169,11 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
           >
             <span className="text-amber-500">시뮬레이션</span> 결과
           </motion.div>
-          <CancelButton handleCancel={onClose} />
+          <div className="fixed right-4 z-[1000] lg:relative lg:right-auto lg:z-auto">
+            <CancelButton handleCancel={onClose} />
+          </div>
         </div>
-        <div className="grid h-fit w-full grid-cols-2 items-stretch gap-6">
+        <div className="chart-sm:grid chart-sm:grid-cols-2 chart-sm:gap-6 chart-sm:space-y-0 h-fit w-full items-stretch space-y-6">
           <SimulationResult
             ref={(el) => {
               if (!el) return;
@@ -190,7 +202,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                 id="3"
                 name="가챠배너 도달 / 중단 확률"
                 result={result}
-                chartHeight="h-[400px]"
+                chartHeight={chartHeight}
               />
               <BannerWinRate
                 ref={(el) => {
@@ -200,7 +212,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                 id="4"
                 name="배너별 성공 / 실패 비율"
                 result={result}
-                chartHeight="h-[400px]"
+                chartHeight={chartHeight}
               />
             </>
           )}
@@ -212,7 +224,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
             id="5"
             name="배너별 성공 시 기대값"
             result={result}
-            chartHeight="h-[400px]"
+            chartHeight={chartHeight}
           />
           {result.total.isTrySim ? (
             <ExpectedCumulativeConsumption
@@ -223,7 +235,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               id="6"
               name="평균 누적 소모 합성옥"
               result={result}
-              chartHeight="h-[400px]"
+              chartHeight={chartHeight}
             />
           ) : (
             <BannerEntryCurrency
@@ -234,10 +246,10 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
               id="7"
               name="배너별 진입 시 평균 재화"
               result={result}
-              chartHeight="h-[400px]"
+              chartHeight={chartHeight}
             />
           )}
-          {/* <BannerPreEVSuccess result={result} chartHeight="h-[400px]" /> */}
+          {/* <BannerPreEVSuccess result={result} chartHeight={chartHeight} /> */}
           <BannerEVShareRate
             ref={(el) => {
               if (!el) return;
@@ -278,7 +290,7 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
                 bannerResult={bannerResult}
                 isTrySim={result.total.isTrySim}
                 simulationTry={result.total.simulationTry}
-                chartHeight="h-[400px]"
+                chartHeight={chartHeight}
               />
             ))
           ) : (
@@ -291,10 +303,10 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
       </section>
       <FloatingActionBar
         handleToTop={() => {
-          modalRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+          scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
         }}
         chartRefs={chartRefs}
-        modalRef={modalRef}
+        scrollRef={scrollRef}
         isOpen={isOpen}
         result={result}
       />

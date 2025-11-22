@@ -12,6 +12,7 @@ import { useSyncedState } from '#/hooks/useSyncedState';
 import { GachaType, OperatorRarity, OperatorType } from '#/types/types';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRef, useState } from 'react';
+import SimpleBar from 'simplebar-react';
 
 const Help = ({ onClose }: { onClose: () => void }) => {
   const isMouseDownOnTarget = useRef<boolean>(false);
@@ -41,72 +42,76 @@ const Help = ({ onClose }: { onClose: () => void }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed top-0 left-0 z-1000 flex size-full justify-center overflow-auto bg-transparent lg:items-center"
+      className="fixed top-0 left-0 z-1000 size-full backdrop-blur-sm"
     >
-      <div className="h-fit w-full max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-20 lg:rounded-lg lg:py-6">
-        <div className="flex items-center justify-between">
-          <h1 className="font-S-CoreDream-500 text-xl">
-            천장 오퍼레이터 <span className="text-red-400">결정 규칙</span>
-          </h1>
-          <CancelButton
-            handleCancel={() => {
-              onClose();
-            }}
-          />
+      <SimpleBar className="h-full min-h-screen">
+        <div className="flex w-full justify-center">
+          <div className="h-fit w-full max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] lg:rounded-lg lg:py-6">
+            <div className="flex items-center justify-between">
+              <h1 className="font-S-CoreDream-500 text-xl">
+                천장 오퍼레이터 <span className="text-red-400">결정 규칙</span>
+              </h1>
+              <CancelButton
+                handleCancel={() => {
+                  onClose();
+                }}
+              />
+            </div>
+            <div className="text-standard font-S-CoreDream-300 space-y-6">
+              <div className="space-y-2">
+                <div className="flex gap-1">
+                  <Badge {...bannerBadgeProps.collab.props} animation={false} />
+                  <Badge {...bannerBadgeProps.limited.props} animation={false} />
+                </div>
+                <div className="space-y-2 leading-7">
+                  <div>
+                    <span className="font-S-CoreDream-400 text-amber-400">기본옵션</span>에서는 목표
+                    6성이 존재하면 내부 로직으로 천장을 계산하게 됩니다.
+                  </div>
+                  <div>
+                    <span className="font-S-CoreDream-400 text-sky-500">세부옵션</span>에서는 한정
+                    6성 오퍼레이터가 있을 시 해당 오퍼레이터가 천장 보상이 됩니다.
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex gap-1">
+                  <Badge {...bannerBadgeProps.single.props} animation={false} />
+                </div>
+                <div className="space-y-2 leading-7">
+                  <div>
+                    <span className="font-S-CoreDream-400 text-amber-400">기본옵션</span>에서는 목표
+                    6성이 존재하면 내부 로직으로 천장을 계산하게 됩니다.
+                  </div>
+                  <div>
+                    <span className="font-S-CoreDream-400 text-sky-500">세부옵션</span>에서는 6성
+                    오퍼레이터가 있을 시 해당 오퍼레이터가 천장 보상이 됩니다.
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                <div className="flex gap-1">
+                  <Badge {...bannerBadgeProps.rotation.props} animation={false} />
+                </div>
+                <div className="space-y-2.5 leading-7">
+                  <div>
+                    로테이션 배너의 천장이 150차 이상과 300차 이상에서 두 번이므로 천장은{' '}
+                    <span className="text-violet-400">2명</span>입니다.
+                  </div>
+                  <div>
+                    <span className="font-S-CoreDream-400 text-amber-400">기본옵션</span>에서는 목표
+                    6성이 존재하면 2명까지 내부 로직으로 천장을 계산하게 됩니다.
+                  </div>
+                  <div>
+                    <span className="font-S-CoreDream-400 text-sky-500">세부옵션</span>에서는 6성
+                    오퍼레이터가 있을 시 2명까지 해당 오퍼레이터가 천장 보상이 됩니다.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="text-standard font-S-CoreDream-300 space-y-6">
-          <div className="space-y-2">
-            <div className="flex gap-1">
-              <Badge {...bannerBadgeProps.collab.props} animation={false} />
-              <Badge {...bannerBadgeProps.limited.props} animation={false} />
-            </div>
-            <div className="space-y-2 leading-7">
-              <div>
-                <span className="font-S-CoreDream-400 text-amber-400">기본옵션</span>에서는 목표
-                6성이 존재하면 내부 로직으로 천장을 계산하게 됩니다.
-              </div>
-              <div>
-                <span className="font-S-CoreDream-400 text-sky-500">세부옵션</span>에서는 한정 6성
-                오퍼레이터가 있을 시 해당 오퍼레이터가 천장 보상이 됩니다.
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex gap-1">
-              <Badge {...bannerBadgeProps.single.props} animation={false} />
-            </div>
-            <div className="space-y-2 leading-7">
-              <div>
-                <span className="font-S-CoreDream-400 text-amber-400">기본옵션</span>에서는 목표
-                6성이 존재하면 내부 로직으로 천장을 계산하게 됩니다.
-              </div>
-              <div>
-                <span className="font-S-CoreDream-400 text-sky-500">세부옵션</span>에서는 6성
-                오퍼레이터가 있을 시 해당 오퍼레이터가 천장 보상이 됩니다.
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2.5">
-            <div className="flex gap-1">
-              <Badge {...bannerBadgeProps.rotation.props} animation={false} />
-            </div>
-            <div className="space-y-2.5 leading-7">
-              <div>
-                로테이션 배너의 천장이 150차 이상과 300차 이상에서 두 번이므로 천장은{' '}
-                <span className="text-violet-400">2명</span>입니다.
-              </div>
-              <div>
-                <span className="font-S-CoreDream-400 text-amber-400">기본옵션</span>에서는 목표
-                6성이 존재하면 2명까지 내부 로직으로 천장을 계산하게 됩니다.
-              </div>
-              <div>
-                <span className="font-S-CoreDream-400 text-sky-500">세부옵션</span>에서는 6성
-                오퍼레이터가 있을 시 2명까지 해당 오퍼레이터가 천장 보상이 됩니다.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </SimpleBar>
     </motion.div>
   );
 };
