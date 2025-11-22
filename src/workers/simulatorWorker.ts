@@ -1,4 +1,5 @@
 import { BannerFailureAction, Dummy, WorkerInput } from '#/components/PickupList';
+import { rarityStrings } from '#/constants/variables';
 import { createRNG, safeNumberOrZero } from '#/libs/utils';
 import {
   BatchGachaGoal,
@@ -885,7 +886,6 @@ const gachaRateSimulate = ({
       }
       currentBanner.bannerTotalGachaRuns += result.bannerGachaRuns;
       simulationResult.total.totalGachaRuns += result.bannerGachaRuns;
-      const rarityStrings = ['sixth', 'fifth', 'fourth'] as const;
       for (const rarityString of rarityStrings) {
         const obtainedTypes = ['totalObtained', 'pickupObtained', 'targetObtained'] as const;
         for (const obtainedType of obtainedTypes) {
