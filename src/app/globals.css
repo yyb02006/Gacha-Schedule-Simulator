@@ -1,21 +1,19 @@
 @import 'tailwindcss';
-@import 'simplebar-react/dist/simplebar.min.css';
+@import 'overlayscrollbars/overlayscrollbars.css';
 
-.simplebar-track.simplebar-vertical .simplebar-scrollbar::before {
-  background: #ffb900;
-  opacity: 1 !important;
-  right: 3 !important;
-  left: 3 !important;
+.os-theme-custom {
+  --os-handle-bg: #ffb900 !important;
+  --os-track-bg: transparent !important;
+  --os-size: 6px !important;
+  --os-handle-border-radius: 1000px !important;
+  --os-handle-bg-active: #fee685 !important;
+  --os-handle-bg-hover: #fee685 !important;
 }
 
-.simplebar-track.simplebar-vertical .simplebar-scrollbar.simplebar-hover::before {
-  background: #ffd044;
-}
-
-.simplebar-content {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
+.os-theme-custom .os-scrollbar-handle {
+  right: 2px;
+  top: 2px;
+  bottom: 2px;
 }
 
 :root {
