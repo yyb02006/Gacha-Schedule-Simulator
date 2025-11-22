@@ -6,21 +6,27 @@ import TotalGachaResult from '#/components/charts/TotalGachaResult';
 import SimulationResultModal from '#/components/modals/SimulationResultModal';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
-import { cls } from '#/libs/utils';
+import { cls, safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 
 export default function SummaryBanner({ result }: { result: GachaSimulationMergedResult | null }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
-    <div className="hidden lg:block lg:w-[480px] lg:space-y-6">
+    <div
+      className={cls(
+        'lg:static lg:block lg:w-[240px] lg:flex-1 lg:space-y-6 xl:w-[480px]',
+        result ? 'fixed bottom-4 w-[calc(100%-32px)]' : 'hidden',
+      )}
+    >
       <motion.div
         variants={cardVariants}
         whileInView="idle"
         viewport={{ once: true, amount: 0.5 }}
         transition={{ ...cardTransition, ease: 'easeIn' }}
         initial="exit"
-        className="font-S-CoreDream-500 w-[480px] rounded-xl p-4"
+        custom={{ background: 'linear-gradient(135deg, #e67a00, #ffb900)' }}
+        className="font-S-CoreDream-500 rounded-xl p-2 lg:p-4"
       >
         <motion.div
           variants={toOpacityZero}
@@ -29,7 +35,19 @@ export default function SummaryBanner({ result }: { result: GachaSimulationMerge
           initial="exit"
           className="flex items-center justify-between text-lg"
         >
-          <div>
+          <div className="text-lg lg:hidden">
+            <span>시뮬레이션 성공률 : </span>
+            {result ? (
+              <span className="font-S-CoreDream-700 text-[#404040]">
+                {truncateToDecimals(
+                  safeNumberOrZero(result?.total.simulationSuccess / result?.total.simulationTry) *
+                    100,
+                )}
+                %
+              </span>
+            ) : null}
+          </div>
+          <div className="hidden lg:block">
             <span
               className={cls(result?.total.isTrySim === false ? 'text-red-400' : 'text-amber-400')}
             >
@@ -41,6 +59,8 @@ export default function SummaryBanner({ result }: { result: GachaSimulationMerge
             <TypeSelectionButton
               name="자세히"
               hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+              shadow="2px 2px 6px #101010, -2px -2px 5px #303030"
+              innerShadow="inset 3px 3px 6px #bb4d00, inset -3px -3px 6px #ffb900"
               onTypeClick={() => {
                 setIsModalOpen(true);
               }}
@@ -58,17 +78,19 @@ export default function SummaryBanner({ result }: { result: GachaSimulationMerge
           </div>
         </motion.div>
       </motion.div>
-      <SimulationResult result={result} />
-      <TotalGachaResult result={result} />
-      <BannerWinRate result={result} enableBrush={false} chartHeight="h-[240px]" />
-      <BannerEVCounts result={result} enableBrush={false} chartHeight="h-[240px]" />
-      <SimulationResultModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-        }}
-        result={result}
-      />
+      <div className="hidden space-y-6 lg:block">
+        <SimulationResult result={result} />
+        <TotalGachaResult result={result} />
+        <BannerWinRate result={result} enableBrush={false} chartHeight="h-[240px]" />
+        <BannerEVCounts result={result} enableBrush={false} chartHeight="h-[240px]" />
+        <SimulationResultModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
+          result={result}
+        />
+      </div>
     </div>
   );
 }
