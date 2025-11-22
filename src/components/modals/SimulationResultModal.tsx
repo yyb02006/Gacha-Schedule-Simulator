@@ -98,10 +98,10 @@ const FloatingActionBar = ({
           onClick={() => {
             setIsListOpen((p) => !p);
           }}
-          className="flex size-full cursor-pointer items-center justify-between"
+          className="group flex size-full cursor-pointer items-center justify-between"
         >
           {currentBanner ? currentBanner.dataset.name : '시뮬레이션 결과'}
-          <div className="aspect-square h-full p-[6px] hover:text-amber-500">
+          <div className="aspect-square h-full p-[6px] group-hover:text-amber-500">
             {isListOpen ? (
               <ChevronDown className="size-full" />
             ) : (
