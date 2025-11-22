@@ -273,7 +273,6 @@ export default function BarChart({
           autoSkip: false,
           font: { family: 'S-CoreDream-300', size: 11 },
           color: (ctx) => {
-            // console.log(ctx, hoveredIndexRef.current);
             return ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666';
           },
           callback: function (this, value, index) {
