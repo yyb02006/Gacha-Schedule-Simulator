@@ -9,18 +9,18 @@ export function useScreenWidth() {
     width: number;
   }>({
     breakPoint: '2xl',
-    width: 1980,
+    width: 1920,
   });
 
   useEffect(() => {
     const getBreakPoint = (): { breakPoint: BreakPointLabel; width: number } => {
-      const minScreen = Math.min(window.innerWidth, window.innerHeight);
-      if (minScreen >= 1536) return { breakPoint: '2xl', width: minScreen };
-      if (minScreen >= 1280) return { breakPoint: 'xl', width: minScreen };
-      if (minScreen >= 1024) return { breakPoint: 'lg', width: minScreen };
-      if (minScreen >= 768) return { breakPoint: 'md', width: minScreen };
-      if (minScreen >= 640) return { breakPoint: 'sm', width: minScreen };
-      return { breakPoint: 'xs', width: minScreen };
+      const { innerWidth } = window;
+      if (innerWidth >= 1536) return { breakPoint: '2xl', width: innerWidth };
+      if (innerWidth >= 1280) return { breakPoint: 'xl', width: innerWidth };
+      if (innerWidth >= 1024) return { breakPoint: 'lg', width: innerWidth };
+      if (innerWidth >= 768) return { breakPoint: 'md', width: innerWidth };
+      if (innerWidth >= 640) return { breakPoint: 'sm', width: innerWidth };
+      return { breakPoint: 'xs', width: innerWidth };
     };
 
     const handle = () => setBreakpoint(getBreakPoint());
