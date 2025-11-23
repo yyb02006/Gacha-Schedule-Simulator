@@ -36,8 +36,6 @@ export type SizeClass = `size-[${number}px]` | `size-${number}` | `size-full`;
 
 export type ElementOfArray<Arr> = Arr extends (infer E)[] ? E : never;
 
-export type PickupDataPresets = (Dummy & { deactivationDate: string })[];
-
 export type BatchGachaGoal = 'allFirst' | 'allMax' | null;
 
 export interface ProgressRefProps {
@@ -47,3 +45,12 @@ export interface ProgressRefProps {
   success: number;
   results: GachaSimulationResult[];
 }
+
+export type DTOOptions = {
+  initialResource: number;
+  batchGachaGoal: 'allFirst' | 'allMax' | null;
+  isTrySim: boolean;
+  isSimpleMode: boolean;
+};
+
+export type DTO = { pickupDatas: Dummy[]; optionDatas: DTOOptions };
