@@ -70,13 +70,13 @@ const Help = ({ onClose }: { onClose: () => void }) => {
                 <div className="space-y-2 leading-7">
                   <div>
                     <span className="text-amber-400">PC환경</span>에서의 최대값은{' '}
-                    <span className="text-amber-400">500,000회</span>이며 배너 최대 갯수인 20개에서
-                    실행할 경우 <span className="text-red-400">최장 1분 이상</span>
+                    <span className="text-amber-400">1,000,000회</span>이며 배너 최대 갯수인
+                    20개에서 실행할 경우 <span className="text-red-400">최장 1분 이상</span>
                     까지 시뮬레이션 시간이 소모될 수 있습니다.
                   </div>
                   <div>
                     <span className="font-S-CoreDream-500 text-sky-500">모바일 환경</span>의 경우
-                    최대 가챠 횟수가 제한될 수 있으며, PC환경의 10% ~ 20% 성능을 기준으로 합니다.
+                    최대 가챠 횟수가 제한될 수 있으며, 200,000회를 최대값으로 합니다.
                   </div>
                 </div>
               </div>
