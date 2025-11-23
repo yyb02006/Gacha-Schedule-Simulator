@@ -4,7 +4,7 @@ import DiamondButton from '#/components/buttons/DiamondButton';
 import { useIsMount } from '#/hooks/useIsMount';
 import { cls } from '#/libs/utils';
 import { motion, Variants } from 'motion/react';
-import { MouseEventHandler, useState } from 'react';
+import { Dispatch, MouseEventHandler, RefObject, SetStateAction, useEffect, useState } from 'react';
 import Add from '#/icons/Add.svg';
 
 const addShadowVariants: Variants = {
@@ -47,6 +47,7 @@ const shaking45Variants: Variants = {
 
 interface AddButtonProps {
   onAddClick: MouseEventHandler<HTMLDivElement>;
+  isShakingRef?: RefObject<Dispatch<SetStateAction<boolean>> | null>;
   diamondCustom?: { size?: 'small' | 'default'; boxShadow?: string; from?: string; to?: string };
   addCustom?: { from: string; to: string };
   isOtherElHover?: boolean;
@@ -55,6 +56,7 @@ interface AddButtonProps {
 
 export default function AddButton({
   onAddClick,
+  isShakingRef,
   diamondCustom,
   addCustom,
   isOtherElHover,
@@ -69,12 +71,24 @@ export default function AddButton({
     size: diamondCustom?.size || 'default',
     ...diamondCustom,
   };
+  useEffect(() => {
+    if (isShakingRef) {
+      isShakingRef.current = setIsShaking;
+    }
+  }, [isShakingRef]);
+
   return (
     <motion.div
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
       onClick={(e) => {
-        if (isAddPrevent) setIsShaking(true);
+        setIsHover(true);
+        setTimeout(() => {
+          setIsHover(false);
+        }, 500);
+        if (isAddPrevent) {
+          setIsShaking(true);
+        }
         if (isShaking || isAddPrevent) return;
         onAddClick(e);
       }}

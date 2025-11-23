@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
 import AddButton from '#/components/buttons/AddButton';
@@ -13,6 +13,7 @@ export default function AddBannerCard({
   isAddPrevent: boolean;
 }) {
   const [isBannerAddHover, setIsBannerAddHover] = useState(false);
+  const isShakingRef = useRef<Dispatch<SetStateAction<boolean>>>(null);
   const preventGradient = { from: '#bd1b36', to: '#ff637e' };
   const baseDiamondCustom = {
     boxShadow: isAddPrevent
@@ -40,7 +41,13 @@ export default function AddBannerCard({
       animate="idle"
       transition={cardTransition}
       onClick={() => {
-        if (isAddPrevent) return;
+        setIsBannerAddHover(true);
+        setTimeout(() => {
+          setIsBannerAddHover(false);
+        }, 500);
+        if (isAddPrevent) {
+          return isShakingRef.current && isShakingRef.current(true);
+        }
         openModal();
       }}
       className="flex cursor-pointer items-center justify-center gap-x-12 overflow-hidden rounded-xl py-6 lg:gap-x-24 lg:py-8"
@@ -56,6 +63,7 @@ export default function AddBannerCard({
       </motion.div>
       <AddButton
         onAddClick={() => {}}
+        isShakingRef={isShakingRef}
         isOtherElHover={isBannerAddHover}
         diamondCustom={
           isAddPrevent ? { ...baseDiamondCustom, ...preventGradient } : { ...baseDiamondCustom }

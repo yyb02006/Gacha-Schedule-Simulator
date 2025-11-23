@@ -36,7 +36,13 @@ export default function PlayButton({
     <motion.div
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      onClick={onPlayClick}
+      onClick={(e) => {
+        setIsHover(true);
+        setTimeout(() => {
+          setIsHover(false);
+        }, 500);
+        onPlayClick(e);
+      }}
       className="relative flex size-18 rotate-45 items-center justify-center"
     >
       <DiamondButton isHover={isHover} initialDelay={initialDelay} isMount={isMount}>

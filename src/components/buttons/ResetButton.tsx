@@ -36,7 +36,13 @@ export default function ResetButton({
     <motion.div
       onHoverStart={() => setIsHover(true)}
       onHoverEnd={() => setIsHover(false)}
-      onClick={onResetClick}
+      onClick={(e) => {
+        setIsHover(true);
+        setTimeout(() => {
+          setIsHover(false);
+        }, 500);
+        onResetClick(e);
+      }}
       className="relative flex size-18 rotate-45 items-center justify-center"
     >
       <DiamondButton isHover={isHover} initialDelay={initialDelay} isMount={isMount}>
