@@ -121,6 +121,8 @@ export const InsetNumberInput = ({
   onInputBlur,
   currentValue,
   name,
+  isSeedNull,
+  useLocaleString = true,
   fullSize = '',
   isMaxAttepmts,
   pattern = '[0-9]*',
@@ -137,6 +139,8 @@ export const InsetNumberInput = ({
   onInputBlur: onInsetNumberInputBlur;
   currentValue: string;
   name: ReactNode;
+  isSeedNull?: boolean;
+  useLocaleString?: boolean;
   fullSize?: string;
   isMaxAttepmts?: boolean;
   pattern?: string;
@@ -150,11 +154,13 @@ export const InsetNumberInput = ({
   animate?: boolean;
 }) => {
   const [localValue, setLocalValue] = useSyncedState(currentValue);
-  const isInfinity = isMaxAttepmts && currentValue === '9999' && localValue === '9999';
-  const firstSixthTry = currentValue === '0' && localValue === '0' && isFirstSixthTry;
-  /*   const isParentPresent = usePresenceData();
-  const preventedTransition = { duration: 0, delay: 0 };
-  const preventTransition = immediateExit && isParentPresent; */
+  const isInfinity =
+    isMaxAttepmts && currentValue === '9999' && localValue === '9999' && !isFirstSixthTry;
+  const firstSixthTry =
+    ((currentValue === '0' && localValue === '0') ||
+      (currentValue === '9999' && localValue === '9999')) &&
+    isFirstSixthTry;
+  const seedNull = currentValue === '' && localValue === '' && isSeedNull;
 
   return (
     <div className={cls('flex items-center gap-2 whitespace-nowrap', fullSize)}>
@@ -194,6 +200,9 @@ export const InsetNumberInput = ({
               첫 6성
             </div>
           )}
+          {showAttemptsSign && seedNull && (
+            <div className="absolute right-0 flex size-full items-center justify-center">-</div>
+          )}
           <input
             type="text"
             inputMode="numeric"
@@ -205,6 +214,7 @@ export const InsetNumberInput = ({
             }}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               const { value } = e.currentTarget;
+
               const newValue = value.replace(/,/g, '');
               const numberString = normalizeNumberString(newValue);
               if (numberString === undefined) return;
@@ -224,9 +234,11 @@ export const InsetNumberInput = ({
             max={max}
             maxLength={maxLength}
             value={
-              showAttemptsSign && (isInfinity || firstSixthTry)
+              showAttemptsSign && (isInfinity || firstSixthTry || seedNull)
                 ? ''
-                : stringToNumber(localValue.replace(/,/g, '')).toLocaleString()
+                : useLocaleString
+                  ? stringToNumber(localValue.replace(/,/g, '')).toLocaleString()
+                  : stringToNumber(localValue.replace(/,/g, '')).toString()
             }
           />
         </motion.div>
@@ -490,11 +502,12 @@ const SimplePreInfoField = ({
     <div className="font-S-CoreDream-400 lg:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex flex-wrap justify-between gap-x-6 gap-y-3">
         <div className="flex flex-wrap gap-x-10 gap-y-3">
-          <div className="flex gap-x-3">
+          <div className="flex w-full gap-x-3 lg:w-auto">
             <InsetNumberInput
               name="픽업 6성"
               className="text-orange-400"
               inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -513,6 +526,7 @@ const SimplePreInfoField = ({
               name="목표 6성"
               className="text-orange-400"
               inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -528,11 +542,12 @@ const SimplePreInfoField = ({
               max={targetLimit['sixth']}
             />
           </div>
-          <div className="flex gap-x-3">
+          <div className="flex w-full gap-x-3 lg:w-auto">
             <InsetNumberInput
               name="픽업 5성"
               className="text-amber-400"
               inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -551,6 +566,7 @@ const SimplePreInfoField = ({
               name="목표 5성"
               className="text-amber-400"
               inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -566,11 +582,12 @@ const SimplePreInfoField = ({
               max={targetLimit['fifth']}
             />
           </div>
-          <div className="flex gap-x-3">
+          <div className="flex w-full gap-x-3 lg:w-auto">
             <InsetNumberInput
               name="픽업 4성"
               className="text-sky-500"
               inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -589,6 +606,7 @@ const SimplePreInfoField = ({
               name="목표 4성"
               className="text-sky-500"
               inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
               onInputBlur={(e, syncLocalValue) => {
                 const count = stringToNumber(e.currentTarget.value);
                 const hasNoTargetOperators =
@@ -662,7 +680,7 @@ const PreInfoField = ({
   return (
     <div className="font-S-CoreDream-400 lg:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
       <div className="flex w-full flex-wrap justify-between gap-x-6 gap-y-3">
-        <div className="flex flex-wrap gap-x-6 gap-y-3">
+        <div className="flex flex-wrap gap-x-6 gap-y-3 sm:w-full sm:flex-nowrap lg:w-auto">
           <MaxAttempts
             maxGachaAttempts={maxGachaAttempts.toString()}
             onInputBlur={(e) => {
@@ -686,7 +704,7 @@ const PreInfoField = ({
             isFirstSixthTry={firstSixthTry}
           />
         </div>
-        <div className="mt-2 text-base lg:hidden">
+        <div className="mt-2 text-base sm:hidden">
           배너 총 <span className="text-amber-400">픽업</span> 수
         </div>
         <div className="flex w-full gap-x-6 gap-y-3 lg:w-auto lg:gap-x-6">
@@ -699,6 +717,7 @@ const PreInfoField = ({
             }
             className="text-orange-400"
             inputWidth="w-full lg:w-8"
+            fullSize="w-full"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -720,6 +739,7 @@ const PreInfoField = ({
             }
             className="text-amber-400"
             inputWidth="w-full lg:w-8"
+            fullSize="w-full"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -741,6 +761,7 @@ const PreInfoField = ({
             }
             className="text-purple-400"
             inputWidth="w-full lg:w-8"
+            fullSize="w-full"
             onInputBlur={(e, syncLocalValue) => {
               const count = stringToNumber(e.currentTarget.value);
               const hasNoTargetOperators =
@@ -1222,12 +1243,12 @@ export default function PickupBanner({
                   updateFirstSixthTry={updateFirstSixthTry}
                 />
                 <div className="space-y-3">
-                  <div className="font-S-CoreDream-500 flex flex-wrap justify-between gap-x-6 gap-y-4 text-xl">
-                    <span className="order-2 py-1 whitespace-nowrap lg:order-1">
+                  <div className="font-S-CoreDream-500 flex-wrap justify-between gap-x-6 gap-y-4 text-xl sm:flex">
+                    <span className="hidden whitespace-nowrap sm:inline">
                       <span className="text-amber-400">목표</span> 픽업 목록
                     </span>
                     {isTrySim || (
-                      <div className="order-1 flex flex-1 items-center justify-end gap-x-3 text-sm lg:order-2 lg:flex-initial lg:justify-start">
+                      <div className="flex flex-1 items-center justify-end gap-x-3 text-sm lg:flex-initial lg:justify-start">
                         <InsetNumberInput
                           name="추가재화"
                           pattern={LOCALE_NUMBER_PATTERN.source}
@@ -1253,6 +1274,9 @@ export default function PickupBanner({
                         </InsetNumberInput>
                       </div>
                     )}
+                    <div className="mt-4 sm:hidden">
+                      <span className="text-amber-400">목표</span> 픽업 목록
+                    </div>
                   </div>
                   <div className="space-y-8 lg:space-y-4">
                     {operators.map((operator) => {
