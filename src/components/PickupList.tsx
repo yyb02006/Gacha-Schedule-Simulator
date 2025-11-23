@@ -2,7 +2,7 @@
 
 import SummaryBanner from '#/components/SummaryBanner';
 import { AnimatePresence } from 'motion/react';
-import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
@@ -10,6 +10,7 @@ import PickupBanner from '#/components/PickupBanner';
 import { useModal } from '#/hooks/useModal';
 import {
   BatchGachaGoal,
+  DTO,
   GachaType,
   OperatorRarity,
   OperatorRarityForString,
@@ -26,11 +27,17 @@ import {
   filterLimitArray,
   isMobileDevice,
   mergeGachaSimulationResults,
+  validateOptionDatas,
+  validatePickupDatas,
 } from '#/libs/utils';
 import LoadingSpinner from '#/components/LoadingSpinner';
 import { useAlert } from '#/hooks/useAlert';
 import ResetAlert from '#/components/modals/ResetAlert';
 import ToTopButton from '#/components/buttons/ToTopButton';
+import { importPickupData } from '#/components/buttons/ImportDatas';
+import DragIndicator from '#/components/modals/DragIndicator';
+import { exportPickupData } from '#/components/buttons/ExportDatas';
+import { v4 } from 'uuid';
 
 export type Operator = {
   operatorId: string;
@@ -62,6 +69,7 @@ export interface Dummy {
   };
   additionalResource: { simpleMode: number; extendedMode: number };
   active: boolean;
+  expiration: string | null;
 }
 
 interface ObtainedStatistics {
@@ -123,6 +131,7 @@ export interface GachaSimulationMergedResult {
     bannerFailureAction: BannerFailureAction;
     statistics: Record<OperatorRarityForString, ObtainedStatistics>;
     seeds: number[];
+    baseSeed: number;
   };
   perBanner: BannerResult[];
 }
@@ -152,6 +161,7 @@ export type PickupDatasAction =
         gachaType: GachaType;
         pickupOpersCount: { sixth: number; fifth: number; fourth: number };
         targetOpersCount: { sixth: number; fifth: number; fourth: number };
+        expiration: string | null;
       };
     }
   | {
@@ -302,8 +312,8 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       if (pickupDatas.length > 20) {
         return pickupDatas;
       }
-      const { gachaType, pickupOpersCount, targetOpersCount } = action.payload;
-      const pickupChance = gachaType === 'limited' || gachaType === 'collab' ? 70 : 50;
+      const { gachaType, pickupOpersCount, targetOpersCount, expiration } = action.payload;
+      const pickupChance = gachaType === 'limited' ? 70 : 50;
       const isSinglePityBanner =
         gachaType === 'collab' || gachaType === 'limited' || gachaType === 'single';
       const isDoublePityBanner = gachaType === 'rotation';
@@ -312,7 +322,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           { length: targetOpersCount.sixth },
           (_, index) =>
             ({
-              operatorId: crypto.randomUUID(),
+              operatorId: v4(),
               currentQty: 0,
               name: `오퍼레이터 ${index + 1}`,
               operatorType:
@@ -331,7 +341,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           { length: pickupOpersCount.fifth },
           (_, index) =>
             ({
-              operatorId: crypto.randomUUID(),
+              operatorId: v4(),
               currentQty: 0,
               name: `오퍼레이터 ${index + 1}`,
               operatorType: 'normal',
@@ -344,7 +354,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           { length: pickupOpersCount.fourth },
           (_, index) =>
             ({
-              operatorId: crypto.randomUUID(),
+              operatorId: v4(),
               currentQty: 0,
               name: `오퍼레이터 ${index + 1}`,
               operatorType: 'normal',
@@ -357,7 +367,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       return [
         ...pickupDatas,
         {
-          id: crypto.randomUUID(),
+          id: v4(),
           gachaType: gachaType,
           image: null,
           pickupDetails: {
@@ -376,6 +386,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           operators: operators,
           additionalResource: { simpleMode: 0, extendedMode: 0 },
           active: true,
+          expiration,
         } satisfies Dummy,
       ];
     }
@@ -383,7 +394,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       if (pickupDatas.length >= 20) {
         return pickupDatas;
       }
-      return [...pickupDatas, { ...action.payload, id: crypto.randomUUID() }];
+      return [...pickupDatas, { ...action.payload, id: v4() }];
     }
     case 'addOperator': {
       const { id } = action.payload;
@@ -424,7 +435,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       const isRotationGachaEligible = gachaType === 'rotation' && currentPityRewardOpersLength < 2;
       const newOperator: Operator = {
         name: `오퍼레이터 ${operatorCount + 1}`,
-        operatorId: crypto.randomUUID(),
+        operatorId: v4(),
         currentQty: 0,
         operatorType: canHaveLimitedOperator ? 'limited' : 'normal',
         rarity: newRarity,
@@ -563,7 +574,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       return modifyBannerDetails(id, (pickupData) => ({
         ...pickupData,
         firstSixthTry: isTry,
-        maxGachaAttempts: 0,
+        maxGachaAttempts: 9999,
         minGachaAttempts: 0,
       }));
     }
@@ -648,9 +659,10 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           isSinglePityRewardLengthVaild;
         const isSingleGachaEligible = gachaType === 'single' && isSinglePityRewardLengthVaild;
         const isRotationGachaEligible =
-          gachaType === 'rotation' && !newOperators[currentIndex].isPityReward
+          gachaType === 'rotation' &&
+          (!newOperators[currentIndex].isPityReward
             ? currentPityRewardOpersLength < 2
-            : currentPityRewardOpersLength < 3;
+            : currentPityRewardOpersLength < 3);
         const isPityReward =
           currentOperatorRarity === 6 &&
           (isSingleLimitPityEligible || isSingleGachaEligible || isRotationGachaEligible);
@@ -858,7 +870,7 @@ export interface WorkerInput {
       isSimpleMode: boolean;
       batchGachaGoal: BatchGachaGoal;
       initialResource: number;
-    } & SimulationOptions;
+    } & Omit<SimulationOptions, 'baseSeed'>;
   };
 }
 
@@ -873,9 +885,10 @@ export type SimulationOptions = {
   simulationTry: number;
   bannerFailureAction: BannerFailureAction;
   showBannerImage: boolean;
+  baseSeed: number | null;
 };
 
-export type initialOptions = {
+export type InitialOptions = {
   initialResource: number;
   batchGachaGoal: 'allFirst' | 'allMax' | null;
   isTrySim: boolean;
@@ -892,6 +905,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     simulationTry: 10000,
     bannerFailureAction: 'interruption',
     showBannerImage: true,
+    baseSeed: null,
   });
   const [batchGachaGoal, setBatchGachaGoal] = useState<'allFirst' | 'allMax' | null>(null);
   const [initialResource, setInitialResource] = useState(0);
@@ -909,6 +923,8 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   const isRunning = useRef(false);
   const [runningTime, setRunningTime] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isImportLoading, setIsImportLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const { isAlertOpen, openAlert, alertMessage, confirm, cancel } = useAlert();
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -918,6 +934,14 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
   const addBannerUsePreset = (payload: Dummy) => {
     dispatch({ type: 'addBannerUsePreset', payload });
+  };
+
+  const setImportedData = (data: DTO) => {
+    setIsSimpleMode(data.optionDatas.isSimpleMode);
+    setIsTrySim(data.optionDatas.isTrySim);
+    setBatchGachaGoal(data.optionDatas.batchGachaGoal);
+    setInitialResource(data.optionDatas.initialResource);
+    dispatch({ type: 'initialize', payload: { initialData: data.pickupDatas } });
   };
 
   const resetSimulator = () => {
@@ -932,11 +956,33 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     dispatch({ type: 'initialize', payload: { initialData: pickupDataPresets } });
   };
 
+  const importData = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || isImportLoading) return;
+    setIsImportLoading(true);
+    try {
+      const validated = await importPickupData(file);
+      setImportedData(validated);
+      setIsImportLoading(false);
+    } catch (err) {
+      setIsImportLoading(false);
+      console.error(err);
+      alert('파일을 읽거나 파싱하는 중 오류가 발생했습니다.');
+    }
+  };
+
+  const exportData = () => {
+    exportPickupData(pickupDatas, { batchGachaGoal, initialResource, isSimpleMode, isTrySim });
+  };
+
   useLayoutEffect(() => {
     const stored = localStorage.getItem('pickupDatas');
     if (stored) {
       try {
-        dispatch({ type: 'initialize', payload: { initialData: JSON.parse(stored) } });
+        dispatch({
+          type: 'initialize',
+          payload: { initialData: validatePickupDatas(JSON.parse(stored)) },
+        });
       } catch {
         console.warn('로컬스토리지 데이터 파싱 실패, 기본 픽업 데이터 사용');
       }
@@ -944,38 +990,32 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
     const initialOptions = localStorage.getItem('options');
     if (initialOptions) {
-      const { batchGachaGoal, initialResource, isSimpleMode, isTrySim, options }: initialOptions =
-        JSON.parse(initialOptions);
       try {
-        const isMobile = isMobileDevice();
-        setInitialResource(initialResource > 9999999 ? 9999999 : initialResource);
-        setBatchGachaGoal(
-          ['allFirst', 'allMax', null].includes(batchGachaGoal) ? batchGachaGoal : null,
-        );
-        setIsTrySim(typeof isSimpleMode === 'boolean' ? isSimpleMode : true);
-        setIsSimpleMode(typeof isSimpleMode === 'boolean' ? isSimpleMode : true);
-        setOptions({
-          bannerFailureAction: ['continueExecution', 'interruption'].includes(
-            options.bannerFailureAction,
-          )
-            ? options.bannerFailureAction
-            : 'interruption',
-          showBannerImage:
-            typeof options.showBannerImage === 'boolean' ? options.showBannerImage : true,
-          simulationTry: isMobile
-            ? options.simulationTry > 200000
-              ? 200000
-              : options.simulationTry
-            : options.simulationTry > 1000000
-              ? 1000000
-              : options.simulationTry,
-          probability: { limited: 70, normal: 50 },
-        });
+        const newOptionDatas = validateOptionDatas(JSON.parse(initialOptions));
+        setInitialResource(newOptionDatas.initialResource);
+        setBatchGachaGoal(newOptionDatas.batchGachaGoal);
+        setIsTrySim(newOptionDatas.isTrySim);
+        setIsSimpleMode(newOptionDatas.isSimpleMode);
+        setOptions(newOptionDatas.options);
       } catch {
         console.warn('로컬스토리지 데이터 파싱 실패, 기본 옵션 데이터 사용');
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [isDragging]);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -1013,7 +1053,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     // 베이스 시드로부터 워커 수 만큼의 시드 생성
     const uintArray = new Uint32Array(1);
     crypto.getRandomValues(uintArray);
-    const baseSeed = uintArray[0];
+    const baseSeed = options.baseSeed ?? uintArray[0];
     const seeds = deriveWorkerSeeds(baseSeed, workerCount);
 
     // active 상태의 배너만 추출
@@ -1135,7 +1175,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
     const results = await Promise.all(promises);
 
-    const mergedResult = mergeGachaSimulationResults(results);
+    const mergedResult = mergeGachaSimulationResults(results, baseSeed);
 
     console.log(mergedResult);
     console.log(baseSeed);
@@ -1145,9 +1185,57 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
   return (
     <>
-      <div ref={listRef} className="mt-12 flex w-full px-4 lg:w-auto lg:space-x-6 lg:px-4">
+      <div
+        ref={listRef}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          if (
+            !Array.from(e.dataTransfer.items).some((item) => item.kind === 'file') ||
+            isImportLoading ||
+            isRunning.current ||
+            document.querySelector('.modal')
+          )
+            return;
+          setIsDragging(true);
+        }}
+        onDragLeave={(e) => {
+          const modalEl = document.querySelector('.option'); // 포탈 모달 클래스
+          const related = e.relatedTarget as Node | null;
+          if (
+            !e.currentTarget.contains(e.relatedTarget as Node) &&
+            isDragging &&
+            !(modalEl && related && modalEl.contains(related))
+          ) {
+            setIsDragging(false);
+          }
+        }}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={async (e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          if (
+            !Array.from(e.dataTransfer.items).some((item) => item.kind === 'file') ||
+            isImportLoading ||
+            isRunning.current ||
+            document.querySelector('.modal')
+          )
+            return;
+          setIsImportLoading(true);
+          const file = e.dataTransfer.files[0];
+          try {
+            const data = await importPickupData(file); // JSON 읽고 검증
+            setImportedData(data); // 상태 업데이트
+            setIsImportLoading(false);
+          } catch (err) {
+            setIsImportLoading(false);
+            console.error(err);
+            alert('파일을 읽거나 파싱하는 중 오류가 발생했습니다.');
+          }
+        }}
+        className="mt-12 flex w-full px-4 lg:w-auto lg:space-x-6 lg:px-4"
+      >
         <div className="flex flex-col items-center space-y-6 lg:flex-2 2xl:w-[984px]">
-          <div className="mb-12 flex space-x-16">
+          <div className="mb-12 flex space-x-16 sm:space-x-24">
             <ResetButton
               onResetClick={async () => {
                 const result = await openAlert(
@@ -1170,6 +1258,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
             />
           </div>
           <OptionBar
+            seed={results?.total.baseSeed}
             isTrySim={isTrySim}
             setIsTrySim={setIsTrySim}
             isSimpleMode={isSimpleMode}
@@ -1181,6 +1270,9 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
             setOptions={setOptions}
             runningTime={runningTime}
             setBatchGachaGoal={setBatchGachaGoal}
+            isImportLoading={isImportLoading}
+            onImport={importData}
+            onExport={exportData}
           />
           <div className="flex flex-col gap-y-6 lg:w-full">
             <AddBannerCard isAddPrevent={pickupDatas.length >= 20} openModal={openModal} />
@@ -1230,6 +1322,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
           }}
         />
       </div>
+      <AnimatePresence>{isDragging && <DragIndicator />}</AnimatePresence>
     </>
   );
 }
