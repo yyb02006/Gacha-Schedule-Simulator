@@ -279,7 +279,7 @@ const GachaSystemInfoModalContent = ({
             width={1230}
             height={530}
             alt="rotation"
-            className="rounded-lg"
+            className="w-full rounded-lg"
           />
           <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
             <li>
@@ -354,7 +354,7 @@ const GachaSystemInfoModalContent = ({
             width={1230}
             height={530}
             alt="rotation"
-            className="rounded-lg"
+            className="w-full rounded-lg"
           />
           <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
             <li>
@@ -430,7 +430,7 @@ const GachaSystemInfoModalContent = ({
             width={1230}
             height={530}
             alt="rotation"
-            className="rounded-lg"
+            className="w-full rounded-lg"
           />
           <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
             <li>
@@ -507,7 +507,7 @@ const GachaSystemInfoModalContent = ({
             width={1230}
             height={530}
             alt="rotation"
-            className="rounded-lg"
+            className="w-full rounded-lg"
           />
           <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
             <li>
@@ -586,7 +586,7 @@ const GachaSystemInfoModalContent = ({
             width={1230}
             height={530}
             alt="rotation"
-            className="rounded-lg"
+            className="w-full rounded-lg"
           />
           <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
             <li>
@@ -656,7 +656,7 @@ const GachaSystemInfoModalContent = ({
             width={1230}
             height={530}
             alt="rotation"
-            className="rounded-lg"
+            className="w-full rounded-lg"
           />
           <ol className="text-standard font-S-CoreDream-300 list-disc space-y-3 pl-4">
             <li>

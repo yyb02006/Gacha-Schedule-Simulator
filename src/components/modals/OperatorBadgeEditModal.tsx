@@ -46,13 +46,13 @@ const Help = ({ onClose }: { onClose: () => void }) => {
     >
       <OverlayScrollbar className="size-full">
         <div className="flex h-full justify-center">
-          <div className="my-auto h-fit w-full max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] lg:rounded-lg lg:py-6">
+          <div className="my-auto h-fit w-full max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] sm:rounded-lg sm:py-6">
             <div className="flex items-center justify-between">
               <h1 className="font-S-CoreDream-500 text-xl">
                 천장 오퍼레이터 <span className="text-red-400">결정 규칙</span>
               </h1>
               <div className="size-11" />
-              <div className="fixed right-4 z-[1000] lg:relative lg:right-auto lg:z-auto">
+              <div className="fixed right-4 z-[1000] sm:relative sm:right-auto sm:z-auto">
                 <CancelButton
                   handleCancel={() => {
                     onClose();
