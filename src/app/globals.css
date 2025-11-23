@@ -17,8 +17,8 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #202020;
+  --foreground: #eaeaea;
 }
 
 @theme inline {
