@@ -1,0 +1,1331 @@
+'use client';
+
+import { AnimatePresence, motion } from 'motion/react';
+import { insetInputVariants, toOpacityZero } from '#/constants/variants';
+import {
+  Dummy,
+  ExtractPayloadFromAction,
+  Operator,
+  PickupDatasAction,
+} from '#/components/PickupList';
+import DeleteButton from '#/components/buttons/DeleteButton';
+import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
+import AddButton from '#/components/buttons/AddButton';
+import {
+  clamp,
+  cls,
+  getOperatorsByRarity,
+  normalizeNumberString,
+  stringToNumber,
+} from '#/libs/utils';
+import React, {
+  ActionDispatch,
+  ChangeEvent,
+  FocusEvent,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { bannerBadgeProps, operatorBadgeProps } from '#/constants/ui';
+import OperatorBadgeEditModal from '#/components/modals/OperatorBadgeEditModal';
+import Badge from '#/components/Badge';
+import BannerBadgeEditModal from '#/components/modals/BannerBadgeEditModal';
+import { GachaType, OperatorRarity, OperatorRarityForString, OperatorType } from '#/types/types';
+import { useSyncedState } from '#/hooks/useSyncedState';
+import Image from 'next/image';
+import ToggleButton from '#/components/buttons/ToggleButton';
+import SmallButton from '#/components/buttons/SmallButton';
+import FoldButton from '#/components/buttons/MaximizeButton';
+import ChevronDown from '#/icons/ChevronDown.svg';
+import ChevronUp from '#/icons/ChevronUp.svg';
+import Tag from '#/icons/Tag.svg';
+import { operatorLimitByBannerType } from '#/constants/variables';
+import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
+import { ResponsiveHide, ResponsiveShow } from '#/components/ResponsiveSpan';
+
+const MaxAttempts = ({
+  maxGachaAttempts,
+  isFirstSixthTry,
+  onUnlimitedClick,
+  onInputBlur,
+}: {
+  maxGachaAttempts: string;
+  isFirstSixthTry: boolean;
+  onUnlimitedClick: () => void;
+  onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
+}) => {
+  return (
+    <InsetNumberInput
+      currentValue={maxGachaAttempts.toString()}
+      name="최대 시도"
+      onInputBlur={onInputBlur}
+      isFirstSixthTry={isFirstSixthTry}
+      className="text-amber-400"
+      inputWidth="w-full lg:w-10"
+      fullSize="lg:w-auto w-full"
+      max={9999}
+      isMaxAttepmts
+      showAttemptsSign
+    >
+      <TypeSelectionButton
+        name="무제한"
+        className="px-3 text-sm"
+        onTypeClick={onUnlimitedClick}
+        hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+      />
+    </InsetNumberInput>
+  );
+};
+
+const MinAttempts = ({
+  minGachaAttempts,
+  isFirstSixthTry,
+  onFirstSixth,
+  onInputBlur,
+}: {
+  minGachaAttempts: string;
+  isFirstSixthTry: boolean;
+  onFirstSixth: () => void;
+  onInputBlur: (e: FocusEvent<HTMLInputElement>) => void;
+}) => {
+  return (
+    <InsetNumberInput
+      currentValue={minGachaAttempts.toString()}
+      name="최소 시도"
+      onInputBlur={onInputBlur}
+      isFirstSixthTry={isFirstSixthTry}
+      className="text-sky-500"
+      inputWidth="w-full lg:w-10"
+      fullSize="lg:w-auto w-full"
+      max={999}
+      showAttemptsSign
+    >
+      <TypeSelectionButton
+        name="첫 6성"
+        className="px-3 text-sm"
+        onTypeClick={onFirstSixth}
+        hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+      />
+    </InsetNumberInput>
+  );
+};
+
+export type onInsetNumberInputBlur = (
+  e: FocusEvent<HTMLInputElement>,
+  syncLocalValue: React.Dispatch<React.SetStateAction<string>>,
+) => void;
+
+export const InsetNumberInput = ({
+  children,
+  onInputBlur,
+  currentValue,
+  name,
+  isSeedNull,
+  useLocaleString = true,
+  fullSize = '',
+  isMaxAttepmts,
+  pattern = '[0-9]*',
+  inputWidth = 'w-8',
+  className = '',
+  max,
+  maxLength,
+  // immediateExit = false,
+  showAttemptsSign = false,
+  isFirstSixthTry,
+  animate = false,
+}: {
+  children?: ReactNode;
+  onInputBlur: onInsetNumberInputBlur;
+  currentValue: string;
+  name: ReactNode;
+  isSeedNull?: boolean;
+  useLocaleString?: boolean;
+  fullSize?: string;
+  isMaxAttepmts?: boolean;
+  pattern?: string;
+  inputWidth?: string;
+  className?: string;
+  max?: number;
+  maxLength?: number;
+  immediateExit?: boolean;
+  showAttemptsSign?: boolean;
+  isFirstSixthTry?: boolean;
+  animate?: boolean;
+}) => {
+  const [localValue, setLocalValue] = useSyncedState(currentValue);
+  const isInfinity =
+    isMaxAttepmts && currentValue === '9999' && localValue === '9999' && !isFirstSixthTry;
+  const firstSixthTry =
+    ((currentValue === '0' && localValue === '0') ||
+      (currentValue === '9999' && localValue === '9999')) &&
+    isFirstSixthTry;
+  const seedNull = currentValue === '' && localValue === '' && isSeedNull;
+
+  return (
+    <div className={cls('flex items-center gap-2 whitespace-nowrap', fullSize)}>
+      {name ? (
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className={cls(className, 'flex h-full items-center')}
+        >
+          {name}
+        </motion.div>
+      ) : null}
+      <motion.div
+        variants={animate ? insetInputVariants : undefined}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className={cls(
+          'relative flex items-center rounded-lg shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]',
+          fullSize,
+        )}
+      >
+        <motion.div
+          variants={toOpacityZero}
+          initial="exit"
+          animate="idle"
+          exit="exit"
+          className={cls('relative flex items-center px-4 py-2', fullSize)}
+        >
+          {showAttemptsSign && isInfinity && (
+            <div className="absolute right-0 mr-4 text-3xl">∞</div>
+          )}
+          {showAttemptsSign && firstSixthTry && (
+            <div className="absolute right-0 flex size-full items-center justify-center">
+              첫 6성
+            </div>
+          )}
+          {showAttemptsSign && seedNull && (
+            <div className="absolute right-0 flex size-full items-center justify-center">-</div>
+          )}
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern={pattern}
+            onFocus={(e: FocusEvent<HTMLInputElement>) => {
+              if (e.currentTarget.value === '0') {
+                e.currentTarget.setSelectionRange(0, 1);
+              }
+            }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              const { value } = e.currentTarget;
+
+              const newValue = value.replace(/,/g, '');
+              const numberString = normalizeNumberString(newValue);
+              if (numberString === undefined) return;
+              const numeric = parseFloat(numberString);
+              if (!isMaxAttepmts) {
+                const normalizedString = Math.floor(clamp(numeric, 0, max)).toString();
+                setLocalValue(normalizedString);
+              } else {
+                setLocalValue(numeric > 3000 ? '9999' : numeric.toString());
+              }
+            }}
+            onBlur={(e: FocusEvent<HTMLInputElement>) => {
+              if (!e.currentTarget.value) return;
+              onInputBlur(e, setLocalValue);
+            }}
+            className={cls('relative h-full min-w-0 text-right', inputWidth)}
+            max={max}
+            maxLength={maxLength}
+            value={
+              showAttemptsSign && (isInfinity || firstSixthTry || seedNull)
+                ? ''
+                : useLocaleString
+                  ? stringToNumber(localValue.replace(/,/g, '')).toLocaleString()
+                  : stringToNumber(localValue.replace(/,/g, '')).toString()
+            }
+          />
+        </motion.div>
+        <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+          {children}
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+const BannerBadges = ({
+  gachaType,
+  isSimpleMode,
+  pickupData,
+  className = '',
+  onBannerBadgeChange,
+}: {
+  gachaType: GachaType;
+  isSimpleMode: boolean;
+  pickupData: Dummy;
+  className?: string;
+  onBannerBadgeChange: (gachaType: GachaType) => void;
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isHover, setIsHover] = useState(false);
+  const currentBadgeProp = bannerBadgeProps[gachaType].props;
+  return (
+    <div className="w-full self-stretch py-2 text-xl">
+      <div className="flex h-full w-full justify-end">
+        <motion.button
+          onHoverStart={() => {
+            setIsHover(true);
+          }}
+          onHoverEnd={() => {
+            setIsHover(false);
+          }}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+          className={cls('font-S-CoreDream-400 flex h-full cursor-pointer gap-x-1', className)}
+        >
+          <div
+            className={cls(
+              currentBadgeProp.color,
+              'rounded-full border bg-[#262626] px-3 py-1 text-sm whitespace-nowrap lg:bg-transparent',
+            )}
+          >
+            <div className="relative top-[1px] select-none">{currentBadgeProp.name}</div>
+          </div>
+          <motion.div
+            animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
+            transition={{ duration: 0.2 }}
+            className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400 bg-[#262626] lg:bg-transparent"
+          >
+            <motion.div
+              animate={
+                isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }
+              }
+              transition={{ duration: 0.2 }}
+              className="text-amber-400"
+            >
+              <Tag className="size-full" />
+            </motion.div>
+          </motion.div>
+        </motion.button>
+        <BannerBadgeEditModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
+          isSimpleMode={isSimpleMode}
+          pickupData={pickupData}
+          onEditConfirmClick={onBannerBadgeChange}
+        />
+      </div>
+    </div>
+  );
+};
+
+const BannerHeader = ({
+  id,
+  index,
+  currentName,
+  isAnimateLocked,
+  gachaType,
+  isMinimized,
+  isActive,
+  isSimpleMode,
+  pickupData,
+  dataLength,
+  onNameBlur,
+  onBannerDelete,
+  onBannerBadgeChange,
+  onUpdateIndex,
+  onMinimized,
+  onToggle,
+}: {
+  id: string;
+  index: number;
+  currentName: string;
+  isAnimateLocked: boolean;
+  gachaType: GachaType;
+  isMinimized: boolean;
+  isActive: boolean;
+  isSimpleMode: boolean;
+  pickupData: Dummy;
+  dataLength: number;
+  onNameBlur: (e: FocusEvent<HTMLInputElement>) => void;
+  onBannerDelete: () => void;
+  onBannerBadgeChange: (gachaType: GachaType) => void;
+  onUpdateIndex: (direction: 'increase' | 'decrease') => void;
+  onMinimized: () => void;
+  onToggle: (isLeft?: boolean) => void;
+}) => {
+  const [localValue, setLocalValue] = useState(currentName);
+  const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setLocalValue(e.currentTarget.value);
+  };
+  return (
+    <div className="flex flex-col gap-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex h-full gap-x-4">
+          <div className="relative">
+            <FoldButton
+              onFold={() => {
+                if (isActive) {
+                  onMinimized();
+                }
+              }}
+              isFolded={isMinimized}
+            />
+            {isActive || (
+              <div className="absolute top-0 left-0 size-full rounded-xl bg-[#505050aa]" />
+            )}
+          </div>
+          <ToggleButton
+            isLeft={isActive}
+            labels={{ left: '활성화', right: '비활성화' }}
+            onToggle={() => {
+              onToggle();
+            }}
+          />
+        </div>
+        <DeleteButton
+          onDelete={onBannerDelete}
+          isDeletePrevent={dataLength === 1}
+          className="shrink-0"
+        />
+      </div>
+      <div className="flex lg:hidden">
+        <div className="flex grow gap-4">
+          <SmallButton
+            background="linear-gradient(135deg, #bb4d00, #ffb900)"
+            color="#eaeaea"
+            onButtonClick={() => {
+              onUpdateIndex('increase');
+            }}
+            isAnimateLocked={isAnimateLocked}
+            className="text-amber-400"
+            isClickPrevent={index < 1}
+          >
+            <ChevronUp className="size-full" />
+          </SmallButton>
+          <SmallButton
+            background="linear-gradient(135deg, #bb4d00, #ffb900)"
+            color="#eaeaea"
+            onButtonClick={() => {
+              onUpdateIndex('decrease');
+            }}
+            isAnimateLocked={isAnimateLocked}
+            className="text-amber-400"
+            isClickPrevent={index >= dataLength - 1}
+          >
+            <ChevronDown className="size-full" />
+          </SmallButton>
+        </div>
+        <BannerBadges
+          gachaType={gachaType}
+          isSimpleMode={isSimpleMode}
+          pickupData={pickupData}
+          onBannerBadgeChange={onBannerBadgeChange}
+        />
+      </div>
+      <div className="flex grow gap-4">
+        <SmallButton
+          background="linear-gradient(135deg, #bb4d00, #ffb900)"
+          color="#eaeaea"
+          onButtonClick={() => {
+            onUpdateIndex('increase');
+          }}
+          isAnimateLocked={isAnimateLocked}
+          className="hidden text-amber-400 lg:inline-block"
+          isClickPrevent={index < 1}
+        >
+          <ChevronUp className="size-full" />
+        </SmallButton>
+        <SmallButton
+          background="linear-gradient(135deg, #bb4d00, #ffb900)"
+          color="#eaeaea"
+          onButtonClick={() => {
+            onUpdateIndex('decrease');
+          }}
+          isAnimateLocked={isAnimateLocked}
+          className="hidden text-amber-400 lg:inline-block"
+          isClickPrevent={index >= dataLength - 1}
+        >
+          <ChevronDown className="size-full" />
+        </SmallButton>
+        <div className="font-S-CoreDream-700 flex items-center text-2xl">
+          <span key={`${id} ${index + 1}`} className="select-none">
+            {index + 1}.
+          </span>
+        </div>
+        <div className="font-S-CoreDream-500 relative flex w-full items-center rounded-lg py-2 pr-2 pl-4 text-xl shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+          <input
+            type="text"
+            onChange={onNameChange}
+            onBlur={onNameBlur}
+            value={localValue}
+            className="w-full"
+          />
+          <div className="hidden lg:flex">
+            <BannerBadges
+              gachaType={gachaType}
+              isSimpleMode={isSimpleMode}
+              pickupData={pickupData}
+              onBannerBadgeChange={onBannerBadgeChange}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SimplePreInfoField = ({
+  isTrySim,
+  pickupData,
+  targetLimit,
+  updateSimplePickupCount,
+  updateAdditionalResource,
+}: {
+  isTrySim: boolean;
+  pickupData: Dummy;
+  targetLimit: Record<OperatorRarityForString, number>;
+  updateSimplePickupCount: UpdateSimplePickupCount;
+  updateAdditionalResource: (
+    mode: 'simpleMode' | 'extendedMode',
+    additionalResource: number,
+  ) => void;
+}) => {
+  const {
+    pickupDetails: {
+      simpleMode: { pickupOpersCount, targetOpersCount },
+    },
+    additionalResource,
+  } = pickupData;
+
+  return (
+    <div className="font-S-CoreDream-400 lg:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
+      <div className="flex flex-wrap justify-between gap-x-6 gap-y-3">
+        <div className="flex flex-wrap gap-x-10 gap-y-3">
+          <div className="flex w-full gap-x-3 lg:w-auto">
+            <InsetNumberInput
+              name="픽업 6성"
+              className="text-orange-400"
+              inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
+              onInputBlur={(e, syncLocalValue) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.fifth === 0 && targetOpersCount.fourth === 0;
+                updateSimplePickupCount({
+                  count: hasNoTargetOperators ? 1 : count,
+                  countType: 'pickupOpersCount',
+                  rarityType: 'sixth',
+                });
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+              }}
+              currentValue={pickupOpersCount.sixth.toString()}
+              max={targetLimit['sixth']}
+            />
+            <InsetNumberInput
+              name="목표 6성"
+              className="text-orange-400"
+              inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
+              onInputBlur={(e, syncLocalValue) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.fifth === 0 && targetOpersCount.fourth === 0;
+                updateSimplePickupCount({
+                  count: hasNoTargetOperators ? 1 : count,
+                  countType: 'targetOpersCount',
+                  rarityType: 'sixth',
+                });
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+              }}
+              currentValue={targetOpersCount.sixth.toString()}
+              max={targetLimit['sixth']}
+            />
+          </div>
+          <div className="flex w-full gap-x-3 lg:w-auto">
+            <InsetNumberInput
+              name="픽업 5성"
+              className="text-amber-400"
+              inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
+              onInputBlur={(e, syncLocalValue) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fourth === 0;
+                updateSimplePickupCount({
+                  count: hasNoTargetOperators ? 1 : count,
+                  countType: 'pickupOpersCount',
+                  rarityType: 'fifth',
+                });
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+              }}
+              currentValue={pickupOpersCount.fifth.toString()}
+              max={targetLimit['fifth']}
+            />
+            <InsetNumberInput
+              name="목표 5성"
+              className="text-amber-400"
+              inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
+              onInputBlur={(e, syncLocalValue) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fourth === 0;
+                updateSimplePickupCount({
+                  count: hasNoTargetOperators ? 1 : count,
+                  countType: 'targetOpersCount',
+                  rarityType: 'fifth',
+                });
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+              }}
+              currentValue={targetOpersCount.fifth.toString()}
+              max={targetLimit['fifth']}
+            />
+          </div>
+          <div className="flex w-full gap-x-3 lg:w-auto">
+            <InsetNumberInput
+              name="픽업 4성"
+              className="text-sky-500"
+              inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
+              onInputBlur={(e, syncLocalValue) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fifth === 0;
+                updateSimplePickupCount({
+                  count: hasNoTargetOperators ? 1 : count,
+                  countType: 'pickupOpersCount',
+                  rarityType: 'fourth',
+                });
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+              }}
+              currentValue={pickupOpersCount.fourth.toString()}
+              max={targetLimit['fourth']}
+            />
+            <InsetNumberInput
+              name="목표 4성"
+              className="text-sky-500"
+              inputWidth="lg:w-8 w-full"
+              fullSize="w-full lg:w-auto"
+              onInputBlur={(e, syncLocalValue) => {
+                const count = stringToNumber(e.currentTarget.value);
+                const hasNoTargetOperators =
+                  count === 0 && targetOpersCount.sixth === 0 && targetOpersCount.fifth === 0;
+                updateSimplePickupCount({
+                  count: hasNoTargetOperators ? 1 : count,
+                  countType: 'targetOpersCount',
+                  rarityType: 'fourth',
+                });
+                syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+              }}
+              currentValue={targetOpersCount.fourth.toString()}
+              max={targetLimit['fourth']}
+            />
+          </div>
+        </div>
+        <div className="mt-2 flex w-full justify-end">
+          {isTrySim || (
+            <div className="flex items-center gap-x-3 text-sm">
+              <InsetNumberInput
+                name="추가재화"
+                pattern={LOCALE_NUMBER_PATTERN.source}
+                className="font-S-CoreDream-400"
+                onInputBlur={(e, syncLocalValue) => {
+                  const { value } = e.currentTarget;
+                  const newValue = value.replace(/,/g, '');
+                  const numberValue = stringToNumber(newValue);
+                  if (numberValue <= 9999999) {
+                    updateAdditionalResource('simpleMode', numberValue);
+                  } else {
+                    syncLocalValue('9999999');
+                    updateAdditionalResource('simpleMode', numberValue);
+                  }
+                }}
+                currentValue={additionalResource.simpleMode.toLocaleString()}
+                max={9999999}
+                inputWidth={'w-20'}
+              >
+                <div className="font-S-CoreDream-400 relative top-[1px] mr-3 -ml-2">합성옥</div>
+              </InsetNumberInput>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PreInfoField = ({
+  pickupData,
+  targetLimit,
+  updatePickupCount,
+  updateAttempts,
+  updateFirstSixthTry,
+}: {
+  pickupData: Dummy;
+  targetLimit: Record<OperatorRarityForString, number>;
+  updatePickupCount: (count: number, rarityType: OperatorRarityForString) => void;
+  updateAttempts: (attempts: number, target: 'max' | 'min' | 'both') => void;
+  updateFirstSixthTry: (isTry: boolean) => void;
+}) => {
+  const {
+    pickupDetails: { pickupOpersCount },
+    maxGachaAttempts,
+    minGachaAttempts,
+    operators,
+    firstSixthTry,
+  } = pickupData;
+
+  const operatorsByRarity = getOperatorsByRarity(operators);
+  return (
+    <div className="font-S-CoreDream-400 lg:font-S-CoreDream-500 flex w-full flex-wrap justify-between gap-x-6 gap-y-3 text-sm">
+      <div className="flex w-full flex-wrap justify-between gap-x-6 gap-y-3">
+        <div className="flex flex-wrap gap-x-6 gap-y-3 sm:w-full sm:flex-nowrap lg:w-auto">
+          <MaxAttempts
+            maxGachaAttempts={maxGachaAttempts.toString()}
+            onInputBlur={(e) => {
+              const newValue = e.currentTarget.value.replace(/,/g, '');
+              updateAttempts(stringToNumber(newValue), 'max');
+            }}
+            onUnlimitedClick={() => {
+              updateAttempts(9999, 'max');
+            }}
+            isFirstSixthTry={firstSixthTry}
+          />
+          <MinAttempts
+            minGachaAttempts={minGachaAttempts.toString()}
+            onInputBlur={(e) => {
+              const newValue = e.currentTarget.value.replace(/,/g, '');
+              updateAttempts(stringToNumber(newValue), 'min');
+            }}
+            onFirstSixth={() => {
+              updateFirstSixthTry(true);
+            }}
+            isFirstSixthTry={firstSixthTry}
+          />
+        </div>
+        <div className="mt-2 text-base sm:hidden">
+          배너 총 <span className="text-amber-400">픽업</span> 수
+        </div>
+        <div className="flex w-full gap-x-6 gap-y-3 lg:w-auto lg:gap-x-6">
+          <InsetNumberInput
+            name={
+              <>
+                <ResponsiveHide above="sm">6성</ResponsiveHide>
+                <ResponsiveShow above="sm">픽업 6성</ResponsiveShow>
+              </>
+            }
+            className="text-orange-400"
+            inputWidth="w-full lg:w-8"
+            fullSize="w-full"
+            onInputBlur={(e, syncLocalValue) => {
+              const count = stringToNumber(e.currentTarget.value);
+              const hasNoTargetOperators =
+                count === 0 &&
+                operatorsByRarity.fifth.length === 0 &&
+                operatorsByRarity.fourth.length === 0;
+              updatePickupCount(hasNoTargetOperators ? 1 : count, 'sixth');
+              syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+            }}
+            currentValue={pickupOpersCount.sixth.toString()}
+            max={targetLimit.sixth}
+          />
+          <InsetNumberInput
+            name={
+              <>
+                <ResponsiveHide above="sm">5성</ResponsiveHide>
+                <ResponsiveShow above="sm">픽업 5성</ResponsiveShow>
+              </>
+            }
+            className="text-amber-400"
+            inputWidth="w-full lg:w-8"
+            fullSize="w-full"
+            onInputBlur={(e, syncLocalValue) => {
+              const count = stringToNumber(e.currentTarget.value);
+              const hasNoTargetOperators =
+                count === 0 &&
+                operatorsByRarity.sixth.length === 0 &&
+                operatorsByRarity.fourth.length === 0;
+              updatePickupCount(hasNoTargetOperators ? 1 : count, 'fifth');
+              syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+            }}
+            currentValue={pickupOpersCount.fifth.toString()}
+            max={targetLimit.fifth}
+          />
+          <InsetNumberInput
+            name={
+              <>
+                <ResponsiveHide above="sm">4성</ResponsiveHide>
+                <ResponsiveShow above="sm">픽업 4성</ResponsiveShow>
+              </>
+            }
+            className="text-purple-400"
+            inputWidth="w-full lg:w-8"
+            fullSize="w-full"
+            onInputBlur={(e, syncLocalValue) => {
+              const count = stringToNumber(e.currentTarget.value);
+              const hasNoTargetOperators =
+                count === 0 &&
+                operatorsByRarity.fifth.length === 0 &&
+                operatorsByRarity.sixth.length === 0;
+              updatePickupCount(hasNoTargetOperators ? 1 : count, 'fourth');
+              syncLocalValue(hasNoTargetOperators ? '1' : count.toString());
+            }}
+            currentValue={pickupOpersCount.fourth.toString()}
+            max={targetLimit.fourth}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const OperatorBadges = ({
+  operator,
+  isPityReward,
+  gachaType,
+  operators,
+  className = '',
+  onChangeOperatorDetails,
+}: {
+  operator: Operator;
+  isPityReward: boolean;
+  gachaType: GachaType;
+  operators: Operator[];
+  className?: string;
+  onChangeOperatorDetails: (payload: UpdateOperatorDetails) => void;
+}) => {
+  const { operatorId, operatorType, rarity } = operator;
+  const [isHover, setIsHover] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const editBadge = (newType: OperatorType, newRarity: OperatorRarity) => {
+    onChangeOperatorDetails({ operatorId, operatorType: newType, rarity: newRarity });
+  };
+  return (
+    <div className={cls('flex', className)}>
+      <div className="flex justify-end">
+        <motion.button
+          onHoverStart={() => {
+            setIsHover(true);
+          }}
+          onHoverEnd={() => {
+            setIsHover(false);
+          }}
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+          className="flex h-full cursor-pointer gap-x-1 *:pointer-events-none"
+        >
+          {isPityReward && <Badge name="천장" color="border-teal-400 text-teal-400" />}
+          {operatorType === 'limited' ? (
+            <Badge {...operatorBadgeProps.operatorType.limited.props} />
+          ) : (
+            <Badge {...operatorBadgeProps.operatorType.normal.props} />
+          )}
+          {rarity === 6 ? (
+            <Badge {...operatorBadgeProps.rarity.sixth.props} />
+          ) : rarity === 5 ? (
+            <Badge {...operatorBadgeProps.rarity.fifth.props} />
+          ) : (
+            <Badge {...operatorBadgeProps.rarity.fourth.props} />
+          )}
+          <motion.div
+            animate={isHover ? { borderColor: '#ff637e' } : { borderColor: '#ffb900' }}
+            className="relative flex aspect-square h-full items-center justify-center rounded-full border border-amber-400"
+          >
+            <motion.div
+              animate={
+                isHover ? { rotateZ: 45, color: '#ff637e' } : { rotateZ: 0, color: '#ffb900' }
+              }
+              transition={{ duration: 0.2 }}
+              className="size-full p-1 text-amber-400"
+            >
+              <Tag className="size-full" />
+            </motion.div>
+          </motion.div>
+        </motion.button>
+        <OperatorBadgeEditModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+          }}
+          operatorType={operatorType}
+          rarity={rarity}
+          operators={operators}
+          gachaType={gachaType}
+          onBadgeEdit={editBadge}
+        />
+      </div>
+    </div>
+  );
+};
+
+const PickupOperatorDetail = ({
+  operator,
+  gachaType,
+  operators,
+  onOperatorDelete,
+  onChangeOperatorDetails,
+}: {
+  operator: Operator;
+  gachaType: GachaType;
+  operators: Operator[];
+  onOperatorDelete: () => void;
+  onChangeOperatorDetails: (payload: UpdateOperatorDetails) => void;
+}) => {
+  const { name, operatorId, currentQty, targetCount, isPityReward } = operator;
+  const [localName, setLocalName] = useState(name);
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+      <div className="flex w-full items-center justify-between lg:hidden">
+        <DeleteButton
+          onDelete={onOperatorDelete}
+          isDeletePrevent={operators.length === 1}
+          className="-mr-2 aspect-square"
+        />
+        <OperatorBadges
+          isPityReward={isPityReward}
+          onChangeOperatorDetails={onChangeOperatorDetails}
+          operator={operator}
+          gachaType={gachaType}
+          operators={operators}
+          className="flex w-full flex-row-reverse"
+        />
+      </div>
+      <div className="flex grow gap-6">
+        <DeleteButton
+          onDelete={onOperatorDelete}
+          isDeletePrevent={operators.length === 1}
+          className="-mr-2 hidden lg:inline-block"
+        />
+        <div className="flex flex-1 items-center rounded-lg py-2 pr-2 pl-4 shadow-[inset_6px_6px_13px_#101010,inset_-6px_-6px_13px_#303030]">
+          <input
+            type="text"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setLocalName(e.currentTarget.value);
+            }}
+            onBlur={(e: FocusEvent<HTMLInputElement>) => {
+              onChangeOperatorDetails({ name: e.currentTarget.value, operatorId });
+            }}
+            value={localName}
+            className="text-standard w-full flex-1"
+          />
+          <OperatorBadges
+            isPityReward={isPityReward}
+            onChangeOperatorDetails={onChangeOperatorDetails}
+            operator={operator}
+            gachaType={gachaType}
+            operators={operators}
+            className="hidden lg:flex"
+          />
+        </div>
+      </div>
+      <div className="flex gap-x-6 gap-y-3">
+        <div className="flex items-center gap-2">
+          <span className="whitespace-nowrap">목표</span>
+          <TypeSelectionButton
+            name="명함"
+            hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+            onTypeClick={() => {
+              onChangeOperatorDetails({ operatorId, targetCount: 1 });
+            }}
+            className="px-4"
+            isActive={targetCount === 1}
+          />
+          <TypeSelectionButton
+            name="풀잠"
+            hoverBackground="linear-gradient(155deg, #ec003f, #ff637e)"
+            onTypeClick={() => {
+              onChangeOperatorDetails({ operatorId, targetCount: 6 });
+            }}
+            className="px-4"
+            isActive={targetCount === 6}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <InsetNumberInput
+            name="현재 잠재"
+            className="font-S-CoreDream-400"
+            onInputBlur={(e, syncLocalValue) => {
+              const count = stringToNumber(e.currentTarget.value);
+              if (count <= 5) {
+                onChangeOperatorDetails({
+                  operatorId,
+                  currentQty: count,
+                });
+              } else {
+                onChangeOperatorDetails({
+                  operatorId,
+                  currentQty: 5,
+                });
+                syncLocalValue('5');
+              }
+            }}
+            currentValue={currentQty.toString()}
+            max={5}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+type UpdateNameProps = Omit<ExtractPayloadFromAction<'updateBannerName'>, 'id'>;
+type DeleteDataProps = Omit<ExtractPayloadFromAction<'delete'>, 'id'>;
+export type UpdateOperatorDetails = Omit<ExtractPayloadFromAction<'updateOperatorDetails'>, 'id'>;
+
+type UpdateSimplePickupCount = ({
+  count,
+  countType,
+  rarityType,
+}: UpdateSimplePickupCountProps) => void;
+
+interface UpdateSimplePickupCountProps {
+  count: number;
+  countType: 'pickupOpersCount' | 'targetOpersCount';
+  rarityType: OperatorRarityForString;
+}
+
+interface PickupBannerProps {
+  pickupData: Dummy;
+  dispatch: ActionDispatch<[action: PickupDatasAction]>;
+  index: number;
+  isTrySim: boolean;
+  isSimpleMode: boolean;
+  bannerCount: number;
+  isImageVisible: boolean;
+}
+
+export default function PickupBanner({
+  pickupData,
+  dispatch,
+  index,
+  isTrySim,
+  isSimpleMode,
+  bannerCount,
+  isImageVisible,
+}: PickupBannerProps) {
+  const { gachaType, name, operators, id, image, active, additionalResource } = pickupData;
+  const ref = useRef<HTMLDivElement>(null);
+  const [isView, setIsView] = useState(false);
+  const [isHover, setIsHover] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [isAnimateLocked, setIsAnimateLocked] = useState(false);
+  const [isImageValid, setIsImageValid] = useState(true);
+  const targetLimit = operatorLimitByBannerType[gachaType];
+
+  const isOperatorsFull =
+    operators.length >=
+    Object.values(operatorLimitByBannerType[gachaType]).reduce((a, b) => a + b, 0);
+
+  const isViewRef = useRef(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+
+    setIsView(false);
+    isViewRef.current = false;
+
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.scrollY + window.innerHeight && rect.top > 0) {
+      setIsView(true);
+      isViewRef.current = true;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isViewRef.current) {
+          setIsView(entry.isIntersecting);
+          isViewRef.current = true;
+        }
+      },
+      { threshold: 0.5 },
+    );
+
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+    };
+  }, [isSimpleMode]);
+
+  const deleteData = (payload: DeleteDataProps) => {
+    dispatch({ type: 'delete', payload: { id, ...payload } });
+  };
+
+  const updateFirstSixthTry = (isTry: boolean) => {
+    dispatch({
+      type: 'updateFirstSixTry',
+      payload: {
+        id,
+        isTry,
+      },
+    });
+  };
+
+  const updatePickupCount = (count: number, rarityType: OperatorRarityForString) => {
+    dispatch({
+      type: 'updatePickupCount',
+      payload: {
+        id,
+        count,
+        rarityType,
+      },
+    });
+  };
+
+  const updateSimplePickupCount = ({
+    count,
+    countType,
+    rarityType,
+  }: UpdateSimplePickupCountProps) => {
+    dispatch({ type: 'updateSimplePickupCount', payload: { id, count, countType, rarityType } });
+  };
+
+  const updateAttempts = (attempts: number, target: 'max' | 'min' | 'both') => {
+    dispatch({
+      type: 'updateAttempts',
+      payload: {
+        id,
+        attempts,
+        target,
+      },
+    });
+  };
+
+  const updateBannerName = (payload: UpdateNameProps) => {
+    dispatch({
+      type: 'updateBannerName',
+      payload: { id, ...payload },
+    });
+  };
+
+  const updateOperatorDetails = (payload: UpdateOperatorDetails) => {
+    dispatch({ type: 'updateOperatorDetails', payload: { id, ...payload } });
+  };
+
+  const updateAdditionalResource = (
+    mode: 'simpleMode' | 'extendedMode',
+    additionalResource: number,
+  ) => {
+    dispatch({ type: 'updateAdditionalResource', payload: { id, mode, additionalResource } });
+  };
+
+  const updateGachaType = (gachaType: GachaType) => {
+    dispatch({ type: 'updateGachaType', payload: { id, gachaType, isSimpleMode } });
+  };
+
+  const updateIndex = (direction: 'increase' | 'decrease') => {
+    if (direction === 'decrease' && index < bannerCount - 1) {
+      dispatch({ type: 'swapIndex', payload: { fromIndex: index, toIndex: index + 1 } });
+    } else if (direction === 'increase' && index > 0) {
+      dispatch({ type: 'swapIndex', payload: { fromIndex: index, toIndex: index - 1 } });
+    }
+  };
+
+  const toggleActive = (isLeft?: boolean) => {
+    dispatch({ type: 'toggleActive', payload: { id, isLeft } });
+  };
+
+  const addOperator = () => {
+    dispatch({ type: 'addOperator', payload: { id } });
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      layout="position"
+      onHoverStart={() => {
+        setIsHover(true);
+      }}
+      onHoverEnd={() => {
+        setIsHover(false);
+      }}
+      variants={toOpacityZero}
+      viewport={{ amount: 0.4 }}
+      initial="exit"
+      animate={
+        isHover
+          ? {
+              scale: 1.02,
+              background: 'linear-gradient(135deg, #222222, #333333)',
+              opacity: 1,
+              transition: {
+                scale: { type: 'spring', stiffness: 170, damping: 27, mass: 1.35, duration: 0.2 },
+                background: { duration: 0.1 },
+              },
+            }
+          : {
+              opacity: 1,
+              background: 'linear-gradient(135deg, #1c1c1c, #2a2a2a)',
+            }
+      }
+      exit={{ opacity: 0, transition: { duration: 0.15 } }}
+      transition={{
+        layout: {
+          duration: 0.3,
+          ease: 'easeInOut',
+          type: 'spring',
+          mass: 0.5,
+        },
+      }}
+      onLayoutAnimationStart={() => {
+        setIsAnimateLocked(true);
+      }}
+      onLayoutAnimationComplete={() => {
+        setIsAnimateLocked(false);
+      }}
+      className={cls(
+        'relative rounded-xl p-4 shadow-[6px_6px_16px_#141414,-6px_-6px_16px_#2e2e2e]',
+      )}
+    >
+      <AnimatePresence>
+        <div key={id} className="relative flex flex-col space-y-6">
+          <BannerHeader
+            id={id}
+            currentName={name}
+            gachaType={gachaType}
+            isAnimateLocked={isAnimateLocked}
+            isMinimized={isMinimized}
+            index={index}
+            isActive={active}
+            isSimpleMode={isSimpleMode}
+            pickupData={pickupData}
+            dataLength={bannerCount}
+            onBannerDelete={() => {
+              deleteData({ target: 'banner' });
+            }}
+            onNameBlur={(e) => {
+              updateBannerName({ name: e.currentTarget.value });
+            }}
+            onBannerBadgeChange={updateGachaType}
+            onUpdateIndex={updateIndex}
+            onMinimized={() => {
+              setIsMinimized((p) => !p);
+            }}
+            onToggle={toggleActive}
+          />
+          {!isMinimized && image && active && isImageVisible && isImageValid ? (
+            <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+              <Image
+                src={`https://pub-cee3b616ec754cb4b3678740fdae72a5.r2.dev${image}`}
+                width={1560}
+                height={500}
+                alt={name}
+                onError={() => {
+                  setIsImageValid(false);
+                }}
+                priority={index < 2}
+              />
+            </motion.div>
+          ) : null}
+          {!isMinimized && isView && active ? (
+            isSimpleMode ? (
+              <SimplePreInfoField
+                // isPresent={isPresent}
+                isTrySim={isTrySim}
+                pickupData={pickupData}
+                targetLimit={targetLimit}
+                updateSimplePickupCount={updateSimplePickupCount}
+                updateAdditionalResource={updateAdditionalResource}
+              />
+            ) : (
+              <div
+                key={`opers-${`${id} ${isSimpleMode}` ? 'hidden' : 'shown'}`}
+                className="space-y-6 text-sm lg:space-y-7"
+              >
+                <PreInfoField
+                  // isPresent={isPresent}
+                  pickupData={pickupData}
+                  targetLimit={targetLimit}
+                  updatePickupCount={updatePickupCount}
+                  updateAttempts={updateAttempts}
+                  updateFirstSixthTry={updateFirstSixthTry}
+                />
+                <div className="space-y-3">
+                  <div className="font-S-CoreDream-500 flex-wrap justify-between gap-x-6 gap-y-4 text-xl sm:flex">
+                    <span className="hidden whitespace-nowrap sm:inline">
+                      <span className="text-amber-400">목표</span> 픽업 목록
+                    </span>
+                    {isTrySim || (
+                      <div className="flex flex-1 items-center justify-end gap-x-3 text-sm lg:flex-initial lg:justify-start">
+                        <InsetNumberInput
+                          name="추가재화"
+                          pattern={LOCALE_NUMBER_PATTERN.source}
+                          className="font-S-CoreDream-400"
+                          onInputBlur={(e, syncLocalValue) => {
+                            const { value } = e.currentTarget;
+                            const newValue = value.replace(/,/g, '');
+                            const numberValue = stringToNumber(newValue);
+                            if (numberValue <= 9999999) {
+                              updateAdditionalResource('extendedMode', numberValue);
+                            } else {
+                              updateAdditionalResource('extendedMode', numberValue);
+                              syncLocalValue('9999999');
+                            }
+                          }}
+                          currentValue={additionalResource.extendedMode.toLocaleString()}
+                          max={9999999}
+                          inputWidth={'w-20'}
+                        >
+                          <div className="font-S-CoreDream-400 relative top-[1px] mr-3 -ml-2">
+                            합성옥
+                          </div>
+                        </InsetNumberInput>
+                      </div>
+                    )}
+                    <div className="mt-4 sm:hidden">
+                      <span className="text-amber-400">목표</span> 픽업 목록
+                    </div>
+                  </div>
+                  <div className="space-y-8 lg:space-y-4">
+                    {operators.map((operator) => {
+                      return (
+                        <PickupOperatorDetail
+                          key={operator.operatorId}
+                          operator={operator}
+                          operators={operators}
+                          gachaType={gachaType}
+                          onChangeOperatorDetails={updateOperatorDetails}
+                          onOperatorDelete={() => {
+                            deleteData({
+                              target: 'operator',
+                              operatorId: operator.operatorId,
+                              rarity: operator.rarity,
+                            });
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+                  <motion.div
+                    layout="position"
+                    transition={{
+                      layout: {
+                        duration: 0.05,
+                        type: 'spring',
+                        mass: 0.3,
+                      },
+                    }}
+                    className="flex w-full justify-center py-2"
+                  >
+                    <AddButton
+                      onAddClick={addOperator}
+                      diamondCustom={
+                        isOperatorsFull
+                          ? { size: 'small', from: '#bd1b36', to: '#ff637e' }
+                          : { size: 'small' }
+                      }
+                      addCustom={isOperatorsFull ? { from: '#bd1b36', to: '#ff637e' } : undefined}
+                      isAddPrevent={isOperatorsFull}
+                    />
+                  </motion.div>
+                </div>
+              </div>
+            )
+          ) : null}
+        </div>
+      </AnimatePresence>
+    </motion.div>
+  );
+}

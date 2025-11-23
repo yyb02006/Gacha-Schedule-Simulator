@@ -1,8 +1,24 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import 'overlayscrollbars/overlayscrollbars.css';
+
+.os-theme-custom {
+  --os-handle-bg: #ffb900 !important;
+  --os-track-bg: transparent !important;
+  --os-size: 6px !important;
+  --os-handle-border-radius: 1000px !important;
+  --os-handle-bg-active: #fee685 !important;
+  --os-handle-bg-hover: #fee685 !important;
+}
+
+.os-theme-custom .os-scrollbar-handle {
+  right: 2px;
+  top: 2px;
+  bottom: 2px;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #202020;
+  --foreground: #eaeaea;
 }
 
 @theme inline {
@@ -10,17 +26,113 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-spoqa: var(--font-spoqa), 'sans-serif';
+}
+
+@theme {
+  --font-S-CoreDream-200: 'S-CoreDream-200', sans-serif;
+  --font-S-CoreDream-300: 'S-CoreDream-300', sans-serif;
+  --font-S-CoreDream-400: 'S-CoreDream-400', sans-serif;
+  --font-S-CoreDream-500: 'S-CoreDream-500', sans-serif;
+  --font-S-CoreDream-700: 'S-CoreDream-700', sans-serif;
+  --text-standard: 0.9375rem;
+  --text-standard--line-height: calc(1.375 / 0.9375);
+  --breakpoint-chart-sm: 55rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #202020;
     --foreground: #ededed;
   }
+}
+
+@utility hide-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@font-face {
+  font-family: 'S-CoreDream-200';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-2ExtraLight.woff')
+    format('woff');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'S-CoreDream-300';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-3Light.woff')
+    format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'S-CoreDream-400';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-4Regular.woff')
+    format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'S-CoreDream-500';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-5Medium.woff')
+    format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'S-CoreDream-700';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-7ExtraBold.woff')
+    format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@-moz-document url-prefix() {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #ffb900 #101010;
+    scrollbar-gutter: 12px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ffb900;
+  border-radius: 10px;
+  border: 3px solid #202020;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #ffd044;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'S-CoreDream-400', Arial, Helvetica, sans-serif;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  appearance: textfield;
+}
+
+input:focus {
+  outline: none;
 }

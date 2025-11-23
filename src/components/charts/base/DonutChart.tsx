@@ -1,0 +1,376 @@
+'use client';
+
+import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
+import EmptyDonutChart from '#/components/charts/base/EmptyDonut';
+import { cls, truncateToDecimals } from '#/libs/utils';
+import { doughnutConnectorPlugin } from '#/plugins/chartJsPlugin';
+import { Chart as ChartJS, ArcElement, Tooltip, ChartData, ChartOptions } from 'chart.js';
+import ChartDataLabels, { Context } from 'chartjs-plugin-datalabels';
+import { useEffect, useRef } from 'react';
+import { Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(ArcElement, Tooltip, ChartDataLabels);
+
+const getLabelPosition = (context: Context) => {
+  const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+  const dataset = context.chart.data.datasets[0].data as number[];
+  const data = (context.dataset?.data as (number | null)[]) ?? [];
+  const currentValue = data[context.dataIndex] ?? 0;
+  const totalizedVaule = total ? total : dataset.reduce((a, b) => a + b, 0);
+  const percentage = truncateToDecimals((currentValue / totalizedVaule) * 100);
+  return percentage < 5 ? 'end' : 'center';
+};
+
+export default function DonutChart({
+  labels,
+  data,
+  backgroundColor,
+  borderColor,
+  legendPosition = 'after',
+  containerClassName = '',
+  legendClassName = '',
+  isBodyPostionLegend,
+  createLegendHTML,
+  createTooltipLiteral,
+}: {
+  labels: string[];
+  data: number[];
+  backgroundColor: string | string[];
+  borderColor: string | string[];
+  legendPosition?: 'after' | 'before';
+  containerClassName?: string;
+  legendClassName?: string;
+  isBodyPostionLegend?: boolean;
+  createLegendHTML: (labels: string[], colors: string[], values: number[]) => string;
+  createTooltipLiteral: (data: CreateTooltipLiteralProps<'doughnut'>) => string;
+}) {
+  // const screenWidth = useScreenWidth();
+  const chartRef = useRef<ChartJS<'doughnut'>>(null);
+  const legendRef = useRef<HTMLDivElement>(null);
+  const rawDataRef = useRef<number[]>([]);
+  const lastChartId = useRef<string | null>(null);
+  const chartData: ChartData<'doughnut'> = {
+    labels,
+    datasets: [
+      {
+        type: 'doughnut',
+        label: '시뮬레이션 통계',
+        data,
+        backgroundColor: backgroundColor || [
+          'rgba(255, 99, 132, 0.7)',
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(255, 206, 86, 0.7)',
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
+        ],
+        borderColor: borderColor || [
+          'rgba(255, 99, 132, 1)',
+          'rgba(54, 162, 235, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(153, 102, 255, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    const legendEl = legendRef.current;
+    if (!chart || !legendEl) return;
+
+    const dataset = chart.data.datasets[0];
+    const data = dataset.data as number[];
+    const bg = dataset.borderColor;
+
+    let colors: string[] = [];
+
+    if (Array.isArray(bg)) {
+      colors = bg;
+    } else if (typeof bg === 'string') {
+      colors = [bg];
+    } else {
+      colors = [];
+    }
+
+    // 원본 데이터 저장 (비율 재계산용)
+    if (!rawDataRef.current.length) {
+      rawDataRef.current = [...data];
+    }
+
+    // 데이터 비율 재계산
+    const recalcData = () => {
+      dataset.data = rawDataRef.current.map((v, i) => {
+        return chart.getDataVisibility(i) ? v : 0;
+      });
+    };
+
+    const labels = chart.data.labels as string[];
+
+    if (labels) {
+      // 커스텀 범례 HTML 생성
+      const legendHTML = createLegendHTML(labels, colors, data);
+      legendEl.innerHTML = legendHTML;
+    }
+
+    // 커스텀 범례 HTML 업데이트
+    const updateLegendState = () => {
+      legendEl.querySelectorAll('[data-index]').forEach((el) => {
+        const index = Number(el.getAttribute('data-index'));
+        const visible = chart.getDataVisibility(index);
+
+        if (visible) {
+          el.classList.remove('opacity-40');
+        } else {
+          el.classList.add('opacity-40'); // 비활성화 시 흐리게
+        }
+      });
+    };
+
+    updateLegendState(); // init
+
+    legendEl.querySelectorAll('[data-index]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const index = Number(el.getAttribute('data-index'));
+        const isCurrentDataVisible = chart.getDataVisibility(index);
+        const hasVisibleData =
+          rawDataRef.current
+            .map((_, index) => chart.getDataVisibility(index))
+            .filter((data) => data === true).length > 1;
+        const total = data.reduce((a, b) => a + b, 0);
+        const currentData = data[index];
+
+        if ((currentData === total || !hasVisibleData) && isCurrentDataVisible) return;
+
+        chart.toggleDataVisibility(index);
+
+        recalcData();
+        updateLegendState();
+        chart.update();
+      });
+    });
+
+    return () => {
+      legendEl.querySelectorAll('[data-index]').forEach((el) => {
+        el.replaceWith(el.cloneNode(true));
+      });
+    };
+  }, [createLegendHTML]);
+
+  const options: ChartOptions<'doughnut'> = {
+    rotation: 270,
+    circumference: 360,
+    maintainAspectRatio: true,
+    responsive: true,
+    layout: {
+      padding: (context) => {
+        const {
+          chart: { width: w, height: h },
+        } = context;
+
+        const base = Math.min(w, h);
+
+        return w < 480 ? base * 0.1 : base * 0.15;
+      },
+    },
+    plugins: {
+      tooltip: {
+        enabled: false,
+        position: 'nearest',
+        external: (context) => {
+          const { chart, tooltip } = context;
+          const chartId = chart.id;
+
+          const canvasParent = chart.canvas.parentElement;
+          if (!canvasParent) return;
+
+          let tooltipEl = canvasParent?.querySelector('#custom-tooltip') as HTMLDivElement;
+          if (!tooltipEl && canvasParent) {
+            tooltipEl = document.createElement('div');
+            tooltipEl.id = 'custom-tooltip';
+            tooltipEl.className = 'absolute z-50 pointer-events-none';
+            canvasParent.appendChild(tooltipEl);
+          }
+
+          // Tooltip 숨김 처리
+          if (tooltip.opacity === 0 || !tooltip.body) {
+            tooltipEl.style.opacity = '0';
+            lastChartId.current = null;
+            return;
+          }
+
+          const canvasRect = chart.canvas.getBoundingClientRect();
+          const parentRect = canvasParent.getBoundingClientRect();
+
+          // parent 내부 좌표로 변환
+          const caretX = tooltip.caretX ?? canvasRect.width / 2;
+          const caretY = tooltip.caretY ?? canvasRect.height / 2;
+          const baseX = caretX + (canvasRect.left - parentRect.left);
+          const baseY = caretY + (canvasRect.top - parentRect.top);
+
+          const sameChart = lastChartId.current === chartId;
+
+          // ----- 위치 계산 -----
+          const tooltipWidth = tooltipEl.offsetWidth || 140; // 대략 기본 너비
+          const tooltipHeight = tooltipEl.offsetHeight || 60;
+
+          let finalX = baseX + 6; // 기본: 오른쪽
+          let finalY = baseY + 6;
+
+          // 오른쪽 공간이 부족하면 왼쪽으로 렌더링
+          if (caretX + tooltipWidth + 12 > canvasRect.width)
+            finalX = canvasRect.width - tooltipWidth - 6;
+
+          // 아래쪽 공간이 부족하면 위로 렌더링
+          if (caretY + tooltipHeight - 80 > canvasRect.height) {
+            finalY = canvasRect.height - tooltipHeight + 80;
+          }
+
+          tooltipEl.style.transition = sameChart ? 'all 0.1s ease' : 'none';
+          tooltipEl.style.left = `${finalX}px`;
+          tooltipEl.style.top = `${finalY}px`;
+          tooltipEl.style.opacity = '1';
+
+          lastChartId.current = chartId;
+
+          // 내용 업데이트
+          const title = tooltip.title || [];
+          const body = tooltip.body;
+          const dataPoints = tooltip.dataPoints;
+          const textColors = (dataPoints[0].dataset.borderColor as string[]).map((borderColor) =>
+            typeof borderColor === 'string' ? borderColor : '#ffb900',
+          );
+
+          const total = dataPoints[0].dataset.data.reduce((a, b) => a + b, 0);
+
+          tooltipEl.innerHTML = createTooltipLiteral({
+            title,
+            textColors,
+            body,
+            datasets: dataPoints,
+            total: total ?? 1,
+          });
+        },
+      },
+      datalabels: {
+        color: '#eaeaea',
+        font: { weight: 'bold', size: 15 },
+        offset: 10,
+        formatter: (value, context) => {
+          const dataset = context.chart.data.datasets[0].data as number[];
+          const { width } = context.chart;
+          const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+          const totalizedVaule = total ? total : dataset.reduce((a, b) => a + b, 0);
+          const percentage = truncateToDecimals((value / totalizedVaule) * 100);
+          return width >= 480
+            ? percentage > 0
+              ? `${percentage}%`
+              : null
+            : percentage >= 5
+              ? `${percentage}%`
+              : null;
+        },
+        align: (context) => {
+          // const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+          return getLabelPosition(context);
+        },
+        anchor: (context) => {
+          // const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+          return getLabelPosition(context);
+        },
+      },
+      legend: {
+        display: false,
+      },
+    },
+    cutout: '30%',
+  };
+
+  useEffect(() => {
+    const handleTouch = (e: TouchEvent) => {
+      if (!chartRef.current) return;
+      const canvas = chartRef.current.canvas;
+      const chart = chartRef.current;
+
+      const canvasRect = canvas.getBoundingClientRect();
+
+      const { chartArea } = chart;
+
+      const rect = {
+        top: canvasRect.top + chartArea.top,
+        bottom: canvasRect.top + chartArea.bottom,
+        left: canvasRect.left + chartArea.left,
+        right: canvasRect.right + chartArea.right,
+      };
+
+      if (canvasRect.width === 0 || canvasRect.height === 0) return;
+
+      const touch = e.touches[0];
+
+      const touchX = touch.clientX;
+      const touchY = touch.clientY;
+
+      const isInsideCanvas =
+        touchX >= rect.left && touchX <= rect.right && touchY >= rect.top && touchY <= rect.bottom;
+
+      if (!isInsideCanvas) {
+        // 캔버스 밖 터치 감지
+        const tooltipEl = canvas.parentElement?.querySelector('#custom-tooltip') as HTMLElement;
+        if (tooltipEl) tooltipEl.style.opacity = '0';
+
+        if (chartRef.current.tooltip) {
+          chart.setActiveElements([]);
+          chartRef.current.tooltip.setActiveElements([], { x: 0, y: 0 });
+          chartRef.current.update();
+        }
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouch);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouch);
+    };
+  }, []);
+
+  return (
+    <>
+      <div
+        className={cls(
+          'relative flex size-full min-w-0 flex-col overflow-hidden lg:overflow-visible',
+          containerClassName,
+        )}
+      >
+        {isBodyPostionLegend || (
+          <div
+            ref={legendRef}
+            className={cls(
+              legendPosition === 'after' ? 'order-3' : 'order-1',
+              'relative px-4',
+              legendClassName,
+            )}
+          />
+        )}
+        <div className="relative order-2 aspect-square w-full">
+          {data.some((dataEl) => dataEl > 0) ? (
+            <Doughnut
+              ref={chartRef}
+              data={chartData}
+              options={options}
+              plugins={[doughnutConnectorPlugin()]}
+            />
+          ) : (
+            <EmptyDonutChart />
+          )}
+        </div>
+      </div>
+      {isBodyPostionLegend && (
+        <div
+          ref={legendRef}
+          className={cls('relative flex items-center p-4 pb-10', legendClassName)}
+        />
+      )}
+    </>
+  );
+}

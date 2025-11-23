@@ -1,0 +1,6 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none"
+    xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M56 24H40V8C40 3.58 36.418 0 32 0C27.582 0 24 3.58 24 8V24H8C3.582 24 0 27.58 0 32C0 36.42 3.582 40 8 40H24V56C24 60.42 27.582 64 32 64C36.418 64 40 60.42 40 56V40H56C60.418 40 64 36.42 64 32C64 27.58 60.418 24 56 24Z"
+        fill="currentColor" />
+</svg>

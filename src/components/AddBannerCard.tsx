@@ -1,0 +1,76 @@
+'use client';
+
+import { Dispatch, SetStateAction, useRef, useState } from 'react';
+import { motion } from 'motion/react';
+import { cardTransition, cardVariants, toOpacityZero } from '#/constants/variants';
+import AddButton from '#/components/buttons/AddButton';
+
+export default function AddBannerCard({
+  openModal,
+  isAddPrevent,
+}: {
+  openModal: () => void;
+  isAddPrevent: boolean;
+}) {
+  const [isBannerAddHover, setIsBannerAddHover] = useState(false);
+  const isShakingRef = useRef<Dispatch<SetStateAction<boolean>>>(null);
+  const preventGradient = { from: '#bd1b36', to: '#ff637e' };
+  const baseDiamondCustom = {
+    boxShadow: isAddPrevent
+      ? `0px -7px 20px 5px #bd1b36, 0px 7px 22px 3px #ff637e`
+      : '0px -7px 20px 5px #bd5b00, 0px 7px 22px 3px #ffde26',
+  } as const;
+  return (
+    <motion.div
+      onHoverStart={() => setIsBannerAddHover(true)}
+      onHoverEnd={() => setIsBannerAddHover(false)}
+      variants={cardVariants}
+      whileHover={{
+        scale: 1.02,
+        background: isAddPrevent
+          ? `linear-gradient(155deg, ${preventGradient.from}, ${preventGradient.to})`
+          : 'linear-gradient(155deg, #bb4d00, #ffb900)',
+      }}
+      whileTap={{
+        scale: 1.02,
+        background: isAddPrevent
+          ? `linear-gradient(155deg, ${preventGradient.from}, ${preventGradient.to})`
+          : 'linear-gradient(155deg, #bb4d00, #ffb900)',
+      }}
+      initial="exit"
+      animate="idle"
+      transition={cardTransition}
+      onClick={() => {
+        setIsBannerAddHover(true);
+        setTimeout(() => {
+          setIsBannerAddHover(false);
+        }, 500);
+        if (isAddPrevent) {
+          return isShakingRef.current && isShakingRef.current(true);
+        }
+        openModal();
+      }}
+      className="flex cursor-pointer items-center justify-center gap-x-12 overflow-hidden rounded-xl py-6 lg:gap-x-24 lg:py-8"
+    >
+      <motion.div
+        variants={toOpacityZero}
+        initial="exit"
+        animate="idle"
+        exit="exit"
+        className="font-S-CoreDream-700 text-2xl select-none"
+      >
+        픽업 배너 추가
+      </motion.div>
+      <AddButton
+        onAddClick={() => {}}
+        isShakingRef={isShakingRef}
+        isOtherElHover={isBannerAddHover}
+        diamondCustom={
+          isAddPrevent ? { ...baseDiamondCustom, ...preventGradient } : { ...baseDiamondCustom }
+        }
+        addCustom={isAddPrevent ? preventGradient : undefined}
+        isAddPrevent={isAddPrevent}
+      />
+    </motion.div>
+  );
+}

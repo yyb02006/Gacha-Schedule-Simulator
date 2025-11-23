@@ -12,6 +12,8 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  display: 'swap',
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -25,16 +27,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="overflow-x-clip overflow-y-auto">
       <body
         className={cls(
           geistSans.variable,
           geistMono.variable,
+          spoqaHanSansNeo.variable,
           'antialiased',
-          spoqaHanSansNeo.variable
+          'mb-32',
         )}
       >
         {children}
+        <div id="portal-root" />
       </body>
     </html>
   );
