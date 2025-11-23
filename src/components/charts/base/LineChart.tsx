@@ -422,7 +422,7 @@ export default function LineChart({
   }, [mainChartRef]);
 
   return (
-    <div className={cls(height ?? '', 'relative overflow-hidden')}>
+    <div className={cls(height ?? '', 'relative overflow-hidden lg:overflow-visible')}>
       <Line ref={chartRef} data={chartData} options={options} plugins={[adaptiveTickSpacing]} />
     </div>
   );

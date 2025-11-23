@@ -519,7 +519,7 @@ export default function BarChart({
   }, [loading, data.length, mainChartRef, selectionIndex, backgroundColor]);
 
   return (
-    <div className={cls(height ?? '', 'relative overflow-hidden')}>
+    <div className={cls(height ?? '', 'relative overflow-hidden lg:overflow-visible')}>
       {!loading || (
         <div className="absolute inset-0 flex items-center justify-center rounded-b-lg bg-[#00050] backdrop-blur-sm">
           <div className="relative flex size-[100px] animate-[spin_1.5s_linear_infinite]">

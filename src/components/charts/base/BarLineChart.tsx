@@ -496,7 +496,7 @@ export default function BarLineChart({
   }, [mainChartRef]);
 
   return (
-    <div className={cls(height ?? '', 'relative overflow-hidden')}>
+    <div className={cls(height ?? '', 'relative overflow-hidden lg:overflow-visible')}>
       <Chart
         type="bar"
         ref={chartRef}

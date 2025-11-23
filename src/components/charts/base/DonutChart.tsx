@@ -2,7 +2,6 @@
 
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import EmptyDonutChart from '#/components/charts/base/EmptyDonut';
-import { useScreenWidth } from '#/hooks/useScreenWidth';
 import { cls, truncateToDecimals } from '#/libs/utils';
 import { doughnutConnectorPlugin } from '#/plugins/chartJsPlugin';
 import { Chart as ChartJS, ArcElement, Tooltip, ChartData, ChartOptions } from 'chart.js';
@@ -339,7 +338,7 @@ export default function DonutChart({
     <>
       <div
         className={cls(
-          'relative flex size-full min-w-0 flex-col overflow-hidden',
+          'relative flex size-full min-w-0 flex-col overflow-hidden lg:overflow-visible',
           containerClassName,
         )}
       >
@@ -354,13 +353,16 @@ export default function DonutChart({
           />
         )}
         <div className="relative order-2 aspect-square w-full">
-          <Doughnut
-            ref={chartRef}
-            data={chartData}
-            options={options}
-            plugins={[doughnutConnectorPlugin()]}
-          />
-          {!data.some((dataEl) => dataEl > 0) ? <EmptyDonutChart /> : null}
+          {data.some((dataEl) => dataEl > 0) ? (
+            <Doughnut
+              ref={chartRef}
+              data={chartData}
+              options={options}
+              plugins={[doughnutConnectorPlugin()]}
+            />
+          ) : (
+            <EmptyDonutChart />
+          )}
         </div>
       </div>
       {isBodyPostionLegend && (
