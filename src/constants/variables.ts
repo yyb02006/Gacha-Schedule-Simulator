@@ -2,6 +2,7 @@ import { GachaType, OperatorRarityForString } from '#/types/types';
 
 export const rarityStrings = ['sixth', 'fifth', 'fourth'] as const;
 export const obtainedTypes = ['totalObtained', 'pickupObtained', 'targetObtained'] as const;
+export const limitedGachaTypes = ['limited', 'collab'];
 export const rarities = {
   6: 'sixth',
   5: 'fifth',
