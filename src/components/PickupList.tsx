@@ -902,7 +902,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   const [isSimpleMode, setIsSimpleMode] = useState(true);
   const [options, setOptions] = useState<SimulationOptions>({
     probability: { limited: 70, normal: 50 },
-    simulationTry: 10000,
+    simulationTry: 200000,
     bannerFailureAction: 'interruption',
     showBannerImage: true,
     baseSeed: null,
