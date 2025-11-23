@@ -230,7 +230,7 @@ export type ChartRef<T extends 'bar' | 'line'> = RefObject<ChartJS<
   unknown
 > | null>;
 
-interface BaseMultiDataBrushProps<T extends PartialChartType, G extends string> {
+interface BaseMultiDataBrushProps<T extends PartialChartType> {
   labels: string[];
   primaryData: number[];
   fullDatas: number[][];
@@ -253,24 +253,24 @@ interface BaseMultiDataBrushProps<T extends PartialChartType, G extends string> 
 
 // isPercentYAxis 없으면 값은 undefined고 without으로 확정되기 때문에 total은 선택형이 됨
 // 반대로 total이 있어도 타입 두 개 다 가능하기 때문에 isPercentYAxis는 여전히 필수가 아님
-interface MultiDataBrushWithoutIsPercent<T extends PartialChartType, G extends string>
-  extends BaseMultiDataBrushProps<T, G> {
+interface MultiDataBrushWithoutIsPercent<T extends PartialChartType>
+  extends BaseMultiDataBrushProps<T> {
   isPercentYAxis?: undefined;
   total?: number;
 }
 
 // isPercentYAxis 있으면 이 타입으로 확정되므로 total도 필수 프로퍼티가 됨
-interface MultiDataBrushWithIsPercent<T extends PartialChartType, G extends string>
-  extends BaseMultiDataBrushProps<T, G> {
+interface MultiDataBrushWithIsPercent<T extends PartialChartType>
+  extends BaseMultiDataBrushProps<T> {
   isPercentYAxis: boolean;
   total: number;
 }
 
-type MultiDataBrushProps<T extends PartialChartType, G extends string> =
-  | MultiDataBrushWithoutIsPercent<T, G>
-  | MultiDataBrushWithIsPercent<T, G>;
+type MultiDataBrushProps<T extends PartialChartType> =
+  | MultiDataBrushWithoutIsPercent<T>
+  | MultiDataBrushWithIsPercent<T>;
 
-export default function MultiDataBrush<T extends PartialChartType, G extends string>({
+export default function MultiDataBrush<T extends PartialChartType>({
   labels,
   primaryData,
   fullDatas,
@@ -285,7 +285,7 @@ export default function MultiDataBrush<T extends PartialChartType, G extends str
   isPercentYAxis,
   height,
   dispatchRef,
-}: MultiDataBrushProps<T, G>) {
+}: MultiDataBrushProps<T>) {
   const chartRef = useRef<ChartJS<'line'>>(null);
   const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
   const BRUSH_MIN_WIDTH_RATIO = 0.05;
