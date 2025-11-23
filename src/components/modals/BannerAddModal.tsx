@@ -96,7 +96,7 @@ type ModalState = ExtractPayloadFromAction<'addBanner'>;
 
 type ModalAction =
   | { type: 'initialIzation' }
-  | { type: 'updateType'; payload: { gachaType: GachaType } }
+  | { type: 'updateGachaType'; payload: { gachaType: GachaType } }
   | {
       type: 'updatePickupCount';
       payload: {
@@ -116,6 +116,7 @@ const initialState: ModalState = {
     fourth: 0,
     fifth: 0,
   },
+  expiration: null,
 };
 
 const reducer = (
@@ -125,12 +126,13 @@ const reducer = (
   gachaType: GachaType;
   pickupOpersCount: { sixth: number; fourth: number; fifth: number };
   targetOpersCount: { sixth: number; fourth: number; fifth: number };
+  expiration: string | null;
 } => {
   switch (action.type) {
     case 'initialIzation': {
       return initialState;
     }
-    case 'updateType': {
+    case 'updateGachaType': {
       const { gachaType } = action.payload;
       const baseOperCount = {
         pickupOpersCount: operatorLimitByBannerType[gachaType],
@@ -143,6 +145,7 @@ const reducer = (
       return {
         gachaType,
         ...baseOperCount,
+        expiration: state.expiration,
       };
     }
     case 'updatePickupCount': {
@@ -521,8 +524,8 @@ export default function BannerAddModal({
       payload,
     });
   };
-  const updateType = (gachaType: GachaType) => {
-    dispatch({ type: 'updateType', payload: { gachaType } });
+  const updateGachaType = (gachaType: GachaType) => {
+    dispatch({ type: 'updateGachaType', payload: { gachaType } });
   };
   const onSaveClick = () => {
     if (bannerCount >= 20) return alert('배너는 20개까지만 추가 가능합니다.');
@@ -595,7 +598,7 @@ export default function BannerAddModal({
             <>
               <CustomModalContents
                 modalState={modalState}
-                onTypeClick={updateType}
+                onTypeClick={updateGachaType}
                 onPickupCountChange={updatePickupCount}
               />
               <TypeSelectionButton
