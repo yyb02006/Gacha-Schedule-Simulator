@@ -1,10 +1,18 @@
 import {
+  Dummy,
   GachaSimulationMergedResult,
   GachaSimulationResult,
+  InitialOptions,
   Operator,
 } from '#/components/PickupList';
-import { obtainedTypes, rarities, rarityStrings } from '#/constants/variables';
+import {
+  obtainedTypes,
+  operatorLimitByBannerType,
+  rarities,
+  rarityStrings,
+} from '#/constants/variables';
 import { GachaType, OperatorRarity, OperatorRarityForString } from '#/types/types';
+import { v4 } from 'uuid';
 
 /**
  *
@@ -424,6 +432,7 @@ export function deriveWorkerSeeds(baseSeed: number, n: number): number[] {
  */
 export function mergeGachaSimulationResults(
   results: GachaSimulationResult[],
+  baseSeed: number,
   simulationTry?: number,
 ) {
   const preMergedResult = results.reduce<GachaSimulationMergedResult>(
@@ -502,6 +511,7 @@ export function mergeGachaSimulationResults(
     },
     {
       total: {
+        baseSeed,
         seeds: [],
         simulationTry: 0,
         simulationSuccess: 0,
@@ -576,3 +586,304 @@ export function isMobileDevice(): boolean {
 
   return false;
 }
+
+/**
+ * 주어진 오퍼레이터 수를 배너별 한도에 맞게 검증하여 반환
+ *
+ * @param {Record<OperatorRarityForString, number>} opertCount - 현재 배너에 설정된 오퍼레이터 수
+ * @param {Record<OperatorRarityForString, number>} limit - 해당 배너 타입에서 허용되는 최대 오퍼레이터 수
+ * @returns {{ sixth: number; fifth: number; fourth: number }} 검증 후 각 등급별 오퍼레이터 수
+ *
+ * @example
+ * const counts = getValidatedOpersCount(
+ *   { sixth: 3, fifth: 5, fourth: 2 },
+ *   { sixth: 2, fifth: 3, fourth: 0 }
+ * );
+ * console.log(counts); // { sixth: 2, fifth: 3, fourth: 0 }
+ */
+export const getValidatedOpersCount = (
+  opertCount: Record<OperatorRarityForString, number>,
+  limit: Record<OperatorRarityForString, number>,
+): { sixth: number; fifth: number; fourth: number } => {
+  const validOpersCountEntries = (['sixth', 'fifth', 'fourth'] as const).map<
+    [OperatorRarityForString, number]
+  >((key) => [
+    key,
+    typeof opertCount[key] === 'number' && opertCount[key] <= limit[key]
+      ? opertCount[key]
+      : limit[key],
+  ]);
+  return Object.fromEntries(validOpersCountEntries) as Record<OperatorRarityForString, number>;
+};
+
+/**
+ * 픽업데이터를 검증하고 정리하여, UUID 채우기, 오퍼레이터 카테고리화, 배너 타입 보정 등을 수행
+ *
+ * @param {Dummy[]} pickupDatas - 검증할 배너 데이터 배열
+ * @returns {Dummy[]} 검증 및 보정이 완료된 배너 데이터 배열
+ *
+ * @example
+ * const validated = validatePickupDatas(rawPickupDatas);
+ * console.log(validated);
+ *
+ * @example
+ * // 각 배너의 오퍼레이터 수, 배너 타입, 만료일, 이미지 등 검증 후 보정됨
+ * validated.forEach(banner => {
+ *   console.log(banner.id, banner.gachaType, banner.operators.length);
+ * });
+ */
+export const validatePickupDatas = (pickupDatas: Dummy[]) => {
+  return pickupDatas.map<Dummy>(
+    (
+      {
+        active,
+        additionalResource: { simpleMode, extendedMode },
+        expiration,
+        firstSixthTry,
+        gachaType,
+        id,
+        image,
+        maxGachaAttempts,
+        minGachaAttempts,
+        name,
+        operators,
+        pickupDetails: { pickupOpersCount, targetOpersCount, simpleMode: simpleOpersCount },
+      },
+      index,
+      original,
+    ) => {
+      const allowedGachaTypes = Object.keys(operatorLimitByBannerType);
+      const validatedGachaType = allowedGachaTypes.includes(gachaType) ? gachaType : 'limited';
+      const validatedExpiration =
+        expiration && !isNaN(new Date(expiration).getTime()) && expiration.trim() !== ''
+          ? expiration
+          : null;
+      const validatedMax =
+        typeof maxGachaAttempts === 'number' && maxGachaAttempts !== 9999
+          ? Math.max(Math.min(maxGachaAttempts, 3000), 0)
+          : 9999;
+      const validatedPickupOpersCount = getValidatedOpersCount(
+        pickupOpersCount,
+        operatorLimitByBannerType[validatedGachaType],
+      );
+      const validateTargetOpersCount = getValidatedOpersCount(
+        targetOpersCount,
+        validatedPickupOpersCount,
+      );
+      const validatedSimplePickupOpersCount = getValidatedOpersCount(
+        simpleOpersCount.pickupOpersCount,
+        operatorLimitByBannerType[validatedGachaType],
+      );
+      const validatedSimpleTargetOpersCount = getValidatedOpersCount(
+        simpleOpersCount.targetOpersCount,
+        validatedSimplePickupOpersCount,
+      );
+      const categorizedOperators = operators.reduce<Record<OperatorRarityForString, Operator[]>>(
+        (
+          acc,
+          { currentQty, isPityReward, name, operatorId, operatorType, rarity, targetCount },
+          currentINdex,
+        ) => {
+          const isRarityValid = [4, 5, 6].includes(rarity);
+          if (isRarityValid) {
+            const newOperator: Operator = {
+              currentQty: typeof currentQty === 'number' ? Math.max(Math.min(currentQty, 5), 0) : 0,
+              name: typeof name === 'string' ? name : `${rarity}성 오퍼레이터 ${currentINdex + 1}`,
+              targetCount: targetCount === 6 ? 6 : 1,
+              rarity,
+              operatorType,
+              operatorId,
+              isPityReward,
+            };
+            acc[rarities[rarity]].push(newOperator);
+          }
+          return acc;
+        },
+        { sixth: [], fifth: [], fourth: [] },
+      );
+      const validatedOperators: Operator[] = [
+        ...categorizedOperators.sixth.reduce<Operator[]>((acc, current, currentIndex, original) => {
+          const isUnderLimit = currentIndex < operatorLimitByBannerType[validatedGachaType].sixth;
+          if (isUnderLimit && current.rarity === 6) {
+            const isFirstOperInTwoOnLimited =
+              validatedGachaType === 'limited' &&
+              original.length > 1 &&
+              !original.some(({ operatorType }) => operatorType === 'limited') &&
+              currentIndex === 0;
+            const isFirstOperOnLimited = validatedGachaType === 'collab' && currentIndex === 0;
+            const isFirstOperOnSingle = validatedGachaType === 'single' && currentIndex === 0;
+            const isFirstOrSecondOperOnRotation =
+              validatedGachaType === 'rotation' && currentIndex < 2;
+            const newOperator: Operator = {
+              ...current,
+              operatorType:
+                isFirstOperInTwoOnLimited || isFirstOperOnLimited ? 'limited' : 'normal',
+              operatorId:
+                typeof current.operatorId === 'string' &&
+                !original.some(
+                  ({ operatorId }, index) =>
+                    index !== currentIndex && operatorId === current.operatorId,
+                )
+                  ? current.operatorId
+                  : v4(),
+              isPityReward:
+                isFirstOperInTwoOnLimited ||
+                isFirstOperOnLimited ||
+                isFirstOperOnSingle ||
+                isFirstOrSecondOperOnRotation,
+            };
+            acc.push(newOperator);
+          }
+          return acc;
+        }, []),
+        ...categorizedOperators.fifth.reduce<Operator[]>((acc, current, currentIndex, original) => {
+          const isUnderLimit = currentIndex < operatorLimitByBannerType[gachaType].fifth;
+          if (isUnderLimit && current.rarity === 5) {
+            const newOperator: Operator = {
+              ...current,
+              operatorType:
+                validatedGachaType === 'collab' && currentIndex < 2 ? 'limited' : 'normal',
+              operatorId:
+                typeof current.operatorId === 'string' &&
+                original.find(
+                  ({ operatorId }, index) =>
+                    index !== currentIndex && operatorId === current.operatorId,
+                )
+                  ? v4()
+                  : current.operatorId,
+              isPityReward: false,
+            };
+            acc.push(newOperator);
+          }
+          return acc;
+        }, []),
+        ...categorizedOperators.fourth.reduce<Operator[]>(
+          (acc, current, currentIndex, original) => {
+            const isUnderLimit = currentIndex < operatorLimitByBannerType[gachaType].fourth;
+            if (isUnderLimit && current.rarity === 4) {
+              const newOperator: Operator = {
+                ...current,
+                operatorType: 'normal',
+                operatorId:
+                  typeof current.operatorId === 'string' &&
+                  original.find(
+                    ({ operatorId }, index) =>
+                      index !== currentIndex && operatorId === current.operatorId,
+                  )
+                    ? v4()
+                    : current.operatorId,
+                isPityReward: false,
+              };
+              acc.push(newOperator);
+            }
+            return acc;
+          },
+          [],
+        ),
+      ];
+      return {
+        active: typeof active === 'boolean' ? active : true,
+        additionalResource: {
+          simpleMode:
+            typeof simpleMode === 'number' ? Math.max(Math.min(simpleMode, 9999999), 0) : 0,
+          extendedMode:
+            typeof extendedMode === 'number' ? Math.max(Math.min(extendedMode, 9999999), 0) : 0,
+        },
+        expiration: validatedExpiration,
+        firstSixthTry: typeof firstSixthTry === 'boolean' ? firstSixthTry : false,
+        id:
+          typeof id === 'string' &&
+          !original.some(
+            (originalEl, originalIndex) => originalIndex !== index && originalEl.id === id,
+          )
+            ? id
+            : v4(),
+        gachaType: validatedGachaType,
+        image:
+          image &&
+          /^\/images\/.*\.jpg$/.test(image) &&
+          validatedExpiration &&
+          Date.now() < new Date(validatedExpiration).getTime()
+            ? image
+            : null,
+        maxGachaAttempts: validatedMax,
+        minGachaAttempts:
+          typeof minGachaAttempts === 'number' && minGachaAttempts <= validatedMax
+            ? minGachaAttempts
+            : validatedMax,
+        name: typeof name === 'string' ? name : `배너 ${index + 1}`,
+        pickupDetails: {
+          pickupChance:
+            validatedGachaType === 'contract' || validatedGachaType === 'orient'
+              ? 100
+              : validatedGachaType === 'limited'
+                ? 70
+                : 50,
+          pickupOpersCount: validatedPickupOpersCount,
+          targetOpersCount: validateTargetOpersCount,
+          simpleMode: {
+            pickupOpersCount: validatedSimplePickupOpersCount,
+            targetOpersCount: validatedSimpleTargetOpersCount,
+          },
+        },
+        operators: validatedOperators,
+      };
+    },
+  );
+};
+
+/**
+ *
+ * 옵션을 검증하고 정리하여, 모바일 환경 여부에 따른 값 제한, 값 조정, 타입 보정 등을 수행
+ *
+ * - `initialResource`는 0 ~ 9,999,999 범위로 강제 조정
+ * - `batchGachaGoal`은 허용되지 않는 값일 경우 `null`로 설정
+ * - `isTrySim`, `isSimpleMode`는 불리언이 아닐 경우 기본값 `true`로 설정
+ * - `options.simulationTry`는 디바이스 타입(모바일 여부)에 따라 최대값이 제한
+ * - `options.bannerFailureAction`은 허용되지 않은 값이면 `'interruption'`으로 설정
+ * - `probability`는 고정 값 `{ limited: 70, normal: 50 }` 로 재정의
+ *
+ * @param {InitialOptions} initialOptions - 검증할 초기 시뮬레이션 옵션 데이터
+ * @returns {InitialOptions} 검증 및 보정이 완료된 옵션 데이터
+ *
+ * @example
+ * const validated = validateOptionDatas(rawOptions);
+ * console.log(validated.initialResource); // 보정된 초기 자원
+ *
+ * @example
+ * // 시뮬레이션 횟수 제한이 디바이스에 따라 조정됨
+ * console.log(validated.options.simulationTry);
+ */
+export const validateOptionDatas = (initialOptions: InitialOptions): InitialOptions => {
+  const { batchGachaGoal, initialResource, isSimpleMode, isTrySim, options } = initialOptions;
+  const isMobile = isMobileDevice();
+  const validatedInitialResource =
+    typeof initialResource === 'number' ? Math.max(Math.min(initialResource, 9999999), 0) : 0;
+  const validatedBatchGachaGoal = ['allFirst', 'allMax', null].includes(batchGachaGoal)
+    ? batchGachaGoal
+    : null;
+  const validatedIsTrySim = typeof isTrySim === 'boolean' ? isTrySim : true;
+  const validatedIsSimpleMode = typeof isSimpleMode === 'boolean' ? isSimpleMode : true;
+  const validatedOptions = {
+    bannerFailureAction: ['continueExecution', 'interruption'].includes(options.bannerFailureAction)
+      ? options.bannerFailureAction
+      : 'interruption',
+    showBannerImage: typeof options.showBannerImage === 'boolean' ? options.showBannerImage : true,
+    simulationTry: isMobile
+      ? options.simulationTry > 200000
+        ? 200000
+        : options.simulationTry
+      : options.simulationTry > 1000000
+        ? 1000000
+        : options.simulationTry,
+    probability: { limited: 70, normal: 50 },
+    baseSeed: options.baseSeed ? Math.max(Math.min(options.baseSeed, 4294967295), 0) : null,
+  };
+  return {
+    batchGachaGoal: validatedBatchGachaGoal,
+    initialResource: validatedInitialResource,
+    isSimpleMode: validatedIsSimpleMode,
+    isTrySim: validatedIsTrySim,
+    options: validatedOptions,
+  };
+};
