@@ -12,6 +12,7 @@ interface ModalProps {
   children: ReactNode;
   isOpen: boolean;
   onClose: () => void;
+  hasModalClass?: boolean;
   backdropBlur?: boolean;
   ref?: RefObject<HTMLDivElement | null>;
   scrollRef?: RefObject<OverlayScrollbarsComponentRef<'div'> | null>;
@@ -24,6 +25,7 @@ export default function Modal({
   children,
   isOpen,
   onClose,
+  hasModalClass = true,
   backdropBlur,
   ref,
   scrollRef,
@@ -104,6 +106,7 @@ export default function Modal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className={cls(
+              hasModalClass ? 'modal' : '',
               'fixed top-0 left-0 flex h-dvh w-dvw justify-center bg-[#00000090]',
               backdropBlur ? 'backdrop-blur-sm' : '',
             )}
