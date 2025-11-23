@@ -5,7 +5,7 @@ import SimulatorOptionModal from '#/components/modals/SimulatorOptionModal';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { cardVariants, toOpacityZero } from '#/constants/variants';
 import { AnimatePresence, motion } from 'motion/react';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
 import SimulatorTypeButton from '#/components/buttons/SimulatorTypeButton';
 import ToggleButton from '#/components/buttons/ToggleButton';
 import { SimulationOptions } from '#/components/PickupList';
@@ -331,6 +331,7 @@ const ControlPanel = ({
 };
 
 export default function OptionBar({
+  seed,
   isTrySim,
   setIsTrySim,
   isSimpleMode,
@@ -342,7 +343,11 @@ export default function OptionBar({
   setBatchGachaGoal,
   initialResource,
   setInitialResource,
+  isImportLoading,
+  onImport,
+  onExport,
 }: {
+  seed?: number;
   isTrySim: boolean;
   setIsTrySim: Dispatch<SetStateAction<boolean>>;
   isSimpleMode: boolean;
@@ -354,6 +359,9 @@ export default function OptionBar({
   setBatchGachaGoal: Dispatch<SetStateAction<BatchGachaGoal>>;
   initialResource: number;
   setInitialResource: Dispatch<SetStateAction<number>>;
+  isImportLoading: boolean;
+  onImport: (e: ChangeEvent<HTMLInputElement>) => void;
+  onExport: () => void;
 }) {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -387,6 +395,7 @@ export default function OptionBar({
       setBatchGachaGoal(null);
     }
   };
+
   return (
     <motion.div
       variants={cardVariants}
@@ -402,14 +411,19 @@ export default function OptionBar({
       >
         <div className="flex items-center gap-x-2">
           {runningTime ? (
-            <span className="space-x-2.5">
-              <span>
-                시뮬레이션 <span className="text-amber-400">완료</span>
-              </span>
-              <span className="font-S-CoreDream-300 text-sm">
-                ⏱ {truncateToDecimals(runningTime / 1000)}초
-              </span>
-            </span>
+            <div className="lg:flex lg:items-end lg:gap-x-2.5">
+              <div className="flex flex-nowrap items-end gap-x-2.5">
+                <p>
+                  시뮬레이션 <span className="text-amber-400">완료</span>
+                </p>
+                <p className="font-S-CoreDream-300 text-sm">
+                  ⏱ {truncateToDecimals(runningTime / 1000)}초
+                </p>
+              </div>
+              {seed !== undefined && (
+                <p className="font-S-CoreDream-300 text-[12px]">🎲 시드 : {seed}</p>
+              )}
+            </div>
           ) : (
             <>
               <span className="lg:hidden">
@@ -445,6 +459,9 @@ export default function OptionBar({
         onClose={() => setIsSettingsModalOpen(false)}
         options={options}
         setOptions={setOptions}
+        isImportLoading={isImportLoading}
+        onImport={onImport}
+        onExport={onExport}
       />
       <Help isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </motion.div>

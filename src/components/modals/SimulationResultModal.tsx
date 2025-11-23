@@ -175,9 +175,14 @@ export default function SimulationResultModal({ isOpen, onClose, result }: Setti
             whileInView="idle"
             viewport={{ once: true, amount: 0.5 }}
             initial="exit"
-            className="font-S-CoreDream-700 text-2xl"
+            className="space-x-3"
           >
-            <span className="text-amber-500">시뮬레이션</span> 결과
+            <span className="font-S-CoreDream-700 text-2xl">
+              <span className="text-amber-500">시뮬레이션</span> 결과
+            </span>
+            <span className="font-S-CoreDream-300 text-[12px]">
+              🎲 시드 : {result.total.baseSeed}
+            </span>
           </motion.div>
           <div className="fixed right-4 z-[1000] lg:relative lg:right-auto lg:z-auto">
             <CancelButton handleCancel={onClose} />

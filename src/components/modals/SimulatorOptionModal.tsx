@@ -1,17 +1,19 @@
 'use client';
 
 import Modal from '#/components/modals/Modal';
-import { Dispatch, SetStateAction, useLayoutEffect, useRef, useState } from 'react';
+import { ChangeEvent, Dispatch, SetStateAction, useLayoutEffect, useRef, useState } from 'react';
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { InsetNumberInput } from '#/components/PickupBanner';
 import { AnimatePresence, motion } from 'motion/react';
 import { toOpacityZero } from '#/constants/variants';
-import { initialOptions, SimulationOptions } from '#/components/PickupList';
+import { InitialOptions, SimulationOptions } from '#/components/PickupList';
 import { isMobileDevice, stringToNumber } from '#/libs/utils';
 import ToggleButton from '#/components/buttons/ToggleButton';
 import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 import OverlayScrollbar from '#/components/OverlayScrollbar';
+import ExportDatas from '#/components/buttons/ExportDatas';
+import ImportDatas from '#/components/buttons/ImportDatas';
 
 const Help = ({ onClose }: { onClose: () => void }) => {
   const isMouseDownOnTarget = useRef<boolean>(false);
@@ -45,13 +47,13 @@ const Help = ({ onClose }: { onClose: () => void }) => {
     >
       <OverlayScrollbar className="size-full">
         <div className="flex h-full justify-center">
-          <div className="my-auto h-fit max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] lg:rounded-lg lg:px-6 lg:py-6">
+          <div className="my-auto h-fit max-w-[400px] space-y-5 bg-[#202020] px-4 pt-6 pb-[120px] sm:rounded-lg sm:px-6 sm:py-6">
             <div className="flex items-center justify-between">
               <h1 className="font-S-CoreDream-500 text-xl">
                 <span className="text-red-400">옵션 작동</span> 안내
               </h1>
               <div className="size-11" />
-              <div className="fixed right-4 z-[1000] lg:relative lg:right-auto lg:z-auto">
+              <div className="fixed right-4 z-[1000] sm:relative sm:right-auto sm:z-auto">
                 <CancelButton
                   handleCancel={() => {
                     onClose();
@@ -113,6 +115,9 @@ interface SimulatorOptionModalProps {
   onClose: () => void;
   options: SimulationOptions;
   setOptions: Dispatch<SetStateAction<SimulationOptions>>;
+  isImportLoading: boolean;
+  onImport: (e: ChangeEvent<HTMLInputElement>) => void;
+  onExport: () => void;
 }
 
 export default function SimulatorOptionModal({
@@ -120,6 +125,9 @@ export default function SimulatorOptionModal({
   onClose,
   options,
   setOptions,
+  isImportLoading,
+  onImport,
+  onExport,
 }: SimulatorOptionModalProps) {
   const [localOptions, setLocalOptions] = useState<SimulationOptions>(options);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -135,8 +143,8 @@ export default function SimulatorOptionModal({
     const initialOptions = localStorage.getItem('options');
     if (initialOptions) {
       const {
-        options: { bannerFailureAction, showBannerImage, simulationTry },
-      }: initialOptions = JSON.parse(initialOptions);
+        options: { bannerFailureAction, showBannerImage, simulationTry, baseSeed },
+      }: InitialOptions = JSON.parse(initialOptions);
       try {
         setLocalOptions({
           bannerFailureAction: ['continueExecution', 'interruption'].includes(bannerFailureAction)
@@ -151,15 +159,25 @@ export default function SimulatorOptionModal({
               ? 1000000
               : simulationTry,
           probability: { limited: 70, normal: 50 },
+          baseSeed,
         });
       } catch {
         console.warn('로컬스토리지 데이터 파싱 실패, 기본 로컬 옵션 데이터 사용');
       }
     }
-  }, []);
+  }, [isMobile]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} backdropBlur>
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        onClose();
+        setLocalOptions(options);
+      }}
+      className="option"
+      hasModalClass={false}
+      backdropBlur
+    >
       <div className="flex h-fit w-full max-w-[400px] flex-1 flex-col gap-4 gap-y-8 rounded-xl bg-[#202020] px-4 py-6 lg:w-[480px] lg:px-6">
         <AnimatePresence>
           {isHelpOpen && (
@@ -188,7 +206,12 @@ export default function SimulatorOptionModal({
               <p className="select-none">?</p>
             </button>
           </motion.h1>
-          <CancelButton handleCancel={onClose} />
+          <CancelButton
+            handleCancel={() => {
+              onClose();
+              setLocalOptions(options);
+            }}
+          />
         </div>
         <div className="flex flex-col gap-y-6">
           <div className="flex flex-col gap-y-3">
@@ -225,6 +248,42 @@ export default function SimulatorOptionModal({
               >
                 회
               </motion.div>
+            </InsetNumberInput>
+          </div>
+          <div className="flex flex-col gap-y-3">
+            <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
+              주사위 시드
+            </motion.div>
+            <InsetNumberInput
+              name=""
+              onInputBlur={(e, syncLocalValue) => {
+                const { value } = e.currentTarget;
+                if (stringToNumber(value) <= 4294967295) {
+                  setLocalOptions((p) => ({
+                    ...p,
+                    baseSeed: stringToNumber(value),
+                  }));
+                } else {
+                  syncLocalValue(
+                    localOptions.baseSeed !== null ? localOptions.baseSeed.toString() : '',
+                  );
+                }
+              }}
+              currentValue={localOptions.baseSeed !== null ? localOptions.baseSeed.toString() : ''}
+              isSeedNull={localOptions.baseSeed === null}
+              showAttemptsSign
+              useLocaleString={false}
+              max={4294967295}
+              inputWidth="w-full"
+              fullSize="w-full"
+              animate
+            >
+              <TypeSelectionButton
+                name="시드 제거"
+                className="px-3 text-sm"
+                onTypeClick={() => setLocalOptions((p) => ({ ...p, baseSeed: null }))}
+                hoverBackground="linear-gradient(155deg, #bb4d00, #ffb900)"
+              />
             </InsetNumberInput>
           </div>
           <div className="flex flex-col gap-y-3">
@@ -274,6 +333,10 @@ export default function SimulatorOptionModal({
             onSaveClick();
           }}
         />
+        <div className="flex gap-4 [&>*]:flex-1">
+          <ExportDatas onExport={onExport} />
+          <ImportDatas onImport={onImport} isImportLoading={isImportLoading} />
+        </div>
       </div>
     </Modal>
   );
