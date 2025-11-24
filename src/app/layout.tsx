@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { spoqaHanSansNeo } from '#/fonts/spoqa';
 import { cls } from '#/libs/utils';
+import { Analytics } from '@vercel/analytics/react';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -39,6 +40,7 @@ export default function RootLayout({
       >
         {children}
         <div id="portal-root" />
+        <Analytics />
       </body>
     </html>
   );

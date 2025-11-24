@@ -218,37 +218,42 @@ export default function SimulatorOptionModal({
             <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
               시뮬레이션 횟수
             </motion.div>
-            <InsetNumberInput
-              name=""
-              pattern={LOCALE_NUMBER_PATTERN.source}
-              className="text-sky-500"
-              onInputBlur={(e, syncLocalValue) => {
-                const { value } = e.currentTarget;
-                const newValue = value.replace(/,/g, '');
-                if (stringToNumber(newValue) <= tryLimit) {
-                  setLocalOptions((p) => ({
-                    ...p,
-                    simulationTry: stringToNumber(newValue),
-                  }));
-                } else {
-                  syncLocalValue(localOptions.simulationTry.toLocaleString());
-                }
-              }}
-              currentValue={localOptions.simulationTry.toLocaleString()}
-              inputWidth="w-20"
-              max={1000000}
-              animate
-            >
-              <motion.div
-                variants={toOpacityZero}
-                initial="exit"
-                animate="idle"
-                exit="exit"
-                className="relative top-[2px] mr-3 -ml-2 text-sm select-none"
+            <div className="flex items-center gap-x-3">
+              <InsetNumberInput
+                name=""
+                pattern={LOCALE_NUMBER_PATTERN.source}
+                className="text-sky-500"
+                onInputBlur={(e, syncLocalValue) => {
+                  const { value } = e.currentTarget;
+                  const newValue = value.replace(/,/g, '');
+                  if (stringToNumber(newValue) <= tryLimit) {
+                    setLocalOptions((p) => ({
+                      ...p,
+                      simulationTry: stringToNumber(newValue),
+                    }));
+                  } else {
+                    syncLocalValue(localOptions.simulationTry.toLocaleString());
+                  }
+                }}
+                currentValue={localOptions.simulationTry.toLocaleString()}
+                inputWidth="w-20"
+                max={isMobile ? 200000 : 1000000}
+                animate
               >
-                회
-              </motion.div>
-            </InsetNumberInput>
+                <motion.div
+                  variants={toOpacityZero}
+                  initial="exit"
+                  animate="idle"
+                  exit="exit"
+                  className="relative top-[2px] mr-3 -ml-2 text-sm select-none"
+                >
+                  회
+                </motion.div>
+              </InsetNumberInput>
+              <span className="font-S-CoreDream-300 text-sm text-red-400">
+                {isMobile ? '최대 200,000회' : '최대 1,000,000회'}
+              </span>
+            </div>
           </div>
           <div className="flex flex-col gap-y-3">
             <motion.div variants={toOpacityZero} initial="exit" animate="idle" exit="exit">
