@@ -400,14 +400,14 @@ const gachaRateSimulate = ({
         firstSixthTry,
         name,
         operators,
-        pickupDetails: { pickupChance: bannerPickupChance, pickupOpersCount, simpleMode },
+        pickupDetails: { pickupOpersCount, simpleMode },
       } = pickupDatas[di];
       const pickupChance =
         gachaType === 'limited'
-          ? probability.limited
-          : gachaType === 'single' || gachaType === 'rotation'
-            ? probability.normal
-            : bannerPickupChance;
+          ? 70
+          : gachaType === 'single' || gachaType === 'rotation' || gachaType === 'collab'
+            ? 50
+            : 100;
       // 배너 셋팅 시작 시 추가 오리지늄 계산 및 계산된 오리지늄을 배너 시작 재화에 할당
       // 이후 배너 진입 횟수만큼 나눠야 함
       // calculateOrundum(simulationConfig, additionalResource);
