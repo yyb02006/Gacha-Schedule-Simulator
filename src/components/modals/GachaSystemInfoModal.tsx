@@ -163,7 +163,7 @@ const GachaSystemInfoModalContent = ({
                 하여 98회 연속 실패 시 100%가 됩니다.
               </p>
               <p className="text-sm text-[#bababa]">
-                70회 연속 실패 확률 = 0.0037%, 80회 연속 실패 확률 = 0.0000488%
+                70회 연속 실패 확률 = 0.01546%, 80회 연속 실패 확률 = 0.0000758%
               </p>
             </li>
             <li>
