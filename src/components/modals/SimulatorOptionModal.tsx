@@ -250,9 +250,15 @@ export default function SimulatorOptionModal({
                   회
                 </motion.div>
               </InsetNumberInput>
-              <span className="font-S-CoreDream-300 text-sm text-red-400">
+              <motion.span
+                variants={toOpacityZero}
+                initial="exit"
+                animate="idle"
+                exit="exit"
+                className="font-S-CoreDream-300 text-sm text-red-400"
+              >
                 {isMobile ? '최대 200,000회' : '최대 1,000,000회'}
-              </span>
+              </motion.span>
             </div>
           </div>
           <div className="flex flex-col gap-y-3">
