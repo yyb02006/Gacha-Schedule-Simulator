@@ -485,7 +485,9 @@ const gachaRateSimulate = ({
           const current = operators[oi];
           const { currentQty, name, operatorId, operatorType, rarity, targetCount, isPityReward } =
             current;
-          const gachaGoalCount = globalGachaGoalCount ?? targetCount;
+          const gachaGoalCount =
+            globalGachaGoalCount !== null && rarity === 6 ? globalGachaGoalCount : targetCount;
+
           if (gachaType === 'rotation' && rarity === 6 && isPityReward) {
             rotationPityRewardCount++;
           } else if (gachaType === 'collab' && rarity === 5 && operatorType === 'limited') {
