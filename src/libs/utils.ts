@@ -706,18 +706,14 @@ export const validatePickupDatas = (pickupDatas: Dummy[]) => {
           const isUnderLimit = currentIndex < operatorLimitByBannerType[validatedGachaType].sixth;
           if (isUnderLimit && current.rarity === 6) {
             const isFirstOperInTwoOnLimited =
-              validatedGachaType === 'limited' &&
-              original.length > 1 &&
-              !original.some(({ operatorType }) => operatorType === 'limited') &&
-              currentIndex === 0;
-            const isFirstOperOnLimited = validatedGachaType === 'collab' && currentIndex === 0;
+              validatedGachaType === 'limited' && original.length > 1 && currentIndex === 0;
+            const isFirstOperOnCollab = validatedGachaType === 'collab' && currentIndex === 0;
             const isFirstOperOnSingle = validatedGachaType === 'single' && currentIndex === 0;
             const isFirstOrSecondOperOnRotation =
               validatedGachaType === 'rotation' && currentIndex < 2;
             const newOperator: Operator = {
               ...current,
-              operatorType:
-                isFirstOperInTwoOnLimited || isFirstOperOnLimited ? 'limited' : 'normal',
+              operatorType: isFirstOperInTwoOnLimited || isFirstOperOnCollab ? 'limited' : 'normal',
               operatorId:
                 typeof current.operatorId === 'string' &&
                 !original.some(
@@ -728,7 +724,7 @@ export const validatePickupDatas = (pickupDatas: Dummy[]) => {
                   : v4(),
               isPityReward:
                 isFirstOperInTwoOnLimited ||
-                isFirstOperOnLimited ||
+                isFirstOperOnCollab ||
                 isFirstOperOnSingle ||
                 isFirstOrSecondOperOnRotation,
             };
