@@ -81,7 +81,14 @@ function LazyRender({
 }
 
 const createTooltipLiteral =
-  (bannerHistogram: number[], pityHistogram: number[]) =>
+  (
+    bannerHistogram: number[],
+    pityHistogram: number[],
+    startIndex: {
+      start: number;
+      end: number;
+    },
+  ) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
     const stringifiedValue = dataset.formattedValue ?? '';
@@ -90,6 +97,7 @@ const createTooltipLiteral =
       .slice(0, dataset.dataIndex + 1)
       .reduce((a, b) => a + b, 0);
     const { dataIndex } = dataset;
+    const currentIndex = startIndex.start + dataIndex;
 
     return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
@@ -105,13 +113,13 @@ const createTooltipLiteral =
           </p>
           <p>
             천장 도달 횟수 :
-            <span class="font-S-CoreDream-500 text-teal-500">${pityHistogram[dataIndex]} 회</span>
+            <span class="font-S-CoreDream-500 text-teal-500">${pityHistogram[currentIndex]} 회</span>
           </p>
         </div>
         <div class="space-y-[3px]">
           <p>
             소모 재화 :
-            <span class="font-S-CoreDream-500 text-rose-400">${((dataIndex + 1) * 600).toLocaleString()} 합성옥</span>
+            <span class="font-S-CoreDream-500 text-rose-400">${((currentIndex + 1) * 600).toLocaleString()} 합성옥</span>
           </p>
           <p>
             현재 차수 비중 :
@@ -356,7 +364,11 @@ const BannerSuccessTrialCounts = forwardRef<
               cutoffIndex={successIndexUntilCutoff}
               height={chartHeight}
               lazyLoading
-              createTooltipLiteral={createTooltipLiteral(bannerHistogram, pityHistogram)}
+              createTooltipLiteral={createTooltipLiteral(
+                bannerHistogram,
+                pityHistogram,
+                selectionIndex,
+              )}
               mainChartRef={mainChartRef}
             />
             {enableBrush && (
