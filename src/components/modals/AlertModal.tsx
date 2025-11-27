@@ -88,7 +88,7 @@ function BaseModal(
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 flex h-dvh w-dvw justify-center bg-black/60"
+            className="fixed top-0 left-0 flex h-dvh w-dvw justify-center bg-black/60 p-4"
           >
             {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
             <div
@@ -99,7 +99,7 @@ function BaseModal(
               aria-modal="true"
               aria-labelledby={ariaLabelledBy}
               aria-describedby={ariaDescribedBy}
-              className="relative my-auto max-w-[90%]"
+              className="relative my-auto w-full max-w-[400px]"
             >
               {children}
             </div>
