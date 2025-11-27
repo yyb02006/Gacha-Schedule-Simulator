@@ -32,12 +32,12 @@ import {
 } from '#/libs/utils';
 import LoadingSpinner from '#/components/LoadingSpinner';
 import { useAlert } from '#/hooks/useAlert';
-import ResetAlert from '#/components/modals/ResetAlert';
 import ToTopButton from '#/components/buttons/ToTopButton';
 import { importPickupData } from '#/components/buttons/ImportDatas';
 import DragIndicator from '#/components/modals/DragIndicator';
 import { exportPickupData } from '#/components/buttons/ExportDatas';
 import { v4 } from 'uuid';
+import CustomAlert from '#/components/modals/CustomAlert';
 
 export type Operator = {
   operatorId: string;
@@ -925,7 +925,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   const [isLoading, setIsLoading] = useState(false);
   const [isImportLoading, setIsImportLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const { isAlertOpen, openAlert, alertMessage, confirm, cancel } = useAlert();
+  const { isAlertOpen, openAlert, alertMessage, alertTitle, confirm, cancel } = useAlert();
   const listRef = useRef<HTMLDivElement>(null);
 
   const addBanner = (payload: ExtractPayloadFromAction<'addBanner'>) => {
@@ -1042,10 +1042,9 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   };
 
   const runSimulation = async () => {
-    if (isLoading) return;
+    const hasActivePickupData = pickupDatas.some(({ active }) => active);
+    if (isLoading || !hasActivePickupData) return;
     const { workerCount } = getOptimalWorkerCount();
-    // const { isMobile } = getOptimalWorkerCount();
-    // const workerCount = 1;
     if (workerCount <= 0) return;
     setIsLoading(true);
     isRunning.current = true;
@@ -1177,8 +1176,6 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
 
     const mergedResult = mergeGachaSimulationResults(results, baseSeed);
 
-    console.log(mergedResult);
-    console.log(baseSeed);
     setResults(mergedResult);
     setIsLoading(false);
   };
@@ -1238,22 +1235,53 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
           <div className="mb-12 flex space-x-16 sm:space-x-24">
             <ResetButton
               onResetClick={async () => {
-                const result = await openAlert(
-                  <span>
-                    시스템 설정을 제외한 모든{' '}
-                    <span className="text-amber-400">시뮬레이션 설정</span>과{' '}
-                    <span className="text-amber-400">가챠일정 배너의 구성</span>이{' '}
-                    <span className="text-red-400">초기화</span>됩니다.
-                  </span>,
-                );
+                const result = await openAlert({
+                  title: (
+                    <span>
+                      시뮬레이션 <span className="text-red-400">초기화</span>
+                    </span>
+                  ),
+                  message: (
+                    <>
+                      <div>
+                        시스템 설정을 제외한 모든{' '}
+                        <span className="text-amber-400">시뮬레이션 설정</span>과{' '}
+                        <span className="text-amber-400">가챠일정 배너의 구성</span>이{' '}
+                        <span className="text-red-400">초기화</span>됩니다.
+                      </div>
+                      <div className="text-sm text-red-400">알겠습니까악!</div>
+                    </>
+                  ),
+                });
                 if (result) {
                   resetSimulator();
                 }
               }}
             />
             <PlayButton
-              onPlayClick={() => {
-                runSimulation();
+              onPlayClick={async () => {
+                const hasActivePickupData = pickupDatas.some(({ active }) => active);
+                if (!hasActivePickupData) {
+                  await openAlert({
+                    title: (
+                      <span>
+                        시뮬레이션 <span className="text-red-400">불가능</span>
+                      </span>
+                    ),
+                    message: (
+                      <>
+                        <div>
+                          활성화된 가챠일정이{' '}
+                          <span className="text-red-400">존재하지 않습니다.</span>
+                        </div>
+                        <div className="text-sm text-red-400">가챠 일정을 확인해주시라요~</div>
+                      </>
+                    ),
+                    isCancelActive: false,
+                  });
+                } else {
+                  runSimulation();
+                }
               }}
             />
           </div>
@@ -1302,10 +1330,11 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
         onSavePreset={addBannerUsePreset}
         pickupDataPresets={pickupDataPresets}
       />
-      <ResetAlert
+      <CustomAlert
         isOpen={isAlertOpen}
         onCancel={cancel}
         onConfirm={confirm}
+        title={alertTitle}
         message={alertMessage}
       />
       <LoadingSpinner
