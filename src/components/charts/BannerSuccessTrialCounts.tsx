@@ -91,19 +91,19 @@ const createTooltipLiteral =
   ) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
+    const { dataIndex } = dataset;
+    const currentIndex = startIndex.start + dataIndex;
     const stringifiedValue = dataset.formattedValue ?? '';
     const rawValue = dataset.raw as number;
     const sumUpBannerHistogram = bannerHistogram
-      .slice(0, dataset.dataIndex + 1)
+      .slice(0, currentIndex + 1)
       .reduce((a, b) => a + b, 0);
-    const { dataIndex } = dataset;
-    const currentIndex = startIndex.start + dataIndex;
 
     return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
   ${title.map((t) => /*html*/ `<p class="text-lg font-S-CoreDream-500"><span style="color: ${textColors[0]};">${t}</span>차</p>`).join('')}
   ${body
-    .map((b, i) => {
+    .map(() => {
       return /*html*/ `
       <div class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
         <div class="space-y-[3px]">

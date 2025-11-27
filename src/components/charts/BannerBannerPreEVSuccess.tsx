@@ -24,7 +24,7 @@ const createTooltipLiteral =
     <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
     ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
     ${body
-      .map((b, i) => {
+      .map(() => {
         return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[3px] text-sm whitespace-nowrap">
             <p>
               기대값 도달 전 성공률 :

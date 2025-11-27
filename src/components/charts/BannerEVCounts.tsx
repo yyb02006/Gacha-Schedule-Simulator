@@ -23,7 +23,7 @@ const createTooltipLiteral =
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
   ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
   ${body
-    .map((b, i) => {
+    .map(() => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
           <p>
             성공 시 기대값 : <span style="color: #51a2ff;" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
