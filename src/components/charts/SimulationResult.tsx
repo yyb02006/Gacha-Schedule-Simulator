@@ -101,7 +101,7 @@ const SimulationResult = forwardRef<
             <ul className="space-y-1">
               <li>시뮬레이션 횟수 : {result.total.simulationTry.toLocaleString()} 회</li>
               <li>성공한 시뮬레이션 : {result.total.simulationSuccess.toLocaleString()} 회</li>
-              <li className="font-S-CoreDream-400 text-amber-400">
+              <li className="font-S-CoreDream-500 text-standard text-amber-400">
                 일정 소화 성공률 :{' '}
                 {truncateToDecimals(
                   (result.total.simulationSuccess / result.total.simulationTry) * 100,
@@ -111,7 +111,7 @@ const SimulationResult = forwardRef<
             </ul>
             <ul className="space-y-1">
               <li>총 가챠 횟수 : {result.total.totalGachaRuns.toLocaleString()} 회</li>
-              <li className="font-S-CoreDream-400 text-amber-400">
+              <li className="font-S-CoreDream-500 text-standard text-amber-400">
                 시뮬레이션 당 평균 가챠횟수 :{' '}
                 {Math.floor(
                   safeNumberOrZero(result.total.totalGachaRuns / result.total.simulationTry),
@@ -121,7 +121,7 @@ const SimulationResult = forwardRef<
             </ul>
             <ul className="space-y-1">
               <li>천장 획득 횟수 : {result.total.anyPityRewardObtained.toLocaleString()} 회</li>
-              <li className="font-S-CoreDream-400 text-amber-400">
+              <li className="font-S-CoreDream-500 text-standard text-amber-400">
                 시뮬레이션 당 천장 획득 횟수 :{' '}
                 {truncateToDecimals(
                   result.total.anyPityRewardObtained / result.total.simulationTry,
