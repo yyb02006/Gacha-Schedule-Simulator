@@ -3,16 +3,31 @@ import { useState, useCallback, ReactNode } from 'react';
 export function useAlert() {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState<ReactNode>('');
+  const [alertTitle, setAlertTitle] = useState<ReactNode>('');
+  const [isCancelActive, setIsCancelActive] = useState(true);
   const [resolver, setResolver] = useState<(v: boolean) => void>(() => () => {});
 
-  const openAlert = useCallback((msg: ReactNode) => {
-    setAlertMessage(msg);
-    setIsAlertOpen(true);
+  const openAlert = useCallback(
+    ({
+      title,
+      message,
+      isCancelActive = true,
+    }: {
+      title: ReactNode;
+      message: ReactNode;
+      isCancelActive?: boolean;
+    }) => {
+      setAlertMessage(message);
+      setAlertTitle(title);
+      setIsCancelActive(isCancelActive);
+      setIsAlertOpen(true);
 
-    return new Promise<boolean>((resolve) => {
-      setResolver(() => resolve);
-    });
-  }, []);
+      return new Promise<boolean>((resolve) => {
+        setResolver(() => resolve);
+      });
+    },
+    [],
+  );
 
   const confirm = () => {
     resolver(true);
@@ -24,5 +39,12 @@ export function useAlert() {
     setIsAlertOpen(false);
   };
 
-  return { isAlertOpen, alertMessage, openAlert, confirm, cancel };
+  return {
+    isAlertOpen,
+    alertMessage,
+    alertTitle,
+    openAlert,
+    confirm,
+    cancel: isCancelActive ? cancel : undefined,
+  };
 }
