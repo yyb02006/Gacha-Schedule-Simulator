@@ -29,29 +29,35 @@ const createTooltipLiteral =
   ${body
     .map(() => {
       return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
-          <p>
-            진입 시 평균 잔여 합성옥 : <span style="color: #ff6467;" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
-          </p>
           <div class="space-y-[3px]">
             <p>
-              필요 합성옥 기대값 :
+              추가 합성옥 :
               <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-                ${(truncateToDecimals(bannerResults[dataIndex].bannerWinGachaRuns / bannerResults[dataIndex].bannerSuccess, 0) * 600).toLocaleString()} 합성옥
+                ${bannerResults[dataIndex].additionalResource.toLocaleString()} 합성옥
               </span>
             </p>
             <p>
-              소모 합성옥 기대값 누적 :
+              진입 시 평균 잔여 합성옥 : <span style="color: #ff6467;" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
+            </p>
+          </div>    
+          <div class="space-y-[3px]">
+            <p>
+              소모 합성옥 평균 :
               <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-                ${(
-                  truncateToDecimals(
-                    bannerResults
-                      .slice(0, dataIndex + 1)
-                      .reduce(
-                        (a, b) => a + safeNumberOrZero(b.bannerWinGachaRuns / b.bannerSuccess),
-                        0,
-                      ),
-                    0,
-                  ) * 600
+                ${truncateToDecimals((bannerResults[dataIndex].bannerWinGachaRuns / bannerResults[dataIndex].bannerSuccess) * 600, 0).toLocaleString()} 합성옥
+              </span>
+            </p>
+            <p>
+              소모 합성옥 누적 평균 :
+              <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
+                ${truncateToDecimals(
+                  bannerResults
+                    .slice(0, dataIndex + 1)
+                    .reduce(
+                      (a, b) => a + safeNumberOrZero(b.bannerWinGachaRuns / b.bannerSuccess),
+                      0,
+                    ) * 600,
+                  0,
                 ).toLocaleString()} 합성옥
               </span>
             </p>
