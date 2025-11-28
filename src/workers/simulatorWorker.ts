@@ -416,7 +416,7 @@ const gachaRateSimulate = ({
         if (isSimpleMode) {
           currentOrundum += additionalResource.simpleMode;
         } else {
-          currentOrundum += additionalResource.simpleMode;
+          currentOrundum += additionalResource.extendedMode;
         }
         currentBanner.bannerStartingCurrency += currentOrundum;
       }
