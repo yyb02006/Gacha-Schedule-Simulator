@@ -637,7 +637,7 @@ export const validatePickupDatas = (pickupDatas: Dummy[]) => {
     (
       {
         active,
-        additionalResource: { simpleMode, extendedMode },
+        additionalResource,
         expiration,
         firstSixthTry,
         gachaType,
@@ -781,9 +781,13 @@ export const validatePickupDatas = (pickupDatas: Dummy[]) => {
         active: typeof active === 'boolean' ? active : true,
         additionalResource: {
           simpleMode:
-            typeof simpleMode === 'number' ? Math.max(Math.min(simpleMode, 9999999), 0) : 0,
+            typeof additionalResource.simpleMode === 'number'
+              ? Math.max(Math.min(additionalResource.simpleMode, 9999999), 0)
+              : 0,
           extendedMode:
-            typeof extendedMode === 'number' ? Math.max(Math.min(extendedMode, 9999999), 0) : 0,
+            typeof additionalResource.extendedMode === 'number'
+              ? Math.max(Math.min(additionalResource.extendedMode, 9999999), 0)
+              : 0,
         },
         expiration: validatedExpiration,
         firstSixthTry: typeof firstSixthTry === 'boolean' ? firstSixthTry : false,
