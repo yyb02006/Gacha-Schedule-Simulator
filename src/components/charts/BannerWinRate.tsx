@@ -4,8 +4,8 @@ import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { ChartType, TooltipItem } from 'chart.js';
 import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
-import BrushBarLineChart from '#/components/charts/base/BrushBarLineChart';
-import { BarLineChartData } from '#/components/charts/base/BarLineChart';
+import BrushMultiChart from '#/components/charts/base/BrushMultiChart';
+import { MultiChartData } from '#/components/charts/base/MultiChart';
 import { forwardRef } from 'react';
 
 export interface CreateTooltipLiteralProps<T extends ChartType> {
@@ -95,7 +95,7 @@ const BannerWinRate = forwardRef<
   const { labels, datas } = result
     ? result.perBanner.reduce<{
         labels: string[];
-        datas: { bar: number[][]; line: number[][] };
+        datas: { faliure: number[][]; success: number[][] };
       }>(
         (acc, { name, currencyShortageFailure, maxAttemptsFailure, bannerSuccess }) => {
           acc.labels.push(name);
@@ -106,19 +106,19 @@ const BannerWinRate = forwardRef<
               arr[index] = [value];
             }
           };
-          safePush(acc.datas.line, 0, bannerSuccess);
-          safePush(acc.datas.bar, 0, currencyShortageFailure);
-          safePush(acc.datas.bar, 1, maxAttemptsFailure);
+          safePush(acc.datas.success, 0, bannerSuccess);
+          safePush(acc.datas.faliure, 0, currencyShortageFailure);
+          safePush(acc.datas.faliure, 1, maxAttemptsFailure);
           return acc;
         },
-        { labels: [], datas: { bar: [], line: [] } },
+        { labels: [], datas: { faliure: [], success: [] } },
       )
-    : { labels: [], datas: { bar: [], line: [] } };
-  const fullDatas: BarLineChartData = {
+    : { labels: [], datas: { faliure: [], success: [] } };
+  const fullDatas: MultiChartData = {
     bar: [
       {
         label: '성공',
-        data: datas.line[0],
+        data: datas.success[0],
         color: {
           backgroundColor: '#51a2ffcc',
           borderColor: '#51a2ff',
@@ -130,7 +130,7 @@ const BannerWinRate = forwardRef<
         ? [
             {
               label: '재화부족',
-              data: datas.bar[0],
+              data: datas.faliure[0],
               color: {
                 backgroundColor: '#ff5e5ecc',
                 borderColor: '#ff5e5e',
@@ -144,7 +144,7 @@ const BannerWinRate = forwardRef<
         ? [
             {
               label: '횟수부족',
-              data: datas.bar[1],
+              data: datas.faliure[1],
               color: {
                 backgroundColor: '#fe9a00cc',
                 borderColor: '#fe9a00',
@@ -169,9 +169,9 @@ const BannerWinRate = forwardRef<
       chartRef={ref}
     >
       {result ? (
-        <BrushBarLineChart
+        <BrushMultiChart
           labels={labels}
-          primaryData={[6700, 9200, 5600, 3100, 8700, 1600, 2800, 9000, 10000, 4400, 8500]}
+          primaryData={datas.success[0]}
           fullDatas={fullDatas}
           brushColor={{
             backgroundColor: '#8e51ffCC',
@@ -189,7 +189,7 @@ const BannerWinRate = forwardRef<
             isCurrencyBarOff={result?.total.isTrySim}
             isLimitBarOff={result?.total.isSimpleMode}
           />
-        </BrushBarLineChart>
+        </BrushMultiChart>
       ) : null}
     </ChartWrapper>
   );
