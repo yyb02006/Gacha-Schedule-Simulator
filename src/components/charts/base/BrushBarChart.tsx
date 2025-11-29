@@ -26,7 +26,10 @@ interface BrushBarChartProps<T extends 'bar' | 'line'> {
   isPercentYAxis?: boolean;
   chartHeight?: string;
   brushHeight?: string;
-  createTooltipLiteral: CreateTooltipLiteral<'bar'>;
+  createTooltipLiteral: (selectionIndex: {
+    start: number;
+    end: number;
+  }) => CreateTooltipLiteral<'bar'>;
 }
 
 export default function BrushBarChart({
@@ -80,7 +83,7 @@ export default function BrushBarChart({
           cutoffIndex={cutoffIndex}
           isPercentYAxis={isPercentYAxis}
           height={chartHeight}
-          createTooltipLiteral={createTooltipLiteral}
+          createTooltipLiteral={createTooltipLiteral(selectionIndex)}
         />
         {enableBrush && (
           <Brush

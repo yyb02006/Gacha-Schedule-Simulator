@@ -9,13 +9,15 @@ import { forwardRef } from 'react';
 
 const createTooltipLiteral =
   (result: GachaSimulationMergedResult) =>
+  (selectionIndex: { start: number; end: number }) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
     const stringifiedValue = dataset.formattedValue ?? '';
     const rawValue = dataset.raw as number;
     const { dataIndex } = dataset;
+    const currentIndex = selectionIndex.start + dataIndex;
 
-    const { bannerSuccess } = result.perBanner[dataIndex];
+    const { bannerSuccess } = result.perBanner[currentIndex];
 
     const cumulativeToEVIndex = bannerSuccess / result.total.simulationTry;
 

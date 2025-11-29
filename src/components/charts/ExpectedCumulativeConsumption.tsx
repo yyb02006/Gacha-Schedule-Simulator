@@ -1,7 +1,7 @@
 'use client';
 
 import ChartWrapper from '#/components/charts/base/ChartWrapper';
-import { GachaSimulationMergedResult } from '#/components/PickupList';
+import { BannerResult, GachaSimulationMergedResult } from '#/components/PickupList';
 import { ChartType } from 'chart.js';
 import { safeNumberOrZero, truncateToDecimals } from '#/libs/utils';
 import BrushLineChart from '#/components/charts/base/BrushLineChart';
@@ -13,25 +13,26 @@ export type CreateTooltipLiteral<T extends ChartType> = (
 ) => string;
 
 const createTooltipLiteral =
-  (result: GachaSimulationMergedResult) =>
+  (bannerResults: BannerResult[]) =>
+  (selectionIndex: { start: number; end: number }) =>
   ({ title, textColors, body, datasets }: CreateTooltipLiteralProps<'line'>) => {
     const dataset = datasets[0];
     const stringifiedValue = dataset.formattedValue ?? '';
     const { dataIndex } = dataset;
+    const currentIndex = selectionIndex.start + dataIndex;
+    const currentBanner = bannerResults[currentIndex];
 
     const expectedVaule = truncateToDecimals(
-      Math.ceil(
-        result.perBanner[dataIndex].bannerWinGachaRuns / result.perBanner[dataIndex].bannerSuccess,
-      ) * 600,
+      Math.ceil(currentBanner.bannerWinGachaRuns / currentBanner.bannerSuccess) * 600,
       0,
     );
 
     return /*html*/ `
-  <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
-  ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
-  ${body
-    .map(() => {
-      return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[3px] text-sm whitespace-nowrap">
+    <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
+      ${title.map((t) => `<p style="color: ${textColors[0]}" class="text-lg font-S-CoreDream-500">${t}</p>`).join('')}
+      ${body
+        .map(() => {
+          return /*html*/ `<div key={i} class="font-S-CoreDream-300 space-y-[3px] text-sm whitespace-nowrap">
           <p>
             누적 소모 : <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 합성옥</span>
           </p>
@@ -42,9 +43,9 @@ const createTooltipLiteral =
             </span>
           </p>
         </div>`;
-    })
-    .join('')}
-</div>`;
+        })
+        .join('')}
+    </div>`;
   };
 
 const ExpectedCumulativeConsumption = forwardRef<
@@ -102,7 +103,7 @@ const ExpectedCumulativeConsumption = forwardRef<
           enableBrush={enableBrush}
           chartHeight={chartHeight}
           brushHeight={brushHeight}
-          createTooltipLiteral={createTooltipLiteral(result)}
+          createTooltipLiteral={createTooltipLiteral(result.perBanner)}
         />
       ) : null}
     </ChartWrapper>
