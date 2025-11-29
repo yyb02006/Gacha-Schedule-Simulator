@@ -308,7 +308,7 @@ export default function BarLineChart({
                   ? selectionIndex.start + index + 1
                   : '';
             } else {
-              return isValueSring ? value : labels[value];
+              return isValueSring ? value : this.getLabels()[value];
             }
           },
         },

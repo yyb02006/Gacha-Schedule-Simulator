@@ -249,7 +249,7 @@ export default function LineChart({
           autoSkip: false,
           font: { family: 'S-CoreDream-300', size: 11 },
           color: (ctx) => (ctx.index === hoveredIndexRef.current ? '#ffb900' : '#666'),
-          callback: (value, index) => {
+          callback: function (this, value, index) {
             const isValueSring = typeof value === 'string';
             const gapMultiplier = Math.min(Math.ceil(data.length / 199), 10);
             if (data.length > 20) {
@@ -259,7 +259,7 @@ export default function LineChart({
                   ? selectionIndex.start + index + 1
                   : '';
             } else {
-              return isValueSring ? value : labels[value];
+              return isValueSring ? value : this.getLabels()[value];
             }
           },
         },
