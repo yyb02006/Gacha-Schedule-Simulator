@@ -97,7 +97,7 @@ const BannerWinRate = forwardRef<
         labels: string[];
         datas: { faliure: number[][]; success: number[][] };
       }>(
-        (acc, { name, currencyShortageFailure, maxAttemptsFailure, bannerSuccess }) => {
+        (acc, { name, maxAttemptsFailure, bannerSuccess }) => {
           acc.labels.push(name);
           const safePush = <T,>(arr: T[][], index: number, value: T) => {
             if (arr[index]) {
@@ -106,8 +106,10 @@ const BannerWinRate = forwardRef<
               arr[index] = [value];
             }
           };
+          const summedCurrencyShortageFailure =
+            result.total.simulationTry - bannerSuccess - maxAttemptsFailure;
           safePush(acc.datas.success, 0, bannerSuccess);
-          safePush(acc.datas.faliure, 0, currencyShortageFailure);
+          safePush(acc.datas.faliure, 0, summedCurrencyShortageFailure);
           safePush(acc.datas.faliure, 1, maxAttemptsFailure);
           return acc;
         },
