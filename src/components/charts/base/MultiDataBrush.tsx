@@ -397,6 +397,7 @@ export default function MultiDataBrush<T extends PartialChartType>({
           display: false,
           color: '#3c3c3c',
         },
+        suggestedMax: total,
         beginAtZero: true,
         ticks: {
           maxTicksLimit: 6,
