@@ -18,10 +18,13 @@ import { ChartRef } from '#/components/charts/base/Brush';
 
 const createTooltipLiteral =
   (bannerResults: BannerResult[]) =>
+  (selectionIndex: { start: number; end: number }) =>
   ({ title, textColors, body, datasets }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
     const stringifiedValue = dataset.formattedValue ?? '';
     const { dataIndex } = dataset;
+    const currentIndex = selectionIndex.start + dataIndex;
+    const currentBanner = bannerResults[currentIndex];
 
     return /*html*/ `
   <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
@@ -33,7 +36,7 @@ const createTooltipLiteral =
             <p>
               추가 합성옥 :
               <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-                ${bannerResults[dataIndex].additionalResource.toLocaleString()} 합성옥
+                ${currentBanner.additionalResource.toLocaleString()} 합성옥
               </span>
             </p>
             <p>
@@ -44,7 +47,7 @@ const createTooltipLiteral =
             <p>
               소모 합성옥 평균 :
               <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
-                ${truncateToDecimals((bannerResults[dataIndex].bannerWinGachaRuns / bannerResults[dataIndex].bannerSuccess) * 600, 0).toLocaleString()} 합성옥
+                ${truncateToDecimals((currentBanner.bannerWinGachaRuns / currentBanner.bannerSuccess) * 600, 0).toLocaleString()} 합성옥
               </span>
             </p>
             <p>
@@ -52,7 +55,7 @@ const createTooltipLiteral =
               <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">
                 ${truncateToDecimals(
                   bannerResults
-                    .slice(0, dataIndex + 1)
+                    .slice(0, currentIndex + 1)
                     .reduce(
                       (a, b) => a + safeNumberOrZero(b.bannerWinGachaRuns / b.bannerSuccess),
                       0,
@@ -84,19 +87,17 @@ const Legend = ({
     chart: null,
     selectionIndex: null,
   });
-  const { cumulative, remained } = result.perBanner
-    .slice(legendData.selectionIndex?.start, legendData.selectionIndex?.end)
-    .reduce(
-      (a, b) => {
-        a.cumulative += b.additionalResource;
-        a.remained =
-          a.remained +
-          b.additionalResource -
-          truncateToDecimals(b.bannerWinGachaRuns / b.bannerSuccess, 0) * 600;
-        return a;
-      },
-      { cumulative: result.total.initialResource, remained: result.total.initialResource },
-    );
+  const { cumulative, remained } = result.perBanner.slice(0, legendData.selectionIndex?.end).reduce(
+    (a, b) => {
+      a.cumulative += b.additionalResource;
+      a.remained =
+        a.remained +
+        b.additionalResource -
+        truncateToDecimals(b.bannerWinGachaRuns / b.bannerSuccess, 0) * 600;
+      return a;
+    },
+    { cumulative: result.total.initialResource, remained: result.total.initialResource },
+  );
   useEffect(() => {
     dispatchRef.current = setLegendData;
   }, [dispatchRef]);

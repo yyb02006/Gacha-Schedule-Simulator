@@ -84,7 +84,7 @@ const createTooltipLiteral =
   (
     bannerHistogram: number[],
     pityHistogram: number[],
-    startIndex: {
+    selectionIndex: {
       start: number;
       end: number;
     },
@@ -92,7 +92,7 @@ const createTooltipLiteral =
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
     const { dataIndex } = dataset;
-    const currentIndex = startIndex.start + dataIndex;
+    const currentIndex = selectionIndex.start + dataIndex;
     const stringifiedValue = dataset.formattedValue ?? '';
     const rawValue = dataset.raw as number;
     const sumUpBannerHistogram = bannerHistogram
@@ -100,41 +100,41 @@ const createTooltipLiteral =
       .reduce((a, b) => a + b, 0);
 
     return /*html*/ `
-  <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
-  ${title.map((t) => /*html*/ `<p class="text-lg font-S-CoreDream-500"><span style="color: ${textColors[0]};">${t}</span>차</p>`).join('')}
-  ${body
-    .map(() => {
-      return /*html*/ `
-      <div class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
-        <div class="space-y-[3px]">
-          <p>
-            현재 차수 성공 횟수 :
-            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
-          </p>
-          <p>
-            천장 도달 횟수 :
-            <span class="font-S-CoreDream-500 text-teal-500">${pityHistogram[currentIndex]} 회</span>
-          </p>
+    <div class="space-y-3 rounded-xl bg-[#202020] opacity-90 px-4 py-3 shadow-xl shadow-[#141414]">
+    ${title.map((t) => /*html*/ `<p class="text-lg font-S-CoreDream-500"><span style="color: ${textColors[0]};">${t}</span>차</p>`).join('')}
+    ${body
+      .map(() => {
+        return /*html*/ `
+        <div class="font-S-CoreDream-300 space-y-3 text-sm whitespace-nowrap">
+          <div class="space-y-[3px]">
+            <p>
+              현재 차수 성공 횟수 :
+              <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${stringifiedValue} 회</span>
+            </p>
+            <p>
+              천장 도달 횟수 :
+              <span class="font-S-CoreDream-500 text-teal-500">${pityHistogram[currentIndex]} 회</span>
+            </p>
+          </div>
+          <div class="space-y-[3px]">
+            <p>
+              소모 재화 :
+              <span class="font-S-CoreDream-500 text-rose-400">${((currentIndex + 1) * 600).toLocaleString()} 합성옥</span>
+            </p>
+            <p>
+              현재 차수 비중 :
+              <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(rawValue / total) * 100)}%</span>
+            </p>
+            <p>
+              누적 성공 확률 :
+              <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(sumUpBannerHistogram / total) * 100)}%</span>
+            </p>
+          </div>
         </div>
-        <div class="space-y-[3px]">
-          <p>
-            소모 재화 :
-            <span class="font-S-CoreDream-500 text-rose-400">${((currentIndex + 1) * 600).toLocaleString()} 합성옥</span>
-          </p>
-          <p>
-            현재 차수 비중 :
-            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(rawValue / total) * 100)}%</span>
-          </p>
-          <p>
-            누적 성공 확률 :
-            <span style="color: ${textColors[0]};" class="font-S-CoreDream-500">${truncateToDecimals(safeNumberOrZero(sumUpBannerHistogram / total) * 100)}%</span>
-          </p>
-        </div>
-      </div>
-    `;
-    })
-    .join('')}
-  </div>`;
+      `;
+      })
+      .join('')}
+    </div>`;
   };
 
 const Legend = ({

@@ -13,6 +13,7 @@ export type CreateTooltipLiteral<T extends ChartType> = (
 
 const createTooltipLiteral =
   (result: GachaSimulationMergedResult) =>
+  () =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
     const { parsed, dataIndex } = dataset;

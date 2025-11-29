@@ -127,7 +127,7 @@ const externalTooltipHandler =
     });
   };
 
-export type BarLineChartData = Record<
+export type MultiChartData = Record<
   'line' | 'bar',
   {
     label: string;
@@ -139,9 +139,9 @@ export type BarLineChartData = Record<
   }[]
 >;
 
-interface BarLineChartProps {
+interface MultiChartProps {
   labels: string[];
-  fullDatas: BarLineChartData;
+  fullDatas: MultiChartData;
   primaryData: number[];
   mainChartRef: RefObject<ChartJS<
     'bar' | 'line',
@@ -161,7 +161,7 @@ interface BarLineChartProps {
   createTooltipLiteral: CreateTooltipLiteral<'bar' | 'line'>;
 }
 
-export default function BarLineChart({
+export default function MultiChart({
   labels,
   fullDatas,
   primaryData,
@@ -174,7 +174,7 @@ export default function BarLineChart({
   cutoffIndex,
   height,
   createTooltipLiteral,
-}: BarLineChartProps) {
+}: MultiChartProps) {
   const isMount = useIsMount();
   const categoryPercentage = primaryData.length < 50 ? 0.9 : primaryData.length < 150 ? 0.8 : 0.9;
   const chartRef = useRef<ChartJS<
@@ -308,7 +308,7 @@ export default function BarLineChart({
                   ? selectionIndex.start + index + 1
                   : '';
             } else {
-              return isValueSring ? value : labels[value];
+              return isValueSring ? value : this.getLabels()[value];
             }
           },
         },

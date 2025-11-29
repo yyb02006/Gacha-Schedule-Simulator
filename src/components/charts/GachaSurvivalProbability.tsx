@@ -4,8 +4,8 @@ import ChartWrapper from '#/components/charts/base/ChartWrapper';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { ChartType } from 'chart.js';
 import { truncateToDecimals } from '#/libs/utils';
-import BrushBarLineChart from '#/components/charts/base/BrushBarLineChart';
-import { BarLineChartData } from '#/components/charts/base/BarLineChart';
+import BrushMultiChart from '#/components/charts/base/BrushMultiChart';
+import { MultiChartData } from '#/components/charts/base/MultiChart';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
 import { forwardRef } from 'react';
 
@@ -70,7 +70,7 @@ const GachaSurvivalProbability = forwardRef<
   const { labels, datas } = result
     ? result.perBanner.reduce<{
         labels: string[];
-        datas: { bar: number[][]; line: number[][] };
+        datas: { failure: number[][]; success: number[][] };
       }>(
         (acc, { name, currencyShortageFailure, maxAttemptsFailure, actualEntryCount }) => {
           acc.labels.push(name);
@@ -82,9 +82,9 @@ const GachaSurvivalProbability = forwardRef<
               arr[index] = [value];
             }
           };
-          safePush(acc.datas.line, 0, actualEntryCount);
+          safePush(acc.datas.success, 0, actualEntryCount);
           safePush(
-            acc.datas.bar,
+            acc.datas.failure,
             0,
             result.total.bannerFailureAction === 'interruption'
               ? currencyShortageFailure + maxAttemptsFailure
@@ -92,26 +92,15 @@ const GachaSurvivalProbability = forwardRef<
           );
           return acc;
         },
-        { labels: [], datas: { bar: [], line: [] } },
+        { labels: [], datas: { failure: [], success: [] } },
       )
-    : { labels: [], datas: { bar: [], line: [] } };
-  const fullDatas: BarLineChartData = {
-    bar: [
-      {
-        label: '중단',
-        data: datas.bar[0],
-        color: {
-          backgroundColor: '#ff6467CC',
-          borderColor: '#ff6467',
-          hoverBackgroundColor: '#8e51ffcc',
-          hoverBorderColor: '#8e51ff',
-        },
-      },
-    ],
+    : { labels: [], datas: { failure: [], success: [] } };
+  // bar와 line의 앞 뒤 순서는 중요하지 않지만, 성공 데이터가 가장 앞에 있어야 함
+  const fullDatas: MultiChartData = {
     line: [
       {
         label: '도달 성공',
-        data: datas.line[0],
+        data: datas.success[0],
         color: {
           backgroundColor: '#51a2ffcc',
           borderColor: '#51a2ff',
@@ -120,7 +109,20 @@ const GachaSurvivalProbability = forwardRef<
         },
       },
     ],
+    bar: [
+      {
+        label: '중단',
+        data: datas.failure[0],
+        color: {
+          backgroundColor: '#ff6467CC',
+          borderColor: '#ff6467',
+          hoverBackgroundColor: '#8e51ffcc',
+          hoverBorderColor: '#8e51ff',
+        },
+      },
+    ],
   };
+
   return (
     <ChartWrapper
       header={
@@ -133,9 +135,9 @@ const GachaSurvivalProbability = forwardRef<
       chartRef={ref}
     >
       {result ? (
-        <BrushBarLineChart
+        <BrushMultiChart
           labels={labels}
-          primaryData={[10000, 9220, 8600, 8500, 7700, 6200, 4300, 3600, 2700, 2000, 1300]}
+          primaryData={datas.success[0]}
           fullDatas={fullDatas}
           brushColor={{
             backgroundColor: '#8e51ffCC',
@@ -150,7 +152,7 @@ const GachaSurvivalProbability = forwardRef<
           createTooltipLiteral={createTooltipLiteral}
         >
           <Legend />
-        </BrushBarLineChart>
+        </BrushMultiChart>
       ) : null}
     </ChartWrapper>
   );

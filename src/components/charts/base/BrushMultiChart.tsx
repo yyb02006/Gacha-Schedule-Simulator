@@ -1,15 +1,15 @@
 import { Dispatch, ReactNode, RefObject, SetStateAction, useRef } from 'react';
 import { Chart as ChartJS, Point } from 'chart.js';
 import { CreateTooltipLiteral } from '#/components/charts/BannerWinRate';
-import BarLineChart, { BarLineChartData } from '#/components/charts/base/BarLineChart';
+import MultiChart, { MultiChartData } from '#/components/charts/base/MultiChart';
 import MultiDataBrush from '#/components/charts/base/MultiDataBrush';
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
 import { safeNumberOrZero } from '#/libs/utils';
 
-interface BrushBarLineChartProps<T extends 'bar' | 'line'> {
+interface BrushMultiChartProps<T extends 'bar' | 'line'> {
   labels: string[];
   primaryData: number[];
-  fullDatas: BarLineChartData;
+  fullDatas: MultiChartData;
   brushColor: Record<'backgroundColor' | 'borderColor', string | string[]>;
   dispatchRef?: RefObject<Dispatch<SetStateAction<LegendData<T>>> | null>;
   total: number;
@@ -24,7 +24,7 @@ interface BrushBarLineChartProps<T extends 'bar' | 'line'> {
   createTooltipLiteral: CreateTooltipLiteral<'bar' | 'line'>;
 }
 
-export default function BrushBarLineChart({
+export default function BrushMultiChart({
   labels,
   primaryData,
   fullDatas,
@@ -40,7 +40,7 @@ export default function BrushBarLineChart({
   dispatchRef,
   children,
   createTooltipLiteral,
-}: BrushBarLineChartProps<'bar' | 'line'>) {
+}: BrushMultiChartProps<'bar' | 'line'>) {
   const mainChartRef = useRef<ChartJS<
     'bar' | 'line',
     (number | [number, number] | null)[] | (number | Point | null)[],
@@ -61,11 +61,16 @@ export default function BrushBarLineChart({
     end: Math.round((primaryData.length - 1) * initialSelectionEnd) + 1,
   }).current;
 
+  const sortedFullDatas = [
+    ...fullDatas.line.map(({ data }) => data),
+    ...fullDatas.bar.map(({ data }) => data),
+  ];
+
   return (
     <>
       {children}
       <div className="relative space-y-1">
-        <BarLineChart
+        <MultiChart
           labels={labels}
           primaryData={primaryData}
           fullDatas={fullDatas}
@@ -83,7 +88,7 @@ export default function BrushBarLineChart({
           <MultiDataBrush
             labels={labels}
             primaryData={primaryData}
-            fullDatas={Object.values(fullDatas).flatMap((data) => data.map(({ data }) => data))}
+            fullDatas={sortedFullDatas}
             mainChartRef={mainChartRef}
             selectionIndex={selectionIndex}
             selection={selection}

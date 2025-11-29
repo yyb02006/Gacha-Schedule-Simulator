@@ -285,7 +285,7 @@ export default function BarChart({
                   ? selectionIndex.start + index + 1
                   : '';
             } else {
-              return isValueSring ? value : labels[value];
+              return isValueSring ? value : this.getLabels()[value];
             }
           },
         },

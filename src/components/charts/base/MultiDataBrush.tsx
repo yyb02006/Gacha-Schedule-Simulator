@@ -309,12 +309,13 @@ export default function MultiDataBrush<T extends PartialChartType>({
       const filteredData = fullDatas.map((data) =>
         data.slice(selectionIndex.start, selectionIndex.end),
       );
+      const filteredLabels = labels.slice(selectionIndex.start, selectionIndex.end);
 
       mainChartRef.current.data.datasets.forEach((dataset, index) => {
         dataset.data = filteredData[index];
       });
 
-      mainChartRef.current.data.labels = labels.slice(selectionIndex.start, selectionIndex.end);
+      mainChartRef.current.data.labels = filteredLabels;
       mainChartRef.current.update();
 
       if (dispatchRef?.current) {
@@ -335,12 +336,13 @@ export default function MultiDataBrush<T extends PartialChartType>({
         const filteredData = fullDatas.map((data) =>
           data.slice(selectionIndex.start, selectionIndex.end),
         );
+        const filteredLabels = labels.slice(selectionIndex.start, selectionIndex.end);
 
         mainChartRef.current.data.datasets.forEach((dataset, index) => {
           dataset.data = filteredData[index];
         });
 
-        mainChartRef.current.data.labels = labels.slice(selectionIndex.start, selectionIndex.end);
+        mainChartRef.current.data.labels = filteredLabels;
         mainChartRef.current.update();
       }
 
@@ -395,6 +397,7 @@ export default function MultiDataBrush<T extends PartialChartType>({
           display: false,
           color: '#3c3c3c',
         },
+        suggestedMax: total,
         beginAtZero: true,
         ticks: {
           maxTicksLimit: 6,
