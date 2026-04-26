@@ -20,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: '가챠 일정 시뮬레이터',
   description: '가챠 일정 시뮬레이터',
+  other: {
+    'color-scheme': 'light',
+  },
 };
 
 export default function RootLayout({
