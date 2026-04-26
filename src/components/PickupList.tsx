@@ -312,6 +312,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       if (pickupDatas.length > 20) {
         return pickupDatas;
       }
+
       const { gachaType, pickupOpersCount, targetOpersCount, expiration } = action.payload;
       const pickupChance = gachaType === 'limited' ? 70 : 50;
       const isSinglePityBanner =
@@ -611,6 +612,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
     }
     case 'updateOperatorDetails': {
       const { id, operatorId, rarity, operatorType } = action.payload;
+
       return modifyBannerDetails(id, (pickupData) => {
         const { gachaType, pickupDetails } = pickupData;
         const prevOperator = pickupData.operators.find(
@@ -625,7 +627,8 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           operatorId,
           operators: pickupData.operators,
           transform: () => ({
-            // 값이 undefined인 프로퍼티를 제외하고 새로운 객체 반환
+            // 값이 undefined인 프로퍼티를 제외하고 payload로 전달된 값 중 undefined인 것을 제외한 후
+            // 다시 객체로 만들어 최종적으로 오퍼레이터객체의 부분집합 객체로 반환
             ...Object.fromEntries(
               Object.entries(action.payload).filter(([, value]) => value !== undefined),
             ),
@@ -635,11 +638,12 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           gachaType === 'limited' &&
           newOperator.operatorId !== operatorId &&
           newOperator.rarity === 6
-            ? operatorType === 'limited'
+            ? currentOperatorType === 'limited'
               ? { ...newOperator, isPityReward: false, operatorType: 'normal' }
               : { ...newOperator, isPityReward: true, operatorType: 'limited' }
             : newOperator,
         );
+
         const currentPityRewardOpersLength = filterLimitArray(
           newOperators,
           ({ isPityReward }) => isPityReward,
