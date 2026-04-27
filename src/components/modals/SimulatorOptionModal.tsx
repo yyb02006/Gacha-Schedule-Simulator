@@ -114,7 +114,7 @@ interface SimulatorOptionModalProps {
   isOpen: boolean;
   onClose: () => void;
   options: SimulationOptions;
-  setOptions: Dispatch<SetStateAction<SimulationOptions>>;
+  setOptions: (simulationOptions: SimulationOptions) => void;
   isImportLoading: boolean;
   onImport: (e: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
