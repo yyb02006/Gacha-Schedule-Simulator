@@ -2,7 +2,17 @@
 
 import SummaryBanner from '#/components/SummaryBanner';
 import { AnimatePresence } from 'motion/react';
-import { ChangeEvent, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  FocusEvent,
+  SetStateAction,
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
@@ -908,40 +918,31 @@ export interface UserConfig {
   options: SimulationOptions;
 }
 
+export interface UserConfigHandlers {
+  onSimulationModeToggle: (isLeft?: boolean) => void;
+  onOptionModeToggle: (isLeft?: boolean) => void;
+  onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => void;
+  onInitialResourceBlur: (
+    e: FocusEvent<HTMLInputElement>,
+    syncLocalValue: Dispatch<SetStateAction<string>>,
+  ) => void;
+  onOptionsSave: (options: SimulationOptions) => void;
+}
+
 export default function PickupList({ pickupDataPresets }: { pickupDataPresets: Dummy[] }) {
-  const [pickupDatas, dispatch] = useReducer(reducer, pickupDataPresets, (initialPresets) => {
-    try {
-      const stored = localStorage.getItem('pickupDatas');
-      if (stored) {
-        return validatePickupDatas(JSON.parse(stored));
-      }
-    } catch {
-      console.warn('로컬스토리지 데이터 파싱 실패, 기본 픽업 데이터 사용');
-    }
-    return initialPresets;
-  });
-  const [userConfig, setUserConfig] = useState<UserConfig>(() => {
-    const initialOptions = localStorage.getItem('options');
-    if (initialOptions) {
-      try {
-        return validateOptionDatas(JSON.parse(initialOptions));
-      } catch {
-        console.warn('로컬스토리지 데이터 파싱 실패, 기본 옵션 데이터 사용');
-      }
-    }
-    return {
-      isTrySim: true,
-      isSimpleMode: true,
-      batchGachaGoal: null,
-      initialResource: 0,
-      options: {
-        probability: { limited: 70, normal: 50 },
-        simulationTry: 200000,
-        bannerFailureAction: 'interruption',
-        showBannerImage: true,
-        baseSeed: null,
-      },
-    };
+  const [pickupDatas, dispatch] = useReducer(reducer, pickupDataPresets);
+  const [userConfig, setUserConfig] = useState<UserConfig>({
+    isTrySim: true,
+    isSimpleMode: true,
+    batchGachaGoal: null,
+    initialResource: 0,
+    options: {
+      probability: { limited: 70, normal: 50 },
+      simulationTry: 200000,
+      bannerFailureAction: 'interruption',
+      showBannerImage: true,
+      baseSeed: null,
+    },
   });
   const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
   const { isOpen: isModalOpen, openModal: openModal, closeModal: closeModal } = useModal();
@@ -961,6 +962,29 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   const [isDragging, setIsDragging] = useState(false);
   const { isAlertOpen, openAlert, alertMessage, alertTitle, confirm, cancel } = useAlert();
   const listRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    try {
+      const stored = localStorage.getItem('pickupDatas');
+      if (stored) {
+        dispatch({
+          type: 'initialize',
+          payload: { initialData: validatePickupDatas(JSON.parse(stored)) },
+        });
+      }
+    } catch {
+      console.warn('로컬스토리지 데이터 파싱 실패, 기본 픽업 데이터 사용');
+    }
+
+    try {
+      const stored = localStorage.getItem('options');
+      if (stored) {
+        setUserConfig((prev) => ({ ...prev, ...validateOptionDatas(JSON.parse(stored)) }));
+      }
+    } catch {
+      console.warn('로컬스토리지 데이터 파싱 실패, 기본 픽업 데이터 사용');
+    }
+  }, []);
 
   const addBanner = (payload: ExtractPayloadFromAction<'addBanner'>) => {
     dispatch({ type: 'addBanner', payload });
@@ -1008,6 +1032,43 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   const exportData = () => {
     const { options, ...configWithoutOptions } = userConfig;
     exportPickupData(pickupDatas, configWithoutOptions);
+  };
+
+  const userConfigChangeHandler: UserConfigHandlers = {
+    onSimulationModeToggle: (isLeft?: boolean) => {
+      setUserConfig((prev) => ({
+        ...prev,
+        isTrySim: isLeft === undefined ? !prev.isTrySim : isLeft,
+      }));
+    },
+    onOptionModeToggle: (isLeft?: boolean) => {
+      setUserConfig((prev) => ({
+        ...prev,
+        isSimpleMode: isLeft === undefined ? !prev.isSimpleMode : isLeft,
+      }));
+    },
+    onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => {
+      setUserConfig((prev) => ({
+        ...prev,
+        batchGachaGoal: type,
+      }));
+    },
+    onInitialResourceBlur: (
+      e: FocusEvent<HTMLInputElement>,
+      syncLocalValue: Dispatch<SetStateAction<string>>,
+    ) => {
+      const normalizedValue = e.target.value.replaceAll(',', '');
+      const parsedValue = Number(normalizedValue);
+      const initialResource = Number.isNaN(parsedValue)
+        ? 0
+        : Math.max(0, Math.min(parsedValue, 9999999));
+
+      syncLocalValue(initialResource.toLocaleString());
+      setUserConfig((prev) => ({ ...prev, initialResource }));
+    },
+    onOptionsSave: (options: SimulationOptions) => {
+      setUserConfig((prev) => ({ ...prev, options }));
+    },
   };
 
   useEffect(() => {
@@ -1293,7 +1354,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
           <OptionBar
             seed={results?.total.baseSeed}
             userConfig={userConfig}
-            setUserConfig={setUserConfig}
+            handlers={userConfigChangeHandler}
             runningTime={runningTime}
             isImportLoading={isImportLoading}
             onImport={importData}
