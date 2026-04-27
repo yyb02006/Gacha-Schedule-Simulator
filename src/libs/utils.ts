@@ -2,7 +2,6 @@ import {
   Dummy,
   GachaSimulationMergedResult,
   GachaSimulationResult,
-  InitialOptions,
   Operator,
 } from '#/components/PickupList';
 import {
@@ -11,7 +10,7 @@ import {
   rarities,
   rarityStrings,
 } from '#/constants/variables';
-import { GachaType, OperatorRarity, OperatorRarityForString } from '#/types/types';
+import { GachaType, InitialOptions, OperatorRarity, OperatorRarityForString } from '#/types/types';
 import { v4 } from 'uuid';
 
 /**

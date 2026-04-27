@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { BannerFailureAction, Dummy, WorkerInput } from '#/components/PickupList';
+import { Dummy, WorkerInput } from '#/components/PickupList';
 import { rarityStrings } from '#/constants/variables';
 import { createRNG, safeNumberOrZero } from '#/libs/utils';
 import {
+  BannerFailureAction,
   BatchGachaGoal,
   GachaType,
   OperatorRarity,
