@@ -1,7 +1,7 @@
 'use client';
 
 import Modal from '#/components/modals/Modal';
-import { ChangeEvent, Dispatch, SetStateAction, useLayoutEffect, useRef, useState } from 'react';
+import { ChangeEvent, useLayoutEffect, useRef, useState } from 'react';
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { InsetNumberInput } from '#/components/PickupBanner';
@@ -114,7 +114,7 @@ interface SimulatorOptionModalProps {
   isOpen: boolean;
   onClose: () => void;
   options: SimulationOptions;
-  setOptions: Dispatch<SetStateAction<SimulationOptions>>;
+  setOptions: (simulationOptions: SimulationOptions) => void;
   isImportLoading: boolean;
   onImport: (e: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
@@ -146,6 +146,7 @@ export default function SimulatorOptionModal({
         options: { bannerFailureAction, showBannerImage, simulationTry, baseSeed },
       }: InitialOptions = JSON.parse(initialOptions);
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLocalOptions({
           bannerFailureAction: ['continueExecution', 'interruption'].includes(bannerFailureAction)
             ? bannerFailureAction

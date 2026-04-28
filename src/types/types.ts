@@ -38,6 +38,32 @@ export type ElementOfArray<Arr> = Arr extends (infer E)[] ? E : never;
 
 export type BatchGachaGoal = 'allFirst' | 'allMax' | null;
 
+export type BannerFailureAction = 'interruption' | 'continueExecution';
+
+export type SimulationOptions = {
+  probability: { limited: number; normal: number };
+  simulationTry: number;
+  bannerFailureAction: BannerFailureAction;
+  showBannerImage: boolean;
+  baseSeed: number | null;
+};
+
+export type InitialOptions = {
+  initialResource: number;
+  batchGachaGoal: BatchGachaGoal;
+  isTrySim: boolean;
+  isSimpleMode: boolean;
+  options: SimulationOptions;
+};
+
+export type UserConfig = {
+  isTrySim: boolean;
+  isSimpleMode: boolean;
+  batchGachaGoal: BatchGachaGoal;
+  initialResource: number;
+  options: SimulationOptions;
+};
+
 export interface ProgressRefProps {
   progressTry: number;
   total: number;
@@ -48,7 +74,7 @@ export interface ProgressRefProps {
 
 export type DTOOptions = {
   initialResource: number;
-  batchGachaGoal: 'allFirst' | 'allMax' | null;
+  batchGachaGoal: BatchGachaGoal;
   isTrySim: boolean;
   isSimpleMode: boolean;
 };

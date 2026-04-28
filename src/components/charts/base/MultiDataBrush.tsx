@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/refs */
+
 'use client';
 
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
@@ -16,7 +18,16 @@ import {
   Point,
 } from 'chart.js';
 import { throttled } from 'chart.js/helpers';
-import { Dispatch, RefObject, SetStateAction, useEffect, useRef, useState } from 'react';
+import {
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Line } from 'react-chartjs-2';
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Decimation, Filler);
@@ -235,14 +246,14 @@ interface BaseMultiDataBrushProps<T extends PartialChartType> {
   primaryData: number[];
   fullDatas: number[][];
   mainChartRef: ChartRef<T>;
-  selection: {
+  selectionRef: RefObject<{
     start: number;
     end: number;
-  };
-  selectionIndex: {
+  }>;
+  selectionIndexRef: RefObject<{
     start: number;
     end: number;
-  };
+  }>;
   colors: Record<'backgroundColor' | 'borderColor', string | string[]>;
   padding: number;
   cutoffRatio: number;
@@ -253,15 +264,17 @@ interface BaseMultiDataBrushProps<T extends PartialChartType> {
 
 // isPercentYAxis 없으면 값은 undefined고 without으로 확정되기 때문에 total은 선택형이 됨
 // 반대로 total이 있어도 타입 두 개 다 가능하기 때문에 isPercentYAxis는 여전히 필수가 아님
-interface MultiDataBrushWithoutIsPercent<T extends PartialChartType>
-  extends BaseMultiDataBrushProps<T> {
+interface MultiDataBrushWithoutIsPercent<
+  T extends PartialChartType,
+> extends BaseMultiDataBrushProps<T> {
   isPercentYAxis?: undefined;
   total?: number;
 }
 
 // isPercentYAxis 있으면 이 타입으로 확정되므로 total도 필수 프로퍼티가 됨
-interface MultiDataBrushWithIsPercent<T extends PartialChartType>
-  extends BaseMultiDataBrushProps<T> {
+interface MultiDataBrushWithIsPercent<
+  T extends PartialChartType,
+> extends BaseMultiDataBrushProps<T> {
   isPercentYAxis: boolean;
   total: number;
 }
@@ -275,8 +288,8 @@ export default function MultiDataBrush<T extends PartialChartType>({
   primaryData,
   fullDatas,
   mainChartRef,
-  selection,
-  selectionIndex,
+  selectionRef,
+  selectionIndexRef,
   colors: { backgroundColor, borderColor },
   padding,
   cutoffRatio,
@@ -297,19 +310,29 @@ export default function MultiDataBrush<T extends PartialChartType>({
     cutoffLabel: `${truncateToDecimals(cutoffPercentage * 100)}%`,
     handle: { handleWidth: 6, handlePadding: 3, handleColor: '#fe9a00' },
   });
+  const chartPlugins = useMemo(() => {
+    const config = brushConfigRef.current;
+    return [brushBackground(config.background), brushPlugin(selectionRef.current, config)];
+  }, []);
 
-  const chartUpdate = useRef((dragging: 'start' | 'end') => {
+  const chartUpdate = useCallback((dragging: 'start' | 'end') => {
     if (mainChartRef.current) {
       if (dragging === 'start') {
-        selectionIndex.start = Math.round((primaryData.length - 1) * selection.start);
+        selectionIndexRef.current.start = Math.round(
+          (primaryData.length - 1) * selectionRef.current.start,
+        );
       } else {
-        selectionIndex.end = Math.round((primaryData.length - 1) * selection.end) + 1;
+        selectionIndexRef.current.end =
+          Math.round((primaryData.length - 1) * selectionRef.current.end) + 1;
       }
 
       const filteredData = fullDatas.map((data) =>
-        data.slice(selectionIndex.start, selectionIndex.end),
+        data.slice(selectionIndexRef.current.start, selectionIndexRef.current.end),
       );
-      const filteredLabels = labels.slice(selectionIndex.start, selectionIndex.end);
+      const filteredLabels = labels.slice(
+        selectionIndexRef.current.start,
+        selectionIndexRef.current.end,
+      );
 
       mainChartRef.current.data.datasets.forEach((dataset, index) => {
         dataset.data = filteredData[index];
@@ -319,38 +342,50 @@ export default function MultiDataBrush<T extends PartialChartType>({
       mainChartRef.current.update();
 
       if (dispatchRef?.current) {
-        dispatchRef.current({ chart: mainChartRef, selectionIndex });
+        dispatchRef.current({ chart: mainChartRef, selectionIndex: selectionIndexRef.current });
       }
     }
-  }).current;
+  }, []);
 
-  const throttledChartUpdate = useRef(
-    throttled((dragging: 'start' | 'end') => {
-      if (dragging === 'start') {
-        selectionIndex.start = Math.round((primaryData.length - 1) * selection.start);
-      } else {
-        selectionIndex.end = Math.round((primaryData.length - 1) * selection.end) + 1;
-      }
+  // 함수 호출을 전달하면 렌더링마다 평가되어서 호출되기 때문에 콜백함수 자체를 전달받고 그 실행값을 초기값으로 사용하는 useMemo를 사용
+  const throttledChartUpdate = useMemo(
+    () =>
+      throttled((dragging: 'start' | 'end') => {
+        if (dragging === 'start') {
+          selectionIndexRef.current.start = Math.round(
+            (primaryData.length - 1) * selectionRef.current.start,
+          );
+        } else {
+          selectionIndexRef.current.end =
+            Math.round((primaryData.length - 1) * selectionRef.current.end) + 1;
+        }
 
-      if ((selection.end <= cutoffRatio || primaryData.length < 500) && mainChartRef.current) {
-        const filteredData = fullDatas.map((data) =>
-          data.slice(selectionIndex.start, selectionIndex.end),
-        );
-        const filteredLabels = labels.slice(selectionIndex.start, selectionIndex.end);
+        if (
+          (selectionRef.current.end <= cutoffRatio || primaryData.length < 500) &&
+          mainChartRef.current
+        ) {
+          const filteredData = fullDatas.map((data) =>
+            data.slice(selectionIndexRef.current.start, selectionIndexRef.current.end),
+          );
+          const filteredLabels = labels.slice(
+            selectionIndexRef.current.start,
+            selectionIndexRef.current.end,
+          );
 
-        mainChartRef.current.data.datasets.forEach((dataset, index) => {
-          dataset.data = filteredData[index];
-        });
+          mainChartRef.current.data.datasets.forEach((dataset, index) => {
+            dataset.data = filteredData[index];
+          });
 
-        mainChartRef.current.data.labels = filteredLabels;
-        mainChartRef.current.update();
-      }
+          mainChartRef.current.data.labels = filteredLabels;
+          mainChartRef.current.update();
+        }
 
-      if (dispatchRef?.current) {
-        dispatchRef.current({ chart: mainChartRef, selectionIndex });
-      }
-    }, 100),
-  ).current;
+        if (dispatchRef?.current) {
+          dispatchRef.current({ chart: mainChartRef, selectionIndex: selectionIndexRef.current });
+        }
+      }, 100),
+    [],
+  );
 
   const chartData: ChartData<'line'> = {
     labels,
@@ -422,8 +457,8 @@ export default function MultiDataBrush<T extends PartialChartType>({
     if (!canvas || chartRef.current === null) return;
 
     const { left, right, top, bottom } = chartRef.current.chartArea;
-    const startX = left + (right - left) * selection.start;
-    const endX = left + (right - left) * selection.end;
+    const startX = left + (right - left) * selectionRef.current.start;
+    const endX = left + (right - left) * selectionRef.current.end;
 
     const handleMouseDown = (e: PointerEvent) => {
       // 포인터 아이디를 캡쳐해서 릴리즈하기 전까지 전역으로 추적
@@ -432,14 +467,20 @@ export default function MultiDataBrush<T extends PartialChartType>({
       canvas.setPointerCapture(e.pointerId);
       const x = e.clientX - rect.left;
       const newRatio = safeNumberOrZero((x - left) / (right - left));
-      const distanceFromStart = Math.abs(newRatio - selection.start);
-      const distanceFromEnd = Math.abs(newRatio - selection.end);
+      const distanceFromStart = Math.abs(newRatio - selectionRef.current.start);
+      const distanceFromEnd = Math.abs(newRatio - selectionRef.current.end);
       const isCloserToStart = distanceFromStart < distanceFromEnd;
 
       if (isCloserToStart) {
-        selection.start = Math.max(0, Math.min(newRatio, selection.end - BRUSH_MIN_WIDTH_RATIO));
+        selectionRef.current.start = Math.max(
+          0,
+          Math.min(newRatio, selectionRef.current.end - BRUSH_MIN_WIDTH_RATIO),
+        );
       } else {
-        selection.end = Math.min(1, Math.max(newRatio, selection.start + BRUSH_MIN_WIDTH_RATIO));
+        selectionRef.current.end = Math.min(
+          1,
+          Math.max(newRatio, selectionRef.current.start + BRUSH_MIN_WIDTH_RATIO),
+        );
       }
 
       // 핸들 근처 클릭 시
@@ -466,9 +507,15 @@ export default function MultiDataBrush<T extends PartialChartType>({
         return; // 드래그 중이 아니면 여기서 종료
       } else {
         if (dragging === 'start') {
-          selection.start = Math.max(0, Math.min(newRatio, selection.end - BRUSH_MIN_WIDTH_RATIO));
+          selectionRef.current.start = Math.max(
+            0,
+            Math.min(newRatio, selectionRef.current.end - BRUSH_MIN_WIDTH_RATIO),
+          );
         } else if (dragging === 'end') {
-          selection.end = Math.min(1, Math.max(newRatio, selection.start + BRUSH_MIN_WIDTH_RATIO));
+          selectionRef.current.end = Math.min(
+            1,
+            Math.max(newRatio, selectionRef.current.start + BRUSH_MIN_WIDTH_RATIO),
+          );
         }
         chartRef.current.draw();
 
@@ -494,19 +541,11 @@ export default function MultiDataBrush<T extends PartialChartType>({
       canvas.removeEventListener('pointermove', handleMouseMove);
       canvas.removeEventListener('pointerup', handleMouseUp);
     };
-  }, [dragging, throttledChartUpdate, chartUpdate, selection]);
+  }, [dragging, selectionRef, chartUpdate, throttledChartUpdate]);
 
   return (
     <div className={height || 'h-[86px]'}>
-      <Line
-        ref={chartRef}
-        data={chartData}
-        options={options}
-        plugins={[
-          brushBackground(brushConfigRef.current.background),
-          brushPlugin(selection, brushConfigRef.current),
-        ]}
-      />
+      <Line ref={chartRef} data={chartData} options={options} plugins={chartPlugins} />
     </div>
   );
 }

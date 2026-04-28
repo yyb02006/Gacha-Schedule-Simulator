@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/refs */
+
 'use client';
 
 import { LegendData } from '#/components/charts/BannerEntryCurrency';
@@ -234,14 +236,14 @@ interface BaseBrushProps<T extends PartialChartType> {
   labels: string[];
   data: number[];
   mainChartRef: ChartRef<T>;
-  selection: {
+  selectionRef: RefObject<{
     start: number;
     end: number;
-  };
-  selectionIndex: {
+  }>;
+  selectionIndexRef: RefObject<{
     start: number;
     end: number;
-  };
+  }>;
   colors: Record<'backgroundColor' | 'borderColor', string | string[]>;
   mainChartColors?: Record<'backgroundColor' | 'borderColor', string | string[]>;
   padding: number;
@@ -270,8 +272,8 @@ export default function Brush<T extends PartialChartType>({
   labels,
   data,
   mainChartRef,
-  selection,
-  selectionIndex,
+  selectionRef,
+  selectionIndexRef,
   colors: { backgroundColor, borderColor },
   mainChartColors,
   padding,
@@ -297,16 +299,25 @@ export default function Brush<T extends PartialChartType>({
   const chartUpdate = useRef((dragging: 'start' | 'end') => {
     if (mainChartRef.current) {
       if (dragging === 'start') {
-        selectionIndex.start = Math.round((data.length - 1) * selection.start);
+        selectionIndexRef.current.start = Math.round(
+          (data.length - 1) * selectionRef.current.start,
+        );
       } else {
-        selectionIndex.end = Math.round((data.length - 1) * selection.end) + 1;
+        selectionIndexRef.current.end =
+          Math.round((data.length - 1) * selectionRef.current.end) + 1;
       }
 
-      const filteredData = data.slice(selectionIndex.start, selectionIndex.end);
-      const filteredLabels = labels.slice(selectionIndex.start, selectionIndex.end);
+      const filteredData = data.slice(
+        selectionIndexRef.current.start,
+        selectionIndexRef.current.end,
+      );
+      const filteredLabels = labels.slice(
+        selectionIndexRef.current.start,
+        selectionIndexRef.current.end,
+      );
       const filteredColors = mainChartColors?.backgroundColor.slice(
-        selectionIndex.start,
-        selectionIndex.end,
+        selectionIndexRef.current.start,
+        selectionIndexRef.current.end,
       );
 
       mainChartRef.current.data.datasets[0].data = filteredData;
@@ -315,8 +326,9 @@ export default function Brush<T extends PartialChartType>({
         filteredColors || mainChartRef.current.data.datasets[0].backgroundColor;
 
       if (mainChartRef.current?.data.datasets[0].type === 'bar' && data.length > 20) {
-        const currentLength = selectionIndex.end - selectionIndex.start;
+        const currentLength = selectionIndexRef.current.end - selectionIndexRef.current.start;
         const dataset = (mainChartRef as ChartRef<'bar'>).current?.data.datasets[0];
+        /* eslint-disable react-hooks/immutability */
         if (dataset) {
           if (currentLength > 700) {
             dataset.categoryPercentage = 1;
@@ -332,12 +344,13 @@ export default function Brush<T extends PartialChartType>({
             dataset.barPercentage = 0.8;
           }
         }
+        /* eslint-disable react-hooks/immutability */
       }
 
       mainChartRef.current.update();
 
       if (dispatchRef?.current) {
-        dispatchRef.current({ chart: mainChartRef, selectionIndex });
+        dispatchRef.current({ chart: mainChartRef, selectionIndex: selectionIndexRef.current });
       }
     }
   }).current;
@@ -345,13 +358,16 @@ export default function Brush<T extends PartialChartType>({
   const throttledChartUpdate = useRef(
     throttled((dragging: 'start' | 'end') => {
       if (dragging === 'start') {
-        selectionIndex.start = Math.round((data.length - 1) * selection.start);
+        selectionIndexRef.current.start = Math.round(
+          (data.length - 1) * selectionRef.current.start,
+        );
       } else {
-        selectionIndex.end = Math.round((data.length - 1) * selection.end) + 1;
+        selectionIndexRef.current.end =
+          Math.round((data.length - 1) * selectionRef.current.end) + 1;
       }
 
       if (mainChartRef.current?.data.datasets[0].type === 'bar' && data.length > 20) {
-        const currentLength = selectionIndex.end - selectionIndex.start;
+        const currentLength = selectionIndexRef.current.end - selectionIndexRef.current.start;
         const dataset = (mainChartRef as ChartRef<'bar'>).current?.data.datasets[0];
         if (dataset) {
           if (currentLength > 700) {
@@ -370,12 +386,18 @@ export default function Brush<T extends PartialChartType>({
         }
       }
 
-      if ((selection.end <= cutoffRatio || data.length < 500) && mainChartRef.current) {
-        const filteredData = data.slice(selectionIndex.start, selectionIndex.end);
-        const filteredLabels = labels.slice(selectionIndex.start, selectionIndex.end);
+      if ((selectionRef.current.end <= cutoffRatio || data.length < 500) && mainChartRef.current) {
+        const filteredData = data.slice(
+          selectionIndexRef.current.start,
+          selectionIndexRef.current.end,
+        );
+        const filteredLabels = labels.slice(
+          selectionIndexRef.current.start,
+          selectionIndexRef.current.end,
+        );
         const filteredColors = mainChartColors?.backgroundColor.slice(
-          selectionIndex.start,
-          selectionIndex.end,
+          selectionIndexRef.current.start,
+          selectionIndexRef.current.end,
         );
 
         mainChartRef.current.data.datasets[0].data = filteredData;
@@ -386,7 +408,7 @@ export default function Brush<T extends PartialChartType>({
       }
 
       if (dispatchRef?.current) {
-        dispatchRef.current({ chart: mainChartRef, selectionIndex });
+        dispatchRef.current({ chart: mainChartRef, selectionIndex: selectionIndexRef.current });
       }
     }, 100),
   ).current;
@@ -460,8 +482,8 @@ export default function Brush<T extends PartialChartType>({
     if (!canvas || chartRef.current === null) return;
 
     const { left, right, top, bottom } = chartRef.current.chartArea;
-    const startX = left + (right - left) * selection.start;
-    const endX = left + (right - left) * selection.end;
+    const startX = left + (right - left) * selectionRef.current.start;
+    const endX = left + (right - left) * selectionRef.current.end;
 
     const handleMouseDown = (e: PointerEvent) => {
       // 포인터 아이디를 캡쳐해서 릴리즈하기 전까지 전역으로 추적
@@ -470,14 +492,20 @@ export default function Brush<T extends PartialChartType>({
       canvas.setPointerCapture(e.pointerId);
       const x = e.clientX - rect.left;
       const newRatio = safeNumberOrZero((x - left) / (right - left));
-      const distanceFromStart = Math.abs(newRatio - selection.start);
-      const distanceFromEnd = Math.abs(newRatio - selection.end);
+      const distanceFromStart = Math.abs(newRatio - selectionRef.current.start);
+      const distanceFromEnd = Math.abs(newRatio - selectionRef.current.end);
       const isCloserToStart = distanceFromStart < distanceFromEnd;
 
       if (isCloserToStart) {
-        selection.start = Math.max(0, Math.min(newRatio, selection.end - BRUSH_MIN_WIDTH_RATIO));
+        selectionRef.current.start = Math.max(
+          0,
+          Math.min(newRatio, selectionRef.current.end - BRUSH_MIN_WIDTH_RATIO),
+        );
       } else {
-        selection.end = Math.min(1, Math.max(newRatio, selection.start + BRUSH_MIN_WIDTH_RATIO));
+        selectionRef.current.end = Math.min(
+          1,
+          Math.max(newRatio, selectionRef.current.start + BRUSH_MIN_WIDTH_RATIO),
+        );
       }
 
       // 핸들 근처 클릭 시
@@ -504,9 +532,15 @@ export default function Brush<T extends PartialChartType>({
         return; // 드래그 중이 아니면 여기서 종료
       } else {
         if (dragging === 'start') {
-          selection.start = Math.max(0, Math.min(newRatio, selection.end - BRUSH_MIN_WIDTH_RATIO));
+          selectionRef.current.start = Math.max(
+            0,
+            Math.min(newRatio, selectionRef.current.end - BRUSH_MIN_WIDTH_RATIO),
+          );
         } else if (dragging === 'end') {
-          selection.end = Math.min(1, Math.max(newRatio, selection.start + BRUSH_MIN_WIDTH_RATIO));
+          selectionRef.current.end = Math.min(
+            1,
+            Math.max(newRatio, selectionRef.current.start + BRUSH_MIN_WIDTH_RATIO),
+          );
         }
         chartRef.current.draw();
 
@@ -532,7 +566,7 @@ export default function Brush<T extends PartialChartType>({
       canvas.removeEventListener('pointermove', handleMouseMove);
       canvas.removeEventListener('pointerup', handleMouseUp);
     };
-  }, [dragging, throttledChartUpdate, chartUpdate, selection]);
+  }, [dragging, throttledChartUpdate, chartUpdate, selectionRef]);
 
   return (
     <div className={height || 'h-[86px]'}>
@@ -542,7 +576,7 @@ export default function Brush<T extends PartialChartType>({
         options={options}
         plugins={[
           brushBackground(brushConfigRef.current.background),
-          brushPlugin(selection, brushConfigRef.current),
+          brushPlugin(selectionRef.current, brushConfigRef.current),
         ]}
         style={{ touchAction: 'none' }}
       />

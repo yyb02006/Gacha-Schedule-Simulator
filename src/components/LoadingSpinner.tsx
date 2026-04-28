@@ -638,6 +638,7 @@ export default function LoadingSpinner({
     loadingRef.current = isLoading;
     if (!isRunning.current) return;
     if (isLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
       // 시작 시간 측정
       mountTimeRef.current = performance.now();

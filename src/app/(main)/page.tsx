@@ -8,6 +8,7 @@ export default async function Home() {
     })
   ).json();
 
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
 
   const filteredPickupDataPresets = pickupDataPresets.datas.filter(({ expiration }) => {

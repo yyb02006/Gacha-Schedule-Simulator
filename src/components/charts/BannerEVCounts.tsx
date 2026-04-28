@@ -5,17 +5,17 @@ import BrushBarChart from '#/components/charts/base/BrushBarChart';
 import { GachaSimulationMergedResult } from '#/components/PickupList';
 import { truncateToDecimals } from '#/libs/utils';
 import { CreateTooltipLiteralProps } from '#/components/charts/BannerWinRate';
-import { forwardRef } from 'react';
+import React, { forwardRef, RefObject } from 'react';
 
 const createTooltipLiteral =
   (result: GachaSimulationMergedResult) =>
-  (selectionIndex: { start: number; end: number }) =>
+  (selectionIndexRef: RefObject<{ start: number; end: number }>) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
     const stringifiedValue = dataset.formattedValue ?? '';
     const rawValue = dataset.raw as number;
     const { dataIndex } = dataset;
-    const currentIndex = selectionIndex.start + dataIndex;
+    const currentIndex = selectionIndexRef.current.start + dataIndex;
 
     const { bannerSuccess } = result.perBanner[currentIndex];
 

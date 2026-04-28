@@ -1,8 +1,18 @@
-'use client';
+﻿'use client';
 
 import SummaryBanner from '#/components/SummaryBanner';
 import { AnimatePresence } from 'motion/react';
-import { ChangeEvent, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import {
+  ChangeEvent,
+  Dispatch,
+  FocusEvent,
+  SetStateAction,
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import PlayButton from '#/components/buttons/PlayButton';
 import OptionBar from '#/components/OptionBar';
 import ResetButton from '#/components/buttons/ResetButton';
@@ -312,6 +322,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
       if (pickupDatas.length > 20) {
         return pickupDatas;
       }
+
       const { gachaType, pickupOpersCount, targetOpersCount, expiration } = action.payload;
       const pickupChance = gachaType === 'limited' ? 70 : 50;
       const isSinglePityBanner =
@@ -611,6 +622,7 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
     }
     case 'updateOperatorDetails': {
       const { id, operatorId, rarity, operatorType } = action.payload;
+
       return modifyBannerDetails(id, (pickupData) => {
         const { gachaType, pickupDetails } = pickupData;
         const prevOperator = pickupData.operators.find(
@@ -625,7 +637,8 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           operatorId,
           operators: pickupData.operators,
           transform: () => ({
-            // 값이 undefined인 프로퍼티를 제외하고 새로운 객체 반환
+            // 값이 undefined인 프로퍼티를 제외하고 payload로 전달된 값 중 undefined인 것을 제외한 후
+            // 다시 객체로 만들어 최종적으로 오퍼레이터객체의 부분집합 객체로 반환
             ...Object.fromEntries(
               Object.entries(action.payload).filter(([, value]) => value !== undefined),
             ),
@@ -635,11 +648,12 @@ const reducer = (pickupDatas: Dummy[], action: PickupDatasAction): Dummy[] => {
           gachaType === 'limited' &&
           newOperator.operatorId !== operatorId &&
           newOperator.rarity === 6
-            ? operatorType === 'limited'
+            ? currentOperatorType === 'limited'
               ? { ...newOperator, isPityReward: false, operatorType: 'normal' }
               : { ...newOperator, isPityReward: true, operatorType: 'limited' }
             : newOperator,
         );
+
         const currentPityRewardOpersLength = filterLimitArray(
           newOperators,
           ({ isPityReward }) => isPityReward,
@@ -896,19 +910,40 @@ export type InitialOptions = {
   options: SimulationOptions;
 };
 
+export interface UserConfig {
+  isTrySim: boolean;
+  isSimpleMode: boolean;
+  batchGachaGoal: 'allFirst' | 'allMax' | null;
+  initialResource: number;
+  options: SimulationOptions;
+}
+
+export interface UserConfigHandlers {
+  onSimulationModeToggle: (isLeft?: boolean) => void;
+  onOptionModeToggle: (isLeft?: boolean) => void;
+  onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => void;
+  onInitialResourceBlur: (
+    e: FocusEvent<HTMLInputElement>,
+    syncLocalValue: Dispatch<SetStateAction<string>>,
+  ) => void;
+  onOptionsSave: (options: SimulationOptions) => void;
+}
+
 export default function PickupList({ pickupDataPresets }: { pickupDataPresets: Dummy[] }) {
   const [pickupDatas, dispatch] = useReducer(reducer, pickupDataPresets);
-  const [isTrySim, setIsTrySim] = useState(true);
-  const [isSimpleMode, setIsSimpleMode] = useState(true);
-  const [options, setOptions] = useState<SimulationOptions>({
-    probability: { limited: 70, normal: 50 },
-    simulationTry: 200000,
-    bannerFailureAction: 'interruption',
-    showBannerImage: true,
-    baseSeed: null,
+  const [userConfig, setUserConfig] = useState<UserConfig>({
+    isTrySim: true,
+    isSimpleMode: true,
+    batchGachaGoal: null,
+    initialResource: 0,
+    options: {
+      probability: { limited: 70, normal: 50 },
+      simulationTry: 200000,
+      bannerFailureAction: 'interruption',
+      showBannerImage: true,
+      baseSeed: null,
+    },
   });
-  const [batchGachaGoal, setBatchGachaGoal] = useState<'allFirst' | 'allMax' | null>(null);
-  const [initialResource, setInitialResource] = useState(0);
   const [results, setResults] = useState<GachaSimulationMergedResult | null>(null);
   const { isOpen: isModalOpen, openModal: openModal, closeModal: closeModal } = useModal();
 
@@ -928,6 +963,30 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   const { isAlertOpen, openAlert, alertMessage, alertTitle, confirm, cancel } = useAlert();
   const listRef = useRef<HTMLDivElement>(null);
 
+  useLayoutEffect(() => {
+    try {
+      const stored = localStorage.getItem('pickupDatas');
+      if (stored) {
+        dispatch({
+          type: 'initialize',
+          payload: { initialData: validatePickupDatas(JSON.parse(stored)) },
+        });
+      }
+    } catch {
+      console.warn('로컬스토리지 데이터 파싱 실패, 기본 픽업 데이터 사용');
+    }
+
+    try {
+      const stored = localStorage.getItem('options');
+      if (stored) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setUserConfig((prev) => ({ ...prev, ...validateOptionDatas(JSON.parse(stored)) }));
+      }
+    } catch {
+      console.warn('로컬스토리지 데이터 파싱 실패, 기본 픽업 데이터 사용');
+    }
+  }, []);
+
   const addBanner = (payload: ExtractPayloadFromAction<'addBanner'>) => {
     dispatch({ type: 'addBanner', payload });
   };
@@ -937,21 +996,21 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   };
 
   const setImportedData = (data: DTO) => {
-    setIsSimpleMode(data.optionDatas.isSimpleMode);
-    setIsTrySim(data.optionDatas.isTrySim);
-    setBatchGachaGoal(data.optionDatas.batchGachaGoal);
-    setInitialResource(data.optionDatas.initialResource);
+    setUserConfig((p) => ({ ...p, ...data.optionDatas }));
     dispatch({ type: 'initialize', payload: { initialData: data.pickupDatas } });
   };
 
   const resetSimulator = () => {
-    setIsSimpleMode(true);
-    setIsTrySim(true);
+    setUserConfig((p) => ({
+      ...p,
+      isSimpleMode: true,
+      isTrySim: true,
+      batchGachaGoal: null,
+      initialResource: 0,
+    }));
     setResults(null);
     setRunningTime(null);
     setIsLoading(false);
-    setBatchGachaGoal(null);
-    setInitialResource(0);
     isRunning.current = false;
     dispatch({ type: 'initialize', payload: { initialData: pickupDataPresets } });
   };
@@ -972,36 +1031,46 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   };
 
   const exportData = () => {
-    exportPickupData(pickupDatas, { batchGachaGoal, initialResource, isSimpleMode, isTrySim });
+    const { ...configWithoutOptions } = userConfig;
+    exportPickupData(pickupDatas, configWithoutOptions);
   };
 
-  useLayoutEffect(() => {
-    const stored = localStorage.getItem('pickupDatas');
-    if (stored) {
-      try {
-        dispatch({
-          type: 'initialize',
-          payload: { initialData: validatePickupDatas(JSON.parse(stored)) },
-        });
-      } catch {
-        console.warn('로컬스토리지 데이터 파싱 실패, 기본 픽업 데이터 사용');
-      }
-    }
+  const userConfigChangeHandler: UserConfigHandlers = {
+    onSimulationModeToggle: (isLeft?: boolean) => {
+      setUserConfig((prev) => ({
+        ...prev,
+        isTrySim: isLeft === undefined ? !prev.isTrySim : isLeft,
+      }));
+    },
+    onOptionModeToggle: (isLeft?: boolean) => {
+      setUserConfig((prev) => ({
+        ...prev,
+        isSimpleMode: isLeft === undefined ? !prev.isSimpleMode : isLeft,
+      }));
+    },
+    onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => {
+      setUserConfig((prev) => ({
+        ...prev,
+        batchGachaGoal: type,
+      }));
+    },
+    onInitialResourceBlur: (
+      e: FocusEvent<HTMLInputElement>,
+      syncLocalValue: Dispatch<SetStateAction<string>>,
+    ) => {
+      const normalizedValue = e.target.value.replaceAll(',', '');
+      const parsedValue = Number(normalizedValue);
+      const initialResource = Number.isNaN(parsedValue)
+        ? 0
+        : Math.max(0, Math.min(parsedValue, 9999999));
 
-    const initialOptions = localStorage.getItem('options');
-    if (initialOptions) {
-      try {
-        const newOptionDatas = validateOptionDatas(JSON.parse(initialOptions));
-        setInitialResource(newOptionDatas.initialResource);
-        setBatchGachaGoal(newOptionDatas.batchGachaGoal);
-        setIsTrySim(newOptionDatas.isTrySim);
-        setIsSimpleMode(newOptionDatas.isSimpleMode);
-        setOptions(newOptionDatas.options);
-      } catch {
-        console.warn('로컬스토리지 데이터 파싱 실패, 기본 옵션 데이터 사용');
-      }
-    }
-  }, []);
+      syncLocalValue(initialResource.toLocaleString());
+      setUserConfig((prev) => ({ ...prev, initialResource }));
+    },
+    onOptionsSave: (options: SimulationOptions) => {
+      setUserConfig((prev) => ({ ...prev, options }));
+    },
+  };
 
   useEffect(() => {
     if (isDragging) {
@@ -1020,13 +1089,10 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   useEffect(() => {
     const id = setTimeout(() => {
       localStorage.setItem('pickupDatas', JSON.stringify(pickupDatas));
-      localStorage.setItem(
-        'options',
-        JSON.stringify({ initialResource, batchGachaGoal, isTrySim, isSimpleMode, options }),
-      );
+      localStorage.setItem('options', JSON.stringify(userConfig));
     }, 200);
     return () => clearTimeout(id);
-  }, [pickupDatas, initialResource, batchGachaGoal, isTrySim, isSimpleMode, options]);
+  }, [pickupDatas, userConfig]);
 
   const stopSimulation = async () => {
     if (workersRef.current.length > 0) {
@@ -1052,7 +1118,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     // 베이스 시드로부터 워커 수 만큼의 시드 생성
     const uintArray = new Uint32Array(1);
     crypto.getRandomValues(uintArray);
-    const baseSeed = options.baseSeed ?? uintArray[0];
+    const baseSeed = userConfig.options.baseSeed ?? uintArray[0];
     const seeds = deriveWorkerSeeds(baseSeed, workerCount);
 
     // active 상태의 배너만 추출
@@ -1063,13 +1129,14 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     const promises: Promise<GachaSimulationResult>[] = [];
 
     // 사전 설정 준비
-    const { simulationTry, probability, showBannerImage, bannerFailureAction } = options;
+    const { simulationTry, probability, showBannerImage, bannerFailureAction } = userConfig.options;
 
     // 워커에 전달할 포스트메세지 생성 함수
     const getPostMessage = (index: number): WorkerInput => {
       const inputTry = simulationTry;
       const base = Math.floor(inputTry / workerCount);
       const remainder = inputTry % workerCount;
+      const { isTrySim, isSimpleMode, batchGachaGoal, initialResource } = userConfig;
       return {
         type: 'start',
         workerIndex: index,
@@ -1287,17 +1354,9 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
           </div>
           <OptionBar
             seed={results?.total.baseSeed}
-            isTrySim={isTrySim}
-            setIsTrySim={setIsTrySim}
-            isSimpleMode={isSimpleMode}
-            setIsSimpleMode={setIsSimpleMode}
-            batchGachaGoal={batchGachaGoal}
-            initialResource={initialResource}
-            setInitialResource={setInitialResource}
-            options={options}
-            setOptions={setOptions}
+            userConfig={userConfig}
+            handlers={userConfigChangeHandler}
             runningTime={runningTime}
-            setBatchGachaGoal={setBatchGachaGoal}
             isImportLoading={isImportLoading}
             onImport={importData}
             onExport={exportData}
@@ -1311,10 +1370,10 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
                   pickupData={pickupData}
                   dispatch={dispatch}
                   index={index}
-                  isSimpleMode={isSimpleMode}
-                  isTrySim={isTrySim}
+                  isSimpleMode={userConfig.isSimpleMode}
+                  isTrySim={userConfig.isTrySim}
                   bannerCount={pickupDatas.length}
-                  isImageVisible={options.showBannerImage}
+                  isImageVisible={userConfig.options.showBannerImage}
                 />
               ))}
             </AnimatePresence>

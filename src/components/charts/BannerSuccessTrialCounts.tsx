@@ -10,6 +10,7 @@ import {
   RefObject,
   SetStateAction,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -84,15 +85,15 @@ const createTooltipLiteral =
   (
     bannerHistogram: number[],
     pityHistogram: number[],
-    selectionIndex: {
+    selectionIndexRef: RefObject<{
       start: number;
       end: number;
-    },
+    }>,
   ) =>
   ({ title, textColors, body, datasets, total }: CreateTooltipLiteralProps<'bar'>) => {
     const dataset = datasets[0];
     const { dataIndex } = dataset;
-    const currentIndex = selectionIndex.start + dataIndex;
+    const currentIndex = selectionIndexRef.current?.start + dataIndex;
     const stringifiedValue = dataset.formattedValue ?? '';
     const rawValue = dataset.raw as number;
     const sumUpBannerHistogram = bannerHistogram
@@ -270,19 +271,22 @@ const BannerSuccessTrialCounts = forwardRef<
   ) => {
     const [isFolded, setFolded] = useState(false);
     const padding = 16;
-    const { data, labels, colors } = useRef({
-      data: bannerHistogram,
-      labels: Array.from({ length: bannerHistogram.length }, (_, index) => `${index + 1}`),
-      colors: winPityRewardObtained
-        ? pityHistogram.map((value, index) =>
-            interpolateColor(
-              '#fe9a00',
-              '#00bba7',
-              safeNumberOrZero(value / bannerHistogram[index]),
-            ),
-          )
-        : '#fe9a00',
-    }).current;
+    const { data, labels, colors } = useMemo(
+      () => ({
+        data: bannerHistogram,
+        labels: Array.from({ length: bannerHistogram.length }, (_, index) => `${index + 1}`),
+        colors: winPityRewardObtained
+          ? pityHistogram.map((value, index) =>
+              interpolateColor(
+                '#fe9a00',
+                '#00bba7',
+                safeNumberOrZero(value / bannerHistogram[index]),
+              ),
+            )
+          : '#fe9a00',
+      }),
+      [],
+    );
     const mainChartRef = useRef<ChartJS<
       'bar',
       (number | [number, number] | null)[],
@@ -297,14 +301,14 @@ const BannerSuccessTrialCounts = forwardRef<
 
     const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
 
-    const selection = useRef({
+    const selectionRef = useRef({
       start: 0,
       end: initialSelectionEnd,
-    }).current;
-    const selectionIndex = useRef({
+    });
+    const selectionIndexRef = useRef({
       start: 0,
       end: Math.round((data.length - 1) * initialSelectionEnd) + 1,
-    }).current;
+    });
 
     return (
       <ChartWrapper
@@ -357,7 +361,7 @@ const BannerSuccessTrialCounts = forwardRef<
                 hoverBackgroundColor: '#8e51ffCC',
                 hoverBorderColor: '#8e51ff',
               }}
-              selectionIndex={selectionIndex}
+              selectionIndexRef={selectionIndexRef}
               total={bannerSuccess}
               padding={padding}
               enableBrush={enableBrush}
@@ -367,7 +371,8 @@ const BannerSuccessTrialCounts = forwardRef<
               createTooltipLiteral={createTooltipLiteral(
                 bannerHistogram,
                 pityHistogram,
-                selectionIndex,
+                // eslint-disable-next-line react-hooks/refs
+                selectionIndexRef,
               )}
               mainChartRef={mainChartRef}
             />
@@ -376,8 +381,8 @@ const BannerSuccessTrialCounts = forwardRef<
                 labels={labels}
                 data={data}
                 mainChartRef={mainChartRef}
-                selection={selection}
-                selectionIndex={selectionIndex}
+                selectionRef={selectionRef}
+                selectionIndexRef={selectionIndexRef}
                 colors={{
                   backgroundColor: '#8e51ffCC',
                   borderColor: '#8e51ff',

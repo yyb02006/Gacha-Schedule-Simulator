@@ -19,6 +19,7 @@
 :root {
   --background: #202020;
   --foreground: #eaeaea;
+  color-scheme: light;
 }
 
 @theme inline {

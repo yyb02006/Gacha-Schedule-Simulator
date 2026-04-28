@@ -5,18 +5,18 @@ import SimulatorOptionModal from '#/components/modals/SimulatorOptionModal';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { cardVariants, toOpacityZero } from '#/constants/variants';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChangeEvent, Dispatch, SetStateAction, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import SimulatorTypeButton from '#/components/buttons/SimulatorTypeButton';
 import ToggleButton from '#/components/buttons/ToggleButton';
-import { SimulationOptions } from '#/components/PickupList';
-import { stringToNumber, truncateToDecimals } from '#/libs/utils';
+import { SimulationOptions, UserConfig, UserConfigHandlers } from '#/components/PickupList';
+import { truncateToDecimals } from '#/libs/utils';
 import Modal from '#/components/modals/Modal';
 import CancelButton from '#/components/buttons/CancelButton';
 import ChevronDown from '#/icons/ChevronDown.svg';
 import ChevronUp from '#/icons/ChevronUp.svg';
 import Maximize from '#/icons/Maximize.svg';
 import Minimize from '#/icons/Minimize.svg';
-import { InsetNumberInput, onInsetNumberInputBlur } from '#/components/PickupBanner';
+import { InsetNumberInput } from '#/components/PickupBanner';
 import { LOCALE_NUMBER_PATTERN } from '#/constants/regex';
 import { BatchGachaGoal } from '#/types/types';
 
@@ -256,24 +256,20 @@ const Help = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => 
 };
 
 const ControlPanel = ({
-  isTrySim,
-  onSimulationModeToggle,
-  isSimpleMode,
-  onOptionModeToggle,
-  batchGachaGoal,
-  onBatchGachaGoalClick,
-  initialResource,
-  onInitialResourceBlur,
+  userConfig,
+  handlers,
 }: {
-  isTrySim: boolean;
-  onSimulationModeToggle: (isLeft?: boolean) => void;
-  isSimpleMode: boolean;
-  onOptionModeToggle: (isLeft?: boolean) => void;
-  batchGachaGoal: BatchGachaGoal;
-  onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => void;
-  initialResource: number;
-  onInitialResourceBlur: onInsetNumberInputBlur;
+  userConfig: UserConfig;
+  handlers: UserConfigHandlers;
 }) => {
+  const {
+    onSimulationModeToggle,
+    onOptionModeToggle,
+    onBatchGachaGoalClick,
+    onInitialResourceBlur,
+  } = handlers;
+  const { batchGachaGoal, initialResource, isTrySim, isSimpleMode } = userConfig;
+
   return (
     <div className="flex flex-col gap-4">
       <SimulatorTypeButton isTrySim={isTrySim} onTypeClick={onSimulationModeToggle} />
@@ -332,69 +328,29 @@ const ControlPanel = ({
 
 export default function OptionBar({
   seed,
-  isTrySim,
-  setIsTrySim,
-  isSimpleMode,
-  setIsSimpleMode,
-  options,
-  setOptions,
+  userConfig,
+  handlers,
   runningTime,
-  batchGachaGoal,
-  setBatchGachaGoal,
-  initialResource,
-  setInitialResource,
   isImportLoading,
   onImport,
   onExport,
 }: {
   seed?: number;
-  isTrySim: boolean;
-  setIsTrySim: Dispatch<SetStateAction<boolean>>;
-  isSimpleMode: boolean;
-  setIsSimpleMode: Dispatch<SetStateAction<boolean>>;
-  options: SimulationOptions;
-  setOptions: Dispatch<SetStateAction<SimulationOptions>>;
+  userConfig: {
+    isTrySim: boolean;
+    isSimpleMode: boolean;
+    batchGachaGoal: BatchGachaGoal;
+    initialResource: number;
+    options: SimulationOptions;
+  };
+  handlers: UserConfigHandlers;
   runningTime: number | null;
-  batchGachaGoal: BatchGachaGoal;
-  setBatchGachaGoal: Dispatch<SetStateAction<BatchGachaGoal>>;
-  initialResource: number;
-  setInitialResource: Dispatch<SetStateAction<number>>;
   isImportLoading: boolean;
   onImport: (e: ChangeEvent<HTMLInputElement>) => void;
   onExport: () => void;
 }) {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
-  const onOptionModeToggle = (isLeft?: boolean) => {
-    setIsSimpleMode((p) => (isLeft === undefined ? !p : isLeft));
-  };
-  const onSimulationModeToggle = (isLeft?: boolean) => {
-    if (isLeft === undefined) {
-      setIsTrySim((p) => !p);
-    } else {
-      setIsTrySim(isLeft);
-    }
-  };
-
-  const onInitialResourceBlur: onInsetNumberInputBlur = (e, syncLocalValue) => {
-    const { value } = e.currentTarget;
-    const newValue = value.replace(/,/g, '');
-    const numberValue = stringToNumber(newValue);
-    if (numberValue <= 9999999) {
-      setInitialResource(numberValue);
-    } else {
-      syncLocalValue('9999999');
-      setInitialResource(9999999);
-    }
-  };
-
-  const onBatchGachaGoalClick: (type: 'allFirst' | 'allMax') => void = (type) => {
-    if (batchGachaGoal !== type) {
-      setBatchGachaGoal(type);
-    } else {
-      setBatchGachaGoal(null);
-    }
-  };
 
   return (
     <motion.div
@@ -444,21 +400,12 @@ export default function OptionBar({
         </div>
         <AdjustmentButton onClick={() => isHelpOpen || setIsSettingsModalOpen(true)} />
       </motion.div>
-      <ControlPanel
-        isTrySim={isTrySim}
-        onSimulationModeToggle={onSimulationModeToggle}
-        isSimpleMode={isSimpleMode}
-        onOptionModeToggle={onOptionModeToggle}
-        batchGachaGoal={batchGachaGoal}
-        onBatchGachaGoalClick={onBatchGachaGoalClick}
-        initialResource={initialResource}
-        onInitialResourceBlur={onInitialResourceBlur}
-      />
+      <ControlPanel userConfig={userConfig} handlers={handlers} />
       <SimulatorOptionModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-        options={options}
-        setOptions={setOptions}
+        options={userConfig.options}
+        setOptions={handlers.onOptionsSave}
         isImportLoading={isImportLoading}
         onImport={onImport}
         onExport={onExport}

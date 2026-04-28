@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 export const useIsMount = () => {
-  const [isFirstRenderOver, setIsFirstRenderOver] = useState(false);
-  useEffect(() => {
-    setIsFirstRenderOver(true);
-  }, []);
-  return isFirstRenderOver;
+  return useSyncExternalStore(
+    () => () => {},
+    () => true, // 클라이언트
+    () => false, // 서버
+  );
 };

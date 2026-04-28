@@ -14,12 +14,12 @@ export type CreateTooltipLiteral<T extends ChartType> = (
 
 const createTooltipLiteral =
   (bannerResults: BannerResult[]) =>
-  (selectionIndex: { start: number; end: number }) =>
+  (selectionIndexRef: React.RefObject<{ start: number; end: number }>) =>
   ({ title, textColors, body, datasets }: CreateTooltipLiteralProps<'line'>) => {
     const dataset = datasets[0];
     const stringifiedValue = dataset.formattedValue ?? '';
     const { dataIndex } = dataset;
-    const currentIndex = selectionIndex.start + dataIndex;
+    const currentIndex = selectionIndexRef.current.start + dataIndex;
     const currentBanner = bannerResults[currentIndex];
 
     const expectedVaule = truncateToDecimals(

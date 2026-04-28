@@ -148,10 +148,10 @@ interface MultiChartProps {
     (number | [number, number] | null)[] | (number | Point | null)[],
     unknown
   > | null>;
-  selectionIndex: {
+  selectionIndexRef: RefObject<{
     start: number;
     end: number;
-  };
+  }>;
   total: number;
   padding: number;
   enableBrush: boolean;
@@ -166,7 +166,7 @@ export default function MultiChart({
   fullDatas,
   primaryData,
   mainChartRef,
-  selectionIndex,
+  selectionIndexRef,
   total,
   padding,
   enableBrush,
@@ -302,10 +302,10 @@ export default function MultiChart({
             const isValueSring = typeof value === 'string';
             const gapMultiplier = Math.min(Math.ceil(this.ticks.length / 199), 10);
             if (this.ticks.length > 20) {
-              return selectionIndex.start === 0 && index === 0
+              return selectionIndexRef.current.start === 0 && index === 0
                 ? 1
                 : index === 0 || index % (stepGap * gapMultiplier) === stepGap * gapMultiplier - 1
-                  ? selectionIndex.start + index + 1
+                  ? selectionIndexRef.current.start + index + 1
                   : '';
             } else {
               return isValueSring ? value : this.getLabels()[value];

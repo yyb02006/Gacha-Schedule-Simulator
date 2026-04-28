@@ -52,14 +52,15 @@ export default function BrushMultiChart({
 
   const initialSelectionEnd = primaryData.length > 300 ? cutoffRatio : 1;
 
-  const selection = useRef({
+  // ref에서 current 떼고 쓰지 말기 (린트에러 + 전달받을 때 Ref 객체인지 알 수 없음)
+  const selectionRef = useRef({
     start: 0,
     end: initialSelectionEnd,
-  }).current;
-  const selectionIndex = useRef({
+  });
+  const selectionIndexRef = useRef({
     start: 0,
     end: Math.round((primaryData.length - 1) * initialSelectionEnd) + 1,
-  }).current;
+  });
 
   const sortedFullDatas = [
     ...fullDatas.line.map(({ data }) => data),
@@ -75,7 +76,7 @@ export default function BrushMultiChart({
           primaryData={primaryData}
           fullDatas={fullDatas}
           mainChartRef={mainChartRef}
-          selectionIndex={selectionIndex}
+          selectionIndexRef={selectionIndexRef}
           total={total}
           padding={padding}
           enableBrush={enableBrush}
@@ -90,8 +91,8 @@ export default function BrushMultiChart({
             primaryData={primaryData}
             fullDatas={sortedFullDatas}
             mainChartRef={mainChartRef}
-            selectionIndex={selectionIndex}
-            selection={selection}
+            selectionIndexRef={selectionIndexRef}
+            selectionRef={selectionRef}
             colors={brushColor}
             cutoffRatio={cutoffRatio}
             cutoffPercentage={cutoffPercentage}
