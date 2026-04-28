@@ -146,6 +146,7 @@ export default function SimulatorOptionModal({
         options: { bannerFailureAction, showBannerImage, simulationTry, baseSeed },
       }: InitialOptions = JSON.parse(initialOptions);
       try {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLocalOptions({
           bannerFailureAction: ['continueExecution', 'interruption'].includes(bannerFailureAction)
             ? bannerFailureAction
