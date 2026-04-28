@@ -33,6 +33,7 @@ export default function SmallButton({
 
   useEffect(() => {
     if (isAnimateLocked) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsHover(false);
       setIsClicked(false);
     }

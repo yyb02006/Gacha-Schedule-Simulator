@@ -979,6 +979,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
     try {
       const stored = localStorage.getItem('options');
       if (stored) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUserConfig((prev) => ({ ...prev, ...validateOptionDatas(JSON.parse(stored)) }));
       }
     } catch {
@@ -1030,7 +1031,7 @@ export default function PickupList({ pickupDataPresets }: { pickupDataPresets: D
   };
 
   const exportData = () => {
-    const { options, ...configWithoutOptions } = userConfig;
+    const { ...configWithoutOptions } = userConfig;
     exportPickupData(pickupDatas, configWithoutOptions);
   };
 

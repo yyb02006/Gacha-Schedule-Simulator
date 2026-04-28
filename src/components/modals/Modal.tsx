@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, RefObject, useEffect, useRef, useState } from 'react';
+import { ReactNode, RefObject, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
 import { cls } from '#/libs/utils';

@@ -1,7 +1,7 @@
 'use client';
 
 import Modal from '#/components/modals/Modal';
-import { ChangeEvent, Dispatch, SetStateAction, useLayoutEffect, useRef, useState } from 'react';
+import { ChangeEvent, useLayoutEffect, useRef, useState } from 'react';
 import CancelButton from '#/components/buttons/CancelButton';
 import TypeSelectionButton from '#/components/buttons/TypeSelectionButton';
 import { InsetNumberInput } from '#/components/PickupBanner';

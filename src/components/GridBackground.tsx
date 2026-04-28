@@ -15,6 +15,7 @@ export default function GridBackground({
   const horizontalLines = Math.ceil(size.height / gap) - 1;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSize({ width: window.innerWidth, height: window.innerHeight });
   }, []);
 
