@@ -7,6 +7,7 @@ import { cls } from '#/libs/utils';
 import ToTopButton from '#/components/buttons/ToTopButton';
 import OverlayScrollbar from '#/components/OverlayScrollbar';
 import { OverlayScrollbarsComponentRef } from 'overlayscrollbars-react';
+import { useIsMount } from '#/hooks/useIsMount';
 
 interface ModalProps {
   children: ReactNode;
@@ -33,7 +34,7 @@ export default function Modal({
   padding = 'p-4 lg:p-12',
   className = '',
 }: ModalProps) {
-  const [mounted, setMounted] = useState(false);
+  const isMount = useIsMount();
   const modalRef = useRef<HTMLDivElement>(null);
   const scrollBarRef = useRef<OverlayScrollbarsComponentRef<'div'>>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -41,7 +42,6 @@ export default function Modal({
   const isMouseDownOnTarget = useRef<boolean>(false);
 
   useEffect(() => {
-    setMounted(true);
     if (isOpen) {
       modalRef.current?.focus();
       document.body.style.overflow = 'hidden';
@@ -65,7 +65,7 @@ export default function Modal({
   }, [ref, isOpen, scrollRef]);
 
   return (
-    mounted &&
+    isMount &&
     createPortal(
       <AnimatePresence>
         {isOpen && (
