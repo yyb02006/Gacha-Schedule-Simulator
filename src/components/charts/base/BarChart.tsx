@@ -132,10 +132,10 @@ interface BarChartProps {
     string | string[]
   >;
   mainChartRef: RefObject<ChartJS<'bar', (number | [number, number] | null)[], unknown> | null>;
-  selectionIndex: {
+  selectionIndexRef: RefObject<{
     start: number;
     end: number;
-  };
+  }>;
   total: number;
   padding: number;
   enableBrush: boolean;
@@ -151,7 +151,7 @@ export default function BarChart({
   data,
   colors: { backgroundColor, borderColor, hoverBackgroundColor, hoverBorderColor },
   mainChartRef,
-  selectionIndex,
+  selectionIndexRef,
   total,
   padding,
   enableBrush,
@@ -186,7 +186,7 @@ export default function BarChart({
     labels: lazyLoading
       ? loading
         ? []
-        : labels.slice(selectionIndex.start, selectionIndex.end)
+        : labels.slice(selectionIndexRef.current?.start ?? 0, selectionIndexRef.current?.end ?? 0)
       : labels,
     datasets: [
       {
@@ -195,7 +195,7 @@ export default function BarChart({
         data: lazyLoading
           ? loading
             ? []
-            : data.slice(selectionIndex.start, selectionIndex.end)
+            : data.slice(selectionIndexRef.current?.start ?? 0, selectionIndexRef.current?.end ?? 0)
           : data,
         backgroundColor,
         borderColor,
@@ -279,10 +279,10 @@ export default function BarChart({
             const isValueSring = typeof value === 'string';
             const gapMultiplier = Math.min(Math.ceil(this.ticks.length / 199), 10);
             if (this.ticks.length > 20) {
-              return selectionIndex.start === 0 && index === 0
+              return selectionIndexRef.current?.start === 0 && index === 0
                 ? 1
                 : index === 0 || index % (stepGap * gapMultiplier) === stepGap * gapMultiplier - 1
-                  ? selectionIndex.start + index + 1
+                  ? selectionIndexRef.current?.start + index + 1
                   : '';
             } else {
               return isValueSring ? value : this.getLabels()[value];
@@ -453,7 +453,7 @@ export default function BarChart({
       const chart = chartRef.current;
       chart.data.datasets[0].animation = false;
 
-      if (progressIndexRef.current >= selectionIndex.end) {
+      if (progressIndexRef.current >= selectionIndexRef.current?.end) {
         setLoading(false);
         // animation이 관여안하게 하려면 undefined여야 함 false가 아니라
         chart.data.datasets[0].animation = undefined;
@@ -494,11 +494,11 @@ export default function BarChart({
     }
 
     drawChunk();
-  }, [data, labels, isMount, selectionIndex, lazyLoading, cutoffIndex]);
+  }, [data, labels, isMount, selectionIndexRef, lazyLoading, cutoffIndex]);
 
   useEffect(() => {
     if (mainChartRef.current && data.length > 20 && !loading) {
-      const currentLength = selectionIndex.end - selectionIndex.start;
+      const currentLength = selectionIndexRef.current?.end - selectionIndexRef.current?.start;
       const dataset = mainChartRef.current?.data.datasets[0];
       if (dataset) {
         if (currentLength > 700) {
@@ -516,7 +516,7 @@ export default function BarChart({
         }
       }
     }
-  }, [loading, data.length, mainChartRef, selectionIndex, backgroundColor]);
+  }, [loading, data.length, mainChartRef, selectionIndexRef, backgroundColor]);
 
   return (
     <div className={cls(height ?? '', 'relative overflow-hidden lg:overflow-visible')}>

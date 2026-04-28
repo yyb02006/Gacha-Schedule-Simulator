@@ -26,10 +26,12 @@ interface BrushBarChartProps<T extends 'bar' | 'line'> {
   isPercentYAxis?: boolean;
   chartHeight?: string;
   brushHeight?: string;
-  createTooltipLiteral: (selectionIndex: {
-    start: number;
-    end: number;
-  }) => CreateTooltipLiteral<'bar'>;
+  createTooltipLiteral: (
+    selectionIndexRef: React.RefObject<{
+      start: number;
+      end: number;
+    }>,
+  ) => CreateTooltipLiteral<'bar'>;
 }
 
 export default function BrushBarChart({
@@ -58,14 +60,14 @@ export default function BrushBarChart({
 
   const initialSelectionEnd = data.length > 300 ? cutoffRatio : 1;
 
-  const selection = useRef({
+  const selectionRef = useRef({
     start: 0,
     end: initialSelectionEnd,
-  }).current;
-  const selectionIndex = useRef({
+  });
+  const selectionIndexRef = useRef({
     start: 0,
     end: Math.round((data.length - 1) * initialSelectionEnd) + 1,
-  }).current;
+  });
 
   return (
     <>
@@ -75,7 +77,7 @@ export default function BrushBarChart({
           labels={labels}
           data={data}
           mainChartRef={mainChartRef}
-          selectionIndex={selectionIndex}
+          selectionIndexRef={selectionIndexRef}
           colors={barChartColors}
           total={total}
           padding={padding}
@@ -83,15 +85,16 @@ export default function BrushBarChart({
           cutoffIndex={cutoffIndex}
           isPercentYAxis={isPercentYAxis}
           height={chartHeight}
-          createTooltipLiteral={createTooltipLiteral(selectionIndex)}
+          // eslint-disable-next-line react-hooks/refs
+          createTooltipLiteral={createTooltipLiteral(selectionIndexRef)}
         />
         {enableBrush && (
           <Brush
             labels={labels}
             data={data}
             mainChartRef={mainChartRef}
-            selectionIndex={selectionIndex}
-            selection={selection}
+            selectionIndexRef={selectionIndexRef}
+            selectionRef={selectionRef}
             dispatchRef={dispatchRef}
             colors={brushColor}
             cutoffRatio={cutoffRatio}
